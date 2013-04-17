@@ -37,14 +37,14 @@ LDFLAGS+=-L$(ADAQHOME)/source/ADAQ/lib -lADAQ
 # for linking the final when building the final binary and the
 # location of the CAEN header files
 ifeq ($(HOSTTYPE),x86_64)
-  LDFLAGS+=-L$(ADAQHOME)/source/ADAQ/lib/x86_64
+  LDFLAGS+=-L$(ADAQHOME)/lib/x86_64
 else
-  LDFLAGS+=-L$(ADAQHOME)/source/ADAQ/lib/x86
+  LDFLAGS+=-L$(ADAQHOME)/lib/x86
 endif
 LDFLAGS+=-lCAENVME -lCAENComm -lCAENDigitizer -lncurses -lc -lm
 
 # Specify the location of the CAEN header files
-CXXFLAGS+=-I$(ADAQHOME)/source/ADAQ/include
+CXXFLAGS+=-I$(ADAQHOME)/lib/include
 
 # Specify the location of the Boost libraries (for compilation on the
 # C-Mod workstations)
