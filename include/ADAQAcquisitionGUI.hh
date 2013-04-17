@@ -1,5 +1,5 @@
-#ifndef __ADAQRootGUI_HH__
-#define __ADAQRootGUI_HH__ 1
+#ifndef __ADAQAcquisitionGUI_HH__
+#define __ADAQAcquisitionGUI_HH__ 1
 
 #include <TGLabel.h>
 #include <TColor.h>
@@ -42,12 +42,12 @@ struct ADAQChannelCalibrationData{
 };
  
 
-class ADAQRootGUI : public TGMainFrame
+class ADAQAcquisitionGUI : public TGMainFrame
 {
 public:
 
-  ADAQRootGUI(int Width, int Height);
-  ~ADAQRootGUI();
+  ADAQAcquisitionGUI(int Width, int Height);
+  ~ADAQAcquisitionGUI();
 
   // Member functions to create and fill GUI frames with widgets ("signals")
   void CreateTopLevelFrames();
@@ -239,8 +239,8 @@ private:
 
   TH1F *DGScopeSpectrum_H[8];
 
-  // Define the ADAQRootGUI class to ROOT 
-  ClassDef(ADAQRootGUI,1);
+  // Define the ADAQAcquisitionGUI class to ROOT 
+  ClassDef(ADAQAcquisitionGUI,1);
 };
 
 

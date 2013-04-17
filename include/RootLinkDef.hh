@@ -4,7 +4,7 @@
 #pragma link off all classes;
 #pragma link off all functions;
 
-#pragma link C++ class ADAQRootGUI+;
+#pragma link C++ class ADAQAcquisitionGUI+;
 #pragma link C++ class ADAQRootMeasParams+;
 
 #endif

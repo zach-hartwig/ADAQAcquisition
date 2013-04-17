@@ -15,11 +15,11 @@ ROOTMAKE:=$(ROOTSYS)/etc/Makefile.arch
 include $(ROOTMAKE)
 
 # Define the target binary
-TARGET = bin/ADAQRootGUI
+TARGET = bin/ADAQAcquisitionGUI
 
 # Specify all object files (to be built in the build/ directory)
 OBJDIR=$(PWD)/build
-OBJS=$(OBJDIR)/ADAQRootGUI.o $(OBJDIR)/ADAQRootGUIDict.o
+OBJS=$(OBJDIR)/ADAQAcquisitionGUI.o $(OBJDIR)/ADAQAcquisitionGUIDict.o
 
 # Indicate the directory for shared ADAQ include files and add it
 # to the compiler flags
@@ -60,16 +60,16 @@ $(TARGET) : $(OBJS)
 	@echo -e "\n$@ build is complete!\n"
 
 # Build dependency object files
-$(OBJDIR)/ADAQRootGUI.o : $(SRCDIR)/ADAQRootGUI.cc 
+$(OBJDIR)/ADAQAcquisitionGUI.o : $(SRCDIR)/ADAQAcquisitionGUI.cc 
 	@echo -e "\n---> Building $@ ..."
 	$(CXX) -g $(CXXFLAGS) $(LDFLAGS) -c -o $@ $<
 
-$(OBJDIR)/ADAQRootGUIDict.o : $(OBJDIR)/ADAQRootGUIDict.cc
+$(OBJDIR)/ADAQAcquisitionGUIDict.o : $(OBJDIR)/ADAQAcquisitionGUIDict.cc
 	@echo -e "\n---> Building $@ ..."
 	$(CXX) -g $(CXXFLAGS) $(LDFLAGS) -c -o $@ $<
 
 # Generate the necessary ROOT dictionaries
-$(OBJDIR)/ADAQRootGUIDict.cc : $(INCLDIR)/ADAQRootGUI.hh $(INCLDIR)/RootLinkDef.hh 
+$(OBJDIR)/ADAQAcquisitionGUIDict.cc : $(INCLDIR)/ADAQAcquisitionGUI.hh $(INCLDIR)/RootLinkDef.hh 
 	@echo -e "\nGenerating a ROOT dictionary from $@ ..."
 	@rootcint -f $@ -c $^
 
@@ -90,11 +90,11 @@ clean:
 # "$<" == subst. first item in dependency list
 
 #******************************************************************************
-# Notes on the ADAQRootGUI makefile
+# Notes on the ADAQAcquisitionGUI makefile
 #
 # This is the Makefile for building the AGNOSTIC Detector Data
-# Acquisition Graphical User Interface controls (ADAQRootGUI) from
-# source. ADAQRootGUI provides graphical, front-end control of the
+# Acquisition Graphical User Interface controls (ADAQAcquisitionGUI) from
+# source. ADAQAcquisitionGUI provides graphical, front-end control of the
 # CAEN data acquisition hardware (the V1718 USB/VME module, the V1720
 # digitizer, and the V6534 high voltage supply) as well as real-time
 # data visualation, graphical plotting, and persistent data storage in
@@ -107,13 +107,13 @@ clean:
 # have ROOT and the Boost libraries installed, as well as access to
 # the necessary CAEN libraries.
 #
-# It should also be noted that ADAQRootGUI depends on the ADAQ
+# It should also be noted that ADAQAcquisitionGUI depends on the ADAQ
 # libraries, which are C++ libraries that I have written for custom
 # control of the V1720 digitizer and V6534 high voltage boards. These
 # C++ classes must be separately built into the "libADAQ.so" shared
-# library, which is used by ADAQRootGUI.
+# library, which is used by ADAQAcquisitionGUI.
 #
-# Dependencies (latest version successfully tested with ADAQRootGUI):
+# Dependencies (latest version successfully tested with ADAQAcquisitionGUI):
 #
 # 0. ROOT (5.32.01) : http://root.cern.ch/drupal/ 
 #    --> Installation must be performed by user if ROOT is not present. The
