@@ -1,0 +1,7 @@
+#!/bin/bash
+
+while [ 0 ]; 
+do 
+    ls -lh $1 | awk '{print $5}';
+    sleep 2;
+ done
