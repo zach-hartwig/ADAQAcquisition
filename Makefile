@@ -31,17 +31,12 @@ SRCDIR=$(PWD)/src
 
 # Specify the location of the ADAQ library for control of the V1720 digitizer and
 # V6534 high voltage boards
-LDFLAGS+=-L$(ADAQHOME)/source/ADAQ/lib -lADAQ 
+LDFLAGS+=-L$(ADAQHOME)/source/ADAQ/lib/$(HOSTTYPE) -lADAQ 
 
 # Specify the location of the CAEN libraries (architecture-dependent)
 # for linking the final when building the final binary and the
 # location of the CAEN header files
-ifeq ($(HOSTTYPE),x86_64)
-  LDFLAGS+=-L$(ADAQHOME)/lib/x86_64
-else
-  LDFLAGS+=-L$(ADAQHOME)/lib/x86
-endif
-LDFLAGS+=-lCAENVME -lCAENComm -lCAENDigitizer -lncurses -lc -lm
+LDFLAGS+=-L$(ADAQHOME)/lib/$(HOSTTYPE) -lCAENVME -lCAENComm -lCAENDigitizer -lncurses -lc -lm
 
 # Specify the location of the CAEN header files
 CXXFLAGS+=-I$(ADAQHOME)/lib/include
