@@ -82,6 +82,17 @@ enum{
   DGScopeCh6BaselineCalcMax_NEL_ID,
   DGScopeCh7BaselineCalcMax_NEL_ID,
 
+  DGScopeAcquisitionTimerStart_TB_ID,
+  DGScopeSpectrumChannel_CBL_ID,
+  DGScopeSpectrumAnalysisHeight_RB_ID,
+  DGScopeSpectrumAnalysisArea_RB_ID,
+  DGScopeSpectrumCalibrationPoint_CBL_ID,
+  DGScopeSpectrumUseCalibrationSlider_CB_ID,
+  DGScopeSpectrumFileName_TB_ID,
+  DGScopeSaveSpectrum_TB_ID,
+  DGScopeCanvasFileName_TB_ID,
+  DGScopeSaveCanvas_TB_ID,
+
   DGScopeVerticalSlider_DVS_ID,
   DGScopeHorizontalSlider_THS_ID,
 
@@ -109,6 +120,7 @@ enum{
 
   DGScopeStartStop_TB_ID,
   DGScopeTrigger_TB_ID,
+  DGScopeUpdatePlot_TB_ID,
   DGScopeSave_TB_ID,
 
   DGScopeTriggerMode_CBL_ID,

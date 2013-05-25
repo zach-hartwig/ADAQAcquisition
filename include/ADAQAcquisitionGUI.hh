@@ -25,6 +25,7 @@
 #include <TGTripleSlider.h>
 #include <TStyle.h>
 #include <TTree.h>
+#include <TRandom.h>
 
 #include <vector>
 #include <map>
@@ -34,6 +35,7 @@ using namespace std;
 #include "ADAQRootGUIClasses.hh"
 class ADAQHighVoltage;
 class ADAQDigitizer;
+
 
 struct ADAQChannelCalibrationData{
   vector<int> PointID;
@@ -54,17 +56,29 @@ public:
   void FillConnectionFrame();
   void FillVoltageFrame();
   void FillScopeFrame();
+  void FillScopeFrame2();
 
   // Member functions for performing widget actions ("slots")
   void HandleVoltageButtons();
   void HandleConnectionButtons();
   void HandleScopeButtons();
   void HandleScopeNumberEntries();
+  void HandleRadioButtons();
+  void HandleComboBoxes(int, int);
+  void HandleCheckButtons();
   void HandleDisconnectAndTerminate(bool = true);
+
+  void SaveSpectrumData();
+  void ForceSpectrumDrawing();
+  void StopAcquisitionSafely();
 
   // Member functions for real-time actions
   void RunHVMonitoring();
   void RunDGScope();
+  void RunDGScope2();
+
+  // Method to generate artificial waveforms (unused presently, ZSH 06 Feb 13 )
+  void GenerateArtificialWaveform(int, vector<int> &, double *, double);
 
   // Member functions to control various widget states
   void SetHVWidgetState(int, bool);
@@ -101,11 +115,25 @@ private:
 
   map<int,int> DGScopeChTriggerThreshold_NEL_ID_Map;
 
+  string SpectrumFileName, SpectrumFileExtension;
+  string GraphicsFileName, GraphicsFileExtension;
+
   TColor *ColorManager;
+
+    // A random number generator
+  TRandom *RNG;
   
   int DisplayWidth, DisplayHeight;
 
   TGVerticalFrame *TopFrame;
+
+  int NumDataChannels;
+  bool BuildInDebugMode;
+
+  // Objects for controlling timed acquisition periods
+  bool AcquisitionTimerEnabled;
+  double AcquisitionTime_Start, AcquisitionTime_Stop;
+
 
   ////////////
   // Tab frame
@@ -153,7 +181,17 @@ private:
   TRootEmbeddedCanvas *DGScope_EC;
   TGDoubleVSlider *DGScopeVerticalScale_DVS;
   TGTripleHSlider *DGScopeHorizontalScale_THS;
-  TGTextButton *DGScopeStartStop_TB, *DGScopeTrigger_TB, *DGScopeSave_TB;
+  TGTextButton *DGScopeStartStop_TB, *DGScopeTrigger_TB, *DGScopeUpdatePlot_TB;
+
+TGCheckButton *DGScopeSpectrumUseCalibrationSlider_CB;
+
+  TGTextButton *DGScopeSave_TB;
+
+  ADAQNumberEntryWithLabel *DGScopeAcquisitionTime_NEL;  
+  ADAQNumberEntryFieldWithLabel *DGScopeAcquisitionTimer_NEFL;
+  TGTextButton *DGScopeAcquisitionTimerStart_TB;
+  
+  ADAQNumberEntryWithLabel *DGScopeMaxEventsBeforeTransfer_NEL;
 
   ADAQComboBoxWithLabel *DGScopeTriggerMode_CBL;
 
@@ -225,6 +263,38 @@ private:
   vector<bool> UseCalibrationManager;
   vector<TGraph *> CalibrationManager;
   vector<ADAQChannelCalibrationData> CalibrationData;
+
+
+
+
+
+  TGTextButton *DGScopeSpectrumFileName_TB;
+  ADAQTextEntryWithLabel *DGScopeSpectrumFileName_TEL;
+  TGCheckButton *DGScopeSaveSpectrumWithTimeExtension_CB;
+  TGTextButton *DGScopeSaveSpectrum_TB;
+  
+  TGTextButton *DGScopeCanvasFileName_TB;
+  ADAQTextEntryWithLabel *DGScopeCanvasFileName_TEL;
+  TGCheckButton *DGScopeSaveCanvasWithTimeExtension_CB;
+  TGTextButton *DGScopeSaveCanvas_TB;
+
+
+
+
+  TGCheckButton *DebugModeEnable_CB;
+  ADAQNumberEntryWithLabel *DebugModeWaveformGenerationPause_NEL;
+
+
+
+
+
+
+
+
+
+
+
+
 
   /////////////////////
   // Quit frame widgets 
