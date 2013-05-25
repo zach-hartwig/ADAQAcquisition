@@ -1292,7 +1292,7 @@ void ADAQAcquisitionGUI::FillScopeFrame2()
   // incorporate sliders that can be used to view all channel widgets
   // in a smaller frame. Pro'n'shit if I do say so myself. And I do.
 
-  TGCanvas *DGScopeChannelControls_C = new TGCanvas(ScopeFrame,400,100,kSunkenFrame);
+  TGCanvas *DGScopeChannelControls_C = new TGCanvas(ScopeFrame,300,100,kSunkenFrame);
   ScopeFrame->AddFrame(DGScopeChannelControls_C, new TGLayoutHints(kLHintsExpandX | kLHintsExpandY));
   
   TGVerticalFrame *DGScopeChannelControls_VF = new TGVerticalFrame(DGScopeChannelControls_C->GetViewPort(),10,10);
@@ -4890,7 +4890,7 @@ int main(int argc, char **argv)
   TApplication *TheApplication = new TApplication("ADAQAcquisitionGUI", &argc, argv);
   
   // Create variables for width and height of the top-level GUI window
-  int Width = 1115;
+  int Width = 1100;
   int Height = 825;
 
   // If the user specifies "small" for the first command line
