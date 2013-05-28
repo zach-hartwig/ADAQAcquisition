@@ -1,5 +1,5 @@
-#ifndef __ADAQAcquisitionGUI_hh__
-#define __ADAQAcquisitionGUI_hh__ 1
+#ifndef __ADAQAcquisition_hh__
+#define __ADAQAcquisition_hh__ 1
 
 #include <TGLabel.h>
 #include <TColor.h>
@@ -38,12 +38,12 @@ class ADAQHighVoltage;
 class ADAQDigitizer;
  
 
-class ADAQAcquisitionGUI : public TGMainFrame
+class ADAQAcquisition : public TGMainFrame
 {
 public:
 
-  ADAQAcquisitionGUI(int Width, int Height);
-  ~ADAQAcquisitionGUI();
+  ADAQAcquisition(int Width, int Height);
+  ~ADAQAcquisition();
   
   // Create/fill the ROOT widgets("signals")
   void CreateTopLevelFrames();
@@ -297,8 +297,8 @@ private:
   TGHorizontalFrame *QuitFrame;
   TGTextButton *QuitButton_TB;
 
-  // Define the ADAQAcquisitionGUI class to ROOT 
-  ClassDef(ADAQAcquisitionGUI,1);
+  // Define the ADAQAcquisition class to ROOT 
+  ClassDef(ADAQAcquisition,1);
 };
 
 

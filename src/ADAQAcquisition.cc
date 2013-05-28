@@ -25,14 +25,14 @@ using namespace boost::assign;
 #include "CAENDigitizer.h"
 
 // ADAQ 
-#include "ADAQAcquisitionGUI.hh"
+#include "ADAQAcquisition.hh"
 #include "ADAQRootClasses.hh"
 #include "ADAQHighVoltage.hh"
 #include "ADAQDigitizer.hh"
 #include "ADAQEnumerators.hh"
 
 
-ADAQAcquisitionGUI::ADAQAcquisitionGUI(int W, int H)
+ADAQAcquisition::ADAQAcquisition(int W, int H)
   : TGMainFrame(gClient->GetRoot()),
     DisplayWidth(W), DisplayHeight(H),
     V6534Enable(false), V6534BoardAddress(0x42420000),
@@ -55,7 +55,7 @@ ADAQAcquisitionGUI::ADAQAcquisitionGUI(int W, int H)
   // Create "managers" for the V6534 high voltage and V1720 digitizer
   // boards that will be used to provide information to this class as
   // well as full control over each of the boards. Note that
-  // ADAQAcquisitionGUI can be run without either board by setting the
+  // ADAQAcquisition can be run without either board by setting the
   // appropriate V*Enable boolean variables above
   HVManager = new ADAQHighVoltage;
   HVManager->SetVerbose(true);
@@ -181,7 +181,7 @@ ADAQAcquisitionGUI::ADAQAcquisitionGUI(int W, int H)
 }
 
 
-ADAQAcquisitionGUI::~ADAQAcquisitionGUI()
+ADAQAcquisition::~ADAQAcquisition()
 {
   for(int ch=0; ch<NumDataChannels; ch++){
     delete CalibrationManager[ch];
@@ -198,7 +198,7 @@ ADAQAcquisitionGUI::~ADAQAcquisitionGUI()
 }
 
 
-void ADAQAcquisitionGUI::CreateTopLevelFrames()
+void ADAQAcquisition::CreateTopLevelFrames()
 {
   TGCanvas *TopFrame_C = new TGCanvas(this, DisplayWidth, DisplayHeight);
   AddFrame(TopFrame_C, new TGLayoutHints(kLHintsCenterX));
@@ -239,7 +239,7 @@ void ADAQAcquisitionGUI::CreateTopLevelFrames()
   QuitFrame->SetBackgroundColor(ColorManager->Number2Pixel(16));
 
   QuitButton_TB = new TGTextButton(QuitFrame,"Exit");
-  QuitButton_TB->Connect("Clicked()","ADAQAcquisitionGUI",this,"HandleDisconnectAndTerminate(bool)");
+  QuitButton_TB->Connect("Clicked()","ADAQAcquisition",this,"HandleDisconnectAndTerminate(bool)");
   QuitButton_TB->Resize(150,40);
   QuitButton_TB->ChangeOptions(QuitButton_TB->GetOptions() | kFixedSize);
   
@@ -260,15 +260,15 @@ void ADAQAcquisitionGUI::CreateTopLevelFrames()
 // connecting to the VME-USB interface, providing connection,
 // initialization and read/write control to registers of V1720
 // digitizer, V6534 high voltage, and V1718 USB-VME boards (planned).
-void ADAQAcquisitionGUI::FillConnectionFrame()
+void ADAQAcquisition::FillConnectionFrame()
 {
   TGGroupFrame *V1718_GF = new TGGroupFrame(ConnectionFrame,"V1718 USB/VME Module", kHorizontalFrame);
   V1718_GF->SetTitlePos(TGGroupFrame::kCenter);
   
-  // ROOT text button that controls connection of ADAQAcquisitionGUI to the VME boards
+  // ROOT text button that controls connection of ADAQAcquisition to the VME boards
   V1718_GF->AddFrame(V1718Connect_TB = new TGTextButton(V1718_GF, "Disconnected: click to connect", V1718Connect_TB_ID),
 		     new TGLayoutHints(kLHintsCenterX, 5,5,5,5));
-  V1718Connect_TB->Connect("Clicked()","ADAQAcquisitionGUI",this,"HandleConnectionButtons()");
+  V1718Connect_TB->Connect("Clicked()","ADAQAcquisition",this,"HandleConnectionButtons()");
   V1718Connect_TB->Resize(500,40);
   V1718Connect_TB->SetBackgroundColor(ColorManager->Number2Pixel(2));
   V1718Connect_TB->ChangeOptions(V1718Connect_TB->GetOptions() | kFixedSize);
@@ -306,7 +306,7 @@ void ADAQAcquisitionGUI::FillConnectionFrame()
   // ROOT text button to enable/disable the use of the V6534 board
   V6534BoardAddress_VF->AddFrame(V6534BoardEnable_TB = new TGTextButton(V6534BoardAddress_VF, "Board enabled", V6534BoardEnable_TB_ID),
 				 new TGLayoutHints(kLHintsCenterX));
-  V6534BoardEnable_TB->Connect("Clicked()","ADAQAcquisitionGUI",this,"HandleConnectionButtons()");
+  V6534BoardEnable_TB->Connect("Clicked()","ADAQAcquisition",this,"HandleConnectionButtons()");
   V6534BoardEnable_TB->Resize(110,25);
   V6534BoardEnable_TB->SetBackgroundColor(ColorManager->Number2Pixel(8));
   V6534BoardEnable_TB->ChangeOptions(V6534BoardEnable_TB->GetOptions() | kFixedSize);
@@ -360,7 +360,7 @@ void ADAQAcquisitionGUI::FillConnectionFrame()
   V6534ReadCycle_GF->AddFrame(V6534Read_TB = new TGTextButton(V6534ReadCycle_GF,"VME Read",V6534Read_ID),
 			      new TGLayoutHints(kLHintsExpandX, 5, 5, 5, 5));
 								   
-  V6534Read_TB->Connect("Clicked()","ADAQAcquisitionGUI",this,"HandleConnectionButtons()");
+  V6534Read_TB->Connect("Clicked()","ADAQAcquisition",this,"HandleConnectionButtons()");
   V6534Read_TB->Resize(150,40);
   V6534Read_TB->ChangeOptions(V6534Read_TB->GetOptions() | kFixedSize);
 
@@ -412,7 +412,7 @@ void ADAQAcquisitionGUI::FillConnectionFrame()
   V6534WriteCycle_GF->AddFrame(V6534Write_TB = new TGTextButton(V6534WriteCycle_GF,"VME Write",V6534Write_ID),
 			       new TGLayoutHints(kLHintsExpandX, 5, 5, 5, 5));
 								   
-  V6534Write_TB->Connect("Clicked()","ADAQAcquisitionGUI",this,"HandleConnectionButtons()");
+  V6534Write_TB->Connect("Clicked()","ADAQAcquisition",this,"HandleConnectionButtons()");
   V6534Write_TB->Resize(150,40);
   V6534Write_TB->ChangeOptions(V6534Write_TB->GetOptions() | kFixedSize);
 
@@ -448,7 +448,7 @@ void ADAQAcquisitionGUI::FillConnectionFrame()
   // A ROOT check button to enable/disable the use of the V1720 board
   V1720BoardAddress_VF->AddFrame(V1720BoardEnable_TB = new TGTextButton(V1720BoardAddress_VF, "Board enabled", V1720BoardEnable_TB_ID),
 				 new TGLayoutHints(kLHintsCenterX));
-  V1720BoardEnable_TB->Connect("Clicked()","ADAQAcquisitionGUI",this,"HandleConnectionButtons()");
+  V1720BoardEnable_TB->Connect("Clicked()","ADAQAcquisition",this,"HandleConnectionButtons()");
   V1720BoardEnable_TB->Resize(115,25);
   V1720BoardEnable_TB->SetBackgroundColor(ColorManager->Number2Pixel(8));
   V1720BoardEnable_TB->ChangeOptions(V1720BoardEnable_TB->GetOptions() | kFixedSize);
@@ -501,7 +501,7 @@ void ADAQAcquisitionGUI::FillConnectionFrame()
   V1720ReadCycle_GF->AddFrame(V1720Read_TB = new TGTextButton(V1720ReadCycle_GF,"VME Read",V1720Read_ID),
 			      new TGLayoutHints(kLHintsExpandX, 5, 5, 5, 5));
 								   
-  V1720Read_TB->Connect("Clicked()","ADAQAcquisitionGUI",this,"HandleConnectionButtons()");
+  V1720Read_TB->Connect("Clicked()","ADAQAcquisition",this,"HandleConnectionButtons()");
   V1720Read_TB->Resize(150,40);
   V1720Read_TB->ChangeOptions(V1720Read_TB->GetOptions() | kFixedSize);
 
@@ -553,7 +553,7 @@ void ADAQAcquisitionGUI::FillConnectionFrame()
   V1720WriteCycle_GF->AddFrame(V1720Write_TB = new TGTextButton(V1720WriteCycle_GF,"VME Write",V1720Write_ID),
 			      new TGLayoutHints(kLHintsExpandX, 5, 5, 5, 5));
 								   
-  V1720Write_TB->Connect("Clicked()","ADAQAcquisitionGUI",this,"HandleConnectionButtons()");
+  V1720Write_TB->Connect("Clicked()","ADAQAcquisition",this,"HandleConnectionButtons()");
   V1720Write_TB->Resize(150,40);
   V1720Write_TB->ChangeOptions(V1720Write_TB->GetOptions() | kFixedSize);
 
@@ -574,7 +574,7 @@ void ADAQAcquisitionGUI::FillConnectionFrame()
 // active voltage and drawn current. Setting the voltage and current
 // for an individual channel are disabled while the channel power is
 // on. This may be updated in the future to enable real-time changes.
-void ADAQAcquisitionGUI::FillVoltageFrame()
+void ADAQAcquisition::FillVoltageFrame()
 {
   TGVerticalFrame *HVChannelControls_VF = new TGVerticalFrame(VoltageFrame);
   
@@ -630,7 +630,7 @@ void ADAQAcquisitionGUI::FillVoltageFrame()
     // ID enumerator (see file "ADAQEnumerators.hh") for each channel
     HVChannel_GF->AddFrame(HVChannelPower_TB[ch] = new TGTextButton(HVChannel_GF, "OFF", HVChannelPower_TB_ID_Vec[ch]),
 			   new TGLayoutHints(kLHintsNormal,15,15,15,5));
-    HVChannelPower_TB[ch]->Connect("Pressed()","ADAQAcquisitionGUI",this,"HandleVoltageButtons()");
+    HVChannelPower_TB[ch]->Connect("Pressed()","ADAQAcquisition",this,"HandleVoltageButtons()");
     HVChannelPower_TB[ch]->SetToolTipText("Engage high voltage!");
     HVChannelPower_TB[ch]->Resize(110,50);
     HVChannelPower_TB[ch]->ChangeOptions(HVChannelPower_TB[ch]->GetOptions() | kFixedSize);
@@ -650,14 +650,14 @@ void ADAQAcquisitionGUI::FillVoltageFrame()
   // channel's set voltage and drawn current
   HVAllChannel_GF->AddFrame(HVMonitorEnable_CB = new TGCheckButton(HVAllChannel_GF, "Enable monitoring", HVEnableMonitoring_CB_ID),
 			    new TGLayoutHints(kLHintsNormal, 5,5,5,5));
-  HVMonitorEnable_CB->Connect("Clicked()", "ADAQAcquisitionGUI", this, "HandleVoltageButtons()");
+  HVMonitorEnable_CB->Connect("Clicked()", "ADAQAcquisition", this, "HandleVoltageButtons()");
   HVMonitorEnable_CB->SetState(kButtonUp);
   
   VoltageFrame->AddFrame(HVChannelControls_VF, new TGLayoutHints(kLHintsTop | kLHintsCenterX, 5, 5, 5, 5));
 }
 
 
-void ADAQAcquisitionGUI::FillScopeFrame()
+void ADAQAcquisition::FillScopeFrame()
 {
   //////////////////////////////
   // Fill left vertical panel //
@@ -734,7 +734,7 @@ void ADAQAcquisitionGUI::FillScopeFrame()
     // ADAQ number entry to set channel's trigger threshold [ADC]
     DGScopeChannelControl_GF->AddFrame(DGScopeChTriggerThreshold_NEL[ch] = new ADAQNumberEntryWithLabel(DGScopeChannelControl_GF, "Trig. Threshold (ADC)", DGScopeChTriggerThreshold_NEL_ID_Vec[ch]),
 				       new TGLayoutHints(kLHintsNormal));
-    DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)","ADAQAcquisitionGUI",this,"HandleScopeNumberEntries()");
+    DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)","ADAQAcquisition",this,"HandleScopeNumberEntries()");
     DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
     DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->SetNumber(2000);
     DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->Resize(65,20);
@@ -742,7 +742,7 @@ void ADAQAcquisitionGUI::FillScopeFrame()
     // ADAQ number entry to set minimum sample for baseline calculation [sample]
     DGScopeChannelControl_GF->AddFrame(DGScopeBaselineCalcMin_NEL[ch] = new ADAQNumberEntryWithLabel(DGScopeChannelControl_GF, "Baseline min. (sample)", DGScopeChBaselineCalcMin_NEL_ID_Vec[ch]),
 				       new TGLayoutHints(kLHintsNormal));
-    DGScopeBaselineCalcMin_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)","ADAQAcquisitionGUI",this,"HandleScopeNumberEntries()");
+    DGScopeBaselineCalcMin_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)","ADAQAcquisition",this,"HandleScopeNumberEntries()");
     
     DGScopeBaselineCalcMin_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
     DGScopeBaselineCalcMin_NEL[ch]->GetEntry()->SetNumber(10);
@@ -810,7 +810,7 @@ void ADAQAcquisitionGUI::FillScopeFrame()
   // ROOT text button for starting/stopping data acquisition by the digitizer
   DGScopeDisplayButtons_HF->AddFrame(DGScopeStartStop_TB = new TGTextButton(DGScopeDisplayButtons_HF, "Stopped", DGScopeStartStop_TB_ID),
 				     new TGLayoutHints(kLHintsNormal,5,5,0,0));
-  DGScopeStartStop_TB->Connect("Clicked()","ADAQAcquisitionGUI",this,"HandleScopeButtons()");
+  DGScopeStartStop_TB->Connect("Clicked()","ADAQAcquisition",this,"HandleScopeButtons()");
   DGScopeStartStop_TB->Resize(300,30);
   DGScopeStartStop_TB->ChangeOptions(DGScopeStartStop_TB->GetOptions() | kFixedSize);
   DGScopeStartStop_TB->SetBackgroundColor(ColorManager->Number2Pixel(2));
@@ -820,7 +820,7 @@ void ADAQAcquisitionGUI::FillScopeFrame()
   // ROOT text button for manually triggering of DGScope acquisition
   DGScopeDisplayButtons_HF->AddFrame(DGScopeTrigger_TB = new TGTextButton(DGScopeDisplayButtons_HF, "Manual trigger", DGScopeTrigger_TB_ID),
 				     new TGLayoutHints(kLHintsNormal,5,5,0,0));
-  DGScopeTrigger_TB->Connect("Clicked()","ADAQAcquisitionGUI",this,"HandleScopeButtons()");
+  DGScopeTrigger_TB->Connect("Clicked()","ADAQAcquisition",this,"HandleScopeButtons()");
   DGScopeTrigger_TB->Resize(175,30);
   DGScopeTrigger_TB->ChangeOptions(DGScopeTrigger_TB->GetOptions() | kFixedSize);
   
@@ -828,7 +828,7 @@ void ADAQAcquisitionGUI::FillScopeFrame()
 				     new TGLayoutHints(kLHintsCenterX, 5,5,0,0));
   DGScopeUpdatePlot_TB->Resize(175,30);
   DGScopeUpdatePlot_TB->ChangeOptions(DGScopeUpdatePlot_TB->GetOptions() | kFixedSize);
-  DGScopeUpdatePlot_TB->Connect("Clicked()","ADAQAcquisitionGUI", this, "HandleScopeButtons()");
+  DGScopeUpdatePlot_TB->Connect("Clicked()","ADAQAcquisition", this, "HandleScopeButtons()");
 
   TGHorizontalFrame *DGScopeDisplayControls_HF = new TGHorizontalFrame(DGScopeDisplay_GF);
   DGScopeDisplay_GF->AddFrame(DGScopeDisplayControls_HF,
@@ -969,7 +969,7 @@ void ADAQAcquisitionGUI::FillScopeFrame()
 					  new TGLayoutHints(kLHintsNormal, 5,5,0,0));
   DGScopeAcquisitionTimerStart_TB->Resize(150, 30);
   DGScopeAcquisitionTimerStart_TB->ChangeOptions(DGScopeAcquisitionTimerStart_TB->GetOptions() | kFixedSize);
-  DGScopeAcquisitionTimerStart_TB->Connect("Clicked()", "ADAQAcquisitionGUI", this, "HandleScopeButtons()");
+  DGScopeAcquisitionTimerStart_TB->Connect("Clicked()", "ADAQAcquisition", this, "HandleScopeButtons()");
 
   // V1720 readout controls
   TGGroupFrame *DGScopeReadoutControls_GF = new TGGroupFrame(DGScopeSettingsFrame, "Readout", kVerticalFrame);
@@ -1000,7 +1000,7 @@ void ADAQAcquisitionGUI::FillScopeFrame()
   for(uint32_t ch=0; ch<8; ch++)
     DGScopeSpectrumChannel_CBL->GetComboBox()->AddEntry(DGChannelLabels[ch].c_str(),ch);
   DGScopeSpectrumChannel_CBL->GetComboBox()->Select(0);
-  DGScopeSpectrumChannel_CBL->GetComboBox()->Connect("Selected(int,int)", "ADAQAcquisitionGUI", this, "HandleComboBoxes(int,int)");
+  DGScopeSpectrumChannel_CBL->GetComboBox()->Connect("Selected(int,int)", "ADAQAcquisition", this, "HandleComboBoxes(int,int)");
   
   // ADAQ number entry to specify number of bins used in the spectra histogram
   DGScopeSpectrumHistogram_GF->AddFrame(DGScopeSpectrumBinNumber_NEL = new ADAQNumberEntryWithLabel(DGScopeSpectrumHistogram_GF, "Number of bins  ", DGScopeSpectrumBinNumber_NEL_ID),
@@ -1043,11 +1043,11 @@ void ADAQAcquisitionGUI::FillScopeFrame()
   DGScopeSpectrumAnalysis_GF->AddFrame(DGScopeSpectrumAnalysis_BG, new TGLayoutHints(kLHintsNormal,-13,0,0,0));
 
   DGScopeSpectrumAnalysisHeight_RB = new TGRadioButton(DGScopeSpectrumAnalysis_BG, "PHS  ", DGScopeSpectrumAnalysisHeight_RB_ID);
-  DGScopeSpectrumAnalysisHeight_RB->Connect("Clicked()", "ADAQAcquisitionGUI", this, "HandleRadioButtons()");
+  DGScopeSpectrumAnalysisHeight_RB->Connect("Clicked()", "ADAQAcquisition", this, "HandleRadioButtons()");
 
   
   DGScopeSpectrumAnalysisArea_RB = new TGRadioButton(DGScopeSpectrumAnalysis_BG, "PAS", DGScopeSpectrumAnalysisArea_RB_ID);
-  DGScopeSpectrumAnalysisArea_RB->Connect("Clicked()", "ADAQAcquisitionGUI", this, "HandleRadioButtons()");
+  DGScopeSpectrumAnalysisArea_RB->Connect("Clicked()", "ADAQAcquisition", this, "HandleRadioButtons()");
   DGScopeSpectrumAnalysisArea_RB->SetState(kButtonDown);
   
   DGScopeSpectrumAnalysis_GF->AddFrame(DGScopeSpectrumAnalysisLLD_NEL = new ADAQNumberEntryWithLabel(DGScopeSpectrumAnalysis_GF, "LLD (ADC/energy)", -1),
@@ -1085,18 +1085,18 @@ void ADAQAcquisitionGUI::FillScopeFrame()
   
   DGScopeSpectrumCalibration_HF1->AddFrame(DGScopeSpectrumCalibration_CB = new TGCheckButton(DGScopeSpectrumCalibration_HF1, "Activate", DGScopeSpectrumCalibration_CB_ID),
                                            new TGLayoutHints(kLHintsLeft,5,5,5,5));
-  DGScopeSpectrumCalibration_CB->Connect("Clicked()","ADAQAcquisitionGUI",this,"HandleCheckButtons()");
+  DGScopeSpectrumCalibration_CB->Connect("Clicked()","ADAQAcquisition",this,"HandleCheckButtons()");
   DGScopeSpectrumCalibration_CB->SetState(kButtonUp);
 
   DGScopeSpectrumCalibration_HF1->AddFrame(DGScopeSpectrumCalibrationPoint_CBL = new ADAQComboBoxWithLabel(DGScopeSpectrumCalibration_HF1, "", DGScopeSpectrumCalibrationPoint_CBL_ID),
                                            new TGLayoutHints(kLHintsNormal, 20,5,5,5));
   DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->AddEntry("Point 0",0);
   DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->Select(0);
-  DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->Connect("Selected(int,int)", "ADAQAcquisitionGUI", this, "HandleComboBoxes(int,int)");
+  DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->Connect("Selected(int,int)", "ADAQAcquisition", this, "HandleComboBoxes(int,int)");
 
   DGScopeSpectrumCalibration_GF->AddFrame(DGScopeSpectrumUseCalibrationSlider_CB = new TGCheckButton(DGScopeSpectrumCalibration_GF, "Use calibration slider", DGScopeSpectrumUseCalibrationSlider_CB_ID),
 					  new TGLayoutHints(kLHintsLeft,5,5,0,0));
-  DGScopeSpectrumUseCalibrationSlider_CB->Connect("Clicked()","ADAQAcquisitionGUI",this,"HandleCheckButtons()");
+  DGScopeSpectrumUseCalibrationSlider_CB->Connect("Clicked()","ADAQAcquisition",this,"HandleCheckButtons()");
   DGScopeSpectrumUseCalibrationSlider_CB->SetState(kButtonUp);
 
   DGScopeSpectrumCalibration_GF->AddFrame(DGScopeSpectrumCalibrationEnergy_NEL = new ADAQNumberEntryWithLabel(DGScopeSpectrumCalibration_GF, "Energy (keV or MeV)  ", -1),
@@ -1120,7 +1120,7 @@ void ADAQAcquisitionGUI::FillScopeFrame()
   // Set point text button
   DGScopeSpectrumCalibration_HF2->AddFrame(DGScopeSpectrumCalibrationSetPoint_TB = new TGTextButton(DGScopeSpectrumCalibration_HF2, "Set Pt.", DGScopeSpectrumCalibrationSetPoint_TB_ID),
                                            new TGLayoutHints(kLHintsNormal, 5,5,0,5));
-  DGScopeSpectrumCalibrationSetPoint_TB->Connect("Clicked()","ADAQAcquisitionGUI",this,"HandleScopeButtons()");
+  DGScopeSpectrumCalibrationSetPoint_TB->Connect("Clicked()","ADAQAcquisition",this,"HandleScopeButtons()");
   DGScopeSpectrumCalibrationSetPoint_TB->Resize(100,25);
   DGScopeSpectrumCalibrationSetPoint_TB->ChangeOptions(DGScopeSpectrumCalibrationSetPoint_TB->GetOptions() | kFixedSize);
   DGScopeSpectrumCalibrationSetPoint_TB->SetState(kButtonDisabled);
@@ -1128,7 +1128,7 @@ void ADAQAcquisitionGUI::FillScopeFrame()
   // Calibrate text button
   DGScopeSpectrumCalibration_HF2->AddFrame(DGScopeSpectrumCalibrationCalibrate_TB = new TGTextButton(DGScopeSpectrumCalibration_HF2, "Calibrate", DGScopeSpectrumCalibrationCalibrate_TB_ID),
 					   new TGLayoutHints(kLHintsNormal, 5,5,0,5));
-  DGScopeSpectrumCalibrationCalibrate_TB->Connect("Clicked()","ADAQAcquisitionGUI",this,"HandleScopeButtons()");
+  DGScopeSpectrumCalibrationCalibrate_TB->Connect("Clicked()","ADAQAcquisition",this,"HandleScopeButtons()");
   DGScopeSpectrumCalibrationCalibrate_TB->Resize(100,25);
   DGScopeSpectrumCalibrationCalibrate_TB->ChangeOptions(DGScopeSpectrumCalibrationCalibrate_TB->GetOptions() | kFixedSize);
   DGScopeSpectrumCalibrationCalibrate_TB->SetState(kButtonDisabled);
@@ -1140,7 +1140,7 @@ void ADAQAcquisitionGUI::FillScopeFrame()
   // Plot text button
   DGScopeSpectrumCalibration_HF3->AddFrame(DGScopeSpectrumCalibrationPlot_TB = new TGTextButton(DGScopeSpectrumCalibration_HF3, "Plot", DGScopeSpectrumCalibrationPlot_TB_ID),
                                            new TGLayoutHints(kLHintsNormal, 5,5,0,5));
-  DGScopeSpectrumCalibrationPlot_TB->Connect("Clicked()","ADAQAcquisitionGUI",this,"HandleScopeButtons()");
+  DGScopeSpectrumCalibrationPlot_TB->Connect("Clicked()","ADAQAcquisition",this,"HandleScopeButtons()");
   DGScopeSpectrumCalibrationPlot_TB->Resize(100,25);
   DGScopeSpectrumCalibrationPlot_TB->ChangeOptions(DGScopeSpectrumCalibrationPlot_TB->GetOptions() | kFixedSize);
   DGScopeSpectrumCalibrationPlot_TB->SetState(kButtonDisabled);
@@ -1148,7 +1148,7 @@ void ADAQAcquisitionGUI::FillScopeFrame()
   // Reset text button
   DGScopeSpectrumCalibration_HF3->AddFrame(DGScopeSpectrumCalibrationReset_TB = new TGTextButton(DGScopeSpectrumCalibration_HF3, "Reset", DGScopeSpectrumCalibrationReset_TB_ID),
                                            new TGLayoutHints(kLHintsNormal, 5,5,0,5));
-  DGScopeSpectrumCalibrationReset_TB->Connect("Clicked()","ADAQAcquisitionGUI",this,"HandleScopeButtons()");
+  DGScopeSpectrumCalibrationReset_TB->Connect("Clicked()","ADAQAcquisition",this,"HandleScopeButtons()");
   DGScopeSpectrumCalibrationReset_TB->Resize(100,25);
   DGScopeSpectrumCalibrationReset_TB->ChangeOptions(DGScopeSpectrumCalibrationReset_TB->GetOptions() | kFixedSize);
   DGScopeSpectrumCalibrationReset_TB->SetState(kButtonDisabled);
@@ -1246,7 +1246,7 @@ void ADAQAcquisitionGUI::FillScopeFrame()
   // ROOT text button to create a root file using the name in the text entry field above
   DGScopeDataStorage_GF->AddFrame(DGScopeDataStorageCreateFile_TB = new TGTextButton(DGScopeDataStorage_GF,"Create ROOT file", DGScopeDataStorageCreateFile_TB_ID),
 				  new TGLayoutHints(kLHintsNormal,5,5,0,5));
-  DGScopeDataStorageCreateFile_TB->Connect("Clicked()","ADAQAcquisitionGUI",this,"HandleScopeButtons()");
+  DGScopeDataStorageCreateFile_TB->Connect("Clicked()","ADAQAcquisition",this,"HandleScopeButtons()");
   DGScopeDataStorageCreateFile_TB->Resize(150,25);
   DGScopeDataStorageCreateFile_TB->ChangeOptions(DGScopeDataStorageCreateFile_TB->GetOptions() | kFixedSize);
   DGScopeDataStorageCreateFile_TB->SetState(kButtonDisabled);
@@ -1255,7 +1255,7 @@ void ADAQAcquisitionGUI::FillScopeFrame()
   // successfully write&close the ROOT file otherwise the ROOT file will have errors.
   DGScopeDataStorage_GF->AddFrame(DGScopeDataStorageCloseFile_TB = new TGTextButton(DGScopeDataStorage_GF,"Close ROOT file", DGScopeDataStorageCloseFile_TB_ID),
 				  new TGLayoutHints(kLHintsNormal,5,5,0,5));
-  DGScopeDataStorageCloseFile_TB->Connect("Clicked()","ADAQAcquisitionGUI",this,"HandleScopeButtons()");
+  DGScopeDataStorageCloseFile_TB->Connect("Clicked()","ADAQAcquisition",this,"HandleScopeButtons()");
   DGScopeDataStorageCloseFile_TB->Resize(150,25);
   DGScopeDataStorageCloseFile_TB->ChangeOptions(DGScopeDataStorageCloseFile_TB->GetOptions() | kFixedSize);
   DGScopeDataStorageCloseFile_TB->SetState(kButtonDisabled);
@@ -1282,7 +1282,7 @@ void ADAQAcquisitionGUI::FillScopeFrame()
 				      new TGLayoutHints(kLHintsNormal, 5,5,5,0));
   DGScopeSpectrumFileName_TB->Resize(175, 30);
   DGScopeSpectrumFileName_TB->ChangeOptions(DGScopeSpectrumFileName_TB->GetOptions() | kFixedSize);
-  DGScopeSpectrumFileName_TB->Connect("Clicked()", "ADAQAcquisitionGUI", this, "HandleScopeButtons()");
+  DGScopeSpectrumFileName_TB->Connect("Clicked()", "ADAQAcquisition", this, "HandleScopeButtons()");
   
   DGScopeSpectrumStorage_GF->AddFrame(DGScopeSpectrumFileName_TEL = new ADAQTextEntryWithLabel(DGScopeSpectrumStorage_GF, "", -1),
 				      new TGLayoutHints(kLHintsNormal, 5,5,5,0));
@@ -1298,7 +1298,7 @@ void ADAQAcquisitionGUI::FillScopeFrame()
 				      new TGLayoutHints(kLHintsNormal, 5,5,0,5));
   DGScopeSaveSpectrum_TB->Resize(175, 30);
   DGScopeSaveSpectrum_TB->ChangeOptions(DGScopeSaveSpectrum_TB->GetOptions() | kFixedSize);
-  DGScopeSaveSpectrum_TB->Connect("Clicked()","ADAQAcquisitionGUI", this, "HandleScopeButtons()");
+  DGScopeSaveSpectrum_TB->Connect("Clicked()","ADAQAcquisition", this, "HandleScopeButtons()");
 
 
   // Widgets for saving the canvas graphics to file
@@ -1311,7 +1311,7 @@ void ADAQAcquisitionGUI::FillScopeFrame()
 				      new TGLayoutHints(kLHintsNormal, 5,5,5,0));
   DGScopeCanvasFileName_TB->Resize(175, 30);
   DGScopeCanvasFileName_TB->ChangeOptions(DGScopeCanvasFileName_TB->GetOptions() | kFixedSize);
-  DGScopeCanvasFileName_TB->Connect("Clicked()", "ADAQAcquisitionGUI", this, "HandleScopeButtons()");
+  DGScopeCanvasFileName_TB->Connect("Clicked()", "ADAQAcquisition", this, "HandleScopeButtons()");
   
   DGScopeCanvasStorage_GF->AddFrame(DGScopeCanvasFileName_TEL = new ADAQTextEntryWithLabel(DGScopeCanvasStorage_GF, "", -1),
 				    new TGLayoutHints(kLHintsNormal, 5,5,5,0));
@@ -1327,7 +1327,7 @@ void ADAQAcquisitionGUI::FillScopeFrame()
 				    new TGLayoutHints(kLHintsNormal,5,5,0,5));
   DGScopeSaveCanvas_TB->Resize(175, 30);
   DGScopeSaveCanvas_TB->ChangeOptions(DGScopeSaveCanvas_TB->GetOptions() | kFixedSize);
-  DGScopeSaveCanvas_TB->Connect("Clicked()","ADAQAcquisitionGUI",this,"HandleScopeButtons()");
+  DGScopeSaveCanvas_TB->Connect("Clicked()","ADAQAcquisition",this,"HandleScopeButtons()");
   
 
   ///////////////////
@@ -1362,9 +1362,9 @@ void ADAQAcquisitionGUI::FillScopeFrame()
 
 
 // Perform actions triggers by the text buttons on the Connection
-// Frame, which is principally connecting the ADAQAcquisitionGUI to the VME
+// Frame, which is principally connecting the ADAQAcquisition to the VME
 // boards as well as reading/writing registers on individual boards
-void ADAQAcquisitionGUI::HandleConnectionButtons()
+void ADAQAcquisition::HandleConnectionButtons()
 {
   // Get pointers and the widget ID for the active (ie, clicked) text button
   TGTextButton *ActiveTextButton = (TGTextButton *) gTQSender;
@@ -1378,7 +1378,7 @@ void ADAQAcquisitionGUI::HandleConnectionButtons()
 
   switch(ActiveButtonID){
 
-    // Connect ADAQAcquisitionGUI with VME boards
+    // Connect ADAQAcquisition with VME boards
   case V1718Connect_TB_ID:
     
     // If no connection is presently established...
@@ -1504,7 +1504,7 @@ void ADAQAcquisitionGUI::HandleConnectionButtons()
 
 
 // Perform actions that are activated by the text buttons on the HV frame
-void ADAQAcquisitionGUI::HandleVoltageButtons()
+void ADAQAcquisition::HandleVoltageButtons()
 {
   // Get pointers and the widget ID for the active (ie, clicked) text button
   TGTextButton *ActiveTextButton = (TGTextButton *) gTQSender;
@@ -1582,7 +1582,7 @@ void ADAQAcquisitionGUI::HandleVoltageButtons()
     if(HVMonitorEnable_CB->IsDown()){
       
       // Set bool to enable the HV monitoring loop (see
-      // ADAQAcquisitionGUI::RunHVMonitoring)
+      // ADAQAcquisition::RunHVMonitoring)
       HVMonitorEnable = true;
 
       // Enable the HV channel monitoring ROOT number entry field
@@ -1620,7 +1620,7 @@ void ADAQAcquisitionGUI::HandleVoltageButtons()
 
 
 // Perform actions triggers by the text buttons on the Scope Frame
-void ADAQAcquisitionGUI::HandleScopeButtons()
+void ADAQAcquisition::HandleScopeButtons()
 {
   // Get pointers and the widget ID for the active (ie, clicked) text button
   TGTextButton *ActiveTextButton = (TGTextButton *) gTQSender;
@@ -1645,7 +1645,7 @@ void ADAQAcquisitionGUI::HandleScopeButtons()
       ActiveTextButton->SetText("Acquiring");
 
       // Set bool to enable the DGScope to update in real time (see
-      // ADAQAcquisitionGUI::RunDGScope) during data acquisition
+      // ADAQAcquisition::RunDGScope) during data acquisition
       DGScopeEnable = true;
       
       // Set the active ROOT canvas to the DGScope embedded canvas
@@ -1981,7 +1981,7 @@ void ADAQAcquisitionGUI::HandleScopeButtons()
     // Set a bool indicating that the next digitized event will
     // trigger the creation of a TTree branch with the correctly sized
     // array. This action is performed once in
-    // ADAQAcquisitionGUI::RunDGScope(). See that function for more comments
+    // ADAQAcquisition::RunDGScope(). See that function for more comments
     BranchWaveformTree = true;
 
 
@@ -2206,7 +2206,7 @@ void ADAQAcquisitionGUI::HandleScopeButtons()
 
 
 // Perform actions triggers by DGScope number entries
-void ADAQAcquisitionGUI::HandleScopeNumberEntries()
+void ADAQAcquisition::HandleScopeNumberEntries()
 {
   // Get the pointer and the widget ID for the active number entry
   TGNumberEntry *ActiveEntry = (TGNumberEntry *) gTQSender;
@@ -2252,7 +2252,7 @@ void ADAQAcquisitionGUI::HandleScopeNumberEntries()
   }
 }
 
-void ADAQAcquisitionGUI::HandleRadioButtons()
+void ADAQAcquisition::HandleRadioButtons()
 {
   TGRadioButton *ActiveRadioButton = (TGRadioButton *) gTQSender;
   int RadioButtonID = ActiveRadioButton->WidgetId();
@@ -2283,7 +2283,7 @@ void ADAQAcquisitionGUI::HandleRadioButtons()
 }
 
 
-void ADAQAcquisitionGUI::HandleComboBoxes(int ComboBoxID, int SelectedID)
+void ADAQAcquisition::HandleComboBoxes(int ComboBoxID, int SelectedID)
 {
   switch(ComboBoxID){
 
@@ -2352,7 +2352,7 @@ void ADAQAcquisitionGUI::HandleComboBoxes(int ComboBoxID, int SelectedID)
 }
   
 
-void ADAQAcquisitionGUI::HandleCheckButtons()
+void ADAQAcquisition::HandleCheckButtons()
 {
   TGCheckButton *ActiveCheckButton = (TGCheckButton *) gTQSender;
   int CheckButtonID = ActiveCheckButton->WidgetId();
@@ -2385,8 +2385,8 @@ void ADAQAcquisitionGUI::HandleCheckButtons()
 
 
 // Performm actions that ensure a safe shutdown and disconnect of the
-// ADAQAcquisitionGUI software from the VME boards
-void ADAQAcquisitionGUI::HandleDisconnectAndTerminate(bool TerminateApplication)
+// ADAQAcquisition software from the VME boards
+void ADAQAcquisition::HandleDisconnectAndTerminate(bool TerminateApplication)
 {
   // If the HVManager has been instantiated (ie, the V6534 is being
   // used) then set the V6534 board to a safe state (all
@@ -2411,7 +2411,7 @@ void ADAQAcquisitionGUI::HandleDisconnectAndTerminate(bool TerminateApplication)
 // Set the state of the HV voltage and maximum current entry
 // widgets. When a specific channel is turned "on", it's HV and I
 // setting widgets are turned "off"
-void ADAQAcquisitionGUI::SetHVWidgetState(int HVChannel, bool HVActive)
+void ADAQAcquisition::SetHVWidgetState(int HVChannel, bool HVActive)
 {
   bool WidgetState = true;
   if(HVActive)
@@ -2425,7 +2425,7 @@ void ADAQAcquisitionGUI::SetHVWidgetState(int HVChannel, bool HVActive)
 // Set the state of DGScope widgets that are used to set parameters to
 // program the V1720 digitizer at the beginning of a data acquisition
 // session. These widgets are disabled when DGScope is acquiring.
-void ADAQAcquisitionGUI::SetDGWidgetState(bool AcquiringData)
+void ADAQAcquisition::SetDGWidgetState(bool AcquiringData)
 {
   EButtonState ButtonState = kButtonUp;
   bool WidgetState = true;
@@ -2475,7 +2475,7 @@ void ADAQAcquisitionGUI::SetDGWidgetState(bool AcquiringData)
 
 // Run the real-time updating of the ROOT number entry widgets that
 // display active voltage and drawn current from all channels
-void ADAQAcquisitionGUI::RunHVMonitoring()
+void ADAQAcquisition::RunHVMonitoring()
 {
   // The high voltage and current will be displayed and updated in the
   // dedicated number entry fields when HVMonitorEnable is true
@@ -2502,7 +2502,7 @@ void ADAQAcquisitionGUI::RunHVMonitoring()
 }
 
 
-void ADAQAcquisitionGUI::RunDGScope()
+void ADAQAcquisition::RunDGScope()
 {
   /////////////////////////////////////////////////
   // Initialize local and class member variables //
@@ -3305,7 +3305,7 @@ void ADAQAcquisitionGUI::RunDGScope()
 }
 
 
-void ADAQAcquisitionGUI::SaveSpectrumData()
+void ADAQAcquisition::SaveSpectrumData()
 {
   // Get the current channel
   int CurrentChannel = DGScopeSpectrumChannel_CBL->GetComboBox()->GetSelected();
@@ -3374,7 +3374,7 @@ void ADAQAcquisitionGUI::SaveSpectrumData()
 // spectrum without slowing down acquisition) or after the acquisition
 // is complete and turned off (setting titles, positions, etc) for
 // pretty output to file.
-void ADAQAcquisitionGUI::ForceSpectrumDrawing()
+void ADAQAcquisition::ForceSpectrumDrawing()
 {
   int ChannelToHistogram = DGScopeSpectrumChannel_CBL->GetComboBox()->GetSelected();
   
@@ -3420,7 +3420,7 @@ void ADAQAcquisitionGUI::ForceSpectrumDrawing()
 
 // Method to safely cease acquiring data, including writing and
 // closing of possibly opened ROOT files.
-void ADAQAcquisitionGUI::StopAcquisitionSafely()
+void ADAQAcquisition::StopAcquisitionSafely()
 {
   // Stop the V1720 from acquiring data first thing
   DGManager->SWStopAcquisition();
@@ -3476,7 +3476,7 @@ void ADAQAcquisitionGUI::StopAcquisitionSafely()
 // to fill the channel data with the artificial waveform data. The
 // artificial waveform has a quick rise time and longer decay tail,
 // which are randomly varied to mimick data acquisition.
-void ADAQAcquisitionGUI::GenerateArtificialWaveform(int RecordLength, vector<int> &Voltage, 
+void ADAQAcquisition::GenerateArtificialWaveform(int RecordLength, vector<int> &Voltage, 
 						    double *Voltage_graph, double VerticalPosition)
 {
   // Exponential time constants with small random variations
@@ -3516,7 +3516,7 @@ void ADAQAcquisitionGUI::GenerateArtificialWaveform(int RecordLength, vector<int
 int main(int argc, char **argv)
 {
   // Create a standalone application that runs outside of a ROOT seesion
-  TApplication *TheApplication = new TApplication("ADAQAcquisitionGUI", &argc, argv);
+  TApplication *TheApplication = new TApplication("ADAQAcquisition", &argc, argv);
   
   // Create variables for width and height of the top-level GUI window
   int Width = 1125;
@@ -3534,9 +3534,9 @@ int main(int argc, char **argv)
       cout << "Error! Only argument allowed is 'small'!\n" << endl;
   }
   
-  // Create an object of type ADAQAcquisitionGUI and connect its "CloseWindow" function
-  ADAQAcquisitionGUI *MainFrame = new ADAQAcquisitionGUI(Width, Height);
-  MainFrame->Connect("CloseWindow()", "ADAQAcquisitionGUI", MainFrame, "HandleDisconnectAndTerminate(bool)");
+  // Create an object of type ADAQAcquisition and connect its "CloseWindow" function
+  ADAQAcquisition *MainFrame = new ADAQAcquisition(Width, Height);
+  MainFrame->Connect("CloseWindow()", "ADAQAcquisition", MainFrame, "HandleDisconnectAndTerminate(bool)");
   
   // Run the standalone application
   TheApplication->Run();
