@@ -1,5 +1,5 @@
-#ifndef __ADAQAcquisitionGUI_HH__
-#define __ADAQAcquisitionGUI_HH__ 1
+#ifndef __ADAQAcquisitionGUI_hh__
+#define __ADAQAcquisitionGUI_hh__ 1
 
 #include <TGLabel.h>
 #include <TColor.h>
@@ -33,15 +33,9 @@
 using namespace std;
 
 #include "ADAQRootGUIClasses.hh"
+#include "ADAQAcquisitionTypes.hh"
 class ADAQHighVoltage;
 class ADAQDigitizer;
-
-
-struct ADAQChannelCalibrationData{
-  vector<int> PointID;
-  vector<double> Energy;
-  vector<double> PulseUnit;
-};
  
 
 class ADAQAcquisitionGUI : public TGMainFrame
@@ -50,17 +44,16 @@ public:
 
   ADAQAcquisitionGUI(int Width, int Height);
   ~ADAQAcquisitionGUI();
-
-  // Member functions to create and fill GUI frames with widgets ("signals")
+  
+  // Create/fill the ROOT widgets("signals")
   void CreateTopLevelFrames();
   void FillConnectionFrame();
   void FillVoltageFrame();
   void FillScopeFrame();
-  void FillScopeFrame2();
 
-  // Member functions for performing widget actions ("slots")
-  void HandleVoltageButtons();
+  // Create handlers for widget actions ("slots")
   void HandleConnectionButtons();
+  void HandleVoltageButtons();
   void HandleScopeButtons();
   void HandleScopeNumberEntries();
   void HandleRadioButtons();
@@ -68,43 +61,49 @@ public:
   void HandleCheckButtons();
   void HandleDisconnectAndTerminate(bool = true);
 
-  void SaveSpectrumData();
-  void ForceSpectrumDrawing();
-  void StopAcquisitionSafely();
-
-  // Member functions for real-time actions
-  void RunHVMonitoring();
-  void RunDGScope();
-  void RunDGScope2();
-
-  // Method to generate artificial waveforms (unused presently, ZSH 06 Feb 13 )
-  void GenerateArtificialWaveform(int, vector<int> &, double *, double);
-
-  // Member functions to control various widget states
+  // Enable/disable widgets
   void SetHVWidgetState(int, bool);
   void SetDGWidgetState(bool);
 
+  // Real time actions
+  void RunHVMonitoring();
+  void RunDGScope();
+
+    // Special actions
+  void SaveSpectrumData();
+  void ForceSpectrumDrawing();
+  void StopAcquisitionSafely();
+  
+  // Method to generate artificial waveforms (Unused, ZSH 28 May 13)
+  void GenerateArtificialWaveform(int, vector<int> &, double *, double);
 
 private:
 
-  ////////////////////////////////
-  // General objects and variables
+  ///////////////////////////
+  // General use variables //
+  ///////////////////////////
+
+  // Dimensions for interface window
+  const int DisplayWidth, DisplayHeight;
+
+  // Managers for the V6534 and V1720 VME boards
   ADAQHighVoltage *HVManager;
   ADAQDigitizer *DGManager;
 
-  bool V1720Enable;
-  int V1720BoardAddress;
-
+  // Use booleans and VME addresses
   bool V6534Enable;
   int V6534BoardAddress;
-
+  bool V1720Enable;
+  int V1720BoardAddress;
   bool VMEConnectionEstablished;
 
+  // Variables for high voltage control
   bool HVMonitorEnable;
   vector<string> HVChannelLabels;
   vector<int> HVChannelPower_TB_ID_Vec;
   map<int,int> HVChannelPower_TB_ID_Map;
 
+  // Variables for digitizer control
   bool DGScopeEnable;
   vector<string> DGChannelLabels;
   vector<int> DGScopeChEnable_CB_ID_Vec;
@@ -112,28 +111,53 @@ private:
   vector<int> DGScopeChTriggerThreshold_NEL_ID_Vec;
   vector<int> DGScopeChBaselineCalcMin_NEL_ID_Vec;
   vector<int> DGScopeChBaselineCalcMax_NEL_ID_Vec;
-
   map<int,int> DGScopeChTriggerThreshold_NEL_ID_Map;
+  const int NumDataChannels;
 
-  string SpectrumFileName, SpectrumFileExtension;
-  string GraphicsFileName, GraphicsFileExtension;
-
-  TColor *ColorManager;
-
-    // A random number generator
-  TRandom *RNG;
-  
-  int DisplayWidth, DisplayHeight;
-
-  TGVerticalFrame *TopFrame;
-
-  int NumDataChannels;
+  // Bool to control building code in debugging mode
   bool BuildInDebugMode;
 
   // Objects for controlling timed acquisition periods
   bool AcquisitionTimerEnabled;
   double AcquisitionTime_Start, AcquisitionTime_Stop;
 
+
+  // Strings for file names, extensions
+  string SpectrumFileName, SpectrumFileExtension;
+  string GraphicsFileName, GraphicsFileExtension;
+
+  // Object to convert numeric color to pixel color
+  TColor *ColorManager;
+
+    // A random number generator
+  TRandom *RNG;
+
+
+  // DGScope objects
+  TGraph *DGScopeWaveform_G[8];
+  TH1F *DGScopeSpectrum_H[8];
+
+  TFile *OutputDataFile;
+  TTree *WaveformTree;
+  bool BranchWaveformTree;
+  ADAQRootMeasParams *MeasParams;
+  TObjString *MeasComment;
+
+  vector<bool> UseCalibrationManager;
+  vector<TGraph *> CalibrationManager;
+  vector<ADAQChannelCalibrationData> CalibrationData;
+
+
+  TLegend *DGScopeWaveform_Leg;
+  TLine *DGScopeChannelTrigger_L[8];
+  TBox *DGScopeBaselineCalcRegion_B[8];
+
+
+  /////////////////////////////
+  // ROOT GUI widget objects //
+  /////////////////////////////
+  
+  TGVerticalFrame *TopFrame;
 
   ////////////
   // Tab frame
@@ -183,7 +207,7 @@ private:
   TGTripleHSlider *DGScopeHorizontalScale_THS;
   TGTextButton *DGScopeStartStop_TB, *DGScopeTrigger_TB, *DGScopeUpdatePlot_TB;
 
-TGCheckButton *DGScopeSpectrumUseCalibrationSlider_CB;
+  TGCheckButton *DGScopeSpectrumUseCalibrationSlider_CB;
 
   TGTextButton *DGScopeSave_TB;
 
@@ -254,20 +278,6 @@ TGCheckButton *DGScopeSpectrumUseCalibrationSlider_CB;
 
   ADAQNumberEntryWithLabel *DGScopeSpectrumRefreshRate_NEL;
 
-  TFile *OutputDataFile;
-  TTree *WaveformTree;
-  bool BranchWaveformTree;
-  ADAQRootMeasParams *MeasParams;
-  TObjString *MeasComment;
-
-  vector<bool> UseCalibrationManager;
-  vector<TGraph *> CalibrationManager;
-  vector<ADAQChannelCalibrationData> CalibrationData;
-
-
-
-
-
   TGTextButton *DGScopeSpectrumFileName_TB;
   ADAQTextEntryWithLabel *DGScopeSpectrumFileName_TEL;
   TGCheckButton *DGScopeSaveSpectrumWithTimeExtension_CB;
@@ -278,38 +288,14 @@ TGCheckButton *DGScopeSpectrumUseCalibrationSlider_CB;
   TGCheckButton *DGScopeSaveCanvasWithTimeExtension_CB;
   TGTextButton *DGScopeSaveCanvas_TB;
 
-
-
-
   TGCheckButton *DebugModeEnable_CB;
   ADAQNumberEntryWithLabel *DebugModeWaveformGenerationPause_NEL;
-
-
-
-
-
-
-
-
-
-
-
 
 
   /////////////////////
   // Quit frame widgets 
   TGHorizontalFrame *QuitFrame;
   TGTextButton *QuitButton_TB;
-
-  //////////////////
-  // DGScope objects
-  TGraph *DGScopeWaveform_G[8];
-  TLegend *DGScopeWaveform_Leg;
-
-  TLine *DGScopeChannelTrigger_L[8];
-  TBox *DGScopeBaselineCalcRegion_B[8];
-
-  TH1F *DGScopeSpectrum_H[8];
 
   // Define the ADAQAcquisitionGUI class to ROOT 
   ClassDef(ADAQAcquisitionGUI,1);

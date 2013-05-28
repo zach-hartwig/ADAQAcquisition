@@ -34,14 +34,17 @@ using namespace boost::assign;
 
 ADAQAcquisitionGUI::ADAQAcquisitionGUI(int W, int H)
   : TGMainFrame(gClient->GetRoot()),
-    V1720Enable(true), V1720BoardAddress(0x00420000),
+    DisplayWidth(W), DisplayHeight(H),
     V6534Enable(false), V6534BoardAddress(0x42420000),
+    V1720Enable(true), V1720BoardAddress(0x00420000),
     VMEConnectionEstablished(false),
     HVMonitorEnable(false), DGScopeEnable(false),
+    NumDataChannels(8), BuildInDebugMode(false),
+    AcquisitionTimerEnabled(false), 
+    AcquisitionTime_Start(0.), AcquisitionTime_Stop(0.),
     SpectrumFileName("DefaultSpectrum"), SpectrumFileExtension(".dat"),
     GraphicsFileName("DefaultGraphics"), GraphicsFileExtension(".eps"),
-    ColorManager(new TColor), RNG(new TRandom),
-    DisplayWidth(W), DisplayHeight(H)
+    ColorManager(new TColor), RNG(new TRandom)
 {
   // Hierarchical cleanup of all child frames during destructor
   SetCleanup(kDeepCleanup);
@@ -60,10 +63,6 @@ ADAQAcquisitionGUI::ADAQAcquisitionGUI(int W, int H)
   DGManager = new ADAQDigitizer;
   DGManager->SetVerbose(true);
   
-  NumDataChannels = 8;
-  BuildInDebugMode = true;
-  
-
   /////////////////////////////
   // Initialize HV variables //
   /////////////////////////////
@@ -118,7 +117,7 @@ ADAQAcquisitionGUI::ADAQAcquisitionGUI(int W, int H)
   // and symbol in the ROOT legend using a dummy TGraph object to set
   // the line attributes. Also, initialize the TH1F objects
   // representing the pulse heigh spectrum for each channel
-  for(int i=0; i<DGManager->GetNumChannels(); i++){
+  for(int i=0; i<NumDataChannels; i++){
     TGraph *Dummy_G = new TGraph();
     Dummy_G->SetLineColor(i+1);
     Dummy_G->SetLineWidth(4);
@@ -137,8 +136,6 @@ ADAQAcquisitionGUI::ADAQAcquisitionGUI(int W, int H)
     DGScopeBaselineCalcRegion_B[i] = new TBox;
     DGScopeBaselineCalcRegion_B[i]->SetFillColor(i+1);
     DGScopeBaselineCalcRegion_B[i]->SetFillStyle(3001);
-    
-    DGScopeSpectrum_H[i] = 0;
   }
 
   // Create a dummy TLine object to add a single entry to thewaveform
@@ -149,11 +146,12 @@ ADAQAcquisitionGUI::ADAQAcquisitionGUI(int W, int H)
   Dummy_Line->SetLineWidth(4);
   DGScopeWaveform_Leg->AddEntry(Dummy_Line, "Trig", "L");
   
-  for(int ch=0; ch<DGManager->GetNumChannels(); ch++){
-    UseCalibrationManager.push_back(false);
+  for(int ch=0; ch<NumDataChannels; ch++){
+    DGScopeWaveform_G[ch] = new TGraph;
+    DGScopeSpectrum_H[ch] = new TH1F;
 
+    UseCalibrationManager.push_back(false);
     CalibrationManager.push_back(new TGraph);
-    
     ADAQChannelCalibrationData Init;
     CalibrationData.push_back(Init);
   }
@@ -170,8 +168,7 @@ ADAQAcquisitionGUI::ADAQAcquisitionGUI(int W, int H)
   ///////////////////////////////////////
   FillConnectionFrame();
   FillVoltageFrame();
-  //FillScopeFrame();
-  FillScopeFrame2();
+  FillScopeFrame();
 
 
   /////////////////////////////////////////////////
@@ -185,7 +182,20 @@ ADAQAcquisitionGUI::ADAQAcquisitionGUI(int W, int H)
 
 
 ADAQAcquisitionGUI::~ADAQAcquisitionGUI()
-{;}
+{
+  for(int ch=0; ch<NumDataChannels; ch++){
+    delete CalibrationManager[ch];
+    delete DGScopeSpectrum_H[ch];
+    delete DGScopeWaveform_G[ch];
+    delete DGScopeBaselineCalcRegion_B[ch];
+    delete DGScopeChannelTrigger_L[ch];
+  }
+
+  delete DGScopeWaveform_Leg;
+
+  delete DGManager;
+  delete HVManager;
+}
 
 
 void ADAQAcquisitionGUI::CreateTopLevelFrames()
@@ -647,650 +657,7 @@ void ADAQAcquisitionGUI::FillVoltageFrame()
 }
 
 
-// The "ScopeFrame" holds ROOT widgets and displays that essentially
-// function as a digital oscilloscope and multichannel analyzer
-// (MCA). It has options for individual channel controls, general
-// scope/MCA functionality, display options, and data storage.
 void ADAQAcquisitionGUI::FillScopeFrame()
-{
-  //////////////////////////////
-  // Fill left vertical panel //
-  //////////////////////////////
-  // The left-most vertical subframe on the DGScope frame is contains
-  // channel-specific settings for each of the 8 digitizer
-  // channels. The subframe makes use of the TGCanvas class to
-  // incorporate sliders that can be used to view all channel widgets
-  // in a smaller frame. Pro'n'shit if I do say so myself. And I do.
-
-  TGCanvas *DGScopeChannelControls_C = new TGCanvas(ScopeFrame,300,100,kSunkenFrame);
-  ScopeFrame->AddFrame(DGScopeChannelControls_C, new TGLayoutHints(kLHintsNormal | kLHintsExpandY));
-  
-  TGVerticalFrame *DGScopeChannelControls_VF = new TGVerticalFrame(DGScopeChannelControls_C->GetViewPort(),10,10);
-  DGScopeChannelControls_C->SetContainer(DGScopeChannelControls_VF);
-
-  // The widgets and layouts for control of channel-relevant
-  // parameters for each of the 8 digitizers is identical although the
-  // underlying functionality must correctly identify and set values
-  // for each channel correctly. The widgets and layouts are therefore
-  // constructed in a "for" loop previously initialized using
-  // std::vectors to assign parameters that are unique to each channel
-  // (names and IDs).
-  for(int ch=0; ch<DGManager->GetNumChannels(); ch++){
-
-    // Each channel's widgets are grouped under its own TGGroupFrame.
-    TGGroupFrame *DGScopeChannelControl_GF = new TGGroupFrame(DGScopeChannelControls_VF, DGChannelLabels[ch].c_str(), kVerticalFrame);
-    DGScopeChannelControls_VF->AddFrame(DGScopeChannelControl_GF, new TGLayoutHints(kLHintsCenterX, 5, 5, 5, 0));
-    DGScopeChannelControl_GF->SetTitlePos(TGGroupFrame::kLeft);
-
-    // Horizontal frame to hold the "enable" and "pulse polarity" buttons
-    TGHorizontalFrame *DGScopeChannelControl_HF = new TGHorizontalFrame(DGScopeChannelControl_GF);
-    DGScopeChannelControl_GF->AddFrame(DGScopeChannelControl_HF);
-    
-    // ROOT check button to enable channel for digitization
-    DGScopeChannelControl_HF->AddFrame(DGScopeChannelEnable_CB[ch] = new TGCheckButton(DGScopeChannelControl_HF, "Enable", DGScopeChEnable_CB_ID_Vec[ch]),
-				       new TGLayoutHints(kLHintsCenterY,0,0,0,0));
-    if(ch==0) 
-      DGScopeChannelEnable_CB[ch]->SetState(kButtonDown);
-
-    // TGLabel for the pulse polarity radio buttons
-    DGScopeChannelControl_HF->AddFrame(new TGLabel(DGScopeChannelControl_HF,"Pulse \n polarity"),
-				       new TGLayoutHints(kLHintsCenterY,25,0,5,0));
-
-    // ROOT radio buttons to select the pulse polarity ("-" means
-    // below the baseline; "+" means above the baseline)
-    TGHButtonGroup *DGScopeChannelPolarity_BG = new TGHButtonGroup(DGScopeChannelControl_HF, "Pulse Polarity");//, kHorizontalFrame);
-    DGScopeChannelPolarity_BG->SetTitlePos(TGButtonGroup::kCenter);
-    DGScopeChannelPolarity_BG->SetBorderDrawn(false);
-    DGScopeChannelControl_HF->AddFrame(DGScopeChannelPolarity_BG, new TGLayoutHints(kLHintsRight,-1,-15,-10,-10));
-
-    DGScopeChannelPosPolarity_RB[ch] = new TGRadioButton(DGScopeChannelPolarity_BG, "+  ", -1);
-    DGScopeChannelNegPolarity_RB[ch] = new TGRadioButton(DGScopeChannelPolarity_BG, "-", -1);
-    DGScopeChannelNegPolarity_RB[ch]->SetState(kButtonDown);
-    DGScopeChannelPolarity_BG->Show();
-
-
-    // ADAQ number entry to set channel's vertical position on graph [ADC]
-    DGScopeChannelControl_GF->AddFrame(DGScopeVerticalPosition_NEL[ch] = new ADAQNumberEntryWithLabel(DGScopeChannelControl_GF, "Vert. Position (ADC)", DGScopeChVerticalPosition_NEL_ID),
-				       new TGLayoutHints(kLHintsNormal));
-    DGScopeVerticalPosition_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-    DGScopeVerticalPosition_NEL[ch]->GetEntry()->SetNumber(0);
-    DGScopeVerticalPosition_NEL[ch]->GetEntry()->Resize(65,20);
-
-    // ADAQ number entry to set channel's DAC offset 
-    DGScopeChannelControl_GF->AddFrame(DGScopeDCOffset_NEL[ch] = new ADAQNumberEntryWithLabel(DGScopeChannelControl_GF, "DC offset (hex)", DGScopeChDCOffset_NEL_ID_Vec[ch]),
-					new TGLayoutHints(kLHintsNormal));
-    DGScopeDCOffset_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESHex);
-    DGScopeDCOffset_NEL[ch]->GetEntry()->SetNumLimits(TGNumberFormat::kNELLimitMinMax);
-    DGScopeDCOffset_NEL[ch]->GetEntry()->SetLimitValues(0x0000,0xffff);
-    DGScopeDCOffset_NEL[ch]->GetEntry()->SetNumber(0x8000);
-    DGScopeDCOffset_NEL[ch]->GetEntry()->Resize(65,20);
-
-    // ADAQ number entry to set channel's trigger threshold [ADC]
-    DGScopeChannelControl_GF->AddFrame(DGScopeChTriggerThreshold_NEL[ch] = new ADAQNumberEntryWithLabel(DGScopeChannelControl_GF, "Trig. Threshold (ADC)", DGScopeChTriggerThreshold_NEL_ID_Vec[ch]),
-				       new TGLayoutHints(kLHintsNormal));
-    DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)","ADAQAcquisitionGUI",this,"HandleScopeNumberEntries()");
-    DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-    DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->SetNumber(2000);
-    DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->Resize(65,20);
-    
-    // ADAQ number entry to set minimum sample for baseline calculation [sample]
-    DGScopeChannelControl_GF->AddFrame(DGScopeBaselineCalcMin_NEL[ch] = new ADAQNumberEntryWithLabel(DGScopeChannelControl_GF, "Baseline min. (sample)", DGScopeChBaselineCalcMin_NEL_ID_Vec[ch]),
-				       new TGLayoutHints(kLHintsNormal));
-    DGScopeBaselineCalcMin_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)","ADAQAcquisitionGUI",this,"HandleScopeNumberEntries()");
-    
-    DGScopeBaselineCalcMin_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-    DGScopeBaselineCalcMin_NEL[ch]->GetEntry()->SetNumber(10);
-    DGScopeBaselineCalcMin_NEL[ch]->GetEntry()->Resize(65,20);
-
-    // ADAQ number entry to set maximum sample for baseline calculation [sample]
-    DGScopeChannelControl_GF->AddFrame(DGScopeBaselineCalcMax_NEL[ch] = new ADAQNumberEntryWithLabel(DGScopeChannelControl_GF, "Baseline max. (sample)", DGScopeChBaselineCalcMax_NEL_ID_Vec[ch]),
-					   new TGLayoutHints(kLHintsNormal));
-    DGScopeBaselineCalcMax_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-    DGScopeBaselineCalcMax_NEL[ch]->GetEntry()->SetNumber(45);
-    DGScopeBaselineCalcMax_NEL[ch]->GetEntry()->Resize(65,20);
-  }
-  
-
-
-  ////////////////////////////////
-  // Fill DGScope display frame //
-  ////////////////////////////////
-  // The display frame contains the ROOT TRootEmbeddedCanvas, which
-  // displays the waveforms and pulse heigh spectra, and two sliders,
-  // which control the vertical and horizontal zoom of the graphs
-  // along with spectrum calibration via the 3rd slider on the
-  // horizontal axis.
-
-  TGVerticalFrame *DGScopeDisplayAndControls_VF = new TGVerticalFrame(ScopeFrame);
-  
-  TGGroupFrame *DGScopeDisplay_GF = new TGGroupFrame(DGScopeDisplayAndControls_VF, "Digital Oscilloscope", kVerticalFrame);
-  DGScopeDisplay_GF->SetTitlePos(TGGroupFrame::kCenter);
-  
-  TGHorizontalFrame *DGScopeDisplayAndSlider_HF = new TGHorizontalFrame(DGScopeDisplay_GF);
-  DGScopeDisplay_GF->AddFrame(DGScopeDisplayAndSlider_HF, new TGLayoutHints(kLHintsNormal));
-
-  // ROOT double slider for control of the min/max of vertical axis, ie, zoom
-  DGScopeDisplayAndSlider_HF->AddFrame(DGScopeVerticalScale_DVS = new TGDoubleVSlider(DGScopeDisplayAndSlider_HF, 400, kDoubleScaleBoth, -1, kVerticalFrame, ColorManager->Number2Pixel(17),true,false),
-				       new TGLayoutHints(kLHintsNormal, 0, 0, 5, 0));
-  DGScopeVerticalScale_DVS->SetRange(0,1);
-  DGScopeVerticalScale_DVS->SetPosition(0,1);
-
-  // ROOT embdedded canvas for display of waveforms and spectra
-  DGScopeDisplayAndSlider_HF->AddFrame(DGScope_EC = new TRootEmbeddedCanvas("DGScope_EC", DGScopeDisplayAndSlider_HF, 650, 400),
-				       new TGLayoutHints(kLHintsCenterX, 5,5,5,5));
-  DGScope_EC->GetCanvas()->SetFillColor(0);
-  DGScope_EC->GetCanvas()->SetFrameFillColor(0);
-  DGScope_EC->GetCanvas()->SetGrid();
-  DGScope_EC->GetCanvas()->SetBorderMode(0);
-  DGScope_EC->GetCanvas()->SetLeftMargin(0.12);
-  DGScope_EC->GetCanvas()->SetBottomMargin(0.12);
-  DGScope_EC->GetCanvas()->SetTopMargin(0.08);
-  DGScope_EC->GetCanvas()->SetRightMargin(0.1);
-
-  // ROOT triple slider. The "double" slider features are used to //
-  // control the min/max of the horizontal axis, ie, zoom; The "third"
-  // slider is used for graphical valibration of the pulse height
-  // spectrum when DGScope is set to "calibration mode" while
-  // acquiring data in "spectrum mode"
-  DGScopeDisplay_GF->AddFrame(DGScopeHorizontalScale_THS = new TGTripleHSlider(DGScopeDisplay_GF, 650, kDoubleScaleBoth, -1, kVerticalFrame, ColorManager->Number2Pixel(17)),
-			      new TGLayoutHints(kLHintsRight, 5, 5, 5, 5));
-  DGScopeHorizontalScale_THS->SetRange(0,1);
-  DGScopeHorizontalScale_THS->SetPosition(0,1);
-  DGScopeHorizontalScale_THS->SetPointerPosition(0.5);
-  
-  TGHorizontalFrame *DGScopeDisplayControls_HF = new TGHorizontalFrame(DGScopeDisplay_GF);
-  DGScopeDisplay_GF->AddFrame(DGScopeDisplayControls_HF,
-			      new TGLayoutHints(kLHintsCenterX));
-
-
-  ///////////////////////////////////////
-  // Create large "acquisition" button //
-  ///////////////////////////////////////
-  // A large TGTextButton to control start/stop of the data
-  // acquisition is create here, although it will not actually be
-  // added to the DGScopeDisplayAndControl_VF frame until the very end
-  // of this function so that we can control the order things appear
-
-  // ROOT text button for starting/stopping data acquisition by the digitizer
-  DGScopeStartStop_TB = new TGTextButton(DGScopeDisplayAndControls_VF, "Stopped", DGScopeStartStop_TB_ID);
-  DGScopeStartStop_TB->Connect("Clicked()","ADAQAcquisitionGUI",this,"HandleScopeButtons()");
-  DGScopeStartStop_TB->Resize(400,30);
-  DGScopeStartStop_TB->ChangeOptions(DGScopeStartStop_TB->GetOptions() | kFixedSize);
-  DGScopeStartStop_TB->SetBackgroundColor(ColorManager->Number2Pixel(2));
-  DGScopeStartStop_TB->SetForegroundColor(ColorManager->Number2Pixel(1));
-
-  
-  //////////////////////////////////
-  // Fill horizontal bottom panel //
-  //////////////////////////////////
-  // The bottom frame of DGScope contains a large number of general
-  // DGScope controls, grouped logically into different tabs for
-  // logical accessibility. The "Scope Settings" tab contains features
-  // that control operation of DGScope, such as data acquisition,
-  // trigger setup, and spectrum controls. The "Display Settings"
-  // controls graphical display, such as setting axis titles and
-  // position. The "Data Storage" tab contains options for storing
-  // acquired data in ROOT files.
-
-  TGHorizontalFrame *DGScopeControlTabs_HF = new TGHorizontalFrame(DGScopeDisplayAndControls_VF);
-  TGTab *DGScopeControlTabs = new TGTab(DGScopeControlTabs_HF);
-  DGScopeControlTabs_HF->AddFrame(DGScopeControlTabs, new TGLayoutHints(kLHintsNormal,10,10,0,0));
-
-  TGCompositeFrame *DGScopeSettingsTab = DGScopeControlTabs->AddTab("Scope Controls");
-  TGCompositeFrame *DGScopeSettingsFrame = new TGCompositeFrame(DGScopeSettingsTab,0,0,kHorizontalFrame);
-  DGScopeSettingsTab->AddFrame(DGScopeSettingsFrame);
-
-  TGCompositeFrame *DGScopeSpectrumTab = DGScopeControlTabs->AddTab("Spectrum Settings");
-  TGCompositeFrame *DGScopeSpectrumFrame = new TGCompositeFrame(DGScopeSpectrumTab,0,0,kHorizontalFrame);
-  DGScopeSpectrumTab->AddFrame(DGScopeSpectrumFrame);
-
-  TGCompositeFrame *DGScopeDisplaySettingsTab = DGScopeControlTabs->AddTab("Graphical Options");
-  TGCompositeFrame *DGScopeDisplaySettingsFrame = new TGCompositeFrame(DGScopeDisplaySettingsTab,0,0,kHorizontalFrame);
-  DGScopeDisplaySettingsTab->AddFrame(DGScopeDisplaySettingsFrame);
-
-  TGCompositeFrame *DGScopeDataStorageTab = DGScopeControlTabs->AddTab("Data Storage");
-  TGCompositeFrame *DGScopeDataStorageFrame = new TGCompositeFrame(DGScopeDataStorageTab,0,0,kHorizontalFrame);
-  DGScopeDataStorageTab->AddFrame(DGScopeDataStorageFrame);
-
-  TGCompositeFrame *DGScopeMiscTab = DGScopeControlTabs->AddTab("Miscellaneous");
-  TGCompositeFrame *DGScopeMiscFrame = new TGCompositeFrame(DGScopeMiscTab,0,0,kHorizontalFrame);
-  DGScopeMiscTab->AddFrame(DGScopeMiscFrame);
-
-
-  ////////////////////
-  // Scope settings //
-  ////////////////////
-
-  ////////////////
-  // Mode controls 
-
-  // ROOT radio buttons to specify operational mode of DGScope:
-  // "Waveform" == oscilloscope, "Spectrum" == MCA, "Blank" == display
-  // no graphics for high data throughput
-  TGButtonGroup *DGScopeMode_BG = new TGButtonGroup(DGScopeSettingsFrame, "DGScope Mode", kVerticalFrame);
-  DGScopeMode_BG->SetTitlePos(TGButtonGroup::kCenter);
-  DGScopeSettingsFrame->AddFrame(DGScopeMode_BG, new TGLayoutHints(kLHintsNormal,5,5,5,5));
-
-  DGScopeWaveform_RB = new TGRadioButton(DGScopeMode_BG, "Waveform", DGScopeWaveform_RB_ID);
-  DGScopeWaveform_RB->SetState(kButtonDown);
-
-  DGScopeSpectrum_RB = new TGRadioButton(DGScopeMode_BG, "Spectrum", DGScopeSpectrum_RB_ID);
-
-  DGScopeBlank_RB = new TGRadioButton(DGScopeMode_BG, "Blank", DGScopeBlank_RB_ID);
-  
-  DGScopeMode_BG->Show();
-
-  ///////////////////
-  // Trigger controls
-
-  TGGroupFrame *DGScopeTriggerControls_GF = new TGGroupFrame(DGScopeSettingsFrame, "Trigger", kVerticalFrame);
-  DGScopeTriggerControls_GF->SetTitlePos(TGGroupFrame::kCenter);
-  DGScopeSettingsFrame->AddFrame(DGScopeTriggerControls_GF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
-
-  DGScopeTriggerControls_GF->AddFrame(DGScopeTriggerCoincidenceEnable_CB = new TGCheckButton(DGScopeTriggerControls_GF, "Coincidence triggering",DGScopeTriggerCoincidenceEnable_CB_ID),
-				     new TGLayoutHints(kLHintsNormal,5,5,5,0));
-
-  DGScopeTriggerControls_GF->AddFrame(DGScopeTriggerCoincidenceLevel_CBL = new ADAQComboBoxWithLabel(DGScopeTriggerControls_GF, "Coincidence level",-1),
-				     new TGLayoutHints(kLHintsNormal,5,5,5,5));
-  DGScopeTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("2 channel",1);
-  DGScopeTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("3 channel",2);
-  DGScopeTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("4 channel",3);
-  DGScopeTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("5 channel",4);
-  DGScopeTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("6 channel",5);
-  DGScopeTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("7 channel",6);
-  DGScopeTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("8 channel",7);
-  DGScopeTriggerCoincidenceLevel_CBL->GetComboBox()->Select(1);
-
-  // ADAQ combo box to enable specification of trigger type
-  DGScopeTriggerControls_GF->AddFrame(DGScopeTriggerMode_CBL = new ADAQComboBoxWithLabel(DGScopeTriggerControls_GF, "Type", DGScopeTriggerMode_CBL_ID),
-				      new TGLayoutHints(kLHintsNormal,5,5,5,5));
-  DGScopeTriggerMode_CBL->GetComboBox()->AddEntry("External (NIM)",0);
-  DGScopeTriggerMode_CBL->GetComboBox()->AddEntry("External (TTL)",1);
-  DGScopeTriggerMode_CBL->GetComboBox()->AddEntry("Automatic",2);
-  DGScopeTriggerMode_CBL->GetComboBox()->AddEntry("Software",3);
-  DGScopeTriggerMode_CBL->GetComboBox()->Select(2);
-  DGScopeTriggerMode_CBL->GetComboBox()->Resize(110,20);
-  DGScopeTriggerMode_CBL->GetComboBox()->ChangeOptions(DGScopeTriggerMode_CBL->GetComboBox()->GetOptions() | kFixedSize);
-
-  // ROOT text button for manually triggering of DGScope acquisition
-  DGScopeTriggerControls_GF->AddFrame(DGScopeTrigger_TB = new TGTextButton(DGScopeTriggerControls_GF, "Manual trigger", DGScopeTrigger_TB_ID),
-				      new TGLayoutHints(kLHintsNormal,5,5,5,5));
-  DGScopeTrigger_TB->Connect("Clicked()","ADAQAcquisitionGUI",this,"HandleScopeButtons()");
-  DGScopeTrigger_TB->Resize(120,25);
-  DGScopeTrigger_TB->ChangeOptions(DGScopeTrigger_TB->GetOptions() | kFixedSize);
-
-  
-  ///////////////////////
-  // Acquisition controls
-
-  TGGroupFrame *DGScopeAcquisitionControls_GF = new TGGroupFrame(DGScopeSettingsFrame, "Acquisition", kVerticalFrame);
-  DGScopeAcquisitionControls_GF->SetTitlePos(TGGroupFrame::kCenter);
-  DGScopeSettingsFrame->AddFrame(DGScopeAcquisitionControls_GF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
-
-  // ADAQ number entry specifying number of samples
-  DGScopeAcquisitionControls_GF->AddFrame(DGScopeRecordLength_NEL = new ADAQNumberEntryWithLabel(DGScopeAcquisitionControls_GF, "Record length (#)", DGScopeRecordLength_NEL_ID),
-					  new TGLayoutHints(kLHintsNormal,5,5,5,0));
-  DGScopeRecordLength_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-  DGScopeRecordLength_NEL->GetEntry()->SetNumber(512);
-
-  // ADAQ number entry specifying the percentage of the acquisition
-  // window that is behind (or after) the triggern (all channels)
-  DGScopeAcquisitionControls_GF->AddFrame(DGScopePostTriggerSize_NEL = new ADAQNumberEntryWithLabel(DGScopeAcquisitionControls_GF, "Post trigger (%)", DGScopePostTriggerSize_NEL_ID),
-					  new TGLayoutHints(kLHintsNormal,5,5,0,5));
-  DGScopePostTriggerSize_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-  DGScopePostTriggerSize_NEL->GetEntry()->SetNumLimits(TGNumberFormat::kNELLimitMinMax);
-  DGScopePostTriggerSize_NEL->GetEntry()->SetLimitValues(0,100);
-  DGScopePostTriggerSize_NEL->GetEntry()->SetNumber(50);
-
-
-  ///////////////////////
-  // Spectrum settings //
-  ///////////////////////
-
-  ////////////
-  // Histogram  
-
-  TGGroupFrame *DGScopeSpectrumHistogram_GF = new TGGroupFrame(DGScopeSpectrumFrame, "Histogram", kVerticalFrame);
-  DGScopeSpectrumHistogram_GF->SetTitlePos(TGGroupFrame::kCenter);
-  DGScopeSpectrumFrame->AddFrame(DGScopeSpectrumHistogram_GF, new TGLayoutHints(kLHintsNormal,5,5,0,0));
-
-  // ADAQ combo box for selecting the channel for display spectrum
-  DGScopeSpectrumHistogram_GF->AddFrame(DGScopeSpectrumChannel_CBL = new ADAQComboBoxWithLabel(DGScopeSpectrumHistogram_GF, "", -1),
-					new TGLayoutHints(kLHintsNormal,0,0,5,5));
-  for(uint32_t ch=0; ch<8; ch++)
-    DGScopeSpectrumChannel_CBL->GetComboBox()->AddEntry(DGChannelLabels[ch].c_str(),ch);
-  DGScopeSpectrumChannel_CBL->GetComboBox()->Select(0);
-  
-  // ADAQ number entry to specify number of bins used in the spectra histogram
-  DGScopeSpectrumHistogram_GF->AddFrame(DGScopeSpectrumBinNumber_NEL = new ADAQNumberEntryWithLabel(DGScopeSpectrumHistogram_GF, "Number of bins  ", DGScopeSpectrumBinNumber_NEL_ID),
-					new TGLayoutHints(kLHintsLeft,0,0,5,0));
-  DGScopeSpectrumBinNumber_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-  DGScopeSpectrumBinNumber_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
-  DGScopeSpectrumBinNumber_NEL->GetEntry()->SetNumber(100);
-
-  // ADAQ number entry to specify the maximum bin in the spectra histogram
-  DGScopeSpectrumHistogram_GF->AddFrame(DGScopeSpectrumMinBin_NEL = new ADAQNumberEntryWithLabel(DGScopeSpectrumHistogram_GF, "Minimum bin", DGScopeSpectrumMinBin_NEL_ID),
-				    new TGLayoutHints(kLHintsLeft,0,0,0,0));
-  DGScopeSpectrumMinBin_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
-  DGScopeSpectrumMinBin_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
-  DGScopeSpectrumMinBin_NEL->GetEntry()->SetNumber(0);
-
-  DGScopeSpectrumHistogram_GF->AddFrame(DGScopeSpectrumMaxBin_NEL = new ADAQNumberEntryWithLabel(DGScopeSpectrumHistogram_GF, "Maximum bin", DGScopeSpectrumMaxBin_NEL_ID),
-				       new TGLayoutHints(kLHintsLeft,0,0,0,5));
-  DGScopeSpectrumMaxBin_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
-  DGScopeSpectrumMaxBin_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
-  DGScopeSpectrumMaxBin_NEL->GetEntry()->SetNumber(30000);
-
-  TGHorizontalFrame *DGScopeSpectrumAxis_HF = new TGHorizontalFrame(DGScopeSpectrumHistogram_GF);
-  DGScopeSpectrumHistogram_GF->AddFrame(DGScopeSpectrumAxis_HF, new TGLayoutHints(kLHintsNormal,0,0,0,0));
-
-  // ROOT check button that allows multiple runs ("run" == acquisition
-  // on and then off) to sum into the same histogram
-  DGScopeSpectrumHistogram_GF->AddFrame(DGScopeSpectrumAggregateRuns_CB = new TGCheckButton(DGScopeSpectrumHistogram_GF, "Aggregate runs", DGScopeSpectrumAggregateRuns_CB_ID),
-					new TGLayoutHints(kLHintsLeft,0,0,5,5));
-
-
-  /////////////////
-  // Pulse analysis
-
-  TGGroupFrame *DGScopeSpectrumAnalysis_GF = new TGGroupFrame(DGScopeSpectrumFrame,"Analysis");
-  DGScopeSpectrumAnalysis_GF->SetTitlePos(TGGroupFrame::kCenter);
-  DGScopeSpectrumFrame->AddFrame(DGScopeSpectrumAnalysis_GF);
-
-  TGButtonGroup *DGScopeSpectrumAnalysis_BG = new TGButtonGroup(DGScopeSpectrumAnalysis_GF,"",kHorizontalFrame);
-  DGScopeSpectrumAnalysis_BG->SetTitlePos(TGGroupFrame::kCenter);
-  DGScopeSpectrumAnalysis_GF->AddFrame(DGScopeSpectrumAnalysis_BG, new TGLayoutHints(kLHintsNormal,-13,0,0,0));
-
-  DGScopeSpectrumAnalysisHeight_RB = new TGRadioButton(DGScopeSpectrumAnalysis_BG, "PHS    ", -1);
-  DGScopeSpectrumAnalysisArea_RB = new TGRadioButton(DGScopeSpectrumAnalysis_BG, "PAS", -1);
-  DGScopeSpectrumAnalysisArea_RB->SetState(kButtonDown);
-  
-  DGScopeSpectrumAnalysis_GF->AddFrame(DGScopeSpectrumAnalysisLLD_NEL = new ADAQNumberEntryWithLabel(DGScopeSpectrumAnalysis_GF, "LLD (ADC/keV)",-1),
-				       new TGLayoutHints(kLHintsNormal, 0,0,-5,0));
-  DGScopeSpectrumAnalysisLLD_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
-  DGScopeSpectrumAnalysisLLD_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEANonNegative);
-  DGScopeSpectrumAnalysisLLD_NEL->GetEntry()->SetNumber(0);
-
-  DGScopeSpectrumAnalysis_GF->AddFrame(DGScopeSpectrumAnalysisULD_NEL = new ADAQNumberEntryWithLabel(DGScopeSpectrumAnalysis_GF, "ULD (ADC/keV)",-1),
-				       new TGLayoutHints(kLHintsNormal, 0,0,0,5));
-  DGScopeSpectrumAnalysisULD_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
-  DGScopeSpectrumAnalysisULD_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
-  DGScopeSpectrumAnalysisULD_NEL->GetEntry()->SetNumber(100000);
-
-  DGScopeSpectrumAnalysis_GF->AddFrame(DGScopeSpectrumAnalysisLDTrigger_CB = new TGCheckButton(DGScopeSpectrumAnalysis_GF,"Use LD trigger on",-1),
-				       new TGLayoutHints(kLHintsNormal,0,0,0,5));
-  
-  DGScopeSpectrumAnalysis_GF->AddFrame(DGScopeSpectrumAnalysisLDTriggerChannel_CBL = new ADAQComboBoxWithLabel(DGScopeSpectrumAnalysis_GF,"",-1),
-				       new TGLayoutHints(kLHintsNormal,0,0,0,5));
-  for(uint32_t ch=0; ch<8; ch++)
-    DGScopeSpectrumAnalysisLDTriggerChannel_CBL->GetComboBox()->AddEntry(DGChannelLabels[ch].c_str(),ch);
-  DGScopeSpectrumAnalysisLDTriggerChannel_CBL->GetComboBox()->Select(0);
-  
-  //////////////
-  // Calibration
-
-  TGGroupFrame *DGScopeSpectrumCalibration_GF = new TGGroupFrame(DGScopeSpectrumFrame, "Calibration", kVerticalFrame);
-  DGScopeSpectrumCalibration_GF->SetTitlePos(TGGroupFrame::kCenter);
-  DGScopeSpectrumFrame->AddFrame(DGScopeSpectrumCalibration_GF, new TGLayoutHints(kLHintsNormal,5,5,0,0));
-
-  TGHorizontalFrame *DGScopeSpectrumCalibration_HF1 = new TGHorizontalFrame(DGScopeSpectrumCalibration_GF);
-  DGScopeSpectrumCalibration_GF->AddFrame(DGScopeSpectrumCalibration_HF1);
-  
-  DGScopeSpectrumCalibration_HF1->AddFrame(DGScopeSpectrumCalibration_CB = new TGCheckButton(DGScopeSpectrumCalibration_HF1, "Engage!", DGScopeSpectrumCalibration_CB_ID),
-					   new TGLayoutHints(kLHintsLeft,5,5,5,5));
-  DGScopeSpectrumCalibration_CB->Connect("Clicked()","ADAQAcquisitionGUI",this,"HandleScopeButtons()");
-  DGScopeSpectrumCalibration_CB->SetState(kButtonUp);
-
-  DGScopeSpectrumCalibration_HF1->AddFrame(DGScopeSpectrumCalibrationPoint_CBL = new ADAQComboBoxWithLabel(DGScopeSpectrumCalibration_HF1, "",-1),
-					   new TGLayoutHints(kLHintsNormal, 20,5,5,5));
-  DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->AddEntry("Point 0",0);
-  DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->Select(0);
-  
-  // ADAQ number entry for setting the calibration energy. The
-  // calibration energy is a known energy of detected particles (ie, a
-  // gamma peak) to which the third slider of the DGScope horizontal
-  // slider is directed on the DGScope spectrum. The calibration is
-  // then computed by dividing the position of the slider in the pulse
-  // height spectrum by the entered calibration energy to obtain
-  // [number of bins / keV]
-  DGScopeSpectrumCalibration_GF->AddFrame(DGScopeSpectrumCalibrationEnergy_NEL = new ADAQNumberEntryWithLabel(DGScopeSpectrumCalibration_GF, "Energy (keV)  ", -1),
-					  new TGLayoutHints(kLHintsLeft,0,0,5,0));
-  DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
-  DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEANonNegative);
-  DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->SetNumber(0.0);
-  DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->SetState(false);
-
-  DGScopeSpectrumCalibration_GF->AddFrame(DGScopeSpectrumCalibrationPulseUnit_NEL = new ADAQNumberEntryWithLabel(DGScopeSpectrumCalibration_GF, "Pulse Unit (ADC)", DGScopeSpectrumCalibrationPulseUnit_NEL_ID),
-				       new TGLayoutHints(kLHintsLeft,0,0,0,5));
-  DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
-  DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
-  DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->SetNumber(1.0);
-  DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->SetState(false);
-
-  TGHorizontalFrame *DGScopeSpectrumCalibration_HF2 = new TGHorizontalFrame(DGScopeSpectrumCalibration_GF);
-  DGScopeSpectrumCalibration_GF->AddFrame(DGScopeSpectrumCalibration_HF2,
-					  new TGLayoutHints(kLHintsExpandX));
-  
-  // Set point text button
-  DGScopeSpectrumCalibration_HF2->AddFrame(DGScopeSpectrumCalibrationSetPoint_TB = new TGTextButton(DGScopeSpectrumCalibration_HF2, "Set Pt.", DGScopeSpectrumCalibrationSetPoint_TB_ID),
-					   new TGLayoutHints(kLHintsNormal, 5,5,5,5));
-  DGScopeSpectrumCalibrationSetPoint_TB->Connect("Clicked()","ADAQAcquisitionGUI",this,"HandleScopeButtons()");
-  DGScopeSpectrumCalibrationSetPoint_TB->Resize(100,25);
-  DGScopeSpectrumCalibrationSetPoint_TB->ChangeOptions(DGScopeSpectrumCalibrationSetPoint_TB->GetOptions() | kFixedSize);
-  DGScopeSpectrumCalibrationSetPoint_TB->SetState(kButtonDisabled);
-  
-  // Calibrate text button
-  DGScopeSpectrumCalibration_HF2->AddFrame(DGScopeSpectrumCalibrationCalibrate_TB = new TGTextButton(DGScopeSpectrumCalibration_HF2, "Calibrate", DGScopeSpectrumCalibrationCalibrate_TB_ID),
-					  new TGLayoutHints(kLHintsNormal, 5,5,5,5));
-  DGScopeSpectrumCalibrationCalibrate_TB->Connect("Clicked()","ADAQAcquisitionGUI",this,"HandleScopeButtons()");
-  DGScopeSpectrumCalibrationCalibrate_TB->Resize(100,25);
-  DGScopeSpectrumCalibrationCalibrate_TB->ChangeOptions(DGScopeSpectrumCalibrationCalibrate_TB->GetOptions() | kFixedSize);
-  DGScopeSpectrumCalibrationCalibrate_TB->SetState(kButtonDisabled);
-
-  TGHorizontalFrame *DGScopeSpectrumCalibration_HF3 = new TGHorizontalFrame(DGScopeSpectrumCalibration_GF);
-  DGScopeSpectrumCalibration_GF->AddFrame(DGScopeSpectrumCalibration_HF3,
-					  new TGLayoutHints(kLHintsExpandX));
-  
-  // Plot text button
-  DGScopeSpectrumCalibration_HF3->AddFrame(DGScopeSpectrumCalibrationPlot_TB = new TGTextButton(DGScopeSpectrumCalibration_HF3, "Plot", DGScopeSpectrumCalibrationPlot_TB_ID),
-					   new TGLayoutHints(kLHintsNormal, 5,5,5,5));
-  DGScopeSpectrumCalibrationPlot_TB->Connect("Clicked()","ADAQAcquisitionGUI",this,"HandleScopeButtons()");
-  DGScopeSpectrumCalibrationPlot_TB->Resize(100,25);
-  DGScopeSpectrumCalibrationPlot_TB->ChangeOptions(DGScopeSpectrumCalibrationPlot_TB->GetOptions() | kFixedSize);
-  DGScopeSpectrumCalibrationPlot_TB->SetState(kButtonDisabled);
-  
-  // Reset text button
-  DGScopeSpectrumCalibration_HF3->AddFrame(DGScopeSpectrumCalibrationReset_TB = new TGTextButton(DGScopeSpectrumCalibration_HF3, "Reset", DGScopeSpectrumCalibrationReset_TB_ID),
-					   new TGLayoutHints(kLHintsNormal, 5,5,5,5));
-  DGScopeSpectrumCalibrationReset_TB->Connect("Clicked()","ADAQAcquisitionGUI",this,"HandleScopeButtons()");
-  DGScopeSpectrumCalibrationReset_TB->Resize(100,25);
-  DGScopeSpectrumCalibrationReset_TB->ChangeOptions(DGScopeSpectrumCalibrationReset_TB->GetOptions() | kFixedSize);
-  DGScopeSpectrumCalibrationReset_TB->SetState(kButtonDisabled);
-
-
-  //////////////////////
-  // Display settings //
-  //////////////////////
-
-  ////////////////////////////
-  // Title names and positions 
-
-  TGGroupFrame *DGScopeDisplayTitle_GF = new TGGroupFrame(DGScopeDisplaySettingsFrame, "Titles", kVerticalFrame);
-  DGScopeDisplayTitle_GF->SetTitlePos(TGGroupFrame::kCenter);
-  DGScopeDisplaySettingsFrame->AddFrame(DGScopeDisplayTitle_GF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
-
-  // ADAQ text entries and number entries for specifying the DGScope title, axes title, and axes position
-
-  // X axis options
-  DGScopeDisplayTitle_GF->AddFrame(DGScopeDisplayXTitle_TEL = new ADAQTextEntryWithLabel(DGScopeDisplayTitle_GF, "X-axis title", -1),
-				      new TGLayoutHints(kLHintsNormal,5,5,5,0));
-  DGScopeDisplayXTitle_TEL->GetEntry()->SetText("");
-
-  TGHorizontalFrame *DGScopeDisplayXTitleOptions_HF = new TGHorizontalFrame(DGScopeDisplayTitle_GF);
-  DGScopeDisplayTitle_GF->AddFrame(DGScopeDisplayXTitleOptions_HF, new TGLayoutHints(kLHintsLeft, 0,0,0,0));
-
-  DGScopeDisplayXTitleOptions_HF->AddFrame(DGScopeDisplayXTitleSize_NEL = new ADAQNumberEntryWithLabel(DGScopeDisplayXTitleOptions_HF, "Size", -1),
-					   new TGLayoutHints(kLHintsLeft,5,5,0,0));
-  DGScopeDisplayXTitleSize_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
-  DGScopeDisplayXTitleSize_NEL->GetEntry()->SetNumber(0.05);
-
-  DGScopeDisplayXTitleOptions_HF->AddFrame(DGScopeDisplayXTitleOffset_NEL = new ADAQNumberEntryWithLabel(DGScopeDisplayXTitleOptions_HF, "Offset", -1),
-					   new TGLayoutHints(kLHintsLeft,5,5,0,5));
-  DGScopeDisplayXTitleOffset_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
-  DGScopeDisplayXTitleOffset_NEL->GetEntry()->SetNumber(1.2);
-
-  // Y-axis options
-  DGScopeDisplayTitle_GF->AddFrame(DGScopeDisplayYTitle_TEL = new ADAQTextEntryWithLabel(DGScopeDisplayTitle_GF, "Y-axis title", -1),
-				      new TGLayoutHints(kLHintsNormal,5,5,5,0));
-  DGScopeDisplayYTitle_TEL->GetEntry()->SetText("");
-
-  TGHorizontalFrame *DGScopeDisplayYTitleOptions_HF = new TGHorizontalFrame(DGScopeDisplayTitle_GF);
-  DGScopeDisplayTitle_GF->AddFrame(DGScopeDisplayYTitleOptions_HF, new TGLayoutHints(kLHintsLeft, 0,0,0,0));
-  
-  DGScopeDisplayYTitleOptions_HF->AddFrame(DGScopeDisplayYTitleSize_NEL = new ADAQNumberEntryWithLabel(DGScopeDisplayYTitleOptions_HF, "Size", -1),
-				      new TGLayoutHints(kLHintsNormal,5,0,0,5));
-  DGScopeDisplayYTitleSize_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
-  DGScopeDisplayYTitleSize_NEL->GetEntry()->SetNumber(0.05);
-
-  DGScopeDisplayYTitleOptions_HF->AddFrame(DGScopeDisplayYTitleOffset_NEL = new ADAQNumberEntryWithLabel(DGScopeDisplayYTitleOptions_HF, "Offset", -1),
-				      new TGLayoutHints(kLHintsNormal,5,0,0,5));
-  DGScopeDisplayYTitleOffset_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
-  DGScopeDisplayYTitleOffset_NEL->GetEntry()->SetNumber(1.5);
-  
-  // Title options
-  DGScopeDisplayTitle_GF->AddFrame(DGScopeDisplayTitle_TEL = new ADAQTextEntryWithLabel(DGScopeDisplayTitle_GF, "Graph Title", -1),
-				      new TGLayoutHints(kLHintsNormal,5,5,5,5));
-
-  ///////////////////////
-  // Graphical attributes
-  
-  TGGroupFrame *DGScopeDisplaySettings_GF = new TGGroupFrame(DGScopeDisplaySettingsFrame, "Display", kVerticalFrame);
-  DGScopeDisplaySettings_GF->SetTitlePos(TGGroupFrame::kCenter);
-  DGScopeDisplaySettingsFrame->AddFrame(DGScopeDisplaySettings_GF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
-
-  // ROOT check button to enable/disable plotting of the legend
-  DGScopeDisplaySettings_GF->AddFrame(DGScopeDisplayDrawLegend_CB = new TGCheckButton(DGScopeDisplaySettings_GF, "Legend", -1),
-				      new TGLayoutHints(kLHintsNormal,0,0,5,0));
-
-  // ROOT check buttons for specifying if X and Y axes on spectra should be logarithmic
-  DGScopeDisplaySettings_GF->AddFrame(DGScopeSpectrumXAxisLog_CB = new TGCheckButton(DGScopeDisplaySettings_GF, "Log. X-axis  ", DGScopeSpectrumXAxisLog_CB_ID),
-				      new TGLayoutHints(kLHintsLeft,0,0,0,0));
-  DGScopeDisplaySettings_GF->AddFrame(DGScopeSpectrumYAxisLog_CB = new TGCheckButton(DGScopeDisplaySettings_GF, "Log. Y-axis", DGScopeSpectrumYAxisLog_CB_ID),
-				      new TGLayoutHints(kLHintsLeft,0,0,0,0));
-
-  TGButtonGroup *DGScopeDisplayWaveformXAxis_BG = new TGButtonGroup(DGScopeDisplaySettings_GF,"Waveform X axis",kHorizontalFrame);
-  DGScopeDisplaySettings_GF->AddFrame(DGScopeDisplayWaveformXAxis_BG, new TGLayoutHints(kLHintsNormal,5,0,5,0));
-  
-  DGScopeDisplayWaveformXAxisSample_RB = new TGRadioButton(DGScopeDisplayWaveformXAxis_BG, "Sample", -1);
-  DGScopeDisplayWaveformXAxisSample_RB->SetState(kButtonDown);
-  
-  DGScopeDisplayWaveformXAxisNanoseconds_RB = new TGRadioButton(DGScopeDisplayWaveformXAxis_BG, "ns", -1);
-
-  TGButtonGroup *DGScopeDisplayWaveformYAxis_BG = new TGButtonGroup(DGScopeDisplaySettings_GF,"Waveform Y axis",kHorizontalFrame);
-  DGScopeDisplaySettings_GF->AddFrame(DGScopeDisplayWaveformYAxis_BG, new TGLayoutHints(kLHintsNormal,5,0,5,0));
-  
-  DGScopeDisplayWaveformYAxisADC_RB = new TGRadioButton(DGScopeDisplayWaveformYAxis_BG, "ADC", -1);
-  DGScopeDisplayWaveformYAxisADC_RB->SetState(kButtonDown);
-  
-  DGScopeDisplayWaveformYAxisMillivolts_RB = new TGRadioButton(DGScopeDisplayWaveformYAxis_BG, "mV", -1);
-
-
-  ///////////////////
-  // Graphical output
-
-  TGGroupFrame *DGScopeDisplayOutput_GF = new TGGroupFrame(DGScopeDisplaySettingsFrame, "Output", kVerticalFrame);
-  DGScopeDisplayOutput_GF->SetTitlePos(TGGroupFrame::kCenter);
-  DGScopeDisplaySettingsFrame->AddFrame(DGScopeDisplayOutput_GF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
-
-  // ADAQ text entry for entering DGScope graphical output file name
-  DGScopeDisplayOutput_GF->AddFrame(DGScopeDisplayOutputFileName_TEL = new ADAQTextEntryWithLabel(DGScopeDisplayOutput_GF, "File name", -1),
-				    new TGLayoutHints(kLHintsNormal,5,5,5,5));
-  DGScopeDisplayOutputFileName_TEL->GetEntry()->SetText("DGScopePlot");
-
-  // ADAQ combo box for selecting the desired DGScope graphical output file format
-  DGScopeDisplayOutput_GF->AddFrame(DGScopeDisplayOutputFileType_CBL = new ADAQComboBoxWithLabel(DGScopeDisplayOutput_GF, "File type", -1),
-				    new TGLayoutHints(kLHintsNormal,5,5,5,5));
-  DGScopeDisplayOutputFileType_CBL->GetComboBox()->AddEntry(".eps",0);
-  DGScopeDisplayOutputFileType_CBL->GetComboBox()->AddEntry(".ps",1);
-  DGScopeDisplayOutputFileType_CBL->GetComboBox()->AddEntry(".png",2);
-  DGScopeDisplayOutputFileType_CBL->GetComboBox()->AddEntry(".jpeg",3);
-  DGScopeDisplayOutputFileType_CBL->GetComboBox()->Select(0);
-  
-  // ROOT text button that saves the DGScope canvas to file
-  DGScopeDisplayOutput_GF->AddFrame(DGScopeSave_TB = new TGTextButton(DGScopeDisplayOutput_GF, "Save plot", DGScopeSave_TB_ID),
-				      new TGLayoutHints(kLHintsNormal,5,5,5,5));
-  DGScopeSave_TB->Connect("Clicked()","ADAQAcquisitionGUI",this,"HandleScopeButtons()");
-  DGScopeSave_TB->Resize(100,25);
-  DGScopeSave_TB->ChangeOptions(DGScopeSave_TB->GetOptions() | kFixedSize);
-
-  
-  //////////////////
-  // Data storage //
-  //////////////////
-
-  TGVerticalFrame *DGScopeDataStorage_VF = new TGVerticalFrame(DGScopeDataStorageFrame);
-  DGScopeDataStorageFrame->AddFrame(DGScopeDataStorage_VF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
-
-  // ADAQ text entry for setting the ROOT file name
-  DGScopeDataStorage_VF->AddFrame(DGScopeDataFileName_TEL = new ADAQTextEntryWithLabel(DGScopeDataStorage_VF, "Filename (.root)",-1),
-				    new TGLayoutHints(kLHintsNormal,5,5,5,5));
-  DGScopeDataFileName_TEL->GetEntry()->SetText("ADAQMeasurement.root");
-  DGScopeDataFileName_TEL->GetEntry()->SetState(false);
-
-  // ADAQ text entry that will add a comment on the saved data to the ROOT file, making it possible to
-  // record various parameters, settings, etc on the measurement for later retrieval
-  DGScopeDataStorage_VF->AddFrame(DGScopeDataComment_TEL = new ADAQTextEntryWithLabel(DGScopeDataStorage_VF, "Comment", -1),
-				    new TGLayoutHints(kLHintsNormal,5,5,5,5));
-  DGScopeDataComment_TEL->GetEntry()->SetState(false);
-
-  // ROOT text button to create a root file using the name in the text entry field above
-  DGScopeDataStorage_VF->AddFrame(DGScopeDataStorageCreateFile_TB = new TGTextButton(DGScopeDataStorage_VF,"Create ROOT file", DGScopeDataStorageCreateFile_TB_ID),
-				  new TGLayoutHints(kLHintsNormal,5,5,0,5));
-  DGScopeDataStorageCreateFile_TB->Connect("Clicked()","ADAQAcquisitionGUI",this,"HandleScopeButtons()");
-  DGScopeDataStorageCreateFile_TB->Resize(150,25);
-  DGScopeDataStorageCreateFile_TB->ChangeOptions(DGScopeDataStorageCreateFile_TB->GetOptions() | kFixedSize);
-  DGScopeDataStorageCreateFile_TB->SetState(kButtonDisabled);
-
-  // ROOT text button to write all data to the ROOT file and close it. This button MUST be clicked to 
-  // successfully write&close the ROOT file otherwise the ROOT file will have errors.
-  DGScopeDataStorage_VF->AddFrame(DGScopeDataStorageCloseFile_TB = new TGTextButton(DGScopeDataStorage_VF,"Close ROOT file", DGScopeDataStorageCloseFile_TB_ID),
-				  new TGLayoutHints(kLHintsNormal,5,5,0,5));
-  DGScopeDataStorageCloseFile_TB->Connect("Clicked()","ADAQAcquisitionGUI",this,"HandleScopeButtons()");
-  DGScopeDataStorageCloseFile_TB->Resize(150,25);
-  DGScopeDataStorageCloseFile_TB->ChangeOptions(DGScopeDataStorageCloseFile_TB->GetOptions() | kFixedSize);
-  DGScopeDataStorageCloseFile_TB->SetState(kButtonDisabled);
-  
-  // ROOT check button to enable/disable saving data to ROOT file. Note that the data is saved to
-  // the ROOT file only while the button is checked. The 
-  DGScopeDataStorage_VF->AddFrame(DGScopeDataStorageEnable_CB = new TGCheckButton(DGScopeDataStorage_VF,"Data stored while checked", -1),
-				  new TGLayoutHints(kLHintsNormal,5,5,5,5));
-  DGScopeDataStorageEnable_CB->SetState(kButtonDisabled);
-
-
-  ///////////////////
-  // Miscellaneous //
-  ///////////////////
-
-  TGVerticalFrame *DGScopeMisc1_VF = new TGVerticalFrame(DGScopeMiscFrame);
-  DGScopeMiscFrame->AddFrame(DGScopeMisc1_VF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
-
-  DGScopeMisc1_VF->AddFrame(DGScopeSpectrumRefreshRate_NEL = new ADAQNumberEntryWithLabel(DGScopeMisc1_VF,"Spectrum Refresh Rate", -1),
-			    new TGLayoutHints(kLHintsNormal,5,5,5,5));
-  DGScopeSpectrumRefreshRate_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-  DGScopeSpectrumRefreshRate_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
-  DGScopeSpectrumRefreshRate_NEL->GetEntry()->SetNumber(100);
-  
-
-  DGScopeDisplayAndControls_VF->AddFrame(DGScopeDisplay_GF, new TGLayoutHints(kLHintsCenterX,5,5,0,0));
-  DGScopeDisplayAndControls_VF->AddFrame(DGScopeStartStop_TB, new TGLayoutHints(kLHintsCenterX,0,0,0,5));
-  DGScopeDisplayAndControls_VF->AddFrame(DGScopeControlTabs_HF, new TGLayoutHints(kLHintsCenterX,5,5,0,5));
-
-  ScopeFrame->AddFrame(DGScopeDisplayAndControls_VF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
-}
-
-
-
-void ADAQAcquisitionGUI::FillScopeFrame2()
 {
   //////////////////////////////
   // Fill left vertical panel //
@@ -1314,7 +681,7 @@ void ADAQAcquisitionGUI::FillScopeFrame2()
   // constructed in a "for" loop previously initialized using
   // vectors to assign parameters that are unique to each channel
   // (names and IDs).
-  for(int ch=0; ch<DGManager->GetNumChannels(); ch++){
+  for(int ch=0; ch<NumDataChannels; ch++){
 
     // Each channel's widgets are grouped under its own TGGroupFrame.
     TGGroupFrame *DGScopeChannelControl_GF = new TGGroupFrame(DGScopeChannelControls_VF, DGChannelLabels[ch].c_str(), kVerticalFrame);
@@ -2293,7 +1660,7 @@ void ADAQAcquisitionGUI::HandleScopeButtons()
       SetDGWidgetState(true);
       
       // Run the DGScope
-      RunDGScope2();
+      RunDGScope();
     }
 
     // If DGScope acquisition is being stopped...
@@ -2597,7 +1964,7 @@ void ADAQAcquisitionGUI::HandleScopeButtons()
     
     // Retrieve the present settings for each of the digitizer
     // channels and store in the MeasParam object
-    for(int ch=0; ch<DGManager->GetNumChannels(); ch++){
+    for(int ch=0; ch<NumDataChannels; ch++){
       MeasParams->DCOffset.push_back( (int)DGScopeDCOffset_NEL[ch]->GetEntry()->GetHexNumber());
       MeasParams->TriggerThreshold.push_back( (int)DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->GetIntNumber() );
       MeasParams->BaselineCalcMin.push_back( (int)DGScopeBaselineCalcMin_NEL[ch]->GetEntry()->GetIntNumber() );
@@ -2985,30 +2352,6 @@ void ADAQAcquisitionGUI::HandleComboBoxes(int ComboBoxID, int SelectedID)
 }
   
 
-// Performm actions that ensure a safe shutdown and disconnect of the
-// ADAQAcquisitionGUI software from the VME boards
-void ADAQAcquisitionGUI::HandleDisconnectAndTerminate(bool TerminateApplication)
-{
-  // If the HVManager has been instantiated (ie, the V6534 is being
-  // used) then set the V6534 board to a safe state (all
-  // voltages/currents to 0, power to off) and then close the link to
-  // the V6534 board
-  if(V6534Enable){
-    HVManager->SetToSafeState();
-    HVManager->CloseLink();
-  }
-  
-  // If the DGManager has been instatiated (ie, the V1720 is being
-  // used) close the link to the V1720 board
-  if(V1720Enable)
-    DGManager->CloseLink();
-  
-  // Close the standalone ROOT application
-  if(TerminateApplication)
-    gApplication->Terminate();
-}
-
-
 void ADAQAcquisitionGUI::HandleCheckButtons()
 {
   TGCheckButton *ActiveCheckButton = (TGCheckButton *) gTQSender;
@@ -3038,6 +2381,30 @@ void ADAQAcquisitionGUI::HandleCheckButtons()
     }
     break;
   }
+}
+
+
+// Performm actions that ensure a safe shutdown and disconnect of the
+// ADAQAcquisitionGUI software from the VME boards
+void ADAQAcquisitionGUI::HandleDisconnectAndTerminate(bool TerminateApplication)
+{
+  // If the HVManager has been instantiated (ie, the V6534 is being
+  // used) then set the V6534 board to a safe state (all
+  // voltages/currents to 0, power to off) and then close the link to
+  // the V6534 board
+  if(V6534Enable){
+    HVManager->SetToSafeState();
+    HVManager->CloseLink();
+  }
+  
+  // If the DGManager has been instatiated (ie, the V1720 is being
+  // used) close the link to the V1720 board
+  if(V1720Enable)
+    DGManager->CloseLink();
+  
+  // Close the standalone ROOT application
+  if(TerminateApplication)
+    gApplication->Terminate();
 }
 
 
@@ -3135,748 +2502,7 @@ void ADAQAcquisitionGUI::RunHVMonitoring()
 }
 
 
-// Run the real-time updating of the DGScope embedded canvas
 void ADAQAcquisitionGUI::RunDGScope()
-{
-  ///////////////////////////////////////////////////////////////
-  // Declaring and setting digitizer variables for acquisition //
-  ///////////////////////////////////////////////////////////////
-  
-
-  ///////////////////////////////////////////////
-  // Variables for digitizer settings and readout
-  
-  // CAEN_DGTZ type variables for readout of the digitized waveforms
-  // from the V1720 FPGA buffer onto the PC buffer
-  char *EventPointer = NULL;
-  CAEN_DGTZ_EventInfo_t EventInfo;
-  CAEN_DGTZ_UINT16_EVENT_t *EventWaveform = NULL;
-  
-  // Variables for PC buffer
-  char *Buffer = NULL;
-  uint32_t BufferSize;
-  uint32_t Size, NumEvents;
-
-  // Get the record length, ie, number of 4ns samples in acquisition window
-  uint32_t RecordLength = DGScopeRecordLength_NEL->GetEntry()->GetIntNumber();
-
-  // Get the percentage of acquisition window that occurs after the trigger
-  uint32_t PostTriggerSize = DGScopePostTriggerSize_NEL->GetEntry()->GetIntNumber();
-
-  // Variables to record the digitized waveform. Raw units are used:
-  // time is in sample number and voltage is in ADC
-  double Time[RecordLength], Voltage[RecordLength]; // [sample], [ADC]
-
-  // Variables for graphing the digitized waveforms as time versus
-  // voltage. Units are determined...
-  double Time_graph[RecordLength], Voltage_graph[RecordLength]; 
-
-  // Variables for channel trigger thresholds, calculation of the
-  // channel baselines
-  uint32_t ChannelTriggerThreshold[8]; // [ADC]
-  uint32_t BaselineCalcMin[8], BaselineCalcMax[8], BaselineCalcLength[8]; // [sample]
-  double BaselineCalcResult[8]; // [ADC]
-
-  // Variable to hold the channel enable mask, ie, sets which
-  // digitizer channels are actively taking data
-  uint32_t ChannelEnableMask = 0;
-
-  // Variable for total number of enabled digitizer channels
-  uint32_t NumDGChannelsEnabled = 0;
-
-  for(int ch=0; ch<DGManager->GetNumChannels(); ch++){
-
-    // Get each channel's trigger threshold]
-    ChannelTriggerThreshold[ch] = DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->GetIntNumber(); // [ADC]
-
-    // Get each channel's baseline calculation region (min, max, length)
-    BaselineCalcMin[ch] = DGScopeBaselineCalcMin_NEL[ch]->GetEntry()->GetIntNumber(); // [sample]
-    BaselineCalcMax[ch] = DGScopeBaselineCalcMax_NEL[ch]->GetEntry()->GetIntNumber(); // [sample]
-    BaselineCalcLength[ch] = BaselineCalcMax[ch]-BaselineCalcMin[ch]; // [sample]
-    BaselineCalcResult[ch] = 0; // [ADC] Result is calculated during acquisition
-
-    // Calculate the channel enable mask, which is a 32-bit integer
-    // describing which of the 8 digitizer channels are enabled. A
-    // 32-bit integer has 8 bytes or 8 "hex" digits; a hex digit set
-    // to "1" in the n-th position in the hex representation indicates
-    // that the n-th channel is enabled. For example, if the
-    // ChannelEnableMask is equal to 0x00110100 then channels 2, 4 and
-    // 5 are enabled for digitization
-    if(DGScopeChannelEnable_CB[ch]->IsDisabledAndSelected()){
-      uint32_t Ch = 0x00000001<<ch;
-      ChannelEnableMask |= Ch;
-      NumDGChannelsEnabled++;
-    }
-  }
-  
-  // Ensure that at least one channel is enabled in the channel
-  // enabled bit mask; if not, return without starting the acquisition
-  // loop, since...well...there ain't shit to acquisition.
-  if((0xff & ChannelEnableMask)==0)
-    return;
-  
-  // Determine the lowest (ie, closest of 0) channel that is enabled
-  // in the ChannelEnableMask. 'Fraid you'll have to figure out the
-  // bitwise operations on your own if you don't know them...but take
-  // it from me, this is a pretty pro'n'shit way to do it
-  int LowestEnabledChannel = 0;
-  uint32_t LowestChannelMask = 0x1;
-  while(!(ChannelEnableMask & LowestChannelMask)){
-    LowestChannelMask <<= 1;
-    LowestEnabledChannel++;
-  }
-  
-  // Get the desired triggering mode (external, automatic, or software)
-  int TriggerMode = DGScopeTriggerMode_CBL->GetComboBox()->GetSelected(); 
-  
-  // Get the trigger coincidence level (number of channels in coincidence - 1);
-  uint32_t TriggerCoincidenceLevel = DGScopeTriggerCoincidenceLevel_CBL->GetComboBox()->GetSelected();
-  
-  // Bit shift the coincidence level bits into position 24:26 of a
-  // 32-bit integer such that they may be added to the digitizer's
-  // TriggerSourceEnableMask with the "or" bit operator
-  uint32_t TriggerCoincidenceLevel_BitShifted = TriggerCoincidenceLevel << 24;
- 
- 
-  /////////////////////////////////////////////////
-  // Variables for waveform/spectrum graph settings
-
-  // Get the number of, min, and max bins for the spectrum
-  int bins = DGScopeSpectrumBinNumber_NEL->GetEntry()->GetIntNumber();
-  int minBin = DGScopeSpectrumMinBin_NEL->GetEntry()->GetIntNumber();
-  int maxBin = DGScopeSpectrumMaxBin_NEL->GetEntry()->GetIntNumber();
-
-  // Allocate variables for the X and Y minimum and maximum positions
-  float xMin, xMax, yMin, yMax;
-  
-  // Get the bools to determine what (if anything) is plotted
-  bool PlotWaveform = DGScopeWaveform_RB->IsDown();
-  bool PlotSpectrum = DGScopeSpectrum_RB->IsDown();
-  bool PlotBlank = DGScopeBlank_RB->IsDown();
-
-  // Get the bools to determine plotting options
-  bool DrawLegend = DGScopeDisplayDrawLegend_CB->IsDown();
-
-  bool PlotXAxisInSamples = DGScopeDisplayWaveformXAxisSample_RB->IsDown();
-  bool PlotYAxisInADC = DGScopeDisplayWaveformYAxisADC_RB->IsDown();
-  double ConvertTimeToGraphUnits = 1.;
-  double ConvertVoltageToGraphUnits = 1.;
-
-  TLine *Trigger_Line[DGManager->GetNumChannels()];
-  TBox *BaselineCalcRegion_Box[DGManager->GetNumChannels()];
-
-  double SignalPolarity[DGManager->GetNumChannels()];
-  
-  for(int ch=0; ch<DGManager->GetNumChannels(); ch++){
-    Trigger_Line[ch] = new TLine();
-    Trigger_Line[ch]->SetLineWidth(2);
-    Trigger_Line[ch]->SetLineStyle(2);
-    Trigger_Line[ch]->SetLineColor(ch+1);
-
-    BaselineCalcRegion_Box[ch] = new TBox();
-    BaselineCalcRegion_Box[ch]->SetFillStyle(3002);
-    BaselineCalcRegion_Box[ch]->SetFillColor(ch+1);
-    
-    if(DGScopeChannelPosPolarity_RB[ch]->IsDown())
-      SignalPolarity[ch] = 1.0;
-    else
-      SignalPolarity[ch] = -1.0;
-  }
-  double VertPosOffset, ChTrigThr;
-  VertPosOffset = ChTrigThr = 0;
-
-  double BaseCalcMin, BaseCalcMax, BaseCalcResult;
-  BaseCalcMin = BaseCalcMax = BaseCalcResult = 0;
-
-  double SampleHeight = 0.;
-
-  uint32_t ChannelToHistogram = 0;
-    
-  // Bools to determine whether the incoming waveforms are filted into
-  // a spectrum by pulse height (maximum value of voltage above the
-  // baseline during the entire record length) or by pulse area
-  // (integrated area between the baseline and the voltage trace)
-  bool AnalyzePulseHeight = DGScopeSpectrumAnalysisHeight_RB->IsDown();
-  bool AnalyzePulseArea = DGScopeSpectrumAnalysisArea_RB->IsDown();
-
-  // Minimum value that will be histogrammed into the spectrum. 
-  int LowerLevelDiscr = DGScopeSpectrumAnalysisLLD_NEL->GetEntry()->GetIntNumber();
-  int UpperLevelDiscr = DGScopeSpectrumAnalysisULD_NEL->GetEntry()->GetIntNumber();
-  bool DiscrOKForOutput = false;
-
-  // Variables contain the pulse height and integrated pulse area
-  // values. Units are in [ADC] until transformed by calibration
-  // factor into units of [keV]
-  double PulseHeight = 0.;
-  double PulseArea = 0.;
-
-  // Iterate through all 8 digitizer channels
-  for(int ch=0; ch<DGManager->GetNumChannels(); ch++){
-
-    // Initialize spectrum histograms for each channel, deleting the
-    // previous ones if they exist to prevent memory leaks. Assign the
-    // correct graphical styles as necessary
-    if(DGScopeSpectrum_H[ch]) delete DGScopeSpectrum_H[ch];
-    DGScopeSpectrum_H[ch] = new TH1F("","",bins,minBin,maxBin);
-
-    DGScopeSpectrum_H[ch]->SetFillColor(ch+1);
-    DGScopeSpectrum_H[ch]->SetLineWidth(2);
-    DGScopeSpectrum_H[ch]->SetLineColor(ch+1);
-    DGScopeSpectrum_H[ch]->SetFillStyle(4000);
-    DGScopeSpectrum_H[ch]->SetFillColor(0);
-  }
-
-  gStyle->SetOptStat("ne");
-
-  // Variables for plotting vertical post-trigger and calibration lines
-  double linePosX = 0;
-  TLine *Calibration_Line;
-
-
-  //////////////////////////////////////////////
-  // Prepare the ROOT output file and objects //
-  //////////////////////////////////////////////
-
-  // Define a vector of vectors that will hold the digitized waveforms
-  // in all channels (units of [ADC]). The outer vector (size 8)
-  // represents each digitizer channel; the inner vector (size
-  // RecordLength) represents the waveform. The start address of each
-  // outer vector will be used to create a unique branch in the
-  // waveform TTree object to store each of the 8 digitizer channels 
-  vector< vector<int> > VoltageInADC_AllChannels;
-
-  // Resize the outer and inner vector to the appropriate, fixed size
-  VoltageInADC_AllChannels.resize(DGManager->GetNumChannels());
-  for(int i=0; i<DGManager->GetNumChannels(); i++)
-    VoltageInADC_AllChannels[i].resize(RecordLength);
-
-
-  ///////////////////////////////////////////////////////
-  // Program V1720 digitizer with acquisition settings //
-  ///////////////////////////////////////////////////////
-
-  // Reset the digitizer to default state
-  //DGManager->FreeEvent((void **)&EventWaveform);
-  //DGManager->FreeEvent(&EventWaveform);
-  //DGManager->FreeReadoutBuffer(&Buffer);
-  DGManager->Reset();
-  
-  // Set the trigger threshold individually for each of the 8
-  // digitizer channels [ADC] and the DC offsets for each channel
-  for(int ch=0; ch<DGManager->GetNumChannels(); ch++){
-    DGManager->SetChannelTriggerThreshold(ch,ChannelTriggerThreshold[ch]);
-    DGManager->SetChannelDCOffset(ch, DGScopeDCOffset_NEL[ch]->GetEntry()->GetHexNumber());
-  }
-
-  // Set the trigger mode
-  switch(TriggerMode){
-
-    // Mode: External trigger (NIM logic input signal) only
-  case 0:
-    DGManager->EnableExternalTrigger("NIM");
-    DGManager->DisableAutoTrigger(ChannelEnableMask);
-    DGManager->DisableSWTrigger();
-    break;
-
-    // Mode: External trigger (TTL logic input signal) only
-  case 1:
-    DGManager->EnableExternalTrigger("TTL");
-    DGManager->DisableAutoTrigger(ChannelEnableMask);
-    DGManager->DisableSWTrigger();
-    break;
-    
-    // Mode: Automatic channel threshold triggering only
-  case 2:
-    DGManager->DisableExternalTrigger();
-    DGManager->EnableAutoTrigger(ChannelEnableMask);
-    DGManager->DisableSWTrigger();
-    break;
-
-    // Mode: Software trigger only
-  case 3:
-    DGManager->DisableExternalTrigger();
-    DGManager->DisableAutoTrigger(ChannelEnableMask);
-    DGManager->EnableSWTrigger();
-    break;
-  }
-  
-  // Set the record length of the acquisition window
-  DGManager->SetRecordLength(RecordLength);
-
-  // Set the channel enable mask
-  DGManager->SetChannelEnableMask(ChannelEnableMask);
-
-  // If the digitizer is to be operated in coincidence mode and "the
-  // conditions are right" as Oye says, set the trigger source mask by
-  // "or" bit operating  bits 24:26 of the preset trigger coincidence
-  // level variable into the digitizer's trigger source enable mask
-  if(TriggerCoincidenceLevel<NumDGChannelsEnabled 
-     and DGScopeTriggerCoincidenceEnable_CB->IsDisabledAndSelected()){
-    uint32_t TriggerSourceEnableMask = 0;
-    DGManager->GetRegisterValue(0x810C,&TriggerSourceEnableMask);
-    TriggerSourceEnableMask = TriggerSourceEnableMask | TriggerCoincidenceLevel_BitShifted;
-    DGManager->SetRegisterValue(0x810C,TriggerSourceEnableMask);
-  }
-  
-  // Set the maximum number of events that will be accumulated before
-  // the V1720 FPGA buffer is dumped to PC memory
-  DGManager->SetMaxNumEventsBLT(5);
-
-  // Set the acquisition to be controlled via software
-  DGManager->SetSWAcquisitionMode();
-
-  // Set the percentage of acquisition window that occurs after trigger
-  DGManager->SetPostTriggerSize(PostTriggerSize);
-
-  // Allocate memory for the readout buffer
-  DGManager->MallocReadoutBuffer(&Buffer, &Size);
-
-  // Set the V1720 to begin acquiring data
-  DGManager->SWStartAcquisition();
-
-
-  ///////////////////////////////////////////////////
-  // V1720 digitizer acquisition and data plotting //
-  ///////////////////////////////////////////////////
-  // The following loops reads digitized data from the digitizers into
-  // local PC memory, principally as arrays of voltage versus time (or
-  // sample). To maximize data throughput, the following loop should
-  // be be as efficient as possible. The highest data throughput rate
-  // will be achieved when neither the waveform or spectrum is plotted
-  // (ie, DGScope is in "blank" mode), but an effort is made to
-  // streamline the loop as much as possible
-  
-  // The following terminology is important:
-  // V1720 buffer == the memory buffer onboard the FPGA of the V1720 board
-  // PC buffer == the memory buffer allocated locally on the PC
-  // Event == an acquisition window caused by a channel trigger threshold being exceeded
-  // NumEvents == the number of events that is allowed to accumulate on the V1720 buffer
-  //              before being automatically readout into the PC buffer
-  // Record Length == the length of the acquisition window in 4 ns units
-  // Sample ==  a single value between 0 and 4095 of digitized voltage
-  
-
-  // The acquisition and data plotting loop is run provided that the
-  // DGScopeEnable bool is true (see ADAQAcquisitionGUI::HandleScopeButtons)
-
-  while(DGScopeEnable){
-
-    /////////////////////////////////////////////
-    // Create separate ROOT thread for processing
-
-    // Run the processes in a seperate thread to maintain full access
-    // to all GUI functions in the main processing thread
-    gSystem->ProcessEvents();
-
-
-    ///////////////////////////
-    // Set graphical attributes
-
-    // Graphical attributes are set at the highest level of the loop
-    // to minimize the number of contributes since the graphical
-    // attributes apply to all events/all channels
-
-    // Get the horizontal and vertical positions of the double
-    // sliders that border the DGScope embedded canvas (the
-    // "zoom"). The slider end values are between 0 and 1;
-    // multiplying the slider values by the appropriate
-    // conversion factor results in correct X and Y axes
-    DGScopeHorizontalScale_THS->GetPosition(&xMin, &xMax);
-    DGScopeVerticalScale_DVS->GetPosition(&yMin, &yMax);
-
-    // Plot the X axis in sample number
-    if(PlotXAxisInSamples){
-      xMin *= RecordLength;
-      xMax *= RecordLength;
-    }
-    else{ // Plot the X axis in nanoseconds
-      xMin *= (RecordLength*DGManager->NanosecondsPerSample);
-      xMax *= (RecordLength*DGManager->NanosecondsPerSample);
-      
-      ConvertTimeToGraphUnits = DGManager->NanosecondsPerSample;
-    }
-    
-    // Plot the Y axis in analog-to-digitial conversion bits (0
-    // to 4095 for the 12-bit V1720 digitizer)
-    if(PlotYAxisInADC){
-      yMin *= DGManager->GetMaxBit();
-      yMax *= DGManager->GetMaxBit();
-    }
-    else{ // Plot the Y axis in millivolts
-      yMin *= DGManager->GetMaxBit()*DGManager->MillivoltsPerBit;
-      yMax *= DGManager->GetMaxBit()*DGManager->MillivoltsPerBit;
-      
-      ConvertVoltageToGraphUnits = DGManager->MillivoltsPerBit;
-    }
-
-
-    /////////////////////
-    // Begin data readout
-
-    // Read data from the V1720 buffer into the PC buffer
-    DGManager->ReadData(Buffer, &BufferSize);    
-
-    // Determine the number of events in the buffer
-    DGManager->GetNumEvents(Buffer, BufferSize, &NumEvents);
-
-    // For each event in the PC memory buffer...
-    for(uint32_t i=0; i<NumEvents; i++){
-      
-      // Get the event information
-      DGManager->GetEventInfo(Buffer, BufferSize, i, &EventInfo, &EventPointer);
-      
-      // Decode the event and obtain the waveform (voltage as a function of time)
-      //DGManager->DecodeEvent(EventPointer, (void **)&EventWaveform);
-      DGManager->DecodeEvent(EventPointer, &EventWaveform);
-
-      // If there is no waveform in the PC buffer, continue in the
-      // while loop to avoid segfaulting
-      if(EventWaveform==NULL)
-	continue;
-
-      // For each channel...
-      for(int ch=0; ch<DGManager->GetNumChannels(); ch++){
-	
-	// Only proceed to waveform analysis if the channel is enabled
-	if(!DGScopeChannelEnable_CB[ch]->IsDisabledAndSelected())
-	  continue;
-	
-	// Initialize the pulse height and pulse area variables
-	PulseHeight = PulseArea = 0.; // [ADC]
-
-	// Reset all channel baseline before each event
-	BaselineCalcResult[ch] = 0.; // [ADC]
-	
-	// For all of the samples in the acquisition window of length RecordLength...
-	for(uint32_t sample=0; sample<RecordLength; sample++){
-	  
-	  // Get the digitized time in units of sample number
-	  Time[sample] = sample; // [sample]
-
-	  // Convert the time [sample] into suitable form for graphing
-	  // (accounts for units of sample/ns)
-	  Time_graph[sample] = Time[sample] * ConvertTimeToGraphUnits;
-	  
-	  // Get the digitized voltage in units of analog-to-digital conversion bits
-	  Voltage[sample] = EventWaveform->DataChannel[ch][sample]; // [ADC]
-	  VoltageInADC_AllChannels[ch][sample] = Voltage[sample];
-
-	  // Convert the voltage [ADC] into suitable form for graphing
-	  // (accounts for units of ADC/mV and vertical offset)
-	  Voltage_graph[sample] = (Voltage[sample] + DGScopeVerticalPosition_NEL[ch]->GetEntry()->GetIntNumber()) * ConvertVoltageToGraphUnits;
-	  
-	  // If the sample number falls within the specified time
-	  // window, calculate the baseline by taking the average of
-	  // all samples that fall within that time window
-	  if(sample>BaselineCalcMin[ch] and sample<BaselineCalcMax[ch])
-	    BaselineCalcResult[ch] += Voltage[sample]*1.0/(BaselineCalcLength[ch]-1); // [ADC]
-	  
-	  // For those sample of the pulse that occur after the
-	  // baseline has been calculate, analyze the pulses to obtain
-	  // pulse height or area spectrum
-	  else if(sample>BaselineCalcMax[ch]){
-	    
-	    // Calculate the absolute value of the sample voltage,
-	    // e.g. the height "above" or "below" the baseline for
-	    // positive and negative pulses respectively
-	    SampleHeight = SignalPolarity[ch] * (Voltage[sample] - BaselineCalcResult[ch]);
-
-	    // Simple algorithm to determine maximum peak height in the pulse
-	    if(SampleHeight>PulseHeight)
-	      PulseHeight = SampleHeight;
-	    
-	    // Integrate the area under the pulse
-	    if(SampleHeight>(ChannelTriggerThreshold[ch]-BaselineCalcResult[ch]))
-	      PulseArea += SampleHeight;
-	  }
-	}
-	
-	// If a CalibrationManager (a ROOT TGraph) exists, ie, has
-	// been successfully created and is valid for interpolation
-	// then convert PulseHeight/Area
-	if(UseCalibrationManager[ch]){
-	  // Use the ROOT TGraph CalibrationManager to convert the
-	  // pulse height/area from ADC to keV using LINEAR
-	  // interpolation on the pre-assigned calibration points
-	  PulseHeight = CalibrationManager[ch]->Eval(PulseHeight);
-	  PulseArea = CalibrationManager[ch]->Eval(PulseArea);
-
-	  // Use the ROOT TGraph CalibrationManager to convert the
-	  // pulse height/area from ADC to keV using SPLINE
-	  // interpolation on the pre-assigned calibration
-	  // points. This settings is only useful if there are a large
-	  // number of points and even then, is probably not that
-	  // valuable. But it's here to show that more complicated
-	  // interpolation can easily be accomplished with ROOT's
-	  // PulseHeight =CalibrationManager->Eval(PulseHeight,0,"S"); 
-	  // PulseArea = CalibrationManager->Eval(PulseHeight,0,"S");
-	}
-	
-	// The following chunk o' code takes the analyzed waveform and
-	// determined if the pulse unit should be binned in the
-	// appropriate spectrum histogram. It also determines whether
-	// the desired channel's waveform is within the LLD/ULD
-	// window; if it is and the user has specified that the "LD
-	// trigger" should be enabled, then OK this group trigger for
-	// output to the ROOT file.
-
-	// If analysis of pulse height is being performed...
-        if(AnalyzePulseHeight){
-	  // Determine if the pulse is within the LLD/ULD window ...
-          if(PulseHeight>LowerLevelDiscr and PulseHeight<UpperLevelDiscr){
-	    // ...and if so fill the PHS histogram
-            DGScopeSpectrum_H[ch]->Fill(PulseHeight);
-	    // Determine if this channel's waveform should be used to
-	    // set the "LD trigger" ...
-	    if(DGScopeSpectrumAnalysisLDTrigger_CB->IsDown() and
-	       ch == DGScopeSpectrumAnalysisLDTriggerChannel_CBL->GetComboBox()->GetSelected())
-	      // ... and if so then OK this group trigger (8 channel's
-	      // worth of waveform data) for output later to the ROOT
-	      // file after all 8 channels have been iterated over
-	      DiscrOKForOutput = true;
-	  }
-        }
-	// Same as above except for the pulse area analysis
-        else if(AnalyzePulseArea){
-          if(PulseArea>LowerLevelDiscr and PulseArea<UpperLevelDiscr){
-            DGScopeSpectrum_H[ch]->Fill(PulseArea);
-            if(DGScopeSpectrumAnalysisLDTrigger_CB->IsDown() and
-               ch == DGScopeSpectrumAnalysisLDTriggerChannel_CBL->GetComboBox()->GetSelected())
-              DiscrOKForOutput = true;
-          }
-        }
-
-
-	// The TTree that holds the waveforms must have a branch
-	// created for the waveforms; however, that branch holds the
-	// waveforms as arrays, which requires specifying (at branch
-	// creation time) the array length (I hate arrays). The array
-	// length of "VoltageInADC" is set when the acquisition
-	// begins, but I want the ability to be able to create/close
-	// multiple ROOT files during the acquisition (provided by
-	// TGTextButtons) as well as only dump data to those files
-	// when desired (provided by TGCheckButton). The ROOT "slots"
-	// for these three buttons are implemented in
-	// ADAQAcquisitionGUI::HandleScopeButtons, which precludes creating
-	// the branch there since the fixed-length array variable
-	// "VoltageInADC" must be set in this member function at the
-	// beginning of each acquisition to allow different
-	// acquisition windows (length of that array). 
-	//
-	// Therefore, the solution is for the acquisition start
-	// TGTextButton to trigger the "BranchWaveformtree" boolean to
-	// true such that the following commands within the "if"
-	// statement are called **only once per acquisition start** to
-	// create the TTree branch with the correct array properties.
-	if(BranchWaveformTree){
-	  ostringstream ss;
-
-	  // For each digitizer channel....
-	  for(Int_t channel=0; channel<DGManager->GetNumChannels(); channel++){
-	    
-	    // ...create a channel-specific name string...
-	    ss << "VoltageInADC_Ch" << channel;
-	    string WaveformTreeBranchName = ss.str();
-	    ss.str("");
-
-	    // ...and use it to specify a channel-specific branch in
-	    /// the waveform TTree The branch holds the address of the
-	    // vector that contains the waveform as a function of
-	    // record length and the RecordLength of each waveform
-	    WaveformTree->Branch(WaveformTreeBranchName.c_str(), 
-				 &VoltageInADC_AllChannels.at(channel),
-				 RecordLength,
-				 0);
-	  }
-	  BranchWaveformTree = false;
-	}
-
-	// Store the digitized waveform in the Root TTree object
-	// provided that the Waveform tree exists and that data should
-	// be dumped into the tree indicated by the TGCheckButton
-	//if(WaveformTree and DGScopeDataStorageEnable_CB->IsDown())
-	//WaveformTree->Fill();
-	
-	// Plot the digitized waveforms in 'oscilloscope' mode
-	if(PlotWaveform){
-
-	  // Ensure the waveforms always plot in linear-linear mode
-	  // (required to plot waveforms after a spectrum is being
-	  // plotted with a logarhythmic y-axis)
-	  gPad->SetLogx(false);
-	  gPad->SetLogy(false);
-	  
-	  // Ensure to free previous memory allocated to the TGraphs
-	  // to prevent fairly massive memory leakage
-	  if(DGScopeWaveform_G[ch]) delete DGScopeWaveform_G[ch];
-	  DGScopeWaveform_G[ch] = new TGraph(RecordLength, Time_graph, Voltage_graph);
-
-	  // At minimum, a single channel's waveform is graphed. The
-	  // "lowest enabled channel", ie, the channel closest to 0
-	  // that is plotted, must set the graphical attributes of the
-	  // plot, including defining the X and Y axies; subsequent
-	  // channel waveform graphs will then be plotted on top.
-
-	  if(ch==LowestEnabledChannel){
-	    DGScopeWaveform_G[ch]->SetLineWidth(2);
-	    DGScopeWaveform_G[ch]->SetLineColor(ch+1);
-	    DGScopeWaveform_G[ch]->SetTitle(DGScopeDisplayTitle_TEL->GetEntry()->GetText());
-	    DGScopeWaveform_G[ch]->GetXaxis()->SetTitle(DGScopeDisplayXTitle_TEL->GetEntry()->GetText());
-	    DGScopeWaveform_G[ch]->GetXaxis()->SetTitleOffset(DGScopeDisplayXTitleOffset_NEL->GetEntry()->GetNumber());
-	    DGScopeWaveform_G[ch]->GetXaxis()->CenterTitle();
-	    DGScopeWaveform_G[ch]->GetXaxis()->SetRangeUser(xMin, xMax);
-	    DGScopeWaveform_G[ch]->GetYaxis()->SetTitle(DGScopeDisplayYTitle_TEL->GetEntry()->GetText());
-	    DGScopeWaveform_G[ch]->GetYaxis()->CenterTitle();
-	    DGScopeWaveform_G[ch]->GetYaxis()->SetTitleOffset(DGScopeDisplayYTitleOffset_NEL->GetEntry()->GetNumber());
-	    DGScopeWaveform_G[ch]->GetYaxis()->SetRangeUser(yMin,yMax);
-	    DGScopeWaveform_G[ch]->Draw("ALP");
-
-	    if(DrawLegend)
-	      DGScopeWaveform_Leg->Draw();
-	  }
-	  else{
-	    DGScopeWaveform_G[ch]->SetLineWidth(2);
-	    DGScopeWaveform_G[ch]->SetLineColor(ch+1);
-	    DGScopeWaveform_G[ch]->Draw("L");
-	  }
-
-	  // Draw a horizontal dotted line of the same color as the
-	  // channel waveform representing the channel trigger
-	  // threshold. Ensure accounting for channel vertical offset
-	  VertPosOffset = DGScopeVerticalPosition_NEL[ch]->GetEntry()->GetIntNumber();
-	  ChTrigThr = (DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->GetIntNumber() + VertPosOffset) * ConvertVoltageToGraphUnits;
-
-	  Trigger_Line[ch]->DrawLine(xMin, ChTrigThr, xMax, ChTrigThr);
-	  
-	  // Draw a shaded box region to represent the area of the
-	  // waveform being used to calculate the current baseline for
-	  // each digitized waveform
-	  BaseCalcMin = BaselineCalcMin[ch]*ConvertTimeToGraphUnits;
-	  BaseCalcMax = BaselineCalcMax[ch]*ConvertTimeToGraphUnits;
-	  BaseCalcResult = (BaselineCalcResult[ch] + VertPosOffset) * ConvertVoltageToGraphUnits;
-	  BaselineCalcRegion_Box[ch]->DrawBox(BaseCalcMin, (BaseCalcResult-100),
-					      BaseCalcMax, (BaseCalcResult+100));
-	}
-
-	// Plot the integrated pulses in 'multichannel analyzer' mode
-	else if(PlotSpectrum){
-
-	  // Determine the channel desired for histogramming into a pulse height spectrum
-	  ChannelToHistogram = DGScopeSpectrumChannel_CBL->GetComboBox()->GetSelected();
-	  
-	  // Update the spectrum every N events, where N is determined
-	  // // via the DGScopeSpectrumRefreshRate_NBL widget.
-	  if(int(DGScopeSpectrum_H[ChannelToHistogram]->GetEntries())%DGScopeSpectrumRefreshRate_NEL->GetEntry()->GetIntNumber()==0){
-	    
-	    // Get the positions of the sliders that bound the DGScope
-	    // embedded canvas and convert them into the appropriate
-	    // units for zooming on the spectrum
-	    DGScopeHorizontalScale_THS->GetPosition(&xMin, &xMax);
-	    DGScopeVerticalScale_DVS->GetPosition(&yMin, &yMax);
-	    
-	    xMin *= maxBin;
-	    xMax *= maxBin;
-
-	    yMin *= DGScopeSpectrum_H[ChannelToHistogram]->GetBinContent(DGScopeSpectrum_H[ChannelToHistogram]->GetMaximumBin());
-	    yMax *= DGScopeSpectrum_H[ChannelToHistogram]->GetBinContent(DGScopeSpectrum_H[ChannelToHistogram]->GetMaximumBin())*1.1;
-	    
-	    // Enable the X and Y axes to be plotted on a log. scale
-	    if(DGScopeSpectrumXAxisLog_CB->IsDown())
-	      DGScope_EC->GetCanvas()->SetLogx(true);
-	    else
-	      DGScope_EC->GetCanvas()->SetLogx(false);
-	    
-	    if(DGScopeSpectrumYAxisLog_CB->IsDown()){
-	      DGScope_EC->GetCanvas()->SetLogy();
-	      yMin += 1;
-	    }
-	    else
-	      DGScope_EC->GetCanvas()->SetLogy(false);
-
-	    DGScopeSpectrum_H[ChannelToHistogram]->GetXaxis()->SetTitle(DGScopeDisplayXTitle_TEL->GetEntry()->GetText());
-	    DGScopeSpectrum_H[ChannelToHistogram]->GetXaxis()->SetTitleSize(DGScopeDisplayXTitleSize_NEL->GetEntry()->GetNumber());
-	    DGScopeSpectrum_H[ChannelToHistogram]->GetXaxis()->SetTitleOffset(DGScopeDisplayXTitleOffset_NEL->GetEntry()->GetNumber());
-	    DGScopeSpectrum_H[ChannelToHistogram]->GetXaxis()->CenterTitle();
-	    DGScopeSpectrum_H[ChannelToHistogram]->GetXaxis()->SetRangeUser(xMin,xMax);
-	    DGScopeSpectrum_H[ChannelToHistogram]->GetYaxis()->SetTitle(DGScopeDisplayYTitle_TEL->GetEntry()->GetText());
-	    DGScopeSpectrum_H[ChannelToHistogram]->GetYaxis()->SetTitleSize(DGScopeDisplayYTitleSize_NEL->GetEntry()->GetNumber());
-	    DGScopeSpectrum_H[ChannelToHistogram]->GetYaxis()->SetTitleOffset(DGScopeDisplayYTitleOffset_NEL->GetEntry()->GetNumber());
-	    DGScopeSpectrum_H[ChannelToHistogram]->GetYaxis()->CenterTitle();
-	    DGScopeSpectrum_H[ChannelToHistogram]->GetYaxis()->SetRangeUser(yMin,yMax);
-	    DGScopeSpectrum_H[ChannelToHistogram]->SetTitle(DGScopeDisplayTitle_TEL->GetEntry()->GetText());
-	    if(DrawLegend)
-	      DGScopeSpectrum_H[ChannelToHistogram]->SetStats(false);
-	    DGScopeSpectrum_H[ChannelToHistogram]->Draw("L");
-	    
-	    // If the calibration mode is enabled, then draw the third
-	    // slider position from the horizontal triple slider and
-	    // use its position to calculate the correct calibration
-	    // factor. Update the calibration factor number entry
-	    // widget with the calculated value
-	    if(DGScopeSpectrumCalibration_CB->IsDown()){
-	      linePosX = DGScopeHorizontalScale_THS->GetPointerPosition()*maxBin;
-	      Calibration_Line = new TLine(linePosX, yMin, linePosX, yMax);
-	      Calibration_Line->SetLineColor(2);
-	      Calibration_Line->SetLineStyle(2);
-	      Calibration_Line->SetLineWidth(2);
-	      Calibration_Line->Draw();
-
-	      // Use the pointer to position to update the pulse unit
-	      // NEL widget to aid the user to determining the exact
-	      // position desired calibration features in the PAS/PHS
-	      DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->SetNumber(DGScopeHorizontalScale_THS->GetPointerPosition() * maxBin);
-	    }
-	    DGScope_EC->GetCanvas()->Update();
-	  }
-	}
-      
-	// Do not plot anything. This mode is most useful to
-	// maximizing the data throughput rate.
-	else if(PlotBlank){
-	}
-      }
-
-      // After all the channels in the event have been iterated
-      // through to extract the waveforms, store the digitized
-      // waveforms for all channels in the ROOT TTree object provided
-      // that 
-      // 0. the waveform tree has been created 
-      // 1. the user wants to dump the data to a ROOT file
-      if(WaveformTree and DGScopeDataStorageEnable_CB->IsDown()){
-
-        // If the user has specified that a specific channel's
-        // waveform falling with the LLD/ULD window should be used as
-        // the "trigger" for plotting the PAS/PHS and writing to a
-        // ROOT file BUT the present waveform is NOT within the
-        // LLD/ULD window (indicated by the DiscrOKForOutput bool set
-        // above during analysis of the readout waveform) then do NOT
-        // write the waveform to the ROOT TTree. This is effectively
-        // triggering the digitizer on a specific pulse/energy window
-        // of a waveform on a desired channel
-        if(DGScopeSpectrumAnalysisLDTrigger_CB->IsDown() and !DiscrOKForOutput)
-          continue;
-
-        // Fill the TTree
-        WaveformTree->Fill();
-
-        // Reset the bool used to determine if the LLD/ULD window
-        // should be used as the "trigger" for writing waveforms
-	DiscrOKForOutput = false;
-      }
-      if(PlotWaveform)
-	DGScope_EC->GetCanvas()->Update();
-      
-      // Free the memory allocated to the V1720 event buffer
-      //DGManager->FreeEvent((void **)&EventWaveform);
-      DGManager->FreeEvent(&EventWaveform);
-    }
-  }
-  // Free the memory allocated to the PC readout buffer
-  DGManager->FreeReadoutBuffer(&Buffer);
-}
-
-
-void ADAQAcquisitionGUI::RunDGScope2()
 {
   /////////////////////////////////////////////////
   // Initialize local and class member variables //
@@ -4342,7 +2968,7 @@ void ADAQAcquisitionGUI::RunDGScope2()
       }
       
       // For each channel...
-      for(int ch=0; ch<DGManager->GetNumChannels(); ch++){
+      for(int ch=0; ch<NumDataChannels; ch++){
 	
 	// Only proceed to waveform analysis if the channel is enabled
 	if(!DGScopeChannelEnable_CB[ch]->IsDisabledAndSelected())
@@ -4454,7 +3080,7 @@ void ADAQAcquisitionGUI::RunDGScope2()
 	  ostringstream ss;
 
 	  // For each digitizer channel....
-	  for(Int_t channel=0; channel<DGManager->GetNumChannels(); channel++){
+	  for(Int_t channel=0; channel<NumDataChannels; channel++){
 	    
 	    // ...create a channel-specific name string...
 	    ss << "VoltageInADC_Ch" << channel;
@@ -4792,50 +3418,6 @@ void ADAQAcquisitionGUI::ForceSpectrumDrawing()
 }
 
 
-
-// Method to generate a standard detector-esque artificial waveoforms
-// to be used in debugging mode when waveforms from the DAQ are not
-// available. Method receives the record length of the acquisition
-// window and a reference to the being-processed data channel in order
-// to fill the channel data with the artificial waveform data. The
-// artificial waveform has a quick rise time and longer decay tail,
-// which are randomly varied to mimick data acquisition.
-void ADAQAcquisitionGUI::GenerateArtificialWaveform(int RecordLength, vector<int> &Voltage, 
-					      double *Voltage_graph, double VerticalPosition)
-{
-  // Exponential time constants with small random variations
-  const double t1 = 20. - (RNG->Rndm()*10);
-  const double t2 = 80. - (RNG->Rndm()*40);;
-  
-  // The waveform amplitude with small random variations
-  const double a = RNG->Rndm() * 30;
-  
-  // Set an artificial baseline for the pulse
-  const double b = 3200;
-  
-  // Set an artifical polarity for the pulse
-  const double p = -1.0;
-  
-  // Set the number of leading zeros before the waveform begins with
-  // small random variations
-  const int NumLeadingSamples = 100;
-  
-  // Fill the Voltage vector with the artificial waveform
-  for(int sample=0; sample<RecordLength; sample++){
-    
-    if(sample < NumLeadingSamples){
-      Voltage[sample] = b + VerticalPosition;
-      Voltage_graph[sample] = b + VerticalPosition;
-    }
-    else{
-      double t = (sample - NumLeadingSamples)*1.0;
-      Voltage[sample] = (p * (a * (t1-t2) * (exp(-t/t1)-exp(-t/t2)))) + b + VerticalPosition;
-      Voltage_graph[sample] = Voltage[sample];
-    }
-  }
-}
-
-
 // Method to safely cease acquiring data, including writing and
 // closing of possibly opened ROOT files.
 void ADAQAcquisitionGUI::StopAcquisitionSafely()
@@ -4887,6 +3469,47 @@ void ADAQAcquisitionGUI::StopAcquisitionSafely()
 }
 
 
+// Method to generate a standard detector-esque artificial waveoforms
+// to be used in debugging mode when waveforms from the DAQ are not
+// available. Method receives the record length of the acquisition
+// window and a reference to the being-processed data channel in order
+// to fill the channel data with the artificial waveform data. The
+// artificial waveform has a quick rise time and longer decay tail,
+// which are randomly varied to mimick data acquisition.
+void ADAQAcquisitionGUI::GenerateArtificialWaveform(int RecordLength, vector<int> &Voltage, 
+						    double *Voltage_graph, double VerticalPosition)
+{
+  // Exponential time constants with small random variations
+  const double t1 = 20. - (RNG->Rndm()*10);
+  const double t2 = 80. - (RNG->Rndm()*40);;
+  
+  // The waveform amplitude with small random variations
+  const double a = RNG->Rndm() * 30;
+  
+  // Set an artificial baseline for the pulse
+  const double b = 3200;
+  
+  // Set an artifical polarity for the pulse
+  const double p = -1.0;
+  
+  // Set the number of leading zeros before the waveform begins with
+  // small random variations
+  const int NumLeadingSamples = 100;
+  
+  // Fill the Voltage vector with the artificial waveform
+  for(int sample=0; sample<RecordLength; sample++){
+    
+    if(sample < NumLeadingSamples){
+      Voltage[sample] = b + VerticalPosition;
+      Voltage_graph[sample] = b + VerticalPosition;
+    }
+    else{
+      double t = (sample - NumLeadingSamples)*1.0;
+      Voltage[sample] = (p * (a * (t1-t2) * (exp(-t/t1)-exp(-t/t2)))) + b + VerticalPosition;
+      Voltage_graph[sample] = Voltage[sample];
+    }
+  }
+}
 
 
 // The mandatory C++ main function
@@ -4896,8 +3519,8 @@ int main(int argc, char **argv)
   TApplication *TheApplication = new TApplication("ADAQAcquisitionGUI", &argc, argv);
   
   // Create variables for width and height of the top-level GUI window
-  int Width = 1100;
-  int Height = 820;
+  int Width = 1125;
+  int Height = 840;
 
   // If the user specifies "small" for the first command line
   // arguments then change the width and height settings
