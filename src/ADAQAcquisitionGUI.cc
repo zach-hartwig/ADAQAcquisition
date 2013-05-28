@@ -35,7 +35,7 @@ using namespace boost::assign;
 ADAQAcquisitionGUI::ADAQAcquisitionGUI(int W, int H)
   : TGMainFrame(gClient->GetRoot()),
     V1720Enable(true), V1720BoardAddress(0x00420000),
-    V6534Enable(true), V6534BoardAddress(0x42420000),
+    V6534Enable(false), V6534BoardAddress(0x42420000),
     VMEConnectionEstablished(false),
     HVMonitorEnable(false), DGScopeEnable(false),
     SpectrumFileName("DefaultSpectrum"), SpectrumFileExtension(".dat"),
@@ -56,10 +56,10 @@ ADAQAcquisitionGUI::ADAQAcquisitionGUI(int W, int H)
   // appropriate V*Enable boolean variables above
   HVManager = new ADAQHighVoltage;
   HVManager->SetVerbose(true);
-
+  
   DGManager = new ADAQDigitizer;
   DGManager->SetVerbose(true);
-
+  
   NumDataChannels = 8;
   BuildInDebugMode = true;
   
@@ -107,12 +107,12 @@ ADAQAcquisitionGUI::ADAQAcquisitionGUI(int W, int H)
   
   
   // Create string array used to assign labels for each channel in the
-  // DGScopeWaveform_L ROOT legend object
+  // DGScopeWaveform_Leg ROOT legend object
   string DGScopeWaveformTitle[8] = {"Ch 0", "Ch 1", "Ch 2", "Ch 3", 
 				    "Ch 4", "Ch 5", "Ch 6", "Ch 7"};
   
   // Create a ROOT legend for the waveform graph
-  DGScopeWaveform_L = new TLegend(0.91, 0.5, 0.99, 0.95);
+  DGScopeWaveform_Leg = new TLegend(0.91, 0.5, 0.99, 0.95);
   
   // For each channel on the digitizer, create the appropriate label
   // and symbol in the ROOT legend using a dummy TGraph object to set
@@ -125,9 +125,18 @@ ADAQAcquisitionGUI::ADAQAcquisitionGUI(int W, int H)
 
     assert(i<9);
 
-    DGScopeWaveform_L->AddEntry(Dummy_G, DGScopeWaveformTitle[i].c_str(), "L");
-    DGScopeWaveform_L->SetFillColor(18);
-    DGScopeWaveform_L->SetTextSize(0.04);
+    DGScopeWaveform_Leg->AddEntry(Dummy_G, DGScopeWaveformTitle[i].c_str(), "L");
+    DGScopeWaveform_Leg->SetFillColor(18);
+    DGScopeWaveform_Leg->SetTextSize(0.04);
+
+    DGScopeChannelTrigger_L[i] = new TLine;
+    DGScopeChannelTrigger_L[i]->SetLineColor(i+1);
+    DGScopeChannelTrigger_L[i]->SetLineWidth(2);
+    DGScopeChannelTrigger_L[i]->SetLineStyle(7);
+    
+    DGScopeBaselineCalcRegion_B[i] = new TBox;
+    DGScopeBaselineCalcRegion_B[i]->SetFillColor(i+1);
+    DGScopeBaselineCalcRegion_B[i]->SetFillStyle(3001);
     
     DGScopeSpectrum_H[i] = 0;
   }
@@ -138,7 +147,7 @@ ADAQAcquisitionGUI::ADAQAcquisitionGUI(int W, int H)
   Dummy_Line->SetLineColor(4);
   Dummy_Line->SetLineStyle(2);
   Dummy_Line->SetLineWidth(4);
-  DGScopeWaveform_L->AddEntry(Dummy_Line, "Trig", "L");
+  DGScopeWaveform_Leg->AddEntry(Dummy_Line, "Trig", "L");
   
   for(int ch=0; ch<DGManager->GetNumChannels(); ch++){
     UseCalibrationManager.push_back(false);
@@ -1272,7 +1281,7 @@ void ADAQAcquisitionGUI::FillScopeFrame()
   DGScopeSpectrumRefreshRate_NEL->GetEntry()->SetNumber(100);
   
 
-  DGScopeDisplayAndControls_VF->AddFrame(DGScopeDisplay_GF, new TGLayoutHints(kLHintsCenterX,5,5,5,0));
+  DGScopeDisplayAndControls_VF->AddFrame(DGScopeDisplay_GF, new TGLayoutHints(kLHintsCenterX,5,5,0,0));
   DGScopeDisplayAndControls_VF->AddFrame(DGScopeStartStop_TB, new TGLayoutHints(kLHintsCenterX,0,0,0,5));
   DGScopeDisplayAndControls_VF->AddFrame(DGScopeControlTabs_HF, new TGLayoutHints(kLHintsCenterX,5,5,0,5));
 
@@ -1644,7 +1653,7 @@ void ADAQAcquisitionGUI::FillScopeFrame2()
 					new TGLayoutHints(kLHintsLeft,0,0,0,5));
   DGScopeSpectrumMaxBin_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
   DGScopeSpectrumMaxBin_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEANonNegative);
-  DGScopeSpectrumMaxBin_NEL->GetEntry()->SetNumber(65000);
+  DGScopeSpectrumMaxBin_NEL->GetEntry()->SetNumber(25000);
 
   TGHorizontalFrame *DGScopeSpectrumAxis_HF = new TGHorizontalFrame(DGScopeSpectrumHistogram_GF);
   DGScopeSpectrumHistogram_GF->AddFrame(DGScopeSpectrumAxis_HF, new TGLayoutHints(kLHintsNormal,0,0,0,0));
@@ -1678,7 +1687,7 @@ void ADAQAcquisitionGUI::FillScopeFrame2()
 				       new TGLayoutHints(kLHintsNormal,0,0,-2,0));
   DGScopeSpectrumAnalysisLLD_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
   DGScopeSpectrumAnalysisLLD_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEANonNegative);
-  DGScopeSpectrumAnalysisLLD_NEL->GetEntry()->SetNumber(4000);
+  DGScopeSpectrumAnalysisLLD_NEL->GetEntry()->SetNumber(0);
 
   DGScopeSpectrumAnalysis_GF->AddFrame(DGScopeSpectrumAnalysisULD_NEL = new ADAQNumberEntryWithLabel(DGScopeSpectrumAnalysis_GF, "ULD (ADC/energy)", -1),
 				       new TGLayoutHints(kLHintsNormal,0,0,0,0));
@@ -2282,9 +2291,9 @@ void ADAQAcquisitionGUI::HandleScopeButtons()
       // cycle. Thus, disabling these widgets indicates to the user
       // that setting them can only be done while DGScope is not active
       SetDGWidgetState(true);
-
+      
       // Run the DGScope
-      RunDGScope();
+      RunDGScope2();
     }
 
     // If DGScope acquisition is being stopped...
@@ -2796,7 +2805,7 @@ void ADAQAcquisitionGUI::HandleScopeButtons()
       break;
     
     if(ActiveTextButton->GetString() == "Start acquisition timer"){
-      
+
       // Set the graphical attributes of the text button
       ActiveTextButton->SetBackgroundColor(ColorManager->Number2Pixel(8));
       ActiveTextButton->SetForegroundColor(ColorManager->Number2Pixel(1));
@@ -3723,7 +3732,7 @@ void ADAQAcquisitionGUI::RunDGScope()
 	    DGScopeWaveform_G[ch]->Draw("ALP");
 
 	    if(DrawLegend)
-	      DGScopeWaveform_L->Draw();
+	      DGScopeWaveform_Leg->Draw();
 	  }
 	  else{
 	    DGScopeWaveform_G[ch]->SetLineWidth(2);
@@ -4448,7 +4457,7 @@ void ADAQAcquisitionGUI::RunDGScope2()
 	  for(Int_t channel=0; channel<DGManager->GetNumChannels(); channel++){
 	    
 	    // ...create a channel-specific name string...
-	    ss << "Voltage_Ch" << channel;
+	    ss << "VoltageInADC_Ch" << channel;
 	    string WaveformTreeBranchName = ss.str();
 	    ss.str("");
 
@@ -4517,7 +4526,7 @@ void ADAQAcquisitionGUI::RunDGScope2()
 	      DGScopeWaveform_G[ch]->Draw("AL");
 	      
 	      if(DrawLegend)
-		DGScopeWaveform_L->Draw();
+		DGScopeWaveform_Leg->Draw();
 	    }
 	    else{
 	      DGScopeWaveform_G[ch]->SetLineWidth(2);
@@ -4531,8 +4540,7 @@ void ADAQAcquisitionGUI::RunDGScope2()
 	    VertPosOffset = DGScopeVerticalPosition_NEL[ch]->GetEntry()->GetIntNumber();
 	    ChTrigThr = (DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->GetIntNumber() + VertPosOffset) * ConvertVoltageToGraphUnits;
 	    
-	    // ZSH 25 May 13
-	    //DGScopeChTrigger_L[ch]->DrawLine(xMin, ChTrigThr, xMax, ChTrigThr);
+	    DGScopeChannelTrigger_L[ch]->DrawLine(xMin, ChTrigThr, xMax, ChTrigThr);
 	    
 	    // Draw a shaded box region to represent the area of the
 	    // waveform being used to calculate the current baseline for
@@ -4541,9 +4549,7 @@ void ADAQAcquisitionGUI::RunDGScope2()
 	    BaseCalcMax = BaselineCalcMax[ch]*ConvertTimeToGraphUnits;
 	    BaseCalcResult = (BaselineCalcResult[ch] + VertPosOffset) * ConvertVoltageToGraphUnits;
 
-	    // ZSH 25 May 13
-	    //BaselineCalcRegion_B[ch]->DrawBox(BaseCalcMin, (BaseCalcResult-100),
-	    //BaseCalcMax, (BaseCalcResult+100));
+	    DGScopeBaselineCalcRegion_B[ch]->DrawBox(BaseCalcMin, (BaseCalcResult-100), BaseCalcMax, (BaseCalcResult+100));
 	  }
 	}
 	
@@ -4891,7 +4897,7 @@ int main(int argc, char **argv)
   
   // Create variables for width and height of the top-level GUI window
   int Width = 1100;
-  int Height = 825;
+  int Height = 820;
 
   // If the user specifies "small" for the first command line
   // arguments then change the width and height settings

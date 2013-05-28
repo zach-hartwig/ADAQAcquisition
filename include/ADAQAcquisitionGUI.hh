@@ -304,8 +304,10 @@ TGCheckButton *DGScopeSpectrumUseCalibrationSlider_CB;
   //////////////////
   // DGScope objects
   TGraph *DGScopeWaveform_G[8];
-  TLegend *DGScopeWaveform_L;
-  TLine *DGScopeChTrigger_Line[8];
+  TLegend *DGScopeWaveform_Leg;
+
+  TLine *DGScopeChannelTrigger_L[8];
+  TBox *DGScopeBaselineCalcRegion_B[8];
 
   TH1F *DGScopeSpectrum_H[8];
 
