@@ -98,7 +98,8 @@ enum{
 
   DGScopeWaveform_RB_ID,
   DGScopeSpectrum_RB_ID,
-  DGScopeBlank_RB_ID,
+  DGScopeHighRate_RB_ID,
+  DGScopeUltraHighRate_RB_ID,
 
   DGScopeTriggerCoincidenceEnable_CB_ID,
   DGScopeChVerticalPosition_NEL_ID,

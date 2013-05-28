@@ -151,6 +151,7 @@ private:
   TLegend *DGScopeWaveform_Leg;
   TLine *DGScopeChannelTrigger_L[8];
   TBox *DGScopeBaselineCalcRegion_B[8];
+  TLine *DGScopeSpectrumCalibration_L;
 
 
   /////////////////////////////
@@ -266,7 +267,8 @@ private:
   ADAQComboBoxWithLabel *DGScopeDisplayOutputFileType_CBL;
 
   TGButtonGroup *DGScopeMode_BG;
-  TGRadioButton *DGScopeWaveform_RB, *DGScopeSpectrum_RB, *DGScopeBlank_RB;
+  TGRadioButton *DGScopeWaveform_RB, *DGScopeSpectrum_RB;
+  TGRadioButton *DGScopeHighRate_RB, *DGScopeUltraHighRate_RB;
 
   ADAQNumberEntryWithLabel *DGScopeBaselineMin_NEL, *DGScopeBaselineMax_NEL;
 

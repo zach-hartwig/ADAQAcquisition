@@ -138,6 +138,12 @@ ADAQAcquisition::ADAQAcquisition(int W, int H)
     DGScopeBaselineCalcRegion_B[i]->SetFillStyle(3001);
   }
 
+  DGScopeSpectrumCalibration_L = new TLine;
+  DGScopeSpectrumCalibration_L->SetLineColor(kRed);
+  DGScopeSpectrumCalibration_L->SetLineWidth(2);
+  DGScopeSpectrumCalibration_L->SetLineStyle(7);
+  
+
   // Create a dummy TLine object to add a single entry to thewaveform
   // graph legend representing the trigger lines
   TLine *Dummy_Line = new TLine();
@@ -894,7 +900,9 @@ void ADAQAcquisition::FillScopeFrame()
 
   DGScopeSpectrum_RB = new TGRadioButton(DGScopeMode_BG, "Pulse spectrum", DGScopeSpectrum_RB_ID);
 
-  DGScopeBlank_RB = new TGRadioButton(DGScopeMode_BG, "High-rate acquisition", DGScopeBlank_RB_ID);
+  DGScopeHighRate_RB = new TGRadioButton(DGScopeMode_BG, "High-rate (updateable)", DGScopeHighRate_RB_ID);
+
+  DGScopeUltraHighRate_RB = new TGRadioButton(DGScopeMode_BG, "Ultra-rate (non-updateable)", DGScopeUltraHighRate_RB_ID);
   
   DGScopeMode_BG->Show();
 
@@ -1678,11 +1686,13 @@ void ADAQAcquisition::HandleScopeButtons()
 
       // Determine if a ROOT file was open and receiving data; if so,
       // ensure that the data is written and the ROOT file is closed
-      /*
-      if(OutputDataFile)
-	if(OutputDataFile->IsOpen())
-	  DGScopeDataStorageCloseFile_TB->Clicked();
-      */
+      if(OutputDataFile){
+	//if(DGScopeDataStorageEnable_CB->IsDown())
+	//  DGScopeDataStorageEnable_CB->SetState(kButtonUp);
+	
+	//if(OutputDataFile->IsOpen())
+	//  DGScopeDataStorageCloseFile_TB->Clicked();
+      }
     }
   }
     
@@ -2005,10 +2015,19 @@ void ADAQAcquisition::HandleScopeButtons()
     ///////////////////////////////
     // Write and close ROOT file
   case DGScopeDataStorageCloseFile_TB_ID:{
+    
+    if(!OutputDataFile)
+      break;
+    
+    cout << "HERE" << endl;
 
+
+    if(DGScopeDataStorageEnable_CB->IsDown())
+      DGScopeDataStorageEnable_CB->SetState(kButtonUp);
+    
     if(WaveformTree)
       WaveformTree->Write();
-
+    
     // Write the ROOT objects to file
     MeasParams->Write("MeasParams");
     MeasComment->Write("MeasComment");
@@ -2124,7 +2143,7 @@ void ADAQAcquisition::HandleScopeButtons()
       // tack it on to the end
       size_t Found = GraphicsFileName.find_last_of(".");
       if(Found == string::npos)
-	GraphicsFileName = GraphicsFileName + GraphicsFileExtension;
+	GraphicsFileName = GraphicsFileName.substr(0,Found) + GraphicsFileExtension;
 
       string FileName_StripPath = GraphicsFileName;
       Found = FileName_StripPath.find_last_of("/");
@@ -2146,26 +2165,29 @@ void ADAQAcquisition::HandleScopeButtons()
       stringstream ss;
       ss << "." << CurrentTime;
       string CurrentTimeString = ss.str();
-      FileName = GraphicsFileName + GraphicsFileExtension + CurrentTimeString;
+      FileName = GraphicsFileName + CurrentTimeString;
     }
     else
-      FileName = GraphicsFileName + GraphicsFileExtension;
+      FileName = GraphicsFileName;
     
     DGScope_EC->GetCanvas()->Print(FileName.c_str(), GraphicsFileExtension.c_str());
     break;
   }
     
-
+    
   case DGScopeUpdatePlot_TB_ID:{
     
     int CurrentChannel = DGScopeSpectrumChannel_CBL->GetComboBox()->GetSelected();
     
-    if(DGScopeSpectrum_H[CurrentChannel])
-      ForceSpectrumDrawing();
-    
-    break;
+    if(DGScopeUltraHighRate_RB->IsDown())
+      break;
+    else{
+      if(DGScopeSpectrum_H[CurrentChannel])
+	ForceSpectrumDrawing();
+      break;
+    }
   }
-
+    
   case DGScopeAcquisitionTimerStart_TB_ID:{
     
     if(DGScopeStartStop_TB->GetString() != "Acquiring")
@@ -2450,7 +2472,8 @@ void ADAQAcquisition::SetDGWidgetState(bool AcquiringData)
 
   DGScopeWaveform_RB->SetEnabled(WidgetState);
   DGScopeSpectrum_RB->SetEnabled(WidgetState);
-  DGScopeBlank_RB->SetEnabled(WidgetState);
+  DGScopeHighRate_RB->SetEnabled(WidgetState);
+  DGScopeUltraHighRate_RB->SetEnabled(WidgetState);
 
   DGScopeSpectrumBinNumber_NEL->GetEntry()->SetState(WidgetState);
   DGScopeSpectrumMinBin_NEL->GetEntry()->SetState(WidgetState);
@@ -2609,7 +2632,8 @@ void ADAQAcquisition::RunDGScope()
   // Get the bools to determine what (if anything) is plotted
   bool PlotWaveform = DGScopeWaveform_RB->IsDown();
   bool PlotSpectrum = DGScopeSpectrum_RB->IsDown();
-  bool PlotBlank = DGScopeBlank_RB->IsDown();
+  bool HighRate = DGScopeHighRate_RB->IsDown();
+  bool UltraHighRate = DGScopeUltraHighRate_RB->IsDown();
    
   // Get the bools to determine plotting options
   bool DrawLegend = DGScopeDisplayDrawLegend_CB->IsDown();
@@ -2893,7 +2917,7 @@ void ADAQAcquisition::RunDGScope()
     // "zoom"). The slider end values are between 0 and 1;
     // multiplying the slider values by the appropriate
     // conversion factor results in correct X and Y axes
-    if(!PlotBlank){
+    if(PlotWaveform or PlotSpectrum){
       DGScopeHorizontalScale_THS->GetPosition(&xMin, &xMax);
       DGScopeVerticalScale_DVS->GetPosition(&yMin, &yMax);
       
@@ -2982,79 +3006,92 @@ void ADAQAcquisition::RunDGScope()
 	
 	// For all of the samples in the acquisition window of length RecordLength...
 	for(uint32_t sample=0; sample<RecordLength; sample++){
-	  
+
+	  // I suspect that this line is *incredibly* wasteful; it
+	  // persists in the code for legacy reasons. It is probably
+	  // far better simply assign the EventWaveform::DataChannel
+	  // addresses to the ROOT tree for readout. I will attempt
+	  // this if I have time or if it becomes a critical
+	  // limitation on experiments. (ZSH 28 May 13)
 	  Voltage[ch][sample] = EventWaveform->DataChannel[ch][sample]; // [ADC]
 
-	  // Convert the voltage [ADC] into suitable form for graphing
-	  // (accounts for units of ADC/mV and vertical offset)
-	  if(PlotWaveform)
-	    Voltage_graph[sample] = (Voltage[ch][sample] + DGScopeVerticalPosition_NEL[ch]->GetEntry()->GetIntNumber()) * ConvertVoltageToGraphUnits;
-	  
-	  // Calculate the baseline by taking the average of all
-	  // samples that fall within the baseline calculation region
-	  if(sample > BaselineCalcMin[ch] and sample < BaselineCalcMax[ch])
-	    BaselineCalcResult[ch] += Voltage[ch][sample]*1.0/(BaselineCalcLength[ch]-1); // [ADC]
-	  
-	  // Analyze the pulses to obtain pulse spectra
-	  else if(sample >= BaselineCalcMax[ch]){
+	  // Do not perform the following for ultrahigh rate readout
+	  if(!UltraHighRate){
+
+	    // Convert the voltage [ADC] into suitable form for graphing
+	    // (accounts for units of ADC/mV and vertical offset)
+	    if(PlotWaveform)
+	      Voltage_graph[sample] = (Voltage[ch][sample] + DGScopeVerticalPosition_NEL[ch]->GetEntry()->GetIntNumber()) * ConvertVoltageToGraphUnits;
 	    
-	    // Calculate the voltage ("height") of the sample above
-	    // the baseline, using the signal polarity to ensure SampleHeight>0
-	    SampleHeight = SignalPolarity[ch] * (Voltage[ch][sample] - BaselineCalcResult[ch]);
-	    TriggerHeight = SignalPolarity[ch] * (DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->GetIntNumber() - BaselineCalcResult[ch]);
+	    // Calculate the baseline by taking the average of all
+	    // samples that fall within the baseline calculation region
+	    if(sample > BaselineCalcMin[ch] and sample < BaselineCalcMax[ch])
+	      BaselineCalcResult[ch] += Voltage[ch][sample]*1.0/(BaselineCalcLength[ch]-1); // [ADC]
 	    
-	    // Simple algorithm to determine maximum peak height in the pulse
-	    if(SampleHeight > PulseHeight and SampleHeight > TriggerHeight)
-	      PulseHeight = SampleHeight;
-	    
-	    // Integrate the area under the pulse
-	    if(SampleHeight > TriggerHeight)
-	      PulseArea += SampleHeight;
+	    // Analyze the pulses to obtain pulse spectra
+	    else if(sample >= BaselineCalcMax[ch]){
+	      
+	      // Calculate the voltage ("height") of the sample above
+	      // the baseline, using the signal polarity to ensure SampleHeight>0
+	      SampleHeight = SignalPolarity[ch] * (Voltage[ch][sample] - BaselineCalcResult[ch]);
+	      TriggerHeight = SignalPolarity[ch] * (DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->GetIntNumber() - BaselineCalcResult[ch]);
+	      
+	      // Simple algorithm to determine maximum peak height in the pulse
+	      if(SampleHeight > PulseHeight and SampleHeight > TriggerHeight)
+		PulseHeight = SampleHeight;
+	      
+	      // Integrate the area under the pulse
+	      if(SampleHeight > TriggerHeight)
+		PulseArea += SampleHeight;
+	    }
 	  }
 	}
 	
-	// If a CalibrationManager (really, a ROOT TGraph) exists, ie,
-	// has been successfully created and is valid for
-	// interpolation then convert PulseHeight/Area
-	if(UseCalibrationManager[ch]){
-	  // Use the ROOT TGraph CalibrationManager to convert the
-	  // pulse height/area from ADC to keV using LINEAR
-	  // interpolation on the pre-assigned calibration points
-	  if(AnalyzePulseHeight)
-	    PulseHeight = CalibrationManager[ch]->Eval(PulseHeight);
-	  else
-	    PulseArea = CalibrationManager[ch]->Eval(PulseArea);
-	  
-	  // Use the ROOT TGraph CalibrationManager to convert the
-	  // pulse height/area from ADC to keV using SPLINE
-	  // interpolation on the pre-assigned calibration
-	  // points. This settings is only useful if there are a large
-	  // number of points and even then, is probably not that
-	  // valuable. But it's here to show that more complicated
-	  // interpolation can easily be accomplished with ROOT's
-	  // PulseHeight =CalibrationManager->Eval(PulseHeight,0,"S"); 
-	  // PulseArea = CalibrationManager->Eval(PulseHeight,0,"S");
-	}
+	if(!UltraHighRate){
 	
-	if(AnalyzePulseHeight){
-	  if(PulseHeight>LowerLevelDiscr and PulseHeight<UpperLevelDiscr)
-	    DGScopeSpectrum_H[ch]->Fill(PulseHeight);
-	  
-	  if(DGScopeSpectrumAnalysisLDTrigger_CB->IsDown() and
-	     ch == DGScopeSpectrumAnalysisLDTriggerChannel_CBL->GetComboBox()->GetSelected())
-	    DiscrOKForOutput = true;
-	}
-	
-	else if(AnalyzePulseArea){
-	  if(PulseArea>LowerLevelDiscr and PulseArea<UpperLevelDiscr){
-	    DGScopeSpectrum_H[ch]->Fill(PulseArea);
+	  // If a CalibrationManager (really, a ROOT TGraph) exists, ie,
+	  // has been successfully created and is valid for
+	  // interpolation then convert PulseHeight/Area
+	  if(UseCalibrationManager[ch]){
+	    // Use the ROOT TGraph CalibrationManager to convert the
+	    // pulse height/area from ADC to keV using LINEAR
+	    // interpolation on the pre-assigned calibration points
+	    if(AnalyzePulseHeight)
+	      PulseHeight = CalibrationManager[ch]->Eval(PulseHeight);
+	    else
+	      PulseArea = CalibrationManager[ch]->Eval(PulseArea);
 	    
-	    if(DGScopeSpectrumAnalysisLDTrigger_CB->IsDown() and 
+	    // Use the ROOT TGraph CalibrationManager to convert the
+	    // pulse height/area from ADC to keV using SPLINE
+	    // interpolation on the pre-assigned calibration
+	    // points. This settings is only useful if there are a large
+	    // number of points and even then, is probably not that
+	    // valuable. But it's here to show that more complicated
+	    // interpolation can easily be accomplished with ROOT's
+	    // PulseHeight =CalibrationManager->Eval(PulseHeight,0,"S"); 
+	    // PulseArea = CalibrationManager->Eval(PulseHeight,0,"S");
+	  }
+	  
+	  if(AnalyzePulseHeight){
+	    if(PulseHeight>LowerLevelDiscr and PulseHeight<UpperLevelDiscr)
+	      DGScopeSpectrum_H[ch]->Fill(PulseHeight);
+	    
+	    if(DGScopeSpectrumAnalysisLDTrigger_CB->IsDown() and
 	       ch == DGScopeSpectrumAnalysisLDTriggerChannel_CBL->GetComboBox()->GetSelected())
 	      DiscrOKForOutput = true;
 	  }
+	  
+	  else if(AnalyzePulseArea){
+	    if(PulseArea>LowerLevelDiscr and PulseArea<UpperLevelDiscr){
+	      DGScopeSpectrum_H[ch]->Fill(PulseArea);
+	      
+	      if(DGScopeSpectrumAnalysisLDTrigger_CB->IsDown() and 
+		 ch == DGScopeSpectrumAnalysisLDTriggerChannel_CBL->GetComboBox()->GetSelected())
+		DiscrOKForOutput = true;
+	    }
+	  }
 	}
-
+	
 	// The TTree that holds the waveforms must have a branch
 	// created for the waveforms; however, that branch holds the
 	// waveforms as arrays, which requires specifying (at branch
@@ -3247,13 +3284,13 @@ void ADAQAcquisition::RunDGScope()
 		// ROOT GUI widget that displays the pulse unit
 		DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->SetNumber(DGScopeHorizontalScale_THS->GetPointerPosition() * maxBin);
 	      }
-
+	      
 	      // ... otherwise, allow the user to set the pulse unit manually
 	      else
 		LinePosX = DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->GetNumber();
 	      
-	      // Draw the vertical calibration line  ZSH 25 May 13
-	      //SpectrumCalibration_L->DrawLine(LinePosX, yMin, LinePosX, yMax);
+	      // Draw the vertical calibration line
+	      DGScopeSpectrumCalibration_L->DrawLine(LinePosX, yMin, LinePosX, yMax);
 	    }
 	    
 	    // Update the canvas
@@ -3263,7 +3300,7 @@ void ADAQAcquisition::RunDGScope()
 	
 	// Do not plot anything. This mode is most useful to
 	// maximizing the data throughput rate.
-	else if(PlotBlank){
+	else{// if(PlotBlank){
 	}
       }
       
@@ -3442,9 +3479,11 @@ void ADAQAcquisition::StopAcquisitionSafely()
   // resetting widget state to prevent seg faults and that ROOT
   // file properly written.
   if(OutputDataFile)
-    if(OutputDataFile->IsOpen())
+    if(OutputDataFile->IsOpen()){
+      DGScopeDataStorageEnable_CB->SetState(kButtonUp);
       DGScopeDataStorageCloseFile_TB->Clicked();
-
+    }
+  
   // Determine if the acquisition timer is active
   if(AcquisitionTimerEnabled){
     // Reset the attributes of the timer start text button
