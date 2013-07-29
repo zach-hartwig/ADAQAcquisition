@@ -35,7 +35,7 @@ using namespace boost::assign;
 ADAQAcquisition::ADAQAcquisition(int W, int H)
   : TGMainFrame(gClient->GetRoot()),
     DisplayWidth(W), DisplayHeight(H),
-    V6534Enable(false), V6534BoardAddress(0x42420000),
+    V6534Enable(true), V6534BoardAddress(0x42420000),
     V1720Enable(true), V1720BoardAddress(0x00420000),
     VMEConnectionEstablished(false),
     HVMonitorEnable(false), DGScopeEnable(false),
@@ -990,6 +990,19 @@ void ADAQAcquisition::FillScopeFrame()
   DGScopeMaxEventsBeforeTransfer_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
   DGScopeMaxEventsBeforeTransfer_NEL->GetEntry()->SetNumber(50);
 
+  DGScopeReadoutControls_GF->AddFrame(DGScopeCheckBufferStatus_TB = new TGTextButton(DGScopeReadoutControls_GF, "Check V1720 Buffer", DGScopeCheckBufferStatus_TB_ID),
+				      new TGLayoutHints(kLHintsNormal, 5,5,5,0));
+  DGScopeCheckBufferStatus_TB->Connect("Clicked()","ADAQAcquisition",this,"HandleScopeButtons()");
+  DGScopeCheckBufferStatus_TB->Resize(150,30);
+  DGScopeCheckBufferStatus_TB->ChangeOptions(DGScopeCheckBufferStatus_TB->GetOptions() | kFixedSize);
+  
+  DGScopeReadoutControls_GF->AddFrame(DGScopeBufferStatus_TE = new TGTextEntry(DGScopeReadoutControls_GF, "<Click above check!>",-1),
+				      new TGLayoutHints(kLHintsNormal, 5,5,5,5));
+  DGScopeBufferStatus_TE->SetAlignment(kTextCenterX);
+  DGScopeBufferStatus_TE->Resize(150,30);
+  DGScopeBufferStatus_TE->ChangeOptions(DGScopeBufferStatus_TE->GetOptions() | kFixedSize);
+  
+
 
   ///////////////////////
   // Spectrum settings //
@@ -1392,25 +1405,24 @@ void ADAQAcquisition::HandleConnectionButtons()
     // If no connection is presently established...
     if(!VMEConnectionEstablished){
 
-      int V6534LinkOpen = -1;
-      int V1720LinkOpen = -1;
-      
-      // ... check to see if the HVManager exists, indicating that the
-      // V6534 board is available for use. If found, get the physical
-      // address of V6534 board and use the HVManager to initialize it
-      if(V6534Enable){
-	V6534BoardAddress = V6534BoardAddress_NEF->GetHexNumber();
-	V6534LinkOpen = HVManager->OpenLink(V6534BoardAddress);
-	HVManager->SetToSafeState();
-      }
-
       // ... check to see if the DgManager exists, indicating that the
       // V1720 board is available for use. If found, get the physical
       // address of V1720 board and use the HVManager to initialize it
+      int V1720LinkOpen = -1;
       if(V1720Enable){
 	V1720BoardAddress = V1720BoardAddress_NEF->GetHexNumber();
 	V1720LinkOpen = DGManager->OpenLink(V1720BoardAddress);
 	DGManager->Initialize();
+      }
+      
+      // ... check to see if the HVManager exists, indicating that the
+      // V6534 board is available for use. If found, get the physical
+      // address of V6534 board and use the HVManager to initialize it
+      int V6534LinkOpen = -1;
+      if(V6534Enable){
+	V6534BoardAddress = V6534BoardAddress_NEF->GetHexNumber();
+	V6534LinkOpen = HVManager->OpenLink(V6534BoardAddress);
+	HVManager->SetToSafeState();
       }
       
       // If either (or both) of the HV and DG managers exist then
@@ -1700,6 +1712,23 @@ void ADAQAcquisition::HandleScopeButtons()
     // data trigger across all channels
   case DGScopeTrigger_TB_ID:{
     DGManager->SendSWTrigger();
+    break;
+  }
+
+
+    // Check to see if the V1720 FPGA buffer is full; the text entry
+    // widget will be updated to alert the user
+  case DGScopeCheckBufferStatus_TB_ID:{
+
+    //    bool BufferFull = DGManager->CheckBufferStatus();
+    bool BufferFull = true;
+
+    if(BufferFull){
+      DGScopeBufferStatus_TE->SetText("Buffer is FULL!");
+    }
+    else{
+      DGScopeBufferStatus_TE->SetText("Buffer is NOT full");
+    }
     break;
   }
 

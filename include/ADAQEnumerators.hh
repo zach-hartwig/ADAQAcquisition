@@ -131,6 +131,8 @@ enum{
 
   DGScopeDataStorageCreateFile_TB_ID,
   DGScopeDataStorageCloseFile_TB_ID,
+
+  DGScopeCheckBufferStatus_TB_ID
 };
 
 #endif

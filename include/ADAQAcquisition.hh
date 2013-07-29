@@ -147,7 +147,6 @@ private:
   vector<TGraph *> CalibrationManager;
   vector<ADAQChannelCalibrationData> CalibrationData;
 
-
   TLegend *DGScopeWaveform_Leg;
   TLine *DGScopeChannelTrigger_L[8];
   TBox *DGScopeBaselineCalcRegion_B[8];
@@ -217,6 +216,9 @@ private:
   TGTextButton *DGScopeAcquisitionTimerStart_TB;
   
   ADAQNumberEntryWithLabel *DGScopeMaxEventsBeforeTransfer_NEL;
+
+  TGTextButton *DGScopeCheckBufferStatus_TB;
+  TGTextEntry *DGScopeBufferStatus_TE;
 
   ADAQComboBoxWithLabel *DGScopeTriggerMode_CBL;
 
