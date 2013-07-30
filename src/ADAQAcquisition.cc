@@ -999,7 +999,7 @@ void ADAQAcquisition::FillScopeFrame()
   DGScopeReadoutControls_GF->AddFrame(DGScopeBufferStatus_TE = new TGTextEntry(DGScopeReadoutControls_GF, "<Click above check!>",-1),
 				      new TGLayoutHints(kLHintsNormal, 5,5,5,5));
   DGScopeBufferStatus_TE->SetAlignment(kTextCenterX);
-  DGScopeBufferStatus_TE->Resize(150,30);
+  DGScopeBufferStatus_TE->Resize(200,30);
   DGScopeBufferStatus_TE->ChangeOptions(DGScopeBufferStatus_TE->GetOptions() | kFixedSize);
   
 
@@ -1720,14 +1720,24 @@ void ADAQAcquisition::HandleScopeButtons()
     // widget will be updated to alert the user
   case DGScopeCheckBufferStatus_TB_ID:{
 
-    bool BufferFull = DGManager->CheckBufferStatus();
+    bool BufferStatus[NumDataChannels];
+    for(int ch=0; ch<NumDataChannels; ch++)
+      BufferStatus[ch] = false;
+    
+    DGManager->CheckBufferStatus(BufferStatus);
 
-    if(BufferFull){
-      DGScopeBufferStatus_TE->SetText("Buffer is FULL!");
+    bool BufferFull = false;
+    
+    for(int ch=0; ch<NumDataChannels; ch++){
+      if(BufferStatus[ch] == true)
+	BufferFull = true;
     }
-    else{
-      DGScopeBufferStatus_TE->SetText("Buffer is NOT full");
-    }
+    
+    if(BufferFull)
+      DGScopeBufferStatus_TE->SetText("Buffers are FULL");
+    else
+      DGScopeBufferStatus_TE->SetText("Buffers are OK");
+    
     break;
   }
 
