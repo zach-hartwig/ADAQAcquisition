@@ -1720,8 +1720,7 @@ void ADAQAcquisition::HandleScopeButtons()
     // widget will be updated to alert the user
   case DGScopeCheckBufferStatus_TB_ID:{
 
-    //    bool BufferFull = DGManager->CheckBufferStatus();
-    bool BufferFull = true;
+    bool BufferFull = DGManager->CheckBufferStatus();
 
     if(BufferFull){
       DGScopeBufferStatus_TE->SetText("Buffer is FULL!");
