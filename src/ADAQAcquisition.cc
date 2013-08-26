@@ -701,7 +701,7 @@ void ADAQAcquisition::FillScopeFrame()
     // ROOT check button to enable channel for digitization
     DGScopeChannelControl_HF->AddFrame(DGScopeChannelEnable_CB[ch] = new TGCheckButton(DGScopeChannelControl_HF, "Enable", DGScopeChEnable_CB_ID_Vec[ch]),
 				       new TGLayoutHints(kLHintsCenterY,0,0,0,0));
-    if(ch==0) 
+    if(ch==2) 
       DGScopeChannelEnable_CB[ch]->SetState(kButtonDown);
 
     // TGLabel for the pulse polarity radio buttons
@@ -950,7 +950,7 @@ void ADAQAcquisition::FillScopeFrame()
   DGScopeAcquisitionControls_GF->AddFrame(DGScopeRecordLength_NEL = new ADAQNumberEntryWithLabel(DGScopeAcquisitionControls_GF, "Record length (#)", DGScopeRecordLength_NEL_ID),
 					  new TGLayoutHints(kLHintsNormal,5,5,5,0));
   DGScopeRecordLength_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-  DGScopeRecordLength_NEL->GetEntry()->SetNumber(1024);
+  DGScopeRecordLength_NEL->GetEntry()->SetNumber(2000);
 
   // ADAQ number entry specifying the percentage of the acquisition
   // window that is behind (or after) the triggern (all channels)
@@ -973,11 +973,22 @@ void ADAQAcquisition::FillScopeFrame()
   DGScopeAcquisitionTimer_NEFL->GetEntry()->SetNumber(10);
   DGScopeAcquisitionTimer_NEFL->GetEntry()->SetState(false);
 
-  DGScopeAcquisitionControls_GF->AddFrame(DGScopeAcquisitionTimerStart_TB = new TGTextButton(DGScopeAcquisitionControls_GF, "Start acquisition timer", DGScopeAcquisitionTimerStart_TB_ID),
-					  new TGLayoutHints(kLHintsNormal, 5,5,0,0));
-  DGScopeAcquisitionTimerStart_TB->Resize(150, 30);
+  TGHorizontalFrame *DGScopeTimerButtons_HF = new TGHorizontalFrame(DGScopeAcquisitionControls_GF);
+  DGScopeAcquisitionControls_GF->AddFrame(DGScopeTimerButtons_HF);
+  
+  DGScopeTimerButtons_HF->AddFrame(DGScopeAcquisitionTimerStart_TB = new TGTextButton(DGScopeTimerButtons_HF, "Start timer", DGScopeAcquisitionTimerStart_TB_ID),
+				   new TGLayoutHints(kLHintsNormal, 5,5,0,0));
+  DGScopeAcquisitionTimerStart_TB->Resize(100, 30);
   DGScopeAcquisitionTimerStart_TB->ChangeOptions(DGScopeAcquisitionTimerStart_TB->GetOptions() | kFixedSize);
   DGScopeAcquisitionTimerStart_TB->Connect("Clicked()", "ADAQAcquisition", this, "HandleScopeButtons()");
+  
+  DGScopeTimerButtons_HF->AddFrame(DGScopeAcquisitionTimerAbort_TB = new TGTextButton(DGScopeTimerButtons_HF, "Abort timer", DGScopeAcquisitionTimerAbort_TB_ID),
+				   new TGLayoutHints(kLHintsNormal, 5,5,0,0));
+  DGScopeAcquisitionTimerAbort_TB->Resize(100, 30);
+  DGScopeAcquisitionTimerAbort_TB->ChangeOptions(DGScopeAcquisitionTimerAbort_TB->GetOptions() | kFixedSize);
+  DGScopeAcquisitionTimerAbort_TB->Connect("Clicked()", "ADAQAcquisition", this, "HandleScopeButtons()");
+  
+
 
   // V1720 readout controls
   TGGroupFrame *DGScopeReadoutControls_GF = new TGGroupFrame(DGScopeSettingsFrame, "Readout", kVerticalFrame);
@@ -988,7 +999,7 @@ void ADAQAcquisition::FillScopeFrame()
 				      new TGLayoutHints(kLHintsNormal, 5,5,5,5));
   DGScopeMaxEventsBeforeTransfer_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
   DGScopeMaxEventsBeforeTransfer_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
-  DGScopeMaxEventsBeforeTransfer_NEL->GetEntry()->SetNumber(50);
+  DGScopeMaxEventsBeforeTransfer_NEL->GetEntry()->SetNumber(5);
 
   DGScopeReadoutControls_GF->AddFrame(DGScopeCheckBufferStatus_TB = new TGTextButton(DGScopeReadoutControls_GF, "Check V1720 Buffer", DGScopeCheckBufferStatus_TB_ID),
 				      new TGLayoutHints(kLHintsNormal, 5,5,5,0));
@@ -1001,6 +1012,16 @@ void ADAQAcquisition::FillScopeFrame()
   DGScopeBufferStatus_TE->SetAlignment(kTextCenterX);
   DGScopeBufferStatus_TE->Resize(200,30);
   DGScopeBufferStatus_TE->ChangeOptions(DGScopeBufferStatus_TE->GetOptions() | kFixedSize);
+
+
+  DGScopeReadoutControls_GF->AddFrame(DGScopeUseDataReduction_CB = new TGCheckButton(DGScopeReadoutControls_GF, "Use data reduction", -1),
+				      new TGLayoutHints(kLHintsNormal, 5,5,5,0));
+
+  DGScopeReadoutControls_GF->AddFrame(DGScopeDataReductionFactor_NEL = new ADAQNumberEntryWithLabel(DGScopeReadoutControls_GF, "Data reduction factor", -1),
+				      new TGLayoutHints(kLHintsNormal, 5,5,0,5));
+  DGScopeDataReductionFactor_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+  DGScopeDataReductionFactor_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+  DGScopeDataReductionFactor_NEL->GetEntry()->SetNumber(1);
   
 
 
@@ -2019,10 +2040,17 @@ void ADAQAcquisition::HandleScopeButtons()
       MeasParams->BaselineCalcMax.push_back( (int)DGScopeBaselineCalcMax_NEL[ch]->GetEntry()->GetIntNumber() );
     }
     
-    // Retrieve the record length for the acquisition window [samples]
+    // Retrieve the record length for the acquisition window [samples].
     MeasParams->RecordLength = DGScopeRecordLength_NEL->GetEntry()->GetIntNumber();
-
-
+    
+    // If the user has selected to reduce the output data then modify
+    // the record length accordingly. Note that this effectively
+    // destroys any pulse timing information, but it presently done to
+    // avoid modifying the structure of the ADAQ ROOT files. In the
+    // future, this should be correctly implemented. ZSH 26 AUG 13
+    if(DGScopeUseDataReduction_CB->IsDown())
+      MeasParams->RecordLength /= DGScopeDataReductionFactor_NEL->GetEntry()->GetIntNumber();
+    
     ///////////////////////////
     // Set the infamous boolean
 
@@ -2056,9 +2084,6 @@ void ADAQAcquisition::HandleScopeButtons()
     
     if(!OutputDataFile)
       break;
-    
-    cout << "HERE" << endl;
-
 
     if(DGScopeDataStorageEnable_CB->IsDown())
       DGScopeDataStorageEnable_CB->SetState(kButtonUp);
@@ -2231,13 +2256,13 @@ void ADAQAcquisition::HandleScopeButtons()
     if(DGScopeStartStop_TB->GetString() != "Acquiring")
       break;
     
-    if(ActiveTextButton->GetString() == "Start acquisition timer"){
-
+    if(ActiveTextButton->GetString() == "Start timer"){
+      
       // Set the graphical attributes of the text button
       ActiveTextButton->SetBackgroundColor(ColorManager->Number2Pixel(8));
       ActiveTextButton->SetForegroundColor(ColorManager->Number2Pixel(1));
       ActiveTextButton->SetText("Waiting ...");
-
+      
       // Get the start time (i.e. now)
       AcquisitionTime_Start = time(NULL);
 
@@ -2256,6 +2281,12 @@ void ADAQAcquisition::HandleScopeButtons()
 	  DGScopeDataStorageEnable_CB->SetState(kButtonDown);
       }
     }
+    break;
+  }
+
+  case DGScopeAcquisitionTimerAbort_TB_ID:{
+    if(DGScopeEnable && AcquisitionTimerEnabled)
+      StopAcquisitionSafely();
     break;
   }
     
@@ -2575,6 +2606,18 @@ void ADAQAcquisition::RunDGScope()
   // Get the record length, ie, number of 4ns samples in acquisition window
   uint32_t RecordLength = DGScopeRecordLength_NEL->GetEntry()->GetIntNumber();
 
+  // Get the data thinning factor 
+  bool UseDataReduction = DGScopeUseDataReduction_CB->IsDown();
+  uint32_t DataReductionFactor = DGScopeDataReductionFactor_NEL->GetEntry()->GetIntNumber();
+
+  if(RecordLength % DataReductionFactor != 0 && UseDataReduction){
+    cout << "\nError! (RecordLength % DataReductionFactor) MUST equal zero to avoid grevious errors!\n"
+	 <<   "       Adjust the data reduction factor and restart acquisition ...\n"
+	 << endl;
+
+    StopAcquisitionSafely();
+  }
+  
   // Get the percentage of acquisition window that occurs after the trigger
   uint32_t PostTriggerSize = DGScopePostTriggerSize_NEL->GetEntry()->GetIntNumber();
 
@@ -2670,7 +2713,7 @@ void ADAQAcquisition::RunDGScope()
   // Get the bools to determine what (if anything) is plotted
   bool PlotWaveform = DGScopeWaveform_RB->IsDown();
   bool PlotSpectrum = DGScopeSpectrum_RB->IsDown();
-  bool HighRate = DGScopeHighRate_RB->IsDown();
+  //bool HighRate = DGScopeHighRate_RB->IsDown();
   bool UltraHighRate = DGScopeUltraHighRate_RB->IsDown();
    
   // Get the bools to determine plotting options
@@ -2755,17 +2798,19 @@ void ADAQAcquisition::RunDGScope()
   gStyle->SetOptStat("ne");
    
   // Convert the time to the user's desired units for graphing
-  // the waveform [sample or ns]
+ // the waveform [sample or ns]
   for(uint32_t sample=0; sample<RecordLength; sample++)
     Time_graph[sample] = sample * ConvertTimeToGraphUnits;
 
-  // Assign values to use if CyDAQRootGUI should be built in debug mode
+  // Assign values to use if built in debug mode (Not used)
+  /*
   bool DebugModeEnabled = false;
   int DebugModeWaveformGenerationPause = 1000;
   if(BuildInDebugMode){
     DebugModeEnabled = DebugModeEnable_CB->IsDown();
     DebugModeWaveformGenerationPause = DebugModeWaveformGenerationPause_NEL->GetEntry()->GetIntNumber();
   }
+  */
 
   // Assign the frequency (in number of histogram entries) with which
   // the canvas will be updated
@@ -2786,15 +2831,25 @@ void ADAQAcquisition::RunDGScope()
   // RecordLength) represents the waveform. The start address of each
   // outer vector will be used to create a unique branch in the
   // waveform TTree object to store each of the 8 digitizer channels 
-  //vector< vector<int> > VoltageInADC_AllChannels;
-  vector< vector<int> > Voltage;
+  vector<vector<int> > Voltage;
+  vector<vector<int> > VoltageTmp;
+
+  uint32_t factor = RecordLength / DataReductionFactor;
 
   // Resize the outer and inner vector to the appropriate, fixed size
-  //VoltageInADC_AllChannels.resize(NumDataChannels);
   Voltage.resize(NumDataChannels);
-  for(int i=0; i<NumDataChannels; i++)
-    Voltage[i].resize(RecordLength);
-
+  VoltageTmp.resize(NumDataChannels);
+  for(int ch=0; ch<NumDataChannels; ch++){
+    if(DGScopeChannelEnable_CB[ch]->IsDisabledAndSelected()){
+      Voltage[ch].resize(RecordLength);
+      VoltageTmp[ch].resize(factor);
+    }
+    else{
+      Voltage[ch].resize(0);
+      VoltageTmp[ch].resize(0);
+    }
+  }
+  
 
   ///////////////////////////////////////////////////////
   // Program V1720 digitizer with acquisition settings //
@@ -2808,6 +2863,9 @@ void ADAQAcquisition::RunDGScope()
   char *EventPointer = NULL;
   CAEN_DGTZ_EventInfo_t EventInfo;
   CAEN_DGTZ_UINT16_EVENT_t *EventWaveform = NULL;
+
+  uint32_t FPGAEventAddress = 0x812c;
+  uint32_t NumFPGAEvents = 0;
 
   // Variables for PC buffer
   char *Buffer = NULL;
@@ -2898,7 +2956,7 @@ void ADAQAcquisition::RunDGScope()
 
   // Set the maximum number of events that will be accumulated before
   // the V1720 FPGA buffer is dumped to PC memory
-  int MaxEvents = DGScopeMaxEventsBeforeTransfer_NEL->GetEntry()->GetIntNumber();
+  uint32_t MaxEvents = DGScopeMaxEventsBeforeTransfer_NEL->GetEntry()->GetIntNumber();
   DGManager->SetMaxNumEventsBLT(MaxEvents);
 
   // Allocate memory for the readout buffer
@@ -2906,6 +2964,8 @@ void ADAQAcquisition::RunDGScope()
 
   // Set the percentage of acquisition window that occurs after trigger
   DGManager->SetPostTriggerSize(PostTriggerSize);
+
+  //timespec preA, postA;
 
   // Set the V1720 to begin acquiring data
   DGManager->SWStartAcquisition();
@@ -2977,15 +3037,20 @@ void ADAQAcquisition::RunDGScope()
     /////////////////////
     // Begin data readout
 
+    // Get number of events in FPGA buffer
+    DGManager->GetRegisterValue(FPGAEventAddress, &NumFPGAEvents);
+
+    // To reduce overhead, only readout the FPGA buffer when it has
+    // reached the user-set max events
+    if(NumFPGAEvents < MaxEvents)
+      continue;
+    
     // Read data from the V1720 buffer into the PC buffer
     DGManager->ReadData(Buffer, &BufferSize);    
 
     // Determine the number of events in the buffer
-    DGManager->GetNumEvents(Buffer, BufferSize, &NumEvents);
 
-    // Continue to look for events if there are zero events in the buffer
-    if(NumEvents < 1)
-      continue;
+    DGManager->GetNumEvents(Buffer, BufferSize, &NumEvents);
 
     // For each event in the PC memory buffer...
     for(uint32_t evt=0; evt<NumEvents; evt++){
@@ -3041,18 +3106,18 @@ void ADAQAcquisition::RunDGScope()
 
 	// Reset all channel baseline before each event
 	BaselineCalcResult[ch] = 0.;
-	
+
 	// For all of the samples in the acquisition window of length RecordLength...
 	for(uint32_t sample=0; sample<RecordLength; sample++){
-
-	  // I suspect that this line is *incredibly* wasteful; it
-	  // persists in the code for legacy reasons. It is probably
-	  // far better simply assign the EventWaveform::DataChannel
-	  // addresses to the ROOT tree for readout. I will attempt
-	  // this if I have time or if it becomes a critical
-	  // limitation on experiments. (ZSH 28 May 13)
+	  
+	  // Readout the pulse into the storage vector
 	  Voltage[ch][sample] = EventWaveform->DataChannel[ch][sample]; // [ADC]
-
+	  
+	  if(UseDataReduction && (sample % DataReductionFactor == 0)){
+	    const int Index = sample / DataReductionFactor;
+	    VoltageTmp[ch][Index] = EventWaveform->DataChannel[ch][sample]; // [ADC]
+	  }
+	  
 	  // Do not perform the following for ultrahigh rate readout
 	  if(!UltraHighRate){
 
@@ -3166,19 +3231,16 @@ void ADAQAcquisition::RunDGScope()
 	    /// the waveform TTree The branch holds the address of the
 	    // vector that contains the waveform as a function of
 	    // record length and the RecordLength of each waveform
-	    WaveformTree->Branch(WaveformTreeBranchName.c_str(), 
-				 &Voltage[channel],
-				 RecordLength,
-				 0);
+	    
+	    if(UseDataReduction)
+	      WaveformTree->Branch(WaveformTreeBranchName.c_str(), 
+				   &VoltageTmp[channel]);
+	    else
+	      WaveformTree->Branch(WaveformTreeBranchName.c_str(), 
+				   &Voltage[channel]);
 	  }
 	  BranchWaveformTree = false;
 	}
-	
-	// Store the digitized waveform in the Root TTree object
-	// provided that the Waveform tree exists and that data should
-	// be dumped into the tree indicated by the TGCheckButton
-	//if(WaveformTree and DGScopeDataStorageEnable_CB->IsDown())
-	//WaveformTree->Fill();
 	
 	// Plot the digitized waveforms in 'oscilloscope' mode
 	if(PlotWaveform){
@@ -3338,7 +3400,7 @@ void ADAQAcquisition::RunDGScope()
 	
 	// Do not plot anything. This mode is most useful to
 	// maximizing the data throughput rate.
-	else{// if(PlotBlank){
+	else{
 	}
       }
       
@@ -3359,8 +3421,10 @@ void ADAQAcquisition::RunDGScope()
 	  continue;
 	
 	// Fill the TTree
+	//clock_gettime(CLOCK_REALTIME, &preA);
 	WaveformTree->Fill();
-
+	//clock_gettime(CLOCK_REALTIME, &postA);
+	
 	// Reset the bool used to determine if the LLD/ULD window
 	// should be used as the "trigger" for writing waveforms
 	DiscrOKForOutput = false;
@@ -3372,6 +3436,19 @@ void ADAQAcquisition::RunDGScope()
       
       DGManager->FreeEvent(&EventWaveform);
     }
+
+    /*
+    long elapsedA_sec = preA.tv_sec - postA.tv_sec;
+    long elapsedA_nsec = 0;
+    if(postA.tv_nsec > preA.tv_nsec)
+      elapsedA_nsec = postA.tv_nsec - preA.tv_nsec;
+    else
+      elapsedA_nsec = (1e9 + postA.tv_nsec) - preA.tv_nsec;
+    
+    cout << std::dec 
+	 << "Elapsed time: " << elapsedA_sec << "s \t " << elapsedA_nsec << "ns" 
+	 << endl;
+    */
   } // End DGScope acquisition 'while' loop
   
   // Once the acquisition session has concluded, free the memory that
@@ -3526,7 +3603,7 @@ void ADAQAcquisition::StopAcquisitionSafely()
   if(AcquisitionTimerEnabled){
     // Reset the attributes of the timer start text button
     DGScopeAcquisitionTimerStart_TB->SetBackgroundColor(ColorManager->Number2Pixel(18));
-    DGScopeAcquisitionTimerStart_TB->SetText("Start acquisition timer");
+    DGScopeAcquisitionTimerStart_TB->SetText("Start timer");
     
     // Set the acquisition enabled boolean to false
     AcquisitionTimerEnabled = false;
@@ -3554,7 +3631,7 @@ void ADAQAcquisition::StopAcquisitionSafely()
 // artificial waveform has a quick rise time and longer decay tail,
 // which are randomly varied to mimick data acquisition.
 void ADAQAcquisition::GenerateArtificialWaveform(int RecordLength, vector<int> &Voltage, 
-						    double *Voltage_graph, double VerticalPosition)
+						 double *Voltage_graph, double VerticalPosition)
 {
   // Exponential time constants with small random variations
   const double t1 = 20. - (RNG->Rndm()*10);
@@ -3617,7 +3694,7 @@ int main(int argc, char **argv)
   
   // Run the standalone application
   TheApplication->Run();
-  
+    
   // Clean up memory upon completion
   delete MainFrame;
   

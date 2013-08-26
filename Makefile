@@ -36,7 +36,7 @@ LDFLAGS+=-L$(ADAQHOME)/lib/$(HOSTTYPE) -lADAQ
 # Specify the location of the CAEN libraries (architecture-dependent)
 # for linking the final when building the final binary and the
 # location of the CAEN header files
-LDFLAGS+=-L$(ADAQHOME)/lib/$(HOSTTYPE) -lCAENVME -lCAENComm -lCAENDigitizer -lncurses -lc -lm
+LDFLAGS+=-L$(ADAQHOME)/lib/$(HOSTTYPE) -lCAENVME -lCAENComm -lCAENDigitizer -lncurses -lc -lm -lrt
 
 # Specify the location of the CAEN header files
 CXXFLAGS+=-I$(ADAQHOME)/lib/include

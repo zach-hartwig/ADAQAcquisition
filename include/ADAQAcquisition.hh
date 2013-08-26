@@ -213,12 +213,14 @@ private:
 
   ADAQNumberEntryWithLabel *DGScopeAcquisitionTime_NEL;  
   ADAQNumberEntryFieldWithLabel *DGScopeAcquisitionTimer_NEFL;
-  TGTextButton *DGScopeAcquisitionTimerStart_TB;
-  
+  TGTextButton *DGScopeAcquisitionTimerStart_TB, *DGScopeAcquisitionTimerAbort_TB;
+    
   ADAQNumberEntryWithLabel *DGScopeMaxEventsBeforeTransfer_NEL;
 
   TGTextButton *DGScopeCheckBufferStatus_TB;
   TGTextEntry *DGScopeBufferStatus_TE;
+  TGCheckButton *DGScopeUseDataReduction_CB;
+  ADAQNumberEntryWithLabel *DGScopeDataReductionFactor_NEL;
 
   ADAQComboBoxWithLabel *DGScopeTriggerMode_CBL;
 

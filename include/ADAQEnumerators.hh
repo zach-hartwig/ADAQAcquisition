@@ -83,6 +83,7 @@ enum{
   DGScopeCh7BaselineCalcMax_NEL_ID,
 
   DGScopeAcquisitionTimerStart_TB_ID,
+  DGScopeAcquisitionTimerAbort_TB_ID,
   DGScopeSpectrumChannel_CBL_ID,
   DGScopeSpectrumAnalysisHeight_RB_ID,
   DGScopeSpectrumAnalysisArea_RB_ID,
