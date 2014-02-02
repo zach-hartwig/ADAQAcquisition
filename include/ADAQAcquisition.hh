@@ -32,7 +32,7 @@
 #include <string>
 using namespace std;
 
-#include "ADAQRootGUIClasses.hh"
+#include "ADAQRootClasses.hh"
 #include "ADAQAcquisitionTypes.hh"
 class ADAQHighVoltage;
 class ADAQDigitizer;

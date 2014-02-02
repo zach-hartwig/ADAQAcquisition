@@ -1,6 +1,6 @@
 #**********************************#
 #  name: Makefile                  #
-#  date: 22 APR 12                 #
+#  date: 02 Feb 14                 #
 #  auth: Zach Hartwig              #
 #  desc: see the end of this file  #
 #**********************************#
@@ -29,8 +29,7 @@ CXXFLAGS+=-I$(INCLDIR)
 # Specify the location of the source files (located in the src/ directory)
 SRCDIR=$(PWD)/src
 
-# Specify the location of the ADAQ library for control of the V1720 digitizer and
-# V6534 high voltage boards
+# Specify the location of the ADAQ library 
 LDFLAGS+=-L$(ADAQHOME)/lib/$(HOSTTYPE) -lADAQ 
 
 # Specify the location of the CAEN libraries (architecture-dependent)
@@ -38,12 +37,11 @@ LDFLAGS+=-L$(ADAQHOME)/lib/$(HOSTTYPE) -lADAQ
 # location of the CAEN header files
 LDFLAGS+=-L$(ADAQHOME)/lib/$(HOSTTYPE) -lCAENVME -lCAENComm -lCAENDigitizer -lncurses -lc -lm -lrt
 
-# Specify the location of the CAEN header files
-CXXFLAGS+=-I$(ADAQHOME)/lib/include
+# Specify the location of the ADAQ and CAEN header files
+CXXFLAGS+=-I$(ADAQHOME)/include
 
 # Specify the location of the Boost libraries (for compilation on the
-# C-Mod workstations)
-CXXFLAGS+=-I$(BOOST_ROOT)
+# CXXFLAGS+=-I$(BOOST_ROOT)
 
 
 #**** RULES ****#
@@ -66,7 +64,7 @@ $(OBJDIR)/ADAQAcquisitionDict.o : $(OBJDIR)/ADAQAcquisitionDict.cc
 # Generate the necessary ROOT dictionaries
 $(OBJDIR)/ADAQAcquisitionDict.cc : $(INCLDIR)/ADAQAcquisition.hh $(INCLDIR)/RootLinkDef.hh 
 	@echo -e "\nGenerating a ROOT dictionary from $@ ..."
-	@rootcint -f $@ -c $^
+	@rootcint -f $@ -c -I$(ADAQHOME)/include $^
 
 # Clean the directory of all build files and binaries
 .PHONY: 
