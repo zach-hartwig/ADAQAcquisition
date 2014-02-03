@@ -45,14 +45,15 @@ echo -e "\nChecking out tagged version from the Git repository ..."
 git co $VERSION -b $VERSION >& /dev/null
 
 echo -e "\nBuilding the ADAQAcquisition binaries ..."
-make clean #>& /dev/null
-make -j2 #>& /dev/null
+make clean >& /dev/null
+make -j2 >& /dev/null
 
 echo -e "\nCopying the binaries to $INSTALLDIR ..."
 sudo cp bin/* $INSTALLDIR #>& /dev/null
 
 echo -e "\nRemoving the temporary tag branch ..."
-git br -d $VERSION #>& /dev/null
+git co master
+git br -d $VERSION >& /dev/null
 
 echo -e "\n************************************************"
 echo -e   "**   ADAQAcquisition has been installed in:   **"
