@@ -32,7 +32,9 @@ if [ "$1" ==  'usr' ]; then
 
 elif [ "$1" == 'dev' ]; then
     export ADAQUSER=developer
-    export PATH=$PWD/../bin:$PATH
+
+    SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )" 
+    export PATH=${SCRIPTDIR///scripts/}/bin:$PATH
     export LD_LIBRARY_PATH=$ADAQHOME/lib/$HOSTTYPE:$LD_LIBRARY_PATH
     export PYTHONPATH=$ADAQHOME/lib/$HOSTTYPE:$PYTHONPATH
 
