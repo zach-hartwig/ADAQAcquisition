@@ -25,11 +25,13 @@ using namespace boost::assign;
 #include "CAENDigitizer.h"
 
 // ADAQ 
-#include "ADAQAcquisition.hh"
 #include "ADAQRootClasses.hh"
 #include "ADAQHighVoltage.hh"
 #include "ADAQDigitizer.hh"
+
+#include "ADAQAcquisition.hh"
 #include "ADAQEnumerators.hh"
+#include "Version.hh"
 
 
 ADAQAcquisition::ADAQAcquisition(int W, int H)
@@ -180,7 +182,14 @@ ADAQAcquisition::ADAQAcquisition(int W, int H)
   /////////////////////////////////////////////////
   // Init. and map the GUI windows, set defaults //
   /////////////////////////////////////////////////
-  SetWindowName("AGNOSTIC Data Acquisition Command Center");
+
+  string TitleString;
+  if(VersionString == "Development")
+    TitleString = "AIMS Data Acquisition (Development version)               Fear is the mind-killer.";
+  else
+    TitleString = "AIMS Data Acquisition (Production version " + VersionString + ")               Fear is the mind-killer.";
+
+  SetWindowName(TitleString.c_str());
   Resize(DisplayWidth, DisplayHeight);
   MapSubwindows();
   MapWindow();

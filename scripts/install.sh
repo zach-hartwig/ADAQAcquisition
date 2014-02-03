@@ -44,15 +44,29 @@ cd $TOPDIR
 echo -e "\nChecking out tagged version from the Git repository ..."
 git co $VERSION -b $VERSION >& /dev/null
 
+# Overwrite the include/AAVersion.hh header such that the correct
+# production version number is accessible to the binary build
+VERSION_ID=${VERSION/v/}
+cat > include/Version.hh << EOL
+#ifndef __Version_hh__
+#define __Version_hh__ 1
+
+const string VersionString = "$VERSION_ID";
+
+#endif 
+EOL
+
+
 echo -e "\nBuilding the ADAQAcquisition binaries ..."
 make clean >& /dev/null
 make -j2 >& /dev/null
 
 echo -e "\nCopying the binaries to $INSTALLDIR ..."
-sudo cp bin/* $INSTALLDIR #>& /dev/null
+sudo cp bin/* $INSTALLDIR >& /dev/null
 
 echo -e "\nRemoving the temporary tag branch ..."
-git co master
+git stash >& /dev/null
+git co master >& /dev/null
 git br -d $VERSION >& /dev/null
 
 echo -e "\n************************************************"
