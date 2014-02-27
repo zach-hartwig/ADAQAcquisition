@@ -87,6 +87,10 @@ private:
   // General use variables //
   ///////////////////////////
 
+  enum{V1718, V1720, V6534};
+
+  const int NumBoards;
+
   // Dimensions for interface window
   const int DisplayWidth, DisplayHeight;
 

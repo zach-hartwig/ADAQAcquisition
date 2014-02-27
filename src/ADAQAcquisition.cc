@@ -37,7 +37,7 @@ using namespace boost::assign;
 
 ADAQAcquisition::ADAQAcquisition(int W, int H)
   : TGMainFrame(gClient->GetRoot()),
-    DisplayWidth(W), DisplayHeight(H), 
+    NumBoards(3), DisplayWidth(W), DisplayHeight(H), 
     V6534Enable(true), V6534BoardAddress(0x42420000),
     V1720Enable(true), V1720BoardAddress(0x00420000),
     VMEConnectionEstablished(false),
@@ -300,13 +300,25 @@ void ADAQAcquisition::FillConnectionFrame()
   TGGroupFrame *ModuleSettings_GF = new TGGroupFrame(ConnectionFrame, "VME Module Settings", kHorizontalFrame);
   ModuleSettings_GF->SetTitlePos(TGGroupFrame::kCenter);
 
-  string AddressTitle[2] = {"V1720 base address", "V6534 base address"};
-  int BoardEnableID[2] = {V1720BoardEnable_TB_ID, V6534BoardEnable_TB_ID};
-  int BoardAddressID[2] = {V1720BoardAddress_ID, V6534BoardAddress_ID};
-  int BoardAddress[2] = {V1720BoardAddress, V6534BoardAddress};
+  vector<string> AddressTitle;
+  AddressTitle += "", "V1720 base address", "V6534 base address";
 
-  for(int board=0; board<2; board++){
+  vector<int> BoardEnableID, BoardAddressID, BoardAddress;
+  BoardEnableID += (int)0, (int)V1720BoardEnable_TB_ID, (int)V6534BoardEnable_TB_ID;
+  BoardAddressID += (int)0, (int)V1720BoardAddress_ID, (int)V6534BoardAddress_ID;
+  BoardAddress += (int)0, (int)V1720BoardAddress, (int)V6534BoardAddress;
+
+  for(int board=0; board<3; board++){
     
+    // The V1718 board has no address/enable functionality. Insert a
+    // placeholder since the standard for vectors holding widgets for
+    // each board is to have three in order
+    if(board == 0){
+      BoardAddress_NEF.push_back(0);
+      BoardEnable_TB.push_back(0);
+      continue;
+    }
+
     TGVerticalFrame *BoardAddress_VF = new TGVerticalFrame(ModuleSettings_GF);
     BoardAddress_VF->AddFrame(new TGLabel(BoardAddress_VF, AddressTitle[board].c_str()), new TGLayoutHints(kLHintsCenterX, 5,5,5,0));
     
@@ -1337,6 +1349,13 @@ void ADAQAcquisition::HandleConnectionButtons()
   TGTextButton *ActiveTextButton = (TGTextButton *) gTQSender;
   int ActiveButtonID = ActiveTextButton->WidgetId();
 
+  enum{V1718, V1720, V6534};
+
+  // Temporarily redirect the std::cout messages to a local buffer
+  streambuf* StandardBuffer = cout.rdbuf();
+  ostringstream NewBuffer;
+  cout.rdbuf( NewBuffer.rdbuf() );
+
   switch(ActiveButtonID){
 
     // Connect ADAQAcquisition with VME boards
@@ -1345,37 +1364,37 @@ void ADAQAcquisition::HandleConnectionButtons()
     // If no connection is presently established...
     if(!VMEConnectionEstablished){
 
-      // ... check to see if the DgManager exists, indicating that the
-      // V1720 board is available for use. If found, get the physical
-      // address of V1720 board and use the HVManager to initialize it
-      int V1720LinkOpen = -1;
+      
+      int V1720LinkOpen = -42;
       if(V1720Enable){
-	V1720BoardAddress = V1720BoardAddress_NEF->GetHexNumber();
+	V1720BoardAddress = BoardAddress_NEF[V1720]->GetHexNumber();
 	V1720LinkOpen = DGManager->OpenLink(V1720BoardAddress);
 	DGManager->Initialize();
       }
-      
-      // ... check to see if the HVManager exists, indicating that the
-      // V6534 board is available for use. If found, get the physical
-      // address of V6534 board and use the HVManager to initialize it
-      int V6534LinkOpen = -1;
-      if(V6534Enable){
-	V6534BoardAddress = V6534BoardAddress_NEF->GetHexNumber();
-	V6534LinkOpen = HVManager->OpenLink(V6534BoardAddress);
-	HVManager->SetToSafeState();
-      }
-      
-      // If either (or both) of the HV and DG managers exist then
-      // attempt to make the connection, changing the button text and
-      // color. 
 
-      // ZSH: This needs to be done much better, checking for an
-      // established connection before setting button attributes. I
-      // plan on getting to this but...well...other shit to do...
+      int V6534LinkOpen = -42;
+      if(V6534Enable){
+	V6534BoardAddress = BoardAddress_NEF[V6534]->GetHexNumber();
+	V6534LinkOpen = HVManager->OpenLink(V6534BoardAddress);
+
+	if(V6534LinkOpen == 0)
+	  HVManager->SetToSafeState();
+      }
+
       if(V6534LinkOpen==0 or V1720LinkOpen==0){
 	V1718Connect_TB->SetBackgroundColor(ColorManager->Number2Pixel(8));
 	V1718Connect_TB->SetText("Connected: click to disconnect");
 	VMEConnectionEstablished = true;
+
+	// Convert the new "std::cout" buffer into a TGText
+	string InputString = NewBuffer.str();
+	TGText *InputText = new TGText;
+	InputText->LoadBuffer(InputString.c_str());
+
+	// Update the connection TGTextView with the status messages
+	ConnectionOutput_TV->AddText(InputText);
+	ConnectionOutput_TV->ShowBottom();
+	ConnectionOutput_TV->Update();
       }
       else
 	V1718Connect_TB->SetBackgroundColor(ColorManager->Number2Pixel(2));
@@ -1393,20 +1412,30 @@ void ADAQAcquisition::HandleConnectionButtons()
       V1718Connect_TB->SetBackgroundColor(ColorManager->Number2Pixel(2));
       V1718Connect_TB->SetText("Disconnected: click to connect");
       VMEConnectionEstablished = false;
+
+      // Convert the new "std::cout" buffer into a TGText
+      string InputString = NewBuffer.str();
+      TGText *InputText = new TGText;
+      InputText->LoadBuffer(InputString.c_str());
+      
+      // Update the connection TGTextView with the status messages
+      ConnectionOutput_TV->AddText(InputText);
+      ConnectionOutput_TV->ShowBottom();
+      ConnectionOutput_TV->Update();
     }
     break;
 
     // Set the V6534Enable boolean that controls whether or not the
     // V6534 high voltage board should be presently used
   case V6534BoardEnable_TB_ID:
-    if(V6534BoardEnable_TB->GetString() == "Board enabled"){
-      V6534BoardEnable_TB->SetText("Board disabled");
-      V6534BoardEnable_TB->SetBackgroundColor(ColorManager->Number2Pixel(2));
+    if(BoardEnable_TB[V6534]->GetString() == "Board enabled"){
+      BoardEnable_TB[V6534]->SetText("Board disabled");
+      BoardEnable_TB[V6534]->SetBackgroundColor(ColorManager->Number2Pixel(2));
       V6534Enable = false;
     }
-    else if(V6534BoardEnable_TB->GetString() == "Board disabled"){
-      V6534BoardEnable_TB->SetText("Board enabled");
-      V6534BoardEnable_TB->SetBackgroundColor(ColorManager->Number2Pixel(8));
+    else if(BoardEnable_TB[V6534]->GetString() == "Board disabled"){
+      BoardEnable_TB[V6534]->SetText("Board enabled");
+      BoardEnable_TB[V6534]->SetBackgroundColor(ColorManager->Number2Pixel(8));
       V6534Enable = true;
     }
     break;
@@ -1414,18 +1443,21 @@ void ADAQAcquisition::HandleConnectionButtons()
     // Set the V1720Enable boolean that controls whether or not the
     // V1720 high voltage board should be presently used
   case V1720BoardEnable_TB_ID:
-    if(V1720BoardEnable_TB->GetString() == "Board enabled"){
-      V1720BoardEnable_TB->SetText("Board disabled");
-      V1720BoardEnable_TB->SetBackgroundColor(ColorManager->Number2Pixel(2));
+    if(BoardEnable_TB[V1720]->GetString() == "Board enabled"){
+      BoardEnable_TB[V1720]->SetText("Board disabled");
+      BoardEnable_TB[V1720]->SetBackgroundColor(ColorManager->Number2Pixel(2));
       V1720Enable = false;
     }
-    else if(V1720BoardEnable_TB->GetString() == "Board disabled"){
-      V1720BoardEnable_TB->SetText("Board enabled");
-      V1720BoardEnable_TB->SetBackgroundColor(ColorManager->Number2Pixel(8));
+    else if(BoardEnable_TB[V1720]->GetString() == "Board disabled"){
+      BoardEnable_TB[V1720]->SetText("Board enabled");
+      BoardEnable_TB[V1720]->SetBackgroundColor(ColorManager->Number2Pixel(8));
       V1720Enable = true;
     }
     break;
   }
+
+  // Redirect std::cout back to the normal terminal output
+  cout.rdbuf(StandardBuffer);
 }
 
 void ADAQAcquisition::HandleRegisterButtons()
@@ -1441,12 +1473,12 @@ void ADAQAcquisition::HandleRegisterButtons()
   uint16_t data16 = 0;
 
   // Create two enums for local parsing of the actions
-  enum{V1718, V1720, V6534};
   enum{READ,WRITE};
 
   // Use a case statement to two select the action and the board upon
   // which the register read/write will take place
-  int Action, Board;
+  int Action = 0;
+  int Board = 0;
   switch(ActiveButtonID){
 
   case V1718Read_ID:
