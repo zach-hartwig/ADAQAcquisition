@@ -7,7 +7,16 @@ enum{
 
   // Widget IDs for the connection frame
   V1718Connect_TB_ID,
-  
+
+  V1718BoardEnable_TB_ID,
+  V1718BoardAddress_ID,
+  V1718ReadAddress_ID,
+  V1718ReadValue_ID,
+  V1718Read_ID,
+  V1718WriteAddress_ID,
+  V1718WriteValue_ID,
+  V1718Write_ID,
+    
   V6534BoardEnable_TB_ID,
   V6534BoardAddress_ID,
   V6534ReadAddress_ID,

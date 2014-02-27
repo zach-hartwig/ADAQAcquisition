@@ -15,6 +15,7 @@
 #include <string.h>
 #include <assert.h>
 #include <cmath>
+#include <bitset>
 using namespace std;
 
 // Boost
@@ -36,7 +37,7 @@ using namespace boost::assign;
 
 ADAQAcquisition::ADAQAcquisition(int W, int H)
   : TGMainFrame(gClient->GetRoot()),
-    DisplayWidth(W), DisplayHeight(H),
+    DisplayWidth(W), DisplayHeight(H), 
     V6534Enable(true), V6534BoardAddress(0x42420000),
     V1720Enable(true), V1720BoardAddress(0x00420000),
     VMEConnectionEstablished(false),
@@ -175,6 +176,8 @@ ADAQAcquisition::ADAQAcquisition(int W, int H)
   // Fill each of the top-level frames //
   ///////////////////////////////////////
   FillConnectionFrame();
+  FillRegisterFrame();
+  FillPulserFrame();
   FillVoltageFrame();
   FillScopeFrame();
 
@@ -230,42 +233,33 @@ void ADAQAcquisition::CreateTopLevelFrames()
 
   TopLevelTabs = new TGTab(TabFrame, 800, 700);
 
-  ConnectionTab = TopLevelTabs->AddTab("VME Connection");
+  ConnectionTab = TopLevelTabs->AddTab(" VME Connection ");
   ConnectionFrame = new TGCompositeFrame(ConnectionTab, 60, 20, kVerticalFrame);
   ConnectionTab->AddFrame(ConnectionFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 5,5,5,5));
 
-  VoltageTab = TopLevelTabs->AddTab("High Voltage");
+  RegisterTab = TopLevelTabs->AddTab(" Register R/W ");
+  RegisterFrame = new TGCompositeFrame(RegisterTab, 200, 20, kVerticalFrame);
+  RegisterTab->AddFrame(RegisterFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 5,5,5,5));
+
+  PulserTab = TopLevelTabs->AddTab(" Pulsers ");
+  PulserFrame = new TGCompositeFrame(PulserTab, 60, 20, kVerticalFrame);
+  PulserTab->AddFrame(PulserFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 5,5,5,5));
+
+  VoltageTab = TopLevelTabs->AddTab(" High Voltage ");
   VoltageFrame = new TGCompositeFrame(VoltageTab, 60, 20, kHorizontalFrame);
   VoltageTab->AddFrame(VoltageFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 5,5,5,5));
 
-  ScopeTab = TopLevelTabs->AddTab("Oscilloscope");
+  ScopeTab = TopLevelTabs->AddTab(" Acquisition ");
   ScopeFrame = new TGCompositeFrame(ScopeTab, 60, 20, kHorizontalFrame);
   ScopeTab->AddFrame(ScopeFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 5,5,5,5));
 
   TabFrame->AddFrame(TopLevelTabs, new TGLayoutHints(kLHintsTop, 5,5,5,5));
 
 
-  ////////////////
-  // Quit frame //
-  ////////////////
-  /*
-  QuitFrame = new TGHorizontalFrame(TopFrame);
-
-  QuitFrame->SetBackgroundColor(ColorManager->Number2Pixel(16));
-
-  QuitButton_TB = new TGTextButton(QuitFrame,"Exit");
-  QuitButton_TB->Connect("Clicked()","ADAQAcquisition",this,"HandleDisconnectAndTerminate(bool)");
-  QuitButton_TB->Resize(150,40);
-  QuitButton_TB->ChangeOptions(QuitButton_TB->GetOptions() | kFixedSize);
-  
-  QuitFrame->AddFrame(QuitButton_TB, new TGLayoutHints(kLHintsTop | kLHintsRight, 5,5,5,5));
-  */
-
   ////////////////////////////////////////////
   // Add top level frames to the main frame //
   ////////////////////////////////////////////
   TopFrame->AddFrame(TabFrame, new TGLayoutHints(kLHintsTop, 5,5,5,5));
-  //TopFrame->AddFrame(QuitFrame, new TGLayoutHints(kLHintsTop | kLHintsRight, 5,5,5,5));
 
   AddFrame(TopFrame, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
 }
@@ -277,311 +271,233 @@ void ADAQAcquisition::CreateTopLevelFrames()
 // digitizer, V6534 high voltage, and V1718 USB-VME boards (planned).
 void ADAQAcquisition::FillConnectionFrame()
 {
-  TGGroupFrame *V1718_GF = new TGGroupFrame(ConnectionFrame,"V1718 USB/VME Module", kHorizontalFrame);
-  V1718_GF->SetTitlePos(TGGroupFrame::kCenter);
-  
+  /////////////////////////////
+  // The main connection bar //
+  /////////////////////////////
+
+  TGGroupFrame *Connection_GF = new TGGroupFrame(ConnectionFrame,"Initiate VME Connection", kVerticalFrame);
+  Connection_GF->SetTitlePos(TGGroupFrame::kCenter);
+
   // ROOT text button that controls connection of ADAQAcquisition to the VME boards
-  V1718_GF->AddFrame(V1718Connect_TB = new TGTextButton(V1718_GF, "Disconnected: click to connect", V1718Connect_TB_ID),
-		     new TGLayoutHints(kLHintsCenterX, 5,5,5,5));
+  Connection_GF->AddFrame(V1718Connect_TB = new TGTextButton(Connection_GF, "Disconnected: click to connect", V1718Connect_TB_ID),
+			    new TGLayoutHints(kLHintsExpandX, 5,5,25,5));
   V1718Connect_TB->Connect("Clicked()","ADAQAcquisition",this,"HandleConnectionButtons()");
   V1718Connect_TB->Resize(500,40);
   V1718Connect_TB->SetBackgroundColor(ColorManager->Number2Pixel(2));
   V1718Connect_TB->ChangeOptions(V1718Connect_TB->GetOptions() | kFixedSize);
 
+  Connection_GF->AddFrame(ConnectionOutput_TV = new TGTextView(Connection_GF, 700, 400, -42),
+			  new TGLayoutHints(kLHintsTop | kLHintsExpandX, 15,15,5,25));
+  ConnectionOutput_TV->SetBackground(ColorManager->Number2Pixel(18));
   
-  ////////////////////
-  // V6534 Controls //
-  ////////////////////
-  // Controls of the V6534 board include settings the VME base (or
-  // "board") address (match the address set on the potentiometers of
-  // the physical V6534 board) and reading/writing to V6534 registers
-  
-  TGGroupFrame *V6534_GF = new TGGroupFrame(ConnectionFrame,"V6534 High Voltage Module",kHorizontalFrame);
-  V6534_GF->SetTitlePos(TGGroupFrame::kCenter);
-
-  TGVerticalFrame *V6534BoardAddress_VF = new TGVerticalFrame(V6534_GF);
-  V6534BoardAddress_VF->AddFrame(new TGLabel(V6534BoardAddress_VF,"V6534 base address"),new TGLayoutHints(kLHintsCenterX, 5, 5, 5, 0));
-
-  TGHorizontalFrame *V6534BoardAddress_HF = new TGHorizontalFrame(V6534BoardAddress_VF);
-  V6534BoardAddress_HF->AddFrame(new TGLabel(V6534BoardAddress_HF,"0x"), new TGLayoutHints(kLHintsExpandY, 5, 0, 0, 5));
-
-  // ROOT number entry field for setting V6534 board address
-  V6534BoardAddress_HF->AddFrame(V6534BoardAddress_NEF = new TGNumberEntryField(V6534BoardAddress_HF, 
-										V6534BoardAddress_ID, 
-										0,
-										TGNumberFormat::kNESHex, 
-										TGNumberFormat::kNEAPositive),
-				 new TGLayoutHints(kLHintsExpandY, 5, 5, 0, 5));
-  V6534BoardAddress_NEF->SetHexNumber(V6534BoardAddress);
-  V6534BoardAddress_NEF->Resize(80,20);
-
-  V6534BoardAddress_VF->AddFrame(V6534BoardAddress_HF,new TGLayoutHints(kLHintsExpandY, 5, 5, 5, 5));
+  ConnectionFrame->AddFrame(Connection_GF, new TGLayoutHints(kLHintsTop | kLHintsCenterX, 5,5,5,5));
 
 
-  // ROOT text button to enable/disable the use of the V6534 board
-  V6534BoardAddress_VF->AddFrame(V6534BoardEnable_TB = new TGTextButton(V6534BoardAddress_VF, "Board enabled", V6534BoardEnable_TB_ID),
-				 new TGLayoutHints(kLHintsCenterX));
-  V6534BoardEnable_TB->Connect("Clicked()","ADAQAcquisition",this,"HandleConnectionButtons()");
-  V6534BoardEnable_TB->Resize(110,25);
-  V6534BoardEnable_TB->SetBackgroundColor(ColorManager->Number2Pixel(8));
-  V6534BoardEnable_TB->ChangeOptions(V6534BoardEnable_TB->GetOptions() | kFixedSize);
-  
-  
-  V6534_GF->AddFrame(V6534BoardAddress_VF, new TGLayoutHints(kLHintsTop | kLHintsLeft, 5,5,5,5));
+  //////////////////////////////////////
+  // The address/board-enable widgets //
+  //////////////////////////////////////
 
+  TGGroupFrame *ModuleSettings_GF = new TGGroupFrame(ConnectionFrame, "VME Module Settings", kHorizontalFrame);
+  ModuleSettings_GF->SetTitlePos(TGGroupFrame::kCenter);
 
-  TGGroupFrame *V6534ReadCycle_GF = new TGGroupFrame(V6534_GF, "V6534 Read Cycle", kVerticalFrame);
+  string AddressTitle[2] = {"V1720 base address", "V6534 base address"};
+  int BoardEnableID[2] = {V1720BoardEnable_TB_ID, V6534BoardEnable_TB_ID};
+  int BoardAddressID[2] = {V1720BoardAddress_ID, V6534BoardAddress_ID};
+  int BoardAddress[2] = {V1720BoardAddress, V6534BoardAddress};
+
+  for(int board=0; board<2; board++){
     
-  TGHorizontalFrame *V6534ReadCycleAddress_HF = new TGHorizontalFrame(V6534ReadCycle_GF);
-  TGLabel *V6534ReadCycle_L1 = new TGLabel(V6534ReadCycleAddress_HF,"Offset address  0x");
-  V6534ReadCycle_L1->Resize(130,20);
-  V6534ReadCycle_L1->SetTextJustify(kTextRight);
-  V6534ReadCycle_L1->ChangeOptions(V6534ReadCycle_L1->GetOptions() | kFixedSize);
-
-  V6534ReadCycleAddress_HF->AddFrame(V6534ReadCycle_L1,
-				     new TGLayoutHints(kLHintsLeft, 5, 0, 5, 5));
-
-  // ROOT number entry field for setting the V6534 register address to read from
-  V6534ReadCycleAddress_HF->AddFrame(V6534ReadAddress_NEF = new TGNumberEntryField(V6534ReadCycleAddress_HF, 
-										   V6534ReadAddress_ID, 
-										   0, 
-										   TGNumberFormat::kNESHex, 
-										   TGNumberFormat::kNEAPositive),
-				     new TGLayoutHints(kLHintsExpandX, 5, 5, 5, 5));
-  V6534ReadAddress_NEF->Resize(80,20);
-
-  TGHorizontalFrame *V6534ReadCycleValue_HF = new TGHorizontalFrame(V6534ReadCycle_GF);
-
-  TGLabel *V6534ReadCycle_L2 = new TGLabel(V6534ReadCycleValue_HF,"   Value  0x");
-  V6534ReadCycle_L2->Resize(130,20);
-  V6534ReadCycle_L2->SetTextJustify(kTextRight);
-  V6534ReadCycle_L2->ChangeOptions(V6534ReadCycle_L1->GetOptions() | kFixedSize);
+    TGVerticalFrame *BoardAddress_VF = new TGVerticalFrame(ModuleSettings_GF);
+    BoardAddress_VF->AddFrame(new TGLabel(BoardAddress_VF, AddressTitle[board].c_str()), new TGLayoutHints(kLHintsCenterX, 5,5,5,0));
     
-  V6534ReadCycleValue_HF->AddFrame(V6534ReadCycle_L2,
-				   new TGLayoutHints(kLHintsLeft, 5, 0, 5, 5));
-
-  // ROOT number entry field for displaying the value from the read register address
-  V6534ReadCycleValue_HF->AddFrame(V6534ReadValue_NEF = new TGNumberEntryField(V6534ReadCycleValue_HF, 
-									       V6534ReadValue_ID, 
-									       0, 
-									       TGNumberFormat::kNESHex, 
-									       TGNumberFormat::kNEAPositive),
-				   new TGLayoutHints(kLHintsExpandX, 5, 5, 5, 5));
-  V6534ReadValue_NEF->Resize(80,20);
-  V6534ReadValue_NEF->SetState(false);
-
-  V6534ReadCycle_GF->AddFrame(V6534ReadCycleAddress_HF, new TGLayoutHints(kLHintsExpandY, 5, 5, 5, 5));
-  V6534ReadCycle_GF->AddFrame(V6534ReadCycleValue_HF, new TGLayoutHints(kLHintsExpandY, 5, 5, 5, 5));
-  V6534ReadCycle_GF->AddFrame(V6534Read_TB = new TGTextButton(V6534ReadCycle_GF,"VME Read",V6534Read_ID),
-			      new TGLayoutHints(kLHintsExpandX, 5, 5, 5, 5));
-								   
-  V6534Read_TB->Connect("Clicked()","ADAQAcquisition",this,"HandleConnectionButtons()");
-  V6534Read_TB->Resize(150,40);
-  V6534Read_TB->ChangeOptions(V6534Read_TB->GetOptions() | kFixedSize);
-
-  V6534_GF->AddFrame(V6534ReadCycle_GF, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 5,5,5,5));
-
-
-  TGGroupFrame *V6534WriteCycle_GF = new TGGroupFrame(V6534_GF, "V6534 Write Cycle", kVerticalFrame);
-  
-  TGHorizontalFrame *V6534WriteCycleAddress_HF = new TGHorizontalFrame(V6534WriteCycle_GF);
-
-  TGLabel *V6534WriteCycle_L1 = new TGLabel(V6534WriteCycleAddress_HF,"Offset Address  0x");
-  V6534WriteCycle_L1->Resize(130,20);
-  V6534WriteCycle_L1->SetTextJustify(kTextRight);
-  V6534WriteCycle_L1->ChangeOptions(V6534WriteCycle_L1->GetOptions() | kFixedSize);
-
-  V6534WriteCycleAddress_HF->AddFrame(V6534WriteCycle_L1,
-				      new TGLayoutHints(kLHintsLeft, 5, 0, 5, 5));
-
-  // ROOT number entry field for setting the V6534 register address to write to
-  V6534WriteCycleAddress_HF->AddFrame(V6534WriteAddress_NEF = new TGNumberEntryField(V6534WriteCycleAddress_HF, 
-										     V6534WriteAddress_ID, 
-										     0, 
-										     TGNumberFormat::kNESHex, 
-										     TGNumberFormat::kNEAPositive),
-				      new TGLayoutHints(kLHintsExpandX, 5, 5, 5, 5));
-  V6534WriteAddress_NEF->Resize(80,20);
-  
-  TGHorizontalFrame *V6534WriteCycleValue_HF = new TGHorizontalFrame(V6534WriteCycle_GF);
-
-  TGLabel *V6534WriteCycle_L2 = new TGLabel(V6534WriteCycleValue_HF,"   Value  0x");
-  V6534WriteCycle_L2->Resize(130,20);
-  V6534WriteCycle_L2->SetTextJustify(kTextRight);
-  V6534WriteCycle_L2->ChangeOptions(V6534WriteCycle_L2->GetOptions() | kFixedSize);
-
-  V6534WriteCycleValue_HF->AddFrame(V6534WriteCycle_L2,
-				    new TGLayoutHints(kLHintsLeft, 5, 0, 5, 5));
-
-  // ROOT number entry field for setting the value that will be written to the set write register address
-  V6534WriteCycleValue_HF->AddFrame(V6534WriteValue_NEF = new TGNumberEntryField(V6534WriteCycleValue_HF, 
-										 V6534WriteValue_ID, 
-										 0, 
-										 TGNumberFormat::kNESHex, 
-										 TGNumberFormat::kNEAPositive),
-				    new TGLayoutHints(kLHintsExpandX, 5, 5, 5, 5));
-  V6534WriteValue_NEF->Resize(80,20);
-
-  V6534WriteCycle_GF->AddFrame(V6534WriteCycleAddress_HF, new TGLayoutHints(kLHintsExpandY, 5, 5, 5, 5));
-  V6534WriteCycle_GF->AddFrame(V6534WriteCycleValue_HF, new TGLayoutHints(kLHintsExpandY, 5, 5, 5, 5));
-  V6534WriteCycle_GF->AddFrame(V6534Write_TB = new TGTextButton(V6534WriteCycle_GF,"VME Write",V6534Write_ID),
-			       new TGLayoutHints(kLHintsExpandX, 5, 5, 5, 5));
-								   
-  V6534Write_TB->Connect("Clicked()","ADAQAcquisition",this,"HandleConnectionButtons()");
-  V6534Write_TB->Resize(150,40);
-  V6534Write_TB->ChangeOptions(V6534Write_TB->GetOptions() | kFixedSize);
-
-  V6534_GF->AddFrame(V6534WriteCycle_GF, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 5,5,5,5));
-
-
-  ////////////////////
-  // V1720 Controls //
-  ////////////////////
-  // Controls of the V1720 board include settings the VME base (or
-  // "board") address (match the address set on the potentiometers of
-  // the physical V1720 board) and reading/writing to V1720 registers
-
-  TGGroupFrame *V1720_GF = new TGGroupFrame(ConnectionFrame,"V1720 Digitizer Module",kHorizontalFrame);
-  V1720_GF->SetTitlePos(TGGroupFrame::kCenter);
-
-  TGVerticalFrame *V1720BoardAddress_VF = new TGVerticalFrame(V1720_GF);
-  V1720BoardAddress_VF->AddFrame(new TGLabel(V1720BoardAddress_VF,"V1720 base address"),new TGLayoutHints(kLHintsCenterX, 5, 5, 5, 0));
-
-  TGHorizontalFrame *V1720BoardAddress_HF = new TGHorizontalFrame(V1720BoardAddress_VF);
-  V1720BoardAddress_HF->AddFrame(new TGLabel(V1720BoardAddress_HF,"0x"), new TGLayoutHints(kLHintsExpandY, 5, 0, 0, 5));
-  V1720BoardAddress_HF->AddFrame(V1720BoardAddress_NEF = new TGNumberEntryField(V1720BoardAddress_HF, 
-										V1720BoardAddress_ID,
-										0,
-										TGNumberFormat::kNESHex,
-										TGNumberFormat::kNEAPositive),
-				 new TGLayoutHints(kLHintsExpandY, 5, 5, 0, 5));
-  V1720BoardAddress_NEF->SetHexNumber(V1720BoardAddress);
-  V1720BoardAddress_NEF->Resize(80,20);
-	
-  V1720BoardAddress_VF->AddFrame(V1720BoardAddress_HF,new TGLayoutHints(kLHintsExpandY, 5,5,5,5));
-  
-  // A ROOT check button to enable/disable the use of the V1720 board
-  V1720BoardAddress_VF->AddFrame(V1720BoardEnable_TB = new TGTextButton(V1720BoardAddress_VF, "Board enabled", V1720BoardEnable_TB_ID),
-				 new TGLayoutHints(kLHintsCenterX));
-  V1720BoardEnable_TB->Connect("Clicked()","ADAQAcquisition",this,"HandleConnectionButtons()");
-  V1720BoardEnable_TB->Resize(115,25);
-  V1720BoardEnable_TB->SetBackgroundColor(ColorManager->Number2Pixel(8));
-  V1720BoardEnable_TB->ChangeOptions(V1720BoardEnable_TB->GetOptions() | kFixedSize);
-
+    TGHorizontalFrame *BoardAddress_HF = new TGHorizontalFrame(BoardAddress_VF);
+    BoardAddress_HF->AddFrame(new TGLabel(BoardAddress_HF,"0x"), new TGLayoutHints(kLHintsExpandY, 5,0,0,5));
     
-  V1720_GF->AddFrame(V1720BoardAddress_VF, new TGLayoutHints(kLHintsTop | kLHintsLeft, 5,5,5,5));
-			 
-  TGGroupFrame *V1720ReadCycle_GF = new TGGroupFrame(V1720_GF, "V1720 Read Cycle", kVerticalFrame);
+    BoardAddress_NEF.push_back(new TGNumberEntryField(BoardAddress_HF, BoardAddressID[board], 0,
+						      TGNumberFormat::kNESHex, 
+						      TGNumberFormat::kNEAPositive));
+    BoardAddress_NEF[board]->SetHexNumber(BoardAddress[board]);
+    BoardAddress_NEF[board]->Resize(80,20);
+    BoardAddress_HF->AddFrame(BoardAddress_NEF[board], new TGLayoutHints(kLHintsExpandY, 5, 5, 0, 5));
+
+    BoardAddress_VF->AddFrame(BoardAddress_HF,new TGLayoutHints(kLHintsExpandY, 5,5,5,5));  
+
+    BoardEnable_TB.push_back(new TGTextButton(BoardAddress_VF, "Board enabled", BoardEnableID[board]));
+    BoardEnable_TB[board]->Connect("Clicked()","ADAQAcquisition",this,"HandleConnectionButtons()");
+    BoardEnable_TB[board]->Resize(110,25);
+    BoardEnable_TB[board]->SetBackgroundColor(ColorManager->Number2Pixel(8));
+    BoardEnable_TB[board]->ChangeOptions(BoardEnable_TB[board]->GetOptions() | kFixedSize);
+    BoardAddress_VF->AddFrame(BoardEnable_TB[board], new TGLayoutHints(kLHintsCenterX));
+
+    int borderLeft = 30;
+    int borderRight = 30;
+    if(board == 1){
+      borderLeft = 30;
+      borderRight = 30;
+    }
+    ModuleSettings_GF->AddFrame(BoardAddress_VF, new TGLayoutHints(kLHintsTop | kLHintsCenterX, borderLeft,borderRight,5,5));
+  }
+
+  ConnectionFrame->AddFrame(ModuleSettings_GF, new TGLayoutHints(kLHintsTop | kLHintsCenterX, 5,5,5,5));
   
-  TGHorizontalFrame *V1720ReadCycleAddress_HF = new TGHorizontalFrame(V1720ReadCycle_GF);
-  TGLabel *V1720ReadCycle_L1 = new TGLabel(V1720ReadCycleAddress_HF,"Offset address  0x");
-  V1720ReadCycle_L1->Resize(130,20);
-  V1720ReadCycle_L1->SetTextJustify(kTextRight);
-  V1720ReadCycle_L1->ChangeOptions(V1720ReadCycle_L1->GetOptions() | kFixedSize);
-
-  V1720ReadCycleAddress_HF->AddFrame(V1720ReadCycle_L1,
-				     new TGLayoutHints(kLHintsLeft, 5, 0, 5, 5));
-
-  // ROOT number entry field for setting the V1720 register address to read from
-  V1720ReadCycleAddress_HF->AddFrame(V1720ReadAddress_NEF = new TGNumberEntryField(V1720ReadCycleAddress_HF, 
-										   V1720ReadAddress_ID, 
-										   0, 
-										   TGNumberFormat::kNESHex, 
-										   TGNumberFormat::kNEAPositive),
-				     new TGLayoutHints(kLHintsExpandX, 5, 5, 5, 5));
-  V1720ReadAddress_NEF->Resize(80,20);
-
-  TGHorizontalFrame *V1720ReadCycleValue_HF = new TGHorizontalFrame(V1720ReadCycle_GF);
-
-  TGLabel *V1720ReadCycle_L2 = new TGLabel(V1720ReadCycleValue_HF,"   Value  0x");
-  V1720ReadCycle_L2->Resize(130,20);
-  V1720ReadCycle_L2->SetTextJustify(kTextRight);
-  V1720ReadCycle_L2->ChangeOptions(V1720ReadCycle_L1->GetOptions() | kFixedSize);
-    
-  V1720ReadCycleValue_HF->AddFrame(V1720ReadCycle_L2,
-				   new TGLayoutHints(kLHintsLeft, 5, 0, 5, 5));
-  
-  // ROOT number entry widget for displaying the value from the read register address
-  V1720ReadCycleValue_HF->AddFrame(V1720ReadValue_NEF = new TGNumberEntryField(V1720ReadCycleValue_HF, 
-									       V1720ReadValue_ID, 
-									       0, 
-									       TGNumberFormat::kNESHex, 
-									       TGNumberFormat::kNEAPositive),
-				   new TGLayoutHints(kLHintsExpandX, 5, 5, 5, 5));
-  V1720ReadValue_NEF->Resize(80,20);
-  V1720ReadValue_NEF->SetState(false);
-
-  V1720ReadCycle_GF->AddFrame(V1720ReadCycleAddress_HF, new TGLayoutHints(kLHintsExpandY, 5, 5, 5, 5));
-  V1720ReadCycle_GF->AddFrame(V1720ReadCycleValue_HF, new TGLayoutHints(kLHintsExpandY, 5, 5, 5, 5));
-  V1720ReadCycle_GF->AddFrame(V1720Read_TB = new TGTextButton(V1720ReadCycle_GF,"VME Read",V1720Read_ID),
-			      new TGLayoutHints(kLHintsExpandX, 5, 5, 5, 5));
-								   
-  V1720Read_TB->Connect("Clicked()","ADAQAcquisition",this,"HandleConnectionButtons()");
-  V1720Read_TB->Resize(150,40);
-  V1720Read_TB->ChangeOptions(V1720Read_TB->GetOptions() | kFixedSize);
-
-  V1720_GF->AddFrame(V1720ReadCycle_GF, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 5,5,5,5));
-
-
-  TGGroupFrame *V1720WriteCycle_GF = new TGGroupFrame(V1720_GF, "V1720 Write Cycle", kVerticalFrame);
-  
-  TGHorizontalFrame *V1720WriteCycleAddress_HF = new TGHorizontalFrame(V1720WriteCycle_GF);
-
-  TGLabel *V1720WriteCycle_L1 = new TGLabel(V1720WriteCycleAddress_HF,"Offset Address  0x");
-  V1720WriteCycle_L1->Resize(130,20);
-  V1720WriteCycle_L1->SetTextJustify(kTextRight);
-  V1720WriteCycle_L1->ChangeOptions(V1720WriteCycle_L1->GetOptions() | kFixedSize);
-
-  V1720WriteCycleAddress_HF->AddFrame(V1720WriteCycle_L1,
-				      new TGLayoutHints(kLHintsLeft, 5, 0, 5, 5));
-
-  // ROOT number entry field for setting the V1720 register address to write to 
-  V1720WriteCycleAddress_HF->AddFrame(V1720WriteAddress_NEF = new TGNumberEntryField(V1720WriteCycleAddress_HF, 
-										     V1720WriteAddress_ID, 
-										     0, 
-										     TGNumberFormat::kNESHex, 
-										     TGNumberFormat::kNEAPositive),
-				     new TGLayoutHints(kLHintsExpandX, 5, 5, 5, 5));
-  V1720WriteAddress_NEF->Resize(80,20);
-
-  TGHorizontalFrame *V1720WriteCycleValue_HF = new TGHorizontalFrame(V1720WriteCycle_GF);
-
-  TGLabel *V1720WriteCycle_L2 = new TGLabel(V1720WriteCycleValue_HF,"   Value  0x");
-  V1720WriteCycle_L2->Resize(130,20);
-  V1720WriteCycle_L2->SetTextJustify(kTextRight);
-  V1720WriteCycle_L2->ChangeOptions(V1720WriteCycle_L2->GetOptions() | kFixedSize);
-
-  V1720WriteCycleValue_HF->AddFrame(V1720WriteCycle_L2,
-				    new TGLayoutHints(kLHintsLeft, 5, 0, 5, 5));
-
-  // ROOT number entry field for setting the value that will be written to the set register address
-  V1720WriteCycleValue_HF->AddFrame(V1720WriteValue_NEF = new TGNumberEntryField(V1720WriteCycleValue_HF, 
-										 V1720WriteValue_ID, 
-										 0, 
-										 TGNumberFormat::kNESHex, 
-										 TGNumberFormat::kNEAPositive),
-				    new TGLayoutHints(kLHintsExpandX, 5, 5, 5, 5));
-  V1720WriteValue_NEF->Resize(80,20);
-  
-  V1720WriteCycle_GF->AddFrame(V1720WriteCycleAddress_HF, new TGLayoutHints(kLHintsExpandY, 5, 5, 5, 5));
-  V1720WriteCycle_GF->AddFrame(V1720WriteCycleValue_HF, new TGLayoutHints(kLHintsExpandY, 5, 5, 5, 5));
-  V1720WriteCycle_GF->AddFrame(V1720Write_TB = new TGTextButton(V1720WriteCycle_GF,"VME Write",V1720Write_ID),
-			      new TGLayoutHints(kLHintsExpandX, 5, 5, 5, 5));
-								   
-  V1720Write_TB->Connect("Clicked()","ADAQAcquisition",this,"HandleConnectionButtons()");
-  V1720Write_TB->Resize(150,40);
-  V1720Write_TB->ChangeOptions(V1720Write_TB->GetOptions() | kFixedSize);
-
-  V1720_GF->AddFrame(V1720WriteCycle_GF, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 5,5,5,5));
-
-  /////////////////////////////////////////////////
-  // Add the group frames to the ConnectionFrame //
-  /////////////////////////////////////////////////
-
-  ConnectionFrame->AddFrame(V1718_GF, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 5,5,5,5));
-  ConnectionFrame->AddFrame(V6534_GF, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 5,5,5,5));
-  ConnectionFrame->AddFrame(V1720_GF, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 5,5,5,5));
 }
+
+
+void ADAQAcquisition::FillRegisterFrame()
+{
+  const int NumVMEBoards = 3;
+
+  string FrameTitle[NumVMEBoards] = {"V1718 VME/USB Module", "V1720 Digitizer Module", "V6534 High Voltage Module"};
+
+  int ReadAddressID[NumVMEBoards] = {V1718ReadAddress_ID, V1720ReadAddress_ID, V6534ReadAddress_ID};
+  int ReadValueID[NumVMEBoards] = {V1718ReadValue_ID, V1720ReadValue_ID, V6534ReadValue_ID};
+
+  int WriteAddressID[NumVMEBoards] = {V1718WriteAddress_ID, V1720WriteAddress_ID, V6534WriteAddress_ID};
+  int WriteValueID[NumVMEBoards] = {V1718WriteValue_ID, V1720WriteValue_ID, V6534WriteValue_ID};
+
+  int ReadID[NumVMEBoards] = {V1718Read_ID, V1720Read_ID, V6534Read_ID};
+  int WriteID[NumVMEBoards] = {V1718Write_ID, V1720Write_ID, V6534Write_ID};
+
+  const int RWButtonX = 250;
+  const int RWButtonY = 30;
+  const int RWFGColor = ColorManager->Number2Pixel(0);
+  const int RWBGColor = ColorManager->Number2Pixel(36);
+
+  for(int board=0; board<NumVMEBoards; board++){
+
+    ////////////////////////////////////////////////////
+    // Create the group frame to hold all the subwidgets
+    TGGroupFrame *RegisterRW_GF = new TGGroupFrame(RegisterFrame, FrameTitle[board].c_str(), kHorizontalFrame);
+    RegisterRW_GF->SetTitlePos(TGGroupFrame::kCenter);
+
+
+    /////////////////////////////////////////////////
+    // The register read/write and display widgets //
+    /////////////////////////////////////////////////
+
+    TGGroupFrame *ReadCycle_GF = new TGGroupFrame(RegisterRW_GF, "Read cycle", kVerticalFrame);
+    
+    TGHorizontalFrame *ReadCycleAddress_HF = new TGHorizontalFrame(ReadCycle_GF);
+    TGLabel *ReadCycle_L1 = new TGLabel(ReadCycleAddress_HF, "Offset address  0x");
+    ReadCycle_L1->Resize(130,20);
+    ReadCycle_L1->SetTextJustify(kTextRight);
+    ReadCycle_L1->ChangeOptions(ReadCycle_L1->GetOptions() | kFixedSize);
+    
+    ReadCycleAddress_HF->AddFrame(ReadCycle_L1, new TGLayoutHints(kLHintsLeft, 5,0,5,5));
+
+    // ROOT number entry field for setting the V6534 register address to read from
+    ReadAddress_NEF.push_back(new TGNumberEntryField(ReadCycleAddress_HF, ReadAddressID[board], 0, 
+						     TGNumberFormat::kNESHex,
+						     TGNumberFormat::kNEAPositive));
+    ReadAddress_NEF[board]->Resize(80,20);
+    ReadCycleAddress_HF->AddFrame(ReadAddress_NEF[board], new TGLayoutHints(kLHintsExpandX, 5,5,5,5));
+
+    // Create two outputs (hex and binary) for the register values
+
+    TGHorizontalFrame *ReadCycleValue_HF1 = new TGHorizontalFrame(ReadCycle_GF);
+    
+    TGLabel *ReadCycle_L2 = new TGLabel(ReadCycleValue_HF1,"   Value  0x");
+    ReadCycle_L2->Resize(130,20);
+    ReadCycle_L2->SetTextJustify(kTextRight);
+    ReadCycle_L2->ChangeOptions(ReadCycle_L1->GetOptions() | kFixedSize);
+    ReadCycleValue_HF1->AddFrame(ReadCycle_L2, new TGLayoutHints(kLHintsLeft, 5,0,5,0));
+    
+    // ROOT number entry field for displaying the value from the read register address
+    ReadValueHex_NEF.push_back(new TGNumberEntryField(ReadCycleValue_HF1, ReadValueID[board], 0, 
+						      TGNumberFormat::kNESHex,
+						      TGNumberFormat::kNEAPositive));
+    ReadValueHex_NEF[board]->Resize(80,20);
+    ReadValueHex_NEF[board]->SetState(false);
+    ReadCycleValue_HF1->AddFrame(ReadValueHex_NEF[board], new TGLayoutHints(kLHintsExpandX, 5,5,5,0));
+
+
+    TGHorizontalFrame *ReadCycleValue_HF2 = new TGHorizontalFrame(ReadCycle_GF);
+    
+    TGLabel *ReadCycle_L3 = new TGLabel(ReadCycleValue_HF2,"          0b");
+    ReadCycle_L3->Resize(130,20);
+    ReadCycle_L3->SetTextJustify(kTextRight);
+    ReadCycle_L3->ChangeOptions(ReadCycle_L1->GetOptions() | kFixedSize);
+    ReadCycleValue_HF2->AddFrame(ReadCycle_L3, new TGLayoutHints(kLHintsLeft, 5,0,0,5));
+    
+    // ROOT number entry field for displaying the value from the read register address
+    ReadValueBinary_TE.push_back(new TGTextEntry(ReadCycleValue_HF2, "0000 0000 0000 0000 0000 0000 0000 0000"));
+    ReadValueBinary_TE[board]->Resize(250,20);
+    ReadValueBinary_TE[board]->SetBackgroundColor(ColorManager->Number2Pixel(18));
+    ReadCycleValue_HF2->AddFrame(ReadValueBinary_TE[board], new TGLayoutHints(kLHintsLeft, 5,5,0,5));
+
+    ReadCycle_GF->AddFrame(ReadCycleAddress_HF, new TGLayoutHints(kLHintsExpandY, 5,5,5,5));
+    ReadCycle_GF->AddFrame(ReadCycleValue_HF1, new TGLayoutHints(kLHintsExpandY, 5,5,5,0));
+    ReadCycle_GF->AddFrame(ReadCycleValue_HF2, new TGLayoutHints(kLHintsExpandY, 5,5,0,5));
+
+    Read_TB.push_back(new TGTextButton(ReadCycle_GF, "VME Read", ReadID[board]));
+    Read_TB[board]->Connect("Clicked()","ADAQAcquisition",this,"HandleRegisterButtons()");
+    Read_TB[board]->Resize(RWButtonX, RWButtonY);
+    Read_TB[board]->SetForegroundColor(RWFGColor);
+    Read_TB[board]->SetBackgroundColor(RWBGColor);
+    Read_TB[board]->ChangeOptions(Read_TB[board]->GetOptions() | kFixedSize);
+    ReadCycle_GF->AddFrame(Read_TB[board], new TGLayoutHints(kLHintsCenterX, 5,5,5,5));
+    
+    // Add the read cycle group frame to the hierarchy
+    RegisterRW_GF->AddFrame(ReadCycle_GF, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 5,5,5,5));
+
+    TGGroupFrame *WriteCycle_GF = new TGGroupFrame(RegisterRW_GF, "Write cycle", kVerticalFrame);
+  
+    TGHorizontalFrame *WriteCycleAddress_HF = new TGHorizontalFrame(WriteCycle_GF);
+
+    TGLabel *WriteCycle_L1 = new TGLabel(WriteCycleAddress_HF, "Offset Address  0x");
+    WriteCycle_L1->Resize(130,20);
+    WriteCycle_L1->SetTextJustify(kTextRight);
+    WriteCycle_L1->ChangeOptions(WriteCycle_L1->GetOptions() | kFixedSize);
+    
+    WriteCycleAddress_HF->AddFrame(WriteCycle_L1, new TGLayoutHints(kLHintsLeft, 5,0,5,5));
+    
+    // ROOT number entry field for setting the V6534 register address to write to
+    WriteAddress_NEF.push_back(new TGNumberEntryField(WriteCycleAddress_HF, WriteAddressID[board], 0, 
+						      TGNumberFormat::kNESHex, 
+						      TGNumberFormat::kNEAPositive));
+    WriteAddress_NEF[board]->Resize(80,20);
+
+    WriteCycleAddress_HF->AddFrame(WriteAddress_NEF[board], new TGLayoutHints(kLHintsExpandX, 5,5,5,5));
+
+    TGHorizontalFrame *WriteCycleValue_HF = new TGHorizontalFrame(WriteCycle_GF);
+    
+    TGLabel *WriteCycle_L2 = new TGLabel(WriteCycleValue_HF,"   Value  0x");
+    WriteCycle_L2->Resize(130,20);
+    WriteCycle_L2->SetTextJustify(kTextRight);
+    WriteCycle_L2->ChangeOptions(WriteCycle_L2->GetOptions() | kFixedSize);
+
+    WriteCycleValue_HF->AddFrame(WriteCycle_L2, new TGLayoutHints(kLHintsLeft, 5,0,5,25));
+
+    // ROOT number entry field for setting the value that will be written to the set write register address
+    WriteValue_NEF.push_back(new TGNumberEntryField(WriteCycleValue_HF, WriteValueID[board], 0, 
+						    TGNumberFormat::kNESHex, 
+						    TGNumberFormat::kNEAPositive));
+    WriteValue_NEF[board]->Resize(80,20);
+
+    WriteCycleValue_HF->AddFrame(WriteValue_NEF[board], new TGLayoutHints(kLHintsExpandX, 5,5,5,5));
+
+    WriteCycle_GF->AddFrame(WriteCycleAddress_HF, new TGLayoutHints(kLHintsExpandY, 5,5,5,5));
+    WriteCycle_GF->AddFrame(WriteCycleValue_HF, new TGLayoutHints(kLHintsExpandY, 5,5,5,5));
+
+    Write_TB.push_back(new TGTextButton(WriteCycle_GF, "VME Write", WriteID[board]));
+    Write_TB[board]->Connect("Clicked()","ADAQAcquisition",this,"HandleRegisterButtons()");
+    Write_TB[board]->Resize(RWButtonX, RWButtonY);
+    Write_TB[board]->SetForegroundColor(RWFGColor);
+    Write_TB[board]->SetBackgroundColor(RWBGColor);
+    Write_TB[board]->ChangeOptions(Write_TB[board]->GetOptions() | kFixedSize);
+    WriteCycle_GF->AddFrame(Write_TB[board], new TGLayoutHints(kLHintsCenterX, 5,5,5,5));
+
+    // Add the write cycle group frame to the hierarchy
+    RegisterRW_GF->AddFrame(WriteCycle_GF, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 5,5,5,5));
+
+    // Add the top-level group frame to the hierarchy
+    RegisterFrame->AddFrame(RegisterRW_GF, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 5,5,5,40));
+  }
+}
+
+
+void ADAQAcquisition::FillPulserFrame()
+{}
 
 
 // The "VoltageFrame" holds ROOT widgets for complete control of the
@@ -1421,12 +1337,6 @@ void ADAQAcquisition::HandleConnectionButtons()
   TGTextButton *ActiveTextButton = (TGTextButton *) gTQSender;
   int ActiveButtonID = ActiveTextButton->WidgetId();
 
-  // 32-bit integers to hold register addresses and data; 16-bit
-  // integer to hold data obtained from the V6534 board
-  uint32_t addr32 = 0;
-  uint32_t data32 = 0;
-  uint16_t data16 = 0;
-
   switch(ActiveButtonID){
 
     // Connect ADAQAcquisition with VME boards
@@ -1515,40 +1425,102 @@ void ADAQAcquisition::HandleConnectionButtons()
       V1720Enable = true;
     }
     break;
+  }
+}
 
-    // Read the specified register on the V1720 board and update the
-    // ROOT number entry widget to display the register value
+void ADAQAcquisition::HandleRegisterButtons()
+{
+  // Get pointers and the widget ID for the active (ie, clicked) text button
+  TGTextButton *ActiveTextButton = (TGTextButton *) gTQSender;
+  int ActiveButtonID = ActiveTextButton->WidgetId();
+
+  // 32-bit integers to hold register addresses and data; 16-bit
+  // integer to hold data obtained from the V6534 board
+  uint32_t addr32 = 0;
+  uint32_t data32 = 0;
+  uint16_t data16 = 0;
+
+  // Create two enums for local parsing of the actions
+  enum{V1718, V1720, V6534};
+  enum{READ,WRITE};
+
+  // Use a case statement to two select the action and the board upon
+  // which the register read/write will take place
+  int Action, Board;
+  switch(ActiveButtonID){
+
+  case V1718Read_ID:
+    Action = READ;
+    Board = V1718;
+    break;
+
+  case V1718Write_ID:
+    Action = WRITE;
+    Board = V1718;
+    break;
+
   case V1720Read_ID:
-    addr32 = V1720ReadAddress_NEF->GetHexNumber();
-    if(V1720Enable) DGManager->GetRegisterValue(addr32, &data32);
-    V1720ReadValue_NEF->SetHexNumber(data32);
+    Action = READ;
+    Board = V1720;
+    break;
+
+  case V1720Write_ID:
+    Action = WRITE;
+    Board = V1720;
     break;
     
-    // Write the specified value to the specified register on the V1720 board
-  case V1720Write_ID:
-    addr32 = V1720WriteAddress_NEF->GetHexNumber();
-    data32 = V1720WriteValue_NEF->GetHexNumber();
-    if(V1720Enable) DGManager->SetRegisterValue(addr32, data32);
-    break;
-
-    // Read the specified register on the V6534 board and update the
-    // ROOT number entry widget to display the register value
   case V6534Read_ID:
-    addr32 = V6534ReadAddress_NEF->GetHexNumber();
-    if(V6534Enable) HVManager->GetRegisterValue(addr32,&data16);
-    V6534ReadValue_NEF->SetHexNumber(data16);
+    Action = READ;
+    Board = V6534;
     break;
 
-    // Write the specified value to the specified register on the V6534 board
   case V6534Write_ID:
-    addr32 = V6534WriteAddress_NEF->GetHexNumber();
-    data16 = V6534WriteValue_NEF->GetHexNumber();
-    if(V6534Enable) HVManager->SetRegisterValue(addr32,data16);
+    Action = WRITE;
+    Board = V6534;
     break;
+  }
 
-  default:
-    cout << "\nError in HandleConnectionButtons(): Unknown button ID!\n" << endl;
-    break;
+  ///////////////////////////////////////////////
+  // Perform a register read of the desired board
+  if(Action == READ){
+    addr32 = ReadAddress_NEF[Board]->GetHexNumber();
+
+    if(Board == 1718)
+      {}
+    else if(Board == V1720 and V1720Enable)
+      DGManager->GetRegisterValue(addr32, &data32);
+    else if(Board == V6534 and V6534Enable){
+      HVManager->GetRegisterValue(addr32, &data16);
+      data32 = data16;
+    }
+
+    // Update the hex widget with the register value
+    ReadValueHex_NEF[Board]->SetHexNumber(data32);
+
+    // Update the bianry widget with the register value inserting
+    // spaces every 4 characters for easier reading
+    bitset<32> Value (data32);
+    string ValueString = Value.to_string();
+    int offset = 0;
+    for(int i=0; i<32/4; i++){
+      ValueString.insert(i*4+offset, " ");
+      offset++;
+    }
+    ReadValueBinary_TE[Board]->SetText(ValueString.c_str());
+  }
+
+  ////////////////////////////////////////////////
+  // Perform a register write of the desired board
+  else if(Action == WRITE){
+    addr32 = WriteAddress_NEF[Board]->GetHexNumber();
+    data32 = WriteValue_NEF[Board]->GetHexNumber();
+
+    if(Board == V1718)
+      {}
+    if(Board == V1720 and V1720Enable) 
+      DGManager->SetRegisterValue(addr32, data32);
+    else if(Board == V6534 and V6534Enable)
+      HVManager->SetRegisterValue(addr32, data32);
   }
 }
 

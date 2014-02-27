@@ -26,6 +26,7 @@
 #include <TStyle.h>
 #include <TTree.h>
 #include <TRandom.h>
+#include <TGTextView.h>
 
 #include <vector>
 #include <map>
@@ -48,11 +49,14 @@ public:
   // Create/fill the ROOT widgets("signals")
   void CreateTopLevelFrames();
   void FillConnectionFrame();
+  void FillRegisterFrame();
+  void FillPulserFrame();
   void FillVoltageFrame();
   void FillScopeFrame();
 
   // Create handlers for widget actions ("slots")
   void HandleConnectionButtons();
+  void HandleRegisterButtons();
   void HandleVoltageButtons();
   void HandleScopeButtons();
   void HandleScopeNumberEntries();
@@ -163,11 +167,23 @@ private:
   // Tab frame
   TGTab *TopLevelTabs;
 
+
   ///////////////////////////////
   // VME connection frame widgets
   TGCompositeFrame *ConnectionTab, *ConnectionFrame;
-
   TGTextButton *V1718Connect_TB;
+
+  TGTextView *ConnectionOutput_TV;
+
+  /////////////////
+  // Register frame
+
+  vector<TGTextButton *> BoardEnable_TB;
+  vector<TGNumberEntryField *> BoardAddress_NEF, ReadAddress_NEF, ReadValueHex_NEF;
+  vector<TGTextEntry *> ReadValueBinary_TE;
+  vector<TGNumberEntryField *> WriteAddress_NEF, WriteValue_NEF;
+  vector<TGTextButton *> Read_TB, Write_TB;
+
 
   TGTextButton *V6534BoardEnable_TB;
   TGNumberEntryField *V1720BoardAddress_NEF, *V1720ReadAddress_NEF, *V1720ReadValue_NEF;
@@ -178,6 +194,13 @@ private:
   TGNumberEntryField *V6534BoardAddress_NEF, *V6534ReadAddress_NEF, *V6534ReadValue_NEF;
   TGNumberEntryField *V6534WriteAddress_NEF, *V6534WriteValue_NEF;
   TGTextButton *V6534Read_TB, *V6534Write_TB;
+
+
+  TGCompositeFrame *RegisterTab, *RegisterFrame;
+  
+  ///////////////
+  // Pulser frame 
+  TGCompositeFrame *PulserTab, *PulserFrame;
 
   /////////////////////////////
   // High voltage frame widgets
@@ -296,12 +319,6 @@ private:
 
   TGCheckButton *DebugModeEnable_CB;
   ADAQNumberEntryWithLabel *DebugModeWaveformGenerationPause_NEL;
-
-
-  /////////////////////
-  // Quit frame widgets 
-  TGHorizontalFrame *QuitFrame;
-  TGTextButton *QuitButton_TB;
 
   // Define the ADAQAcquisition class to ROOT 
   ClassDef(ADAQAcquisition,1);
