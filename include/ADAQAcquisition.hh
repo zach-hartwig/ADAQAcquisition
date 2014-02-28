@@ -37,6 +37,7 @@ using namespace std;
 #include "ADAQAcquisitionTypes.hh"
 class ADAQHighVoltage;
 class ADAQDigitizer;
+class ADAQBridge;
  
 
 class ADAQAcquisition : public TGMainFrame
@@ -87,9 +88,8 @@ private:
   // General use variables //
   ///////////////////////////
 
+  // IDs for each module
   enum{V1718, V1720, V6534};
-
-  const int NumBoards;
 
   // Dimensions for interface window
   const int DisplayWidth, DisplayHeight;
@@ -97,6 +97,7 @@ private:
   // Managers for the V6534 and V1720 VME boards
   ADAQHighVoltage *HVManager;
   ADAQDigitizer *DGManager;
+  ADAQBridge *BRManager;
 
   // Use booleans and VME addresses
   bool V6534Enable;

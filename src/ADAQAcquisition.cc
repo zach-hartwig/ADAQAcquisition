@@ -29,6 +29,7 @@ using namespace boost::assign;
 #include "ADAQRootClasses.hh"
 #include "ADAQHighVoltage.hh"
 #include "ADAQDigitizer.hh"
+#include "ADAQBridge.hh"
 
 #include "ADAQAcquisition.hh"
 #include "ADAQEnumerators.hh"
@@ -37,7 +38,7 @@ using namespace boost::assign;
 
 ADAQAcquisition::ADAQAcquisition(int W, int H)
   : TGMainFrame(gClient->GetRoot()),
-    NumBoards(3), DisplayWidth(W), DisplayHeight(H), 
+    DisplayWidth(W), DisplayHeight(H), 
     V6534Enable(true), V6534BoardAddress(0x42420000),
     V1720Enable(true), V1720BoardAddress(0x00420000),
     VMEConnectionEstablished(false),
@@ -65,6 +66,9 @@ ADAQAcquisition::ADAQAcquisition(int W, int H)
   
   DGManager = new ADAQDigitizer;
   DGManager->SetVerbose(true);
+
+  BRManager = new ADAQBridge;
+  BRManager->SetVerbose(true);
   
   /////////////////////////////
   // Initialize HV variables //
@@ -1364,7 +1368,6 @@ void ADAQAcquisition::HandleConnectionButtons()
     // If no connection is presently established...
     if(!VMEConnectionEstablished){
 
-      
       int V1720LinkOpen = -42;
       if(V1720Enable){
 	V1720BoardAddress = BoardAddress_NEF[V1720]->GetHexNumber();
