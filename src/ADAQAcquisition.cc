@@ -245,8 +245,8 @@ void ADAQAcquisition::CreateTopLevelFrames()
   RegisterFrame = new TGCompositeFrame(RegisterTab, 200, 20, kVerticalFrame);
   RegisterTab->AddFrame(RegisterFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 5,5,5,5));
 
-  PulserTab = TopLevelTabs->AddTab(" Pulsers ");
-  PulserFrame = new TGCompositeFrame(PulserTab, 60, 20, kVerticalFrame);
+  //PulserTab = TopLevelTabs->AddTab(" Pulsers ");
+  //PulserFrame = new TGCompositeFrame(PulserTab, 60, 20, kVerticalFrame);
   //PulserTab->AddFrame(PulserFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 5,5,5,5));
 
   VoltageTab = TopLevelTabs->AddTab(" High Voltage ");
