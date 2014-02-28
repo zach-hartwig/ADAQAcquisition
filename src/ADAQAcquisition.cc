@@ -247,7 +247,7 @@ void ADAQAcquisition::CreateTopLevelFrames()
 
   PulserTab = TopLevelTabs->AddTab(" Pulsers ");
   PulserFrame = new TGCompositeFrame(PulserTab, 60, 20, kVerticalFrame);
-  PulserTab->AddFrame(PulserFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 5,5,5,5));
+  //PulserTab->AddFrame(PulserFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 5,5,5,5));
 
   VoltageTab = TopLevelTabs->AddTab(" High Voltage ");
   VoltageFrame = new TGCompositeFrame(VoltageTab, 60, 20, kHorizontalFrame);
@@ -701,6 +701,19 @@ void ADAQAcquisition::FillScopeFrame()
     DGScopeBaselineCalcMax_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
     DGScopeBaselineCalcMax_NEL[ch]->GetEntry()->SetNumber(45);
     DGScopeBaselineCalcMax_NEL[ch]->GetEntry()->Resize(65,20);
+
+    DGScopeChannelControl_GF->AddFrame(DGScopeZSThreshold_NEL[ch] = new ADAQNumberEntryWithLabel(DGScopeChannelControl_GF, "ZS threshold", -1),
+				       new TGLayoutHints(kLHintsNormal));
+    DGScopeZSThreshold_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+    DGScopeZSThreshold_NEL[ch]->GetEntry()->SetNumber(0);
+    DGScopeZSThreshold_NEL[ch]->GetEntry()->Resize(65,20);
+
+    DGScopeChannelControl_GF->AddFrame(DGScopeZSSamples_NEL[ch] = new ADAQNumberEntryWithLabel(DGScopeChannelControl_GF, "ZS samples", -1),
+				       new TGLayoutHints(kLHintsNormal));
+    DGScopeZSSamples_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+    DGScopeZSSamples_NEL[ch]->GetEntry()->SetNumber(0);
+    DGScopeZSSamples_NEL[ch]->GetEntry()->Resize(65,20);
+    
   }
   
 
@@ -716,7 +729,7 @@ void ADAQAcquisition::FillScopeFrame()
 
   TGVerticalFrame *DGScopeDisplayAndControls_VF = new TGVerticalFrame(ScopeFrame);
   
-  TGGroupFrame *DGScopeDisplay_GF = new TGGroupFrame(DGScopeDisplayAndControls_VF, "Digital Oscilloscope", kVerticalFrame);
+  TGGroupFrame *DGScopeDisplay_GF = new TGGroupFrame(DGScopeDisplayAndControls_VF, "Multipurpose Display", kVerticalFrame);
   DGScopeDisplay_GF->SetTitlePos(TGGroupFrame::kCenter);
   
   TGHorizontalFrame *DGScopeDisplayAndSlider_HF = new TGHorizontalFrame(DGScopeDisplay_GF);
@@ -963,6 +976,14 @@ void ADAQAcquisition::FillScopeFrame()
   DGScopeDataReductionFactor_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
   DGScopeDataReductionFactor_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
   DGScopeDataReductionFactor_NEL->GetEntry()->SetNumber(1);
+
+  DGScopeReadoutControls_GF->AddFrame(DGScopeZSMode_CBL = new ADAQComboBoxWithLabel(DGScopeReadoutControls_GF, "ZS Mode", -1),
+				      new TGLayoutHints(kLHintsNormal, 5,5,0,5));
+  DGScopeZSMode_CBL->GetComboBox()->Resize(130,20);
+  DGScopeZSMode_CBL->GetComboBox()->AddEntry("Disabled", 0);
+  DGScopeZSMode_CBL->GetComboBox()->AddEntry("Z-length encoding", 2);
+  DGScopeZSMode_CBL->GetComboBox()->AddEntry("Z-suppression", 3);
+  DGScopeZSMode_CBL->GetComboBox()->Select(0);
   
 
 
@@ -2891,11 +2912,15 @@ void ADAQAcquisition::RunDGScope()
   // Reset the digitizer to default state
   DGManager->Reset();
 
-  // Set the trigger threshold individually for each of the 8
-  // digitizer channels [ADC] and the DC offsets for each channel
+  // Set the trigger threshold, DC offsets, and ZS parameters
+  // individually for each of the 8 digitizer channels
   for(int ch=0; ch<NumDataChannels; ch++){
     DGManager->SetChannelTriggerThreshold(ch,ChannelTriggerThreshold[ch]);
     DGManager->SetChannelDCOffset(ch, DGScopeDCOffset_NEL[ch]->GetEntry()->GetHexNumber());
+
+    int32_t Threshold = DGScopeZSThreshold_NEL[ch]->GetEntry()->GetIntNumber();
+    int32_t Samples = DGScopeZSSamples_NEL[ch]->GetEntry()->GetIntNumber();
+    DGManager->SetChannelZSParams(ch, 0, Threshold, Samples);
   }
 
   // Set the trigger mode
@@ -2957,6 +2982,9 @@ void ADAQAcquisition::RunDGScope()
 
   // Set the channel enable mask
   DGManager->SetChannelEnableMask(ChannelEnableMask);
+
+  // Set the Zero-Supperssion mode
+  DGManager->SetZeroSuppressionMode(DGScopeZSMode_CBL->GetComboBox()->GetSelected());
 
   // If the digitizer is to be operated in coincidence mode and "the
   // conditions are right" as Oye says, set the trigger source mask by

@@ -229,6 +229,8 @@ private:
   ADAQNumberEntryWithLabel *DGScopeChTriggerThreshold_NEL[8];
   ADAQNumberEntryWithLabel *DGScopeBaselineCalcMin_NEL[8];
   ADAQNumberEntryWithLabel *DGScopeBaselineCalcMax_NEL[8];
+  ADAQNumberEntryWithLabel *DGScopeZSThreshold_NEL[8];
+  ADAQNumberEntryWithLabel *DGScopeZSSamples_NEL[8];
   
   TRootEmbeddedCanvas *DGScope_EC;
   TGDoubleVSlider *DGScopeVerticalScale_DVS;
@@ -249,6 +251,7 @@ private:
   TGTextEntry *DGScopeBufferStatus_TE;
   TGCheckButton *DGScopeUseDataReduction_CB;
   ADAQNumberEntryWithLabel *DGScopeDataReductionFactor_NEL;
+  ADAQComboBoxWithLabel *DGScopeZSMode_CBL;
 
   ADAQComboBoxWithLabel *DGScopeTriggerMode_CBL;
 
