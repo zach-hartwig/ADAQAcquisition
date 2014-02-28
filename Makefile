@@ -40,6 +40,8 @@ LDFLAGS+=-L$(ADAQHOME)/lib/$(HOSTTYPE) -lCAENVME -lCAENComm -lCAENDigitizer -lnc
 # Specify the location of the ADAQ and CAEN header files
 CXXFLAGS+=-I$(ADAQHOME)/include
 
+CXX=clang++
+
 
 #**** RULES ****#
 
@@ -52,11 +54,11 @@ $(TARGET) : $(OBJS)
 # Build dependency object files
 $(OBJDIR)/ADAQAcquisition.o : $(SRCDIR)/ADAQAcquisition.cc 
 	@echo -e "\n---> Building $@ ..."
-	$(CXX) -g $(CXXFLAGS) $(LDFLAGS) -c -o $@ $<
+	$(CXX) -g $(CXXFLAGS) -c -o $@ $<
 
 $(OBJDIR)/ADAQAcquisitionDict.o : $(OBJDIR)/ADAQAcquisitionDict.cc
 	@echo -e "\n---> Building $@ ..."
-	$(CXX) -g $(CXXFLAGS) $(LDFLAGS) -c -o $@ $<
+	$(CXX) -g $(CXXFLAGS) -c -o $@ $<
 
 # Generate the necessary ROOT dictionaries
 $(OBJDIR)/ADAQAcquisitionDict.cc : $(INCLDIR)/ADAQAcquisition.hh $(INCLDIR)/RootLinkDef.hh 
