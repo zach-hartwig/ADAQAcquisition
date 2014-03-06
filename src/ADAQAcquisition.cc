@@ -245,9 +245,9 @@ void ADAQAcquisition::CreateTopLevelFrames()
   RegisterFrame = new TGCompositeFrame(RegisterTab, 200, 20, kVerticalFrame);
   RegisterTab->AddFrame(RegisterFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 5,5,5,5));
 
-  //PulserTab = TopLevelTabs->AddTab(" Pulsers ");
-  //PulserFrame = new TGCompositeFrame(PulserTab, 60, 20, kVerticalFrame);
-  //PulserTab->AddFrame(PulserFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 5,5,5,5));
+  PulserTab = TopLevelTabs->AddTab(" Pulsers ");
+  PulserFrame = new TGCompositeFrame(PulserTab, 60, 20, kVerticalFrame);
+  PulserTab->AddFrame(PulserFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 5,5,5,5));
 
   VoltageTab = TopLevelTabs->AddTab(" High Voltage ");
   VoltageFrame = new TGCompositeFrame(VoltageTab, 60, 20, kHorizontalFrame);
@@ -513,7 +513,126 @@ void ADAQAcquisition::FillRegisterFrame()
 
 
 void ADAQAcquisition::FillPulserFrame()
-{}
+{
+  const int XSize = 125;
+  const int YSize = 20;
+
+  const int NumPulsers = 2;
+
+  string PulserTitle[NumPulsers] = {"V1718 Pulser A", "V1718 Pulser B"};
+
+  int V1718PulserLineOut[NumPulsers] = {0,1};
+
+  int V1718PulserID[NumPulsers] = {V1718PulserA_TB_ID, V1718PulserB_TB_ID};
+
+  for(int pulser=0; pulser<NumPulsers; pulser++){
+    
+    TGGroupFrame *Pulser_GF = new TGGroupFrame(PulserFrame, PulserTitle[pulser].c_str(), kHorizontalFrame);
+    Pulser_GF->SetTitlePos(TGGroupFrame::kCenter);
+    PulserFrame->AddFrame(Pulser_GF, new TGLayoutHints(kLHintsCenterX, 5,5,50,30));
+    
+    TGVerticalFrame *PulserSettings_VF = new TGVerticalFrame(Pulser_GF);
+    Pulser_GF->AddFrame(PulserSettings_VF, new TGLayoutHints(kLHintsLeft, 5,45,5,5));
+
+    PulserSettings_VF->AddFrame(V1718PulserTimeUnit_CBL[pulser] = new ADAQComboBoxWithLabel(PulserSettings_VF, "Time unit", -1),
+				new TGLayoutHints(kLHintsNormal, 5,5,5,0));
+    V1718PulserTimeUnit_CBL[pulser]->GetComboBox()->AddEntry("25 ns", 0);
+    V1718PulserTimeUnit_CBL[pulser]->GetComboBox()->AddEntry("1600 ns", 1);
+    V1718PulserTimeUnit_CBL[pulser]->GetComboBox()->AddEntry("410 us", 2);
+    V1718PulserTimeUnit_CBL[pulser]->GetComboBox()->AddEntry("104 ms", 3);
+    V1718PulserTimeUnit_CBL[pulser]->GetComboBox()->Resize(XSize,YSize);
+    V1718PulserTimeUnit_CBL[pulser]->GetComboBox()->Select(0);
+
+    PulserSettings_VF->AddFrame(V1718PulserPeriod_NEL[pulser] = new ADAQNumberEntryWithLabel(PulserSettings_VF, "Period (number of time units)", -1),
+				new TGLayoutHints(kLHintsNormal, 5,5,5,0));
+    V1718PulserPeriod_NEL[pulser]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+    V1718PulserPeriod_NEL[pulser]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+    V1718PulserPeriod_NEL[pulser]->GetEntry()->Resize(XSize,YSize);
+    V1718PulserPeriod_NEL[pulser]->GetEntry()->SetNumber(4);
+  
+    PulserSettings_VF->AddFrame(V1718PulserWidth_NEL[pulser] = new ADAQNumberEntryWithLabel(PulserSettings_VF, "Width (number of time units)", -1),
+				new TGLayoutHints(kLHintsNormal, 5,5,5,0));
+    V1718PulserWidth_NEL[pulser]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+    V1718PulserWidth_NEL[pulser]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+    V1718PulserWidth_NEL[pulser]->GetEntry()->Resize(XSize,YSize);
+    V1718PulserWidth_NEL[pulser]->GetEntry()->SetNumber(1);
+
+    PulserSettings_VF->AddFrame(V1718PulserPulses_NEL[pulser] = new ADAQNumberEntryWithLabel(PulserSettings_VF, "Number pulses (0 = infinite)", -1),
+				new TGLayoutHints(kLHintsNormal, 5,5,5,0));
+    V1718PulserPulses_NEL[pulser]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+    V1718PulserPulses_NEL[pulser]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+    V1718PulserPulses_NEL[pulser]->GetEntry()->Resize(XSize,YSize);
+    V1718PulserPulses_NEL[pulser]->GetEntry()->SetNumber(1);
+
+    PulserSettings_VF->AddFrame(V1718PulserStartSource_CBL[pulser] = new ADAQComboBoxWithLabel(PulserSettings_VF, "Time unit", -1),
+				new TGLayoutHints(kLHintsNormal, 5,5,5,0));
+    V1718PulserStartSource_CBL[pulser]->GetComboBox()->AddEntry("Manual", 0);
+    V1718PulserStartSource_CBL[pulser]->GetComboBox()->AddEntry("Input 1", 1);
+    V1718PulserStartSource_CBL[pulser]->GetComboBox()->AddEntry("Input 2", 2);
+    V1718PulserStartSource_CBL[pulser]->GetComboBox()->AddEntry("Coincidence", 3);
+    V1718PulserStartSource_CBL[pulser]->GetComboBox()->AddEntry("VME bus", 4);
+    V1718PulserStartSource_CBL[pulser]->GetComboBox()->AddEntry("Misc. signals", 6);
+    V1718PulserStartSource_CBL[pulser]->GetComboBox()->Resize(XSize,YSize);
+    V1718PulserStartSource_CBL[pulser]->GetComboBox()->Select(0);
+
+    PulserSettings_VF->AddFrame(V1718PulserStopSource_CBL[pulser] = new ADAQComboBoxWithLabel(PulserSettings_VF, "Time unit", -1),
+				new TGLayoutHints(kLHintsNormal, 5,5,5,0));
+    V1718PulserStopSource_CBL[pulser]->GetComboBox()->AddEntry("Manual", 0);
+    V1718PulserStopSource_CBL[pulser]->GetComboBox()->AddEntry("Input 1", 1);
+    V1718PulserStopSource_CBL[pulser]->GetComboBox()->AddEntry("Input 2", 2);
+    V1718PulserStopSource_CBL[pulser]->GetComboBox()->AddEntry("Coincidence", 3);
+    V1718PulserStopSource_CBL[pulser]->GetComboBox()->AddEntry("VME bus", 4);
+    V1718PulserStopSource_CBL[pulser]->GetComboBox()->AddEntry("Misc. signals", 6);
+    V1718PulserStopSource_CBL[pulser]->GetComboBox()->Resize(XSize,YSize);
+    V1718PulserStopSource_CBL[pulser]->GetComboBox()->Select(0);
+  
+    TGVerticalFrame *PulserOutput_VF = new TGVerticalFrame(Pulser_GF);
+    Pulser_GF->AddFrame(PulserOutput_VF, new TGLayoutHints(kLHintsLeft, 5,5,5,5));
+
+    PulserOutput_VF->AddFrame(V1718PulserOutputLine_CBL[pulser] = new ADAQComboBoxWithLabel(PulserOutput_VF, "Output line", -1),
+			      new TGLayoutHints(kLHintsNormal, 5,5,5,0));
+    V1718PulserOutputLine_CBL[pulser]->GetComboBox()->AddEntry("Line 0", 0);
+    V1718PulserOutputLine_CBL[pulser]->GetComboBox()->AddEntry("Line 1", 1);
+    V1718PulserOutputLine_CBL[pulser]->GetComboBox()->AddEntry("Line 2", 2);
+    V1718PulserOutputLine_CBL[pulser]->GetComboBox()->AddEntry("Line 3", 3);
+    V1718PulserOutputLine_CBL[pulser]->GetComboBox()->AddEntry("Line 4", 4);
+    V1718PulserOutputLine_CBL[pulser]->GetComboBox()->Resize(XSize,YSize);
+    V1718PulserOutputLine_CBL[pulser]->GetComboBox()->Select(V1718PulserLineOut[pulser]);
+
+    PulserOutput_VF->AddFrame(V1718PulserOutputPolarity_CBL[pulser] = new ADAQComboBoxWithLabel(PulserOutput_VF, "Output polarity", -1),
+			      new TGLayoutHints(kLHintsNormal, 5,5,5,0));
+    V1718PulserOutputPolarity_CBL[pulser]->GetComboBox()->AddEntry("Normal", 0);
+    V1718PulserOutputPolarity_CBL[pulser]->GetComboBox()->AddEntry("Inverted", 1);
+    V1718PulserOutputPolarity_CBL[pulser]->GetComboBox()->Resize(XSize,YSize);
+    V1718PulserOutputPolarity_CBL[pulser]->GetComboBox()->Select(0);
+
+    PulserOutput_VF->AddFrame(V1718PulserLEDPolarity_CBL[pulser] = new ADAQComboBoxWithLabel(PulserOutput_VF, "LED polarity", -1),
+			      new TGLayoutHints(kLHintsNormal, 5,5,5,0));
+    V1718PulserLEDPolarity_CBL[pulser]->GetComboBox()->AddEntry("High", 0);
+    V1718PulserLEDPolarity_CBL[pulser]->GetComboBox()->AddEntry("Low", 1);
+    V1718PulserLEDPolarity_CBL[pulser]->GetComboBox()->Resize(XSize,YSize);
+    V1718PulserLEDPolarity_CBL[pulser]->GetComboBox()->Select(0);
+
+    PulserOutput_VF->AddFrame(V1718PulserSource_CBL[pulser] = new ADAQComboBoxWithLabel(PulserOutput_VF, "Output source", -1),
+			      new TGLayoutHints(kLHintsNormal, 5,5,5,0));
+    V1718PulserSource_CBL[pulser]->GetComboBox()->AddEntry("Manual", 0);
+    V1718PulserSource_CBL[pulser]->GetComboBox()->AddEntry("Input 1", 1);
+    V1718PulserSource_CBL[pulser]->GetComboBox()->AddEntry("Input 2", 2);
+    V1718PulserSource_CBL[pulser]->GetComboBox()->AddEntry("Coincidence", 3);
+    V1718PulserSource_CBL[pulser]->GetComboBox()->AddEntry("VME bus", 4);
+    V1718PulserSource_CBL[pulser]->GetComboBox()->AddEntry("Misc. signals", 6);
+    V1718PulserSource_CBL[pulser]->GetComboBox()->Resize(XSize,YSize);
+    V1718PulserSource_CBL[pulser]->GetComboBox()->Select(6);
+
+    PulserOutput_VF->AddFrame(V1718PulserStartStop_TB[pulser] = new TGTextButton(PulserOutput_VF, "Stopped", V1718PulserID[pulser]),
+			      new TGLayoutHints(kLHintsNormal, 5,5,20,5));
+    V1718PulserStartStop_TB[pulser]->SetBackgroundColor(ColorManager->Number2Pixel(kRed));
+    V1718PulserStartStop_TB[pulser]->Resize(200,40);
+    V1718PulserStartStop_TB[pulser]->ChangeOptions(V1718PulserStartStop_TB[pulser]->GetOptions() | kFixedSize);
+    V1718PulserStartStop_TB[pulser]->Connect("Pressed()","ADAQAcquisition",this,"HandlePulserButtons()");
+  }  
+
+}
 
 
 // The "VoltageFrame" holds ROOT widgets for complete control of the
@@ -1577,6 +1696,50 @@ void ADAQAcquisition::HandleRegisterButtons()
       DGManager->SetRegisterValue(addr32, data32);
     else if(Board == V6534 and V6534Enable)
       HVManager->SetRegisterValue(addr32, data32);
+  }
+}
+
+
+void ADAQAcquisition::HandlePulserButtons()
+{
+  // Get pointers and the widget ID for the active (ie, clicked) text button
+  TGTextButton *ActiveTextButton = (TGTextButton *) gTQSender;
+  int ActiveButtonID = ActiveTextButton->WidgetId();
+
+  //if(!VMEConnectionEstablished)
+  //    return;
+
+  enum {PulserA, PulserB};
+  int Pulser = -1;
+
+  switch(ActiveButtonID){
+
+  case V1718PulserA_TB_ID:
+    Pulser = PulserA;
+    break;
+
+  case V1718PulserB_TB_ID:
+    Pulser = PulserB;
+    break;
+  }
+
+  // Call BRManager to set pulser settings
+
+  if(ActiveTextButton->GetString()=="Stopped"){
+    // Update button color from red to green andn update text
+    ActiveTextButton->SetBackgroundColor(ColorManager->Number2Pixel(8));
+    ActiveTextButton->SetForegroundColor(ColorManager->Number2Pixel(1));
+    ActiveTextButton->SetText("Pulsing");
+
+    //BRManager->StartPulser();
+  }
+  else if(ActiveTextButton->GetString()=="Pulsing"){
+    // Update button color from green to red and update text
+    ActiveTextButton->SetBackgroundColor(ColorManager->Number2Pixel(2));
+    ActiveTextButton->SetForegroundColor(ColorManager->Number2Pixel(1));
+    ActiveTextButton->SetText("Stopped");
+
+    //BRManager->StopPulser();
   }
 }
 

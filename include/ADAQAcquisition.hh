@@ -58,6 +58,7 @@ public:
   // Create handlers for widget actions ("slots")
   void HandleConnectionButtons();
   void HandleRegisterButtons();
+  void HandlePulserButtons();
   void HandleVoltageButtons();
   void HandleScopeButtons();
   void HandleScopeNumberEntries();
@@ -200,12 +201,19 @@ private:
   TGNumberEntryField *V6534WriteAddress_NEF, *V6534WriteValue_NEF;
   TGTextButton *V6534Read_TB, *V6534Write_TB;
 
-
   TGCompositeFrame *RegisterTab, *RegisterFrame;
   
   ///////////////
   // Pulser frame 
   TGCompositeFrame *PulserTab, *PulserFrame;
+  ADAQComboBoxWithLabel *V1718PulserTimeUnit_CBL[2];
+  ADAQNumberEntryWithLabel *V1718PulserPeriod_NEL[2], *V1718PulserWidth_NEL[2];
+  ADAQNumberEntryWithLabel *V1718PulserPulses_NEL[2];
+  ADAQComboBoxWithLabel *V1718PulserStartSource_CBL[2], *V1718PulserStopSource_CBL[2];
+
+  ADAQComboBoxWithLabel *V1718PulserOutputLine_CBL[2], *V1718PulserOutputPolarity_CBL[2];
+  ADAQComboBoxWithLabel *V1718PulserLEDPolarity_CBL[2], *V1718PulserSource_CBL[2];
+  TGTextButton *V1718PulserStartStop_TB[2];
 
   /////////////////////////////
   // High voltage frame widgets

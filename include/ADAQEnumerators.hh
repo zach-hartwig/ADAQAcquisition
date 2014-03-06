@@ -35,6 +35,10 @@ enum{
   V1720WriteValue_ID,
   V1720Write_ID,
 
+  // Widget IDs for the pulser frame
+  V1718PulserA_TB_ID, 
+  V1718PulserB_TB_ID,
+
   // Widget IDs for the voltage frame
   HVChannel0Power_TB_ID,
   HVChannel1Power_TB_ID,
