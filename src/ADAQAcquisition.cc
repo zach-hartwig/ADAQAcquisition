@@ -1515,6 +1515,11 @@ void ADAQAcquisition::HandleConnectionButtons()
 	DGManager->Initialize();
       }
 
+      int V1718LinkOpen = -42;
+      if(V1720LinkOpen){
+	BRManager->OpenLink(DGManager->GetBoardHandle(), V1720LinkOpen);
+      }
+
       int V6534LinkOpen = -42;
       if(V6534Enable){
 	V6534BoardAddress = BoardAddress_NEF[V6534]->GetHexNumber();
