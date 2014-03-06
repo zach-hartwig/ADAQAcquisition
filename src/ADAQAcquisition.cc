@@ -1711,8 +1711,8 @@ void ADAQAcquisition::HandlePulserButtons()
   TGTextButton *ActiveTextButton = (TGTextButton *) gTQSender;
   int ActiveButtonID = ActiveTextButton->WidgetId();
 
-  //if(!VMEConnectionEstablished)
-  //    return;
+  if(!VMEConnectionEstablished)
+    return;
 
   enum {PulserA, PulserB};
   int Pulser = -1;
@@ -1728,7 +1728,25 @@ void ADAQAcquisition::HandlePulserButtons()
     break;
   }
 
-  // Call BRManager to set pulser settings
+  // Readout the widgets into structs provided by ADAQBridge class
+  PulserSettings PS;
+  PS.PulserToSet = Pulser;
+  PS.Period = V1718PulserPeriod_NEL[Pulser]->GetEntry()->GetIntNumber();
+  PS.Width = V1718PulserWidth_NEL[Pulser]->GetEntry()->GetIntNumber();
+  PS.TimeUnit = V1718PulserTimeUnit_CBL[Pulser]->GetComboBox()->GetSelected();
+  PS.PulseNumber = V1718PulserPulses_NEL[Pulser]->GetEntry()->GetIntNumber();
+  PS.StartSource = V1718PulserStartSource_CBL[Pulser]->GetComboBox()->GetSelected();
+  PS.StopSource = V1718PulserStopSource_CBL[Pulser]->GetComboBox()->GetSelected();
+
+  PulserOutputSettings POS;
+  POS.OutputLine = V1718PulserOutputLine_CBL[Pulser]->GetComboBox()->GetSelected();
+  POS.OutputPolarity = V1718PulserOutputPolarity_CBL[Pulser]->GetComboBox()->GetSelected();
+  POS.LEDPolarity = V1718PulserLEDPolarity_CBL[Pulser]->GetComboBox()->GetSelected();
+  POS.Source = V1718PulserSource_CBL[Pulser]->GetComboBox()->GetSelected();
+
+  // Update the pulser settings through the V1718 manager class
+  BRManager->SetPulserSettings(&PS);
+  BRManager->SetPulserOutputSettings(&POS);
 
   if(ActiveTextButton->GetString()=="Stopped"){
     // Update button color from red to green andn update text
@@ -1736,7 +1754,7 @@ void ADAQAcquisition::HandlePulserButtons()
     ActiveTextButton->SetForegroundColor(ColorManager->Number2Pixel(1));
     ActiveTextButton->SetText("Pulsing");
 
-    //BRManager->StartPulser();
+    BRManager->StartPulser(Pulser);
   }
   else if(ActiveTextButton->GetString()=="Pulsing"){
     // Update button color from green to red and update text
@@ -1744,7 +1762,7 @@ void ADAQAcquisition::HandlePulserButtons()
     ActiveTextButton->SetForegroundColor(ColorManager->Number2Pixel(1));
     ActiveTextButton->SetText("Stopped");
 
-    //BRManager->StopPulser();
+    BRManager->StopPulser(Pulser);
   }
 }
 
