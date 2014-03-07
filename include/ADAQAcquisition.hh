@@ -101,10 +101,12 @@ private:
   ADAQBridge *BRManager;
 
   // Use booleans and VME addresses
-  bool V6534Enable;
-  int V6534BoardAddress;
+  const bool V1718Enable;
   bool V1720Enable;
   int V1720BoardAddress;
+  bool V6534Enable;
+  int V6534BoardAddress;
+
   bool VMEConnectionEstablished;
 
   // Variables for high voltage control

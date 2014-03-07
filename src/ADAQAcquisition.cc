@@ -39,8 +39,10 @@ using namespace boost::assign;
 ADAQAcquisition::ADAQAcquisition(int W, int H)
   : TGMainFrame(gClient->GetRoot()),
     DisplayWidth(W), DisplayHeight(H), 
-    V6534Enable(true), V6534BoardAddress(0x42420000),
+    V1718Enable(true),
     V1720Enable(true), V1720BoardAddress(0x00420000),
+    V6534Enable(true), V6534BoardAddress(0x42420000),
+
     VMEConnectionEstablished(false),
     HVMonitorEnable(false), DGScopeEnable(false),
     NumDataChannels(8), BuildInDebugMode(false),
@@ -560,11 +562,11 @@ void ADAQAcquisition::FillPulserFrame()
     PulserSettings_VF->AddFrame(V1718PulserPulses_NEL[pulser] = new ADAQNumberEntryWithLabel(PulserSettings_VF, "Number pulses (0 = infinite)", -1),
 				new TGLayoutHints(kLHintsNormal, 5,5,5,0));
     V1718PulserPulses_NEL[pulser]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-    V1718PulserPulses_NEL[pulser]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+    V1718PulserPulses_NEL[pulser]->GetEntry()->SetNumAttr(TGNumberFormat::kNEANonNegative);
     V1718PulserPulses_NEL[pulser]->GetEntry()->Resize(XSize,YSize);
-    V1718PulserPulses_NEL[pulser]->GetEntry()->SetNumber(1);
+    V1718PulserPulses_NEL[pulser]->GetEntry()->SetNumber(0);
 
-    PulserSettings_VF->AddFrame(V1718PulserStartSource_CBL[pulser] = new ADAQComboBoxWithLabel(PulserSettings_VF, "Time unit", -1),
+    PulserSettings_VF->AddFrame(V1718PulserStartSource_CBL[pulser] = new ADAQComboBoxWithLabel(PulserSettings_VF, "Start source", -1),
 				new TGLayoutHints(kLHintsNormal, 5,5,5,0));
     V1718PulserStartSource_CBL[pulser]->GetComboBox()->AddEntry("Manual", 0);
     V1718PulserStartSource_CBL[pulser]->GetComboBox()->AddEntry("Input 1", 1);
@@ -575,7 +577,7 @@ void ADAQAcquisition::FillPulserFrame()
     V1718PulserStartSource_CBL[pulser]->GetComboBox()->Resize(XSize,YSize);
     V1718PulserStartSource_CBL[pulser]->GetComboBox()->Select(0);
 
-    PulserSettings_VF->AddFrame(V1718PulserStopSource_CBL[pulser] = new ADAQComboBoxWithLabel(PulserSettings_VF, "Time unit", -1),
+    PulserSettings_VF->AddFrame(V1718PulserStopSource_CBL[pulser] = new ADAQComboBoxWithLabel(PulserSettings_VF, "Stop source", -1),
 				new TGLayoutHints(kLHintsNormal, 5,5,5,0));
     V1718PulserStopSource_CBL[pulser]->GetComboBox()->AddEntry("Manual", 0);
     V1718PulserStopSource_CBL[pulser]->GetComboBox()->AddEntry("Input 1", 1);
@@ -1484,9 +1486,7 @@ void ADAQAcquisition::FillScopeFrame()
 }
 
 
-// Perform actions triggers by the text buttons on the Connection
-// Frame, which is principally connecting the ADAQAcquisition to the VME
-// boards as well as reading/writing registers on individual boards
+// Handles all actions by buttons on the VME Connection frame
 void ADAQAcquisition::HandleConnectionButtons()
 {
   // Get pointers and the widget ID for the active (ie, clicked) text button
@@ -1514,10 +1514,10 @@ void ADAQAcquisition::HandleConnectionButtons()
 	V1720LinkOpen = DGManager->OpenLink(V1720BoardAddress);
 	DGManager->Initialize();
       }
-
+      
       int V1718LinkOpen = -42;
-      if(V1720LinkOpen){
-	BRManager->OpenLink(DGManager->GetBoardHandle(), V1720LinkOpen);
+      if(V1718Enable and V1720LinkOpen == 0){
+	V1718LinkOpen = BRManager->OpenLink(DGManager->GetBoardHandle(), true);
       }
 
       int V6534LinkOpen = -42;
@@ -1665,8 +1665,12 @@ void ADAQAcquisition::HandleRegisterButtons()
   if(Action == READ){
     addr32 = ReadAddress_NEF[Board]->GetHexNumber();
 
-    if(Board == 1718)
-      {}
+    cout << V1718Enable << endl;
+
+    if(Board == V1718 and V1718Enable){
+      BRManager->GetRegisterValue(addr32, &data32);
+      cout << data32 << endl;
+    }
     else if(Board == V1720 and V1720Enable)
       DGManager->GetRegisterValue(addr32, &data32);
     else if(Board == V6534 and V6534Enable){
@@ -1677,7 +1681,7 @@ void ADAQAcquisition::HandleRegisterButtons()
     // Update the hex widget with the register value
     ReadValueHex_NEF[Board]->SetHexNumber(data32);
 
-    // Update the bianry widget with the register value inserting
+    // Update the binary widget with the register value inserting
     // spaces every 4 characters for easier reading
     bitset<32> Value (data32);
     string ValueString = Value.to_string();
@@ -1696,7 +1700,7 @@ void ADAQAcquisition::HandleRegisterButtons()
     data32 = WriteValue_NEF[Board]->GetHexNumber();
 
     if(Board == V1718)
-      {}
+      BRManager->SetRegisterValue(addr32, data32);
     if(Board == V1720 and V1720Enable) 
       DGManager->SetRegisterValue(addr32, data32);
     else if(Board == V6534 and V6534Enable)
@@ -2715,7 +2719,10 @@ void ADAQAcquisition::HandleDisconnectAndTerminate(bool TerminateApplication)
   // used) close the link to the V1720 board
   if(V1720Enable)
     DGManager->CloseLink();
-  
+
+  if(V1718Enable)
+    BRManager->CloseLink();
+
   // Close the standalone ROOT application
   if(TerminateApplication)
     gApplication->Terminate();
