@@ -763,7 +763,7 @@ void ADAQAcquisition::FillScopeFrame()
     // ROOT check button to enable channel for digitization
     DGScopeChannelControl_HF->AddFrame(DGScopeChannelEnable_CB[ch] = new TGCheckButton(DGScopeChannelControl_HF, "Enable", DGScopeChEnable_CB_ID_Vec[ch]),
 				       new TGLayoutHints(kLHintsCenterY,0,0,0,0));
-    if(ch==2) 
+    if(ch==0) 
       DGScopeChannelEnable_CB[ch]->SetState(kButtonDown);
 
     // TGLabel for the pulse polarity radio buttons
