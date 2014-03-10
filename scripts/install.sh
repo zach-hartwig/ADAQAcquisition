@@ -1,13 +1,16 @@
 #!/bin/bash
 #
 # name: install.sh
-# date: 03 Feb 14
+# date: 10 Feb 14
 # auth: Zach Hartwig
 #
 # desc: Bash script for installing production version ADAQAcquisition
 #       binaries and the required libraries into the publicly
-#       accessible directory /usr/local/adaq. The list of production
-#       versions may be obtained by running "git tags"
+#       accessible directory /usr/local/adaq. Note that only
+#       Git-tagged production version are available for
+#       installation. The tagged version is checked out into its own
+#       transient branch, where it is built and from which it is
+#       installed.
 #
 # 2run: ./install <Git.Version.Tag> 
 
@@ -16,7 +19,7 @@
 if [ ! "$#" == "1" ]; then
     echo -e "\nInstall script error! Only a single argument is allowed from the user:"
     echo -e   "   arg1 == ADAQAcquisition version number"
-    echo -e   "   example: ./install.sh v1.3.2"
+    echo -e   "   example: ./install.sh v1.3.2\n"
     exit
 fi
 
