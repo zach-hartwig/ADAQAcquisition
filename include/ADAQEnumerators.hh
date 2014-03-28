@@ -125,6 +125,7 @@ enum{
   DGScopeSpectrumCalibrationCalibrate_TB_ID,
   DGScopeSpectrumCalibrationPlot_TB_ID,
   DGScopeSpectrumCalibrationReset_TB_ID,
+  DGScopeSpectrumCalibrationLoad_TB_ID,
   
   DGScopeSpectrumBinNumber_NEL_ID,
   DGScopeSpectrumMinBin_NEL_ID,

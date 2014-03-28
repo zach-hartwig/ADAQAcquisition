@@ -854,7 +854,7 @@ void ADAQAcquisition::FillScopeFrame()
   DGScopeDisplay_GF->SetTitlePos(TGGroupFrame::kCenter);
   
   TGHorizontalFrame *DGScopeDisplayAndSlider_HF = new TGHorizontalFrame(DGScopeDisplay_GF);
-  DGScopeDisplay_GF->AddFrame(DGScopeDisplayAndSlider_HF, new TGLayoutHints(kLHintsNormal));
+  DGScopeDisplay_GF->AddFrame(DGScopeDisplayAndSlider_HF, new TGLayoutHints(kLHintsNormal,0,0,5,0));
 
   // ROOT double slider for control of the min/max of vertical axis, ie, zoom
   DGScopeDisplayAndSlider_HF->AddFrame(DGScopeVerticalScale_DVS = new TGDoubleVSlider(DGScopeDisplayAndSlider_HF, 400, kDoubleScaleBoth, -1, kVerticalFrame, ColorManager->Number2Pixel(17),true,false),
@@ -913,7 +913,7 @@ void ADAQAcquisition::FillScopeFrame()
 
   TGHorizontalFrame *DGScopeDisplayControls_HF = new TGHorizontalFrame(DGScopeDisplay_GF);
   DGScopeDisplay_GF->AddFrame(DGScopeDisplayControls_HF,
-			      new TGLayoutHints(kLHintsCenterX));
+			      new TGLayoutHints(kLHintsCenterX,5,5,0,0));
 
   
   //////////////////////////////////
@@ -1277,6 +1277,18 @@ void ADAQAcquisition::FillScopeFrame()
   DGScopeSpectrumCalibrationReset_TB->Resize(100,25);
   DGScopeSpectrumCalibrationReset_TB->ChangeOptions(DGScopeSpectrumCalibrationReset_TB->GetOptions() | kFixedSize);
   DGScopeSpectrumCalibrationReset_TB->SetState(kButtonDisabled);
+
+  TGHorizontalFrame *DGScopeSpectrumCalibration_HF4 = new TGHorizontalFrame(DGScopeSpectrumCalibration_GF);
+  DGScopeSpectrumCalibration_GF->AddFrame(DGScopeSpectrumCalibration_HF4,
+                                          new TGLayoutHints(kLHintsExpandX));
+
+  // Load from file text button
+  DGScopeSpectrumCalibration_HF4->AddFrame(DGScopeSpectrumCalibrationLoad_TB = new TGTextButton(DGScopeSpectrumCalibration_HF4, "Load from file", DGScopeSpectrumCalibrationLoad_TB_ID),
+                                           new TGLayoutHints(kLHintsCenterX, 5,5,5,0));
+  DGScopeSpectrumCalibrationLoad_TB->Connect("Clicked()","ADAQAcquisition",this,"HandleScopeButtons()");
+  DGScopeSpectrumCalibrationLoad_TB->Resize(150,25);
+  DGScopeSpectrumCalibrationLoad_TB->ChangeOptions(DGScopeSpectrumCalibrationLoad_TB->GetOptions() | kFixedSize);
+  DGScopeSpectrumCalibrationLoad_TB->SetState(kButtonDisabled);
 
 
   //////////////////////
@@ -2048,6 +2060,7 @@ void ADAQAcquisition::HandleScopeButtons()
       DGScopeSpectrumCalibrationCalibrate_TB->SetState(kButtonUp);
       DGScopeSpectrumCalibrationPlot_TB->SetState(kButtonUp);
       DGScopeSpectrumCalibrationReset_TB->SetState(kButtonUp);
+      DGScopeSpectrumCalibrationLoad_TB->SetState(kButtonUp);
 
     }
 
@@ -2059,6 +2072,7 @@ void ADAQAcquisition::HandleScopeButtons()
       DGScopeSpectrumCalibrationCalibrate_TB->SetState(kButtonDisabled);
       DGScopeSpectrumCalibrationPlot_TB->SetState(kButtonDisabled);
       DGScopeSpectrumCalibrationReset_TB->SetState(kButtonDisabled);
+      DGScopeSpectrumCalibrationLoad_TB->SetState(kButtonDisabled);
     }
     break;
 
@@ -2170,8 +2184,6 @@ void ADAQAcquisition::HandleScopeButtons()
     break;
   }
 
-
-
   case DGScopeSpectrumCalibrationReset_TB_ID:{
 
     // Get the current channel being histogrammed in DGScope
@@ -2202,8 +2214,45 @@ void ADAQAcquisition::HandleScopeButtons()
 
     break;
   }
-    
-    
+
+  case DGScopeSpectrumCalibrationLoad_TB_ID:{
+
+    const char *FileTypes[] = {"ADAQ calibration file", ".acal",
+			       0};
+
+    TGFileInfo FileInformation;
+    FileInformation.fFileTypes = FileTypes;
+    FileInformation.fIniDir = StrDup(getenv("PWD"));
+    new TGFileDialog(gClient->GetRoot(), this, kFDSave, &FileInformation);
+
+    if(FileInformation.fFilename==NULL)
+      {}
+
+    else{
+      
+      int SetPoint = DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->GetSelected();
+
+      int CurrentChannel = DGScopeSpectrumChannel_CBL->GetComboBox()->GetSelected();
+
+      string CalibrationFileName = FileInformation.fFilename;
+
+      size_t Found = CalibrationFileName.find_last_of(".");
+      if(Found != string::npos){
+
+	ifstream In(CalibrationFileName.c_str());
+	while(In.good()){
+	  double Energy, PulseUnit;
+	  
+	  if(In.eof()) break;
+
+	  In >> Energy >> PulseUnit;
+
+	  CalibrationData[CurrentChannel].Energy[SetPoint] = Energy;
+	}
+      }
+    }
+    break;
+  }
 
     ///////////////////////////
     // Create ROOT data file
@@ -2686,6 +2735,7 @@ void ADAQAcquisition::HandleCheckButtons()
       DGScopeSpectrumCalibrationCalibrate_TB->SetState(kButtonUp);
       DGScopeSpectrumCalibrationPlot_TB->SetState(kButtonUp);
       DGScopeSpectrumCalibrationReset_TB->SetState(kButtonUp);
+      DGScopeSpectrumCalibrationLoad_TB->SetState(kButtonUp);
     }
 
     // Disable the calibration widgets
@@ -2696,6 +2746,7 @@ void ADAQAcquisition::HandleCheckButtons()
       DGScopeSpectrumCalibrationCalibrate_TB->SetState(kButtonDisabled);
       DGScopeSpectrumCalibrationPlot_TB->SetState(kButtonDisabled);
       DGScopeSpectrumCalibrationReset_TB->SetState(kButtonDisabled);
+      DGScopeSpectrumCalibrationLoad_TB->SetState(kButtonDisabled);
     }
     break;
   }
