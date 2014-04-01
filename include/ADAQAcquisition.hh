@@ -287,6 +287,7 @@ private:
   TGTextButton *DGScopeSpectrumCalibrationPlot_TB;
   TGTextButton *DGScopeSpectrumCalibrationReset_TB;
   TGTextButton *DGScopeSpectrumCalibrationLoad_TB;
+  TGTextButton *DGScopeSpectrumCalibrationWrite_TB;
 
   ADAQNumberEntryWithLabel *DGScopeSpectrumBinNumber_NEL;
   ADAQNumberEntryWithLabel *DGScopeSpectrumMinBin_NEL;
