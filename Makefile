@@ -40,7 +40,7 @@ LDFLAGS+=-L$(ADAQHOME)/lib/$(HOSTTYPE) -lCAENVME -lCAENComm -lCAENDigitizer -lnc
 # Specify the location of the ADAQ and CAEN header files
 CXXFLAGS+=-I$(ADAQHOME)/include
 
-CXX=clang++
+CXX=clang++ -ferror-limit=5 -w
 
 
 #**** RULES ****#

@@ -119,7 +119,7 @@ enum{
   DGScopeChVerticalPosition_NEL_ID,
 
   DGScopeSpectrumCalibration_CB_ID,
-  DGScopeSpectrumCalibrationEnergyPulseUnit_NEL_ID,
+  DGScopeSpectrumCalibrationEnergy_NEL_ID,
   DGScopeSpectrumCalibrationPulseUnit_NEL_ID,
   DGScopeSpectrumCalibrationSetPoint_TB_ID,
   DGScopeSpectrumCalibrationCalibrate_TB_ID,

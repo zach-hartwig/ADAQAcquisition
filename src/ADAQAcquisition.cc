@@ -1137,15 +1137,15 @@ void ADAQAcquisition::FillScopeFrame()
   // ADAQ number entry to specify the maximum bin in the spectra histogram
   DGScopeSpectrumHistogram_GF->AddFrame(DGScopeSpectrumMinBin_NEL = new ADAQNumberEntryWithLabel(DGScopeSpectrumHistogram_GF, "Minimum bin", DGScopeSpectrumMinBin_NEL_ID),
 					new TGLayoutHints(kLHintsLeft,0,0,0,0));
-  DGScopeSpectrumMinBin_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+  DGScopeSpectrumMinBin_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
   DGScopeSpectrumMinBin_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEANonNegative);
-  DGScopeSpectrumMinBin_NEL->GetEntry()->SetNumber(0);
+  DGScopeSpectrumMinBin_NEL->GetEntry()->SetNumber(0.);
 
   DGScopeSpectrumHistogram_GF->AddFrame(DGScopeSpectrumMaxBin_NEL = new ADAQNumberEntryWithLabel(DGScopeSpectrumHistogram_GF, "Maximum bin", DGScopeSpectrumMaxBin_NEL_ID),
 					new TGLayoutHints(kLHintsLeft,0,0,0,5));
   DGScopeSpectrumMaxBin_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
   DGScopeSpectrumMaxBin_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEANonNegative);
-  DGScopeSpectrumMaxBin_NEL->GetEntry()->SetNumber(25000);
+  DGScopeSpectrumMaxBin_NEL->GetEntry()->SetNumber(30000.);
 
   TGHorizontalFrame *DGScopeSpectrumAxis_HF = new TGHorizontalFrame(DGScopeSpectrumHistogram_GF);
   DGScopeSpectrumHistogram_GF->AddFrame(DGScopeSpectrumAxis_HF, new TGLayoutHints(kLHintsNormal,0,0,0,0));
@@ -1201,7 +1201,111 @@ void ADAQAcquisition::FillScopeFrame()
   //////////////
   // Calibration
 
-  TGGroupFrame *DGScopeSpectrumCalibration_GF = new TGGroupFrame(DGScopeSpectrumFrame, "Calibration", kVerticalFrame);
+  TGGroupFrame *SpectrumCalibration_GF = new TGGroupFrame(DGScopeSpectrumFrame, "Energy calibration", kVerticalFrame);
+  DGScopeSpectrumFrame->AddFrame(SpectrumCalibration_GF, new TGLayoutHints(kLHintsNormal,15,5,10,0));
+  
+  TGHorizontalFrame *SpectrumCalibration_HF0 = new TGHorizontalFrame(SpectrumCalibration_GF);
+  SpectrumCalibration_GF->AddFrame(SpectrumCalibration_HF0, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+  
+  // Energy calibration 
+  SpectrumCalibration_HF0->AddFrame(DGScopeSpectrumCalibration_CB = new TGCheckButton(SpectrumCalibration_HF0, "Make it so", DGScopeSpectrumCalibration_CB_ID),
+				    new TGLayoutHints(kLHintsLeft, 0,0,10,0));
+  DGScopeSpectrumCalibration_CB->Connect("Clicked()", "ADAQAcquisition", this, "HandleCheckButtons()");
+  DGScopeSpectrumCalibration_CB->SetState(kButtonUp);
+  
+  // Load from file text button
+  SpectrumCalibration_HF0->AddFrame(DGScopeSpectrumCalibrationLoad_TB = new TGTextButton(SpectrumCalibration_HF0, "Load from file", DGScopeSpectrumCalibrationLoad_TB_ID),
+				    new TGLayoutHints(kLHintsRight, 15,0,5,5));
+  DGScopeSpectrumCalibrationLoad_TB->Connect("Clicked()", "ADAQAcquisition", this, "HandleScopeButtons()");
+  DGScopeSpectrumCalibrationLoad_TB->Resize(120,25);
+  DGScopeSpectrumCalibrationLoad_TB->ChangeOptions(DGScopeSpectrumCalibrationLoad_TB->GetOptions() | kFixedSize);
+  DGScopeSpectrumCalibrationLoad_TB->SetState(kButtonDisabled);
+
+
+  TGHorizontalFrame *SpectrumCalibration_HF1 = new TGHorizontalFrame(SpectrumCalibration_GF);
+  SpectrumCalibration_GF->AddFrame(SpectrumCalibration_HF1, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+
+  /*
+  SpectrumCalibration_HF1->AddFrame(SpectrumCalibrationStandard_RB = new TGRadioButton(SpectrumCalibration_HF1, "Standard", SpectrumCalibrationStandard_RB_ID),
+					   new TGLayoutHints(kLHintsNormal, 10,5,5,5));
+  SpectrumCalibrationStandard_RB->SetState(kButtonDown);
+  SpectrumCalibrationStandard_RB->SetState(kButtonDisabled);
+  SpectrumCalibrationStandard_RB->Connect("Clicked()", "ADAQAcquisition", this, "HandleRadioButtons()");
+  
+  SpectrumCalibration_HF1->AddFrame(SpectrumCalibrationEdgeFinder_RB = new TGRadioButton(SpectrumCalibration_HF1, "Edge finder", SpectrumCalibrationEdgeFinder_RB_ID),
+				       new TGLayoutHints(kLHintsNormal, 30,5,5,5));
+  SpectrumCalibrationEdgeFinder_RB->SetState(kButtonDisabled);
+  SpectrumCalibrationEdgeFinder_RB->Connect("Clicked()", "ADAQAcquisition", this, "HandleRadioButtons()");
+
+
+  TGVerticalFrame *SpectrumCalibration_VF = new TGVerticalFrame(SpectrumCalibration_GF);
+  SpectrumCalibration_GF->AddFrame(SpectrumCalibration_VF);
+  */
+
+  SpectrumCalibration_GF->AddFrame(DGScopeSpectrumCalibrationPoint_CBL = new ADAQComboBoxWithLabel(SpectrumCalibration_GF, "", DGScopeSpectrumCalibrationPoint_CBL_ID),
+				   new TGLayoutHints(kLHintsNormal, 0,0,10,3));
+  DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->Resize(150,20);
+  DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->AddEntry("Calibration point 0",0);
+  DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->Select(0);
+  DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->SetEnabled(false);
+  DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->Connect("Selected(int,int)", "ADAQAcquisition", this, "HandleComboBoxes(int,int)");
+
+  SpectrumCalibration_GF->AddFrame(DGScopeSpectrumCalibrationEnergy_NEL = new ADAQNumberEntryWithLabel(SpectrumCalibration_GF, "Energy (keV or MeV)", DGScopeSpectrumCalibrationEnergy_NEL_ID),
+					  new TGLayoutHints(kLHintsLeft,0,0,0,0));
+  DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
+  DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEANonNegative);
+  DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->SetNumber(0.0);
+  DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->SetState(false);
+  DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->Connect("ValueSet(long)", "ADAQAcquisition", this, "HandleScopeNumberEntries()");
+
+  SpectrumCalibration_GF->AddFrame(DGScopeSpectrumCalibrationPulseUnit_NEL = new ADAQNumberEntryWithLabel(SpectrumCalibration_GF, "Pulse unit (ADC)", DGScopeSpectrumCalibrationPulseUnit_NEL_ID),
+				       new TGLayoutHints(kLHintsLeft,0,0,0,5));
+  DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
+  DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+  DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->SetNumber(1.0);
+  DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->SetState(false);
+  DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->Connect("ValueSet(long)", "ADAQAcquisition", this, "HandleScopeNumberEntries()");
+
+  TGHorizontalFrame *SpectrumCalibration_HF2 = new TGHorizontalFrame(SpectrumCalibration_GF);
+  SpectrumCalibration_GF->AddFrame(SpectrumCalibration_HF2);
+  
+  // Set point text button
+  SpectrumCalibration_HF2->AddFrame(DGScopeSpectrumCalibrationSetPoint_TB = new TGTextButton(SpectrumCalibration_HF2, "Set Pt.", DGScopeSpectrumCalibrationSetPoint_TB_ID),
+				    new TGLayoutHints(kLHintsNormal, 5,5,5,0));
+  DGScopeSpectrumCalibrationSetPoint_TB->Connect("Clicked()", "ADAQAcquisition", this, "HandleScopeButtons()");
+  DGScopeSpectrumCalibrationSetPoint_TB->Resize(100,25);
+  DGScopeSpectrumCalibrationSetPoint_TB->ChangeOptions(DGScopeSpectrumCalibrationSetPoint_TB->GetOptions() | kFixedSize);
+  DGScopeSpectrumCalibrationSetPoint_TB->SetState(kButtonDisabled);
+
+  // Calibrate text button
+  SpectrumCalibration_HF2->AddFrame(DGScopeSpectrumCalibrationCalibrate_TB = new TGTextButton(SpectrumCalibration_HF2, "Calibrate", DGScopeSpectrumCalibrationCalibrate_TB_ID),
+				    new TGLayoutHints(kLHintsNormal, 0,0,5,0));
+  DGScopeSpectrumCalibrationCalibrate_TB->Connect("Clicked()", "ADAQAcquisition", this, "HandleScopeButtons()");
+  DGScopeSpectrumCalibrationCalibrate_TB->Resize(100,25);
+  DGScopeSpectrumCalibrationCalibrate_TB->ChangeOptions(DGScopeSpectrumCalibrationCalibrate_TB->GetOptions() | kFixedSize);
+  DGScopeSpectrumCalibrationCalibrate_TB->SetState(kButtonDisabled);
+  
+  TGHorizontalFrame *SpectrumCalibration_HF3 = new TGHorizontalFrame(SpectrumCalibration_GF);
+  SpectrumCalibration_GF->AddFrame(SpectrumCalibration_HF3);
+  
+  // Plot text button
+  SpectrumCalibration_HF3->AddFrame(DGScopeSpectrumCalibrationPlot_TB = new TGTextButton(SpectrumCalibration_HF3, "Plot", DGScopeSpectrumCalibrationPlot_TB_ID),
+				    new TGLayoutHints(kLHintsNormal, 5,5,5,5));
+  DGScopeSpectrumCalibrationPlot_TB->Connect("Clicked()", "ADAQAcquisition", this, "HandleScopeButtons()");
+  DGScopeSpectrumCalibrationPlot_TB->Resize(100,25);
+  DGScopeSpectrumCalibrationPlot_TB->ChangeOptions(DGScopeSpectrumCalibrationPlot_TB->GetOptions() | kFixedSize);
+  DGScopeSpectrumCalibrationPlot_TB->SetState(kButtonDisabled);
+
+  // Reset text button
+  SpectrumCalibration_HF3->AddFrame(DGScopeSpectrumCalibrationReset_TB = new TGTextButton(SpectrumCalibration_HF3, "Reset", DGScopeSpectrumCalibrationReset_TB_ID),
+				    new TGLayoutHints(kLHintsNormal, 0,0,5,5));
+  DGScopeSpectrumCalibrationReset_TB->Connect("Clicked()", "ADAQAcquisition", this, "HandleScopeButtons()");
+  DGScopeSpectrumCalibrationReset_TB->Resize(100,25);
+  DGScopeSpectrumCalibrationReset_TB->ChangeOptions(DGScopeSpectrumCalibrationReset_TB->GetOptions() | kFixedSize);
+  DGScopeSpectrumCalibrationReset_TB->SetState(kButtonDisabled);
+  
+  /*
+  TGGroupFrame *DGScopeDGScopeSpectrumCalibrationGF = new TGGroupFrame(DGScopeSpectrumFrame, "Calibration", kVerticalFrame);
   DGScopeSpectrumCalibration_GF->SetTitlePos(TGGroupFrame::kCenter);
   DGScopeSpectrumFrame->AddFrame(DGScopeSpectrumCalibration_GF, new TGLayoutHints(kLHintsNormal,5,5,0,0));
 
@@ -1289,7 +1393,7 @@ void ADAQAcquisition::FillScopeFrame()
   DGScopeSpectrumCalibrationLoad_TB->Resize(150,25);
   DGScopeSpectrumCalibrationLoad_TB->ChangeOptions(DGScopeSpectrumCalibrationLoad_TB->GetOptions() | kFixedSize);
   DGScopeSpectrumCalibrationLoad_TB->SetState(kButtonDisabled);
-
+  */
 
   //////////////////////
   // Display settings //
@@ -2155,6 +2259,11 @@ void ADAQAcquisition::HandleScopeButtons()
       // to energy within the acquisition loop before histogramming
       // the result into the channel's spectrum
       UseCalibrationManager[CurrentChannel] = true;
+
+
+      DGScopeSpectrumCalibrationCalibrate_TB->SetText("Calibrated");
+      DGScopeSpectrumCalibrationCalibrate_TB->SetForegroundColor(ColorManager->Number2Pixel(1));
+      DGScopeSpectrumCalibrationCalibrate_TB->SetBackgroundColor(ColorManager->Number2Pixel(8));
     }
     break;
   }
@@ -2210,28 +2319,30 @@ void ADAQAcquisition::HandleScopeButtons()
     DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->Select(0);
     DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->SetNumber(0.0);
     DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->SetNumber(1.0);
-    
 
+    DGScopeSpectrumCalibrationCalibrate_TB->SetText("Calibrate");
+    DGScopeSpectrumCalibrationCalibrate_TB->SetForegroundColor(ColorManager->Number2Pixel(1));
+    DGScopeSpectrumCalibrationCalibrate_TB->SetBackgroundColor(ColorManager->Number2Pixel(18));
+    
     break;
   }
 
   case DGScopeSpectrumCalibrationLoad_TB_ID:{
 
-    const char *FileTypes[] = {"ADAQ calibration file", ".acal",
-			       0};
+    const char *FileTypes[] = {"ADAQ calibration file", "*.acal",
+			       "All",                   "*.*",
+			       0,0};
 
     TGFileInfo FileInformation;
     FileInformation.fFileTypes = FileTypes;
     FileInformation.fIniDir = StrDup(getenv("PWD"));
-    new TGFileDialog(gClient->GetRoot(), this, kFDSave, &FileInformation);
+    new TGFileDialog(gClient->GetRoot(), this, kFDOpen, &FileInformation);
 
     if(FileInformation.fFilename==NULL)
       {}
 
     else{
       
-      int SetPoint = DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->GetSelected();
-
       int CurrentChannel = DGScopeSpectrumChannel_CBL->GetComboBox()->GetSelected();
 
       string CalibrationFileName = FileInformation.fFilename;
@@ -2239,16 +2350,41 @@ void ADAQAcquisition::HandleScopeButtons()
       size_t Found = CalibrationFileName.find_last_of(".");
       if(Found != string::npos){
 
+	// Set the calibration file to an input stream
 	ifstream In(CalibrationFileName.c_str());
+
+	// Reset any preexisting calibrations
+	DGScopeSpectrumCalibrationReset_TB->Clicked();
+
+	// An index to control the set point
+	int SetPoint = 0;
+
+	// Iterate through each line in the file and use the values
+	// (column1 == energy, column2 == pulse unit) to set the
+	// CalibrationData objects for the current channel
 	while(In.good()){
 	  double Energy, PulseUnit;
-	  
 	  if(In.eof()) break;
-
 	  In >> Energy >> PulseUnit;
+	  CalibrationData[CurrentChannel].PointID.push_back(SetPoint);
+	  CalibrationData[CurrentChannel].Energy.push_back(Energy);
+	  CalibrationData[CurrentChannel].PulseUnit.push_back(PulseUnit);
 
-	  CalibrationData[CurrentChannel].Energy[SetPoint] = Energy;
+	  // Add a new point to the number of calibration points in case
+	  // the user wants to add subsequent points to the calibration
+	  stringstream ss;
+	  ss << (SetPoint+1);
+	  string NewPointLabel = "Point " + ss.str();
+	  DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->AddEntry(NewPointLabel.c_str(),SetPoint+1);
+	  
+	  // Set the combo box to display the new calibration point...
+	  DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->Select(SetPoint+1);
+
+	  SetPoint++;
 	}
+
+	// Use the loaded calibration points to set the calibration
+	DGScopeSpectrumCalibrationCalibrate_TB->Clicked();
       }
     }
     break;
@@ -2610,12 +2746,20 @@ void ADAQAcquisition::HandleScopeNumberEntries()
     // horizontal triple widget just under DGScope canvas) then update
     // the position of the horizontal triple widget such that the
     // drawn calibration line on th ecanvas matches the entered number
-  case DGScopeSpectrumCalibrationPulseUnit_NEL_ID:
-    int CalibrationPulseUnit = DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->GetNumber();
-    DGScopeHorizontalScale_THS->SetPointerPosition(CalibrationPulseUnit);
+  case DGScopeSpectrumCalibrationEnergy_NEL_ID:
+  case DGScopeSpectrumCalibrationPulseUnit_NEL_ID:{
+    double Value = 0.;
+    if(ActiveEntryID == DGScopeSpectrumCalibrationEnergy_NEL_ID)
+      Value = DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->GetNumber();
+    else
+      Value = DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->GetNumber();
+    
+    // Normalize value for slider position setting from 0 to 1
+    Value /= DGScopeSpectrumMaxBin_NEL->GetEntry()->GetNumber();
+    
+    DGScopeHorizontalScale_THS->SetPointerPosition(Value);
     break;
-
- 
+  }
   }
 }
 
@@ -2729,6 +2873,7 @@ void ADAQAcquisition::HandleCheckButtons()
     // Enable the calibration widgets
   case DGScopeSpectrumCalibration_CB_ID:
     if(DGScopeSpectrumCalibration_CB->IsDown()){
+      DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->SetEnabled(true);
       DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->SetState(true);
       DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->SetState(true);
       DGScopeSpectrumCalibrationSetPoint_TB->SetState(kButtonUp);
@@ -2740,6 +2885,7 @@ void ADAQAcquisition::HandleCheckButtons()
 
     // Disable the calibration widgets
     else{
+      DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->SetEnabled(false);
       DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->SetState(false);
       DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->SetState(false);
       DGScopeSpectrumCalibrationSetPoint_TB->SetState(kButtonDisabled);
@@ -2984,8 +3130,8 @@ void ADAQAcquisition::RunDGScope()
    
   // Get the number of, min, and max bins for the spectrum
   int bins = DGScopeSpectrumBinNumber_NEL->GetEntry()->GetIntNumber();
-  int minBin = DGScopeSpectrumMinBin_NEL->GetEntry()->GetIntNumber();
-  int maxBin = DGScopeSpectrumMaxBin_NEL->GetEntry()->GetIntNumber();
+  double minBin = DGScopeSpectrumMinBin_NEL->GetEntry()->GetNumber();
+  double maxBin = DGScopeSpectrumMaxBin_NEL->GetEntry()->GetNumber();
    
   // Allocate variables for the X and Y minimum and maximum positions
   // of the X and Y double sliders that control canvas plotting range
