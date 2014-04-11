@@ -145,6 +145,7 @@ enum{
   DGScopeRecordLength_NEL_ID,
   DGScopePostTriggerSize_NEL_ID,
 
+  DGScopeDataFileName_TB_ID,
   DGScopeDataStorageCreateFile_TB_ID,
   DGScopeDataStorageCloseFile_TB_ID,
 

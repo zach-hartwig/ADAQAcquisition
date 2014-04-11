@@ -319,8 +319,11 @@ private:
 
   ADAQNumberEntryWithLabel *DGScopeBaselineMin_NEL, *DGScopeBaselineMax_NEL;
 
-  ADAQTextEntryWithLabel *DGScopeDataFileName_TEL;
+
   ADAQTextEntryWithLabel *DGScopeDataComment_TEL;
+
+  TGTextButton *DGScopeDataFileName_TB;
+  ADAQTextEntryWithLabel *DGScopeDataFileName_TEL;
   TGTextButton *DGScopeDataStorageCreateFile_TB;
   TGTextButton *DGScopeDataStorageCloseFile_TB;
   TGCheckButton *DGScopeDataStorageEnable_CB;

@@ -1400,6 +1400,7 @@ void ADAQAcquisition::FillScopeFrame()
   DGScopeDataStorageFrame->AddFrame(DGScopeDataStorage_GF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
 
   // ADAQ text entry for setting the ROOT file name
+  /*
   DGScopeDataStorage_GF->AddFrame(DGScopeDataFileName_TEL = new ADAQTextEntryWithLabel(DGScopeDataStorage_GF, "Filename",-1),
 				  new TGLayoutHints(kLHintsNormal,5,5,5,5));
   DGScopeDataFileName_TEL->GetEntry()->SetText("ADAQMeasurement");
@@ -1410,21 +1411,36 @@ void ADAQAcquisition::FillScopeFrame()
   DGScopeDataStorage_GF->AddFrame(DGScopeDataComment_TEL = new ADAQTextEntryWithLabel(DGScopeDataStorage_GF, "Comment", -1),
 				  new TGLayoutHints(kLHintsNormal,5,5,5,5));
   DGScopeDataComment_TEL->GetEntry()->SetState(false);
+  */
+  DGScopeDataStorage_GF->AddFrame(DGScopeDataFileName_TB = new TGTextButton(DGScopeDataStorage_GF, "Data file name", DGScopeDataFileName_TB_ID),
+				  new TGLayoutHints(kLHintsNormal,10,5,5,0));
+  DGScopeDataFileName_TB->Connect("Clicked()","ADAQAcquisition", this, "HandleScopeButtons()");
+  DGScopeDataFileName_TB->Resize(175, 30);
+  DGScopeDataFileName_TB->ChangeOptions(DGScopeDataFileName_TB->GetOptions() | kFixedSize);
+  DGScopeDataFileName_TB->SetState(kButtonDisabled);
+
+  DGScopeDataStorage_GF->AddFrame(DGScopeDataFileName_TEL = new ADAQTextEntryWithLabel(DGScopeDataStorage_GF, "", -1),
+				      new TGLayoutHints(kLHintsNormal,10,5,5,0));
+  DGScopeDataFileName_TEL->GetEntry()->Resize(175, 25);
+  DGScopeDataFileName_TEL->GetEntry()->ChangeOptions(DGScopeDataFileName_TEL->GetOptions() | kFixedSize | kSunkenFrame);
+  DGScopeDataFileName_TEL->GetEntry()->SetState(false);
+  DGScopeDataFileName_TEL->GetEntry()->SetText("ADAQMeasurement.adaq");
+
 
   // ROOT text button to create a root file using the name in the text entry field above
   DGScopeDataStorage_GF->AddFrame(DGScopeDataStorageCreateFile_TB = new TGTextButton(DGScopeDataStorage_GF,"Create ROOT file", DGScopeDataStorageCreateFile_TB_ID),
-				  new TGLayoutHints(kLHintsNormal,5,5,0,5));
+				  new TGLayoutHints(kLHintsNormal,10,5,8,5));
   DGScopeDataStorageCreateFile_TB->Connect("Clicked()","ADAQAcquisition",this,"HandleScopeButtons()");
-  DGScopeDataStorageCreateFile_TB->Resize(150,25);
+  DGScopeDataStorageCreateFile_TB->Resize(175,30);
   DGScopeDataStorageCreateFile_TB->ChangeOptions(DGScopeDataStorageCreateFile_TB->GetOptions() | kFixedSize);
   DGScopeDataStorageCreateFile_TB->SetState(kButtonDisabled);
 
   // ROOT text button to write all data to the ROOT file and close it. This button MUST be clicked to 
   // successfully write&close the ROOT file otherwise the ROOT file will have errors.
   DGScopeDataStorage_GF->AddFrame(DGScopeDataStorageCloseFile_TB = new TGTextButton(DGScopeDataStorage_GF,"Close ROOT file", DGScopeDataStorageCloseFile_TB_ID),
-				  new TGLayoutHints(kLHintsNormal,5,5,0,5));
+				  new TGLayoutHints(kLHintsNormal,10,5,0,5));
   DGScopeDataStorageCloseFile_TB->Connect("Clicked()","ADAQAcquisition",this,"HandleScopeButtons()");
-  DGScopeDataStorageCloseFile_TB->Resize(150,25);
+  DGScopeDataStorageCloseFile_TB->Resize(175,30);
   DGScopeDataStorageCloseFile_TB->ChangeOptions(DGScopeDataStorageCloseFile_TB->GetOptions() | kFixedSize);
   DGScopeDataStorageCloseFile_TB->SetState(kButtonDisabled);
   
