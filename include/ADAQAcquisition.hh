@@ -133,8 +133,9 @@ private:
   bool AcquisitionTimerEnabled;
   double AcquisitionTime_Start, AcquisitionTime_Stop;
 
-
+  
   // Strings for file names, extensions
+  string DataFileName, DataFileExtension;
   string SpectrumFileName, SpectrumFileExtension;
   string GraphicsFileName, GraphicsFileExtension;
 
@@ -154,6 +155,7 @@ private:
   bool BranchWaveformTree;
   ADAQRootMeasParams *MeasParams;
   TObjString *MeasComment;
+  bool ROOTFileOpen;
 
   vector<bool> UseCalibrationManager;
   vector<TGraph *> CalibrationManager;
@@ -318,7 +320,6 @@ private:
   TGRadioButton *DGScopeHighRate_RB, *DGScopeUltraHighRate_RB;
 
   ADAQNumberEntryWithLabel *DGScopeBaselineMin_NEL, *DGScopeBaselineMax_NEL;
-
 
   ADAQTextEntryWithLabel *DGScopeDataComment_TEL;
 

@@ -47,6 +47,7 @@ ADAQAcquisition::ADAQAcquisition(int W, int H)
     NumDataChannels(8), BuildInDebugMode(false),
     AcquisitionTimerEnabled(false), 
     AcquisitionTime_Start(0.), AcquisitionTime_Stop(0.),
+    DataFileName("DefaultData"), DataFileExtension(".adaq"),
     SpectrumFileName("DefaultSpectrum"), SpectrumFileExtension(".dat"),
     GraphicsFileName("DefaultGraphics"), GraphicsFileExtension(".eps"),
     ColorManager(new TColor), RNG(new TRandom)
@@ -1069,7 +1070,7 @@ void ADAQAcquisition::FillScopeFrame()
   DGScopeReadoutControls_GF->SetTitlePos(TGGroupFrame::kCenter);
   DGScopeSettingsFrame->AddFrame(DGScopeReadoutControls_GF, new TGLayoutHints(kLHintsNormal, 5,5,5,5));
   
-  DGScopeReadoutControls_GF->AddFrame(DGScopeMaxEventsBeforeTransfer_NEL = new ADAQNumberEntryWithLabel(DGScopeReadoutControls_GF, "VME transfer events", -1),
+  DGScopeReadoutControls_GF->AddFrame(DGScopeMaxEventsBeforeTransfer_NEL = new ADAQNumberEntryWithLabel(DGScopeReadoutControls_GF, "ME transfer events", -1),
 				      new TGLayoutHints(kLHintsNormal, 5,5,5,5));
   DGScopeMaxEventsBeforeTransfer_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
   DGScopeMaxEventsBeforeTransfer_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
@@ -1424,11 +1425,11 @@ void ADAQAcquisition::FillScopeFrame()
   DGScopeDataFileName_TEL->GetEntry()->Resize(175, 25);
   DGScopeDataFileName_TEL->GetEntry()->ChangeOptions(DGScopeDataFileName_TEL->GetOptions() | kFixedSize | kSunkenFrame);
   DGScopeDataFileName_TEL->GetEntry()->SetState(false);
-  DGScopeDataFileName_TEL->GetEntry()->SetText("ADAQMeasurement.adaq");
+  DGScopeDataFileName_TEL->GetEntry()->SetText("DefaultData.adaq");
 
 
   // ROOT text button to create a root file using the name in the text entry field above
-  DGScopeDataStorage_GF->AddFrame(DGScopeDataStorageCreateFile_TB = new TGTextButton(DGScopeDataStorage_GF,"Create ROOT file", DGScopeDataStorageCreateFile_TB_ID),
+  DGScopeDataStorage_GF->AddFrame(DGScopeDataStorageCreateFile_TB = new TGTextButton(DGScopeDataStorage_GF,"Create ADAQ file", DGScopeDataStorageCreateFile_TB_ID),
 				  new TGLayoutHints(kLHintsNormal,10,5,8,5));
   DGScopeDataStorageCreateFile_TB->Connect("Clicked()","ADAQAcquisition",this,"HandleScopeButtons()");
   DGScopeDataStorageCreateFile_TB->Resize(175,30);
@@ -1437,7 +1438,7 @@ void ADAQAcquisition::FillScopeFrame()
 
   // ROOT text button to write all data to the ROOT file and close it. This button MUST be clicked to 
   // successfully write&close the ROOT file otherwise the ROOT file will have errors.
-  DGScopeDataStorage_GF->AddFrame(DGScopeDataStorageCloseFile_TB = new TGTextButton(DGScopeDataStorage_GF,"Close ROOT file", DGScopeDataStorageCloseFile_TB_ID),
+  DGScopeDataStorage_GF->AddFrame(DGScopeDataStorageCloseFile_TB = new TGTextButton(DGScopeDataStorage_GF,"Close ADAQ file", DGScopeDataStorageCloseFile_TB_ID),
 				  new TGLayoutHints(kLHintsNormal,10,5,0,5));
   DGScopeDataStorageCloseFile_TB->Connect("Clicked()","ADAQAcquisition",this,"HandleScopeButtons()");
   DGScopeDataStorageCloseFile_TB->Resize(175,30);
@@ -1447,7 +1448,7 @@ void ADAQAcquisition::FillScopeFrame()
   // ROOT check button to enable/disable saving data to ROOT file. Note that the data is saved to
   // the ROOT file only while the button is checked. The 
   DGScopeDataStorage_GF->AddFrame(DGScopeDataStorageEnable_CB = new TGCheckButton(DGScopeDataStorage_GF,"Data stored while checked", -1),
-				  new TGLayoutHints(kLHintsNormal,5,5,5,5));
+				  new TGLayoutHints(kLHintsNormal,10,5,5,5));
   DGScopeDataStorageEnable_CB->SetState(kButtonDisabled);
   
   DGScopeDisplayAndControls_VF->AddFrame(DGScopeDisplay_GF, new TGLayoutHints(kLHintsCenterX,5,5,5,5));
@@ -2008,14 +2009,15 @@ void ADAQAcquisition::HandleScopeButtons()
 
       // Determine if a ROOT file was open and receiving data; if so,
       // ensure that the data is written and the ROOT file is closed
-      if(OutputDataFile){
-	//if(DGScopeDataStorageEnable_CB->IsDown())
-	//  DGScopeDataStorageEnable_CB->SetState(kButtonUp);
+      if(ROOTFileOpen){
+	if(DGScopeDataStorageEnable_CB->IsDown())
+	  DGScopeDataStorageEnable_CB->Clicked();
 	
-	//if(OutputDataFile->IsOpen())
-	//  DGScopeDataStorageCloseFile_TB->Clicked();
+	if(OutputDataFile->IsOpen())
+	  DGScopeDataStorageCloseFile_TB->Clicked();
       }
     }
+    break;
   }
     
     // Send a software signal to the V1720 to for a manually forced
@@ -2355,49 +2357,81 @@ void ADAQAcquisition::HandleScopeButtons()
     break;
   }
 
+    //////////////////////////////
+    // Set the ROOT data file name
+
+  case DGScopeDataFileName_TB_ID:{
+    
+    const char *FileTypes[] = {"ADAQ ROOT file","*.adaq",
+			       "ADAQ ROOT file","*.root",
+			       0, 0};
+    
+    TGFileInfo FileInformation;
+    FileInformation.fFileTypes = FileTypes;
+    FileInformation.fOverwrite = false;
+    FileInformation.fIniDir = StrDup(getenv("PWD"));
+    new TGFileDialog(gClient->GetRoot(), this, kFDSave, &FileInformation);
+    
+    if(FileInformation.fFilename==NULL)
+      {}
+    else{
+      DataFileName = FileInformation.fFilename;
+      
+      size_t Found = DataFileName.find_last_of(".");
+      if(Found != string::npos)
+	DataFileName = DataFileName.substr(0, Found);
+
+      DataFileExtension = FileInformation.fFileTypes[FileInformation.fFileTypeIdx+1];
+
+      Found = DataFileExtension.find_last_of("*");
+      DataFileExtension = DataFileExtension.substr(Found+1, DataFileExtension.size());
+      string FileName_StripPath = DataFileName + DataFileExtension;
+
+      Found = FileName_StripPath.find_last_of("/");
+      if(Found != string::npos)
+	FileName_StripPath = FileName_StripPath.substr(Found+1, FileName_StripPath.size());
+
+      DGScopeDataFileName_TEL->GetEntry()->SetText(FileName_StripPath.c_str());
+    }
+    
+    break;
+  }
 
     ///////////////////////////
     // Create ROOT data file
   case DGScopeDataStorageCreateFile_TB_ID:{
 
+    ///////////////////////////////////////////////
+    // Test to ensure data file is not already open
+
+
     /////////////////////////////////////////////
     // Instantiate objects for persistent storage
 
-    // Test to ensure that the specified TFile name does not exist to
-    // prevent overwritting potentially precious data. You'll thank me
-    // for this someday.
-    ifstream TestFile(DGScopeDataFileName_TEL->GetEntry()->GetText());
-    if(TestFile.is_open()){
-      cout << "\nADAQ: Attempted to create a new ROOT file but one already exists with\n"
-		<<   "      that name! Please specify a new ROOT file!\n"
-		<< endl;
-      TestFile.close();
-      break;
-    }
-    TestFile.close();
+    string FileName = DataFileName + DataFileExtension;
 
     // TFile to create a ROOT binary file for output
-    OutputDataFile = new TFile(DGScopeDataFileName_TEL->GetEntry()->GetText(),"recreate");
+    OutputDataFile = new TFile(FileName.c_str(), "recreate");
     
     // TTree to store the waveforms as arrays. The array indices are
     // sample numbers and array values are the voltages
     WaveformTree = new TTree("WaveformTree","Prototype tree to store all waveforms of an event");
-
+    
     // TObjString to hold a comment on the measurement data
-    MeasComment = new TObjString(DGScopeDataComment_TEL->GetEntry()->GetText());
-
+    MeasComment = new TObjString("Comments are not presently enabled! ZSH 14 Apr 14");
+    
     // ADAQ class to hold measurement paremeters
     MeasParams = new ADAQRootMeasParams();
-
+    
     
     /////////////////////////////////////////////
     // Retrieve all values (except the waveforms)
-
+    
     // Retrieve the present voltage and drawn current for each
     // high voltage channel and store in the MeasParam object
     uint16_t voltage = 0;
     uint16_t current = 0;
-
+    
     for(int ch=0; ch<HVManager->GetNumChannels(); ch++){
       if(V6534Enable){
 	MeasParams->DetectorVoltage.push_back( HVManager->GetVoltage(ch,&voltage) );
@@ -2429,40 +2463,42 @@ void ADAQAcquisition::HandleScopeButtons()
     if(DGScopeUseDataReduction_CB->IsDown())
       MeasParams->RecordLength /= DGScopeDataReductionFactor_NEL->GetEntry()->GetIntNumber();
     
-    ///////////////////////////
-    // Set the infamous boolean
-
+    ////////////////////////////
+    // Set the infamous booleans
+    
     // Set a bool indicating that the next digitized event will
     // trigger the creation of a TTree branch with the correctly sized
     // array. This action is performed once in
     // ADAQAcquisition::RunDGScope(). See that function for more comments
     BranchWaveformTree = true;
 
-
+    ROOTFileOpen = true;
+    
     //////////////////////////////////
     // Set widget states appropriately
-
+    
     // Disable the filename, comment, and create file button (since we
     // don't want to create new ROOT files until the active is closed)
     // and activate the close file and enable buttons (since these
     // options are now available with an open ROOT file for data writing)
-    DGScopeDataFileName_TEL->GetEntry()->SetState(false);
-    DGScopeDataComment_TEL->GetEntry()->SetState(false);
+    //DGScopeDataFileName_TEL->GetEntry()->SetState(false);
+    //DGScopeDataComment_TEL->GetEntry()->SetState(false);
     DGScopeDataStorageCreateFile_TB->SetState(kButtonDisabled);
+    DGScopeDataStorageCreateFile_TB->SetBackgroundColor(ColorManager->Number2Pixel(8));
+    DGScopeDataStorageCreateFile_TB->SetText("ADAQ file created");
     DGScopeDataStorageCloseFile_TB->SetState(kButtonUp);
     DGScopeDataStorageEnable_CB->SetState(kButtonUp);
-
+  
     break;
   }
-
 
     ///////////////////////////////
     // Write and close ROOT file
   case DGScopeDataStorageCloseFile_TB_ID:{
     
-    if(!OutputDataFile)
+    if(!ROOTFileOpen)
       break;
-
+    
     if(DGScopeDataStorageEnable_CB->IsDown())
       DGScopeDataStorageEnable_CB->SetState(kButtonUp);
     
@@ -2483,12 +2519,14 @@ void ADAQAcquisition::HandleScopeButtons()
     delete OutputDataFile;
 
     // Set widget states appropriately.
-    DGScopeDataFileName_TEL->GetEntry()->SetState(true);
-    DGScopeDataComment_TEL->GetEntry()->SetState(true);
     DGScopeDataStorageCreateFile_TB->SetState(kButtonUp);
+    DGScopeDataStorageCreateFile_TB->SetBackgroundColor(ColorManager->Number2Pixel(18));
+    DGScopeDataStorageCreateFile_TB->SetText("Create ADAQ file");
     DGScopeDataStorageCloseFile_TB->SetState(kButtonDisabled);
     DGScopeDataStorageEnable_CB->SetState(kButtonUp);
     DGScopeDataStorageEnable_CB->SetState(kButtonDisabled);
+
+    ROOTFileOpen = false;
 
     break;
   }
@@ -2654,7 +2692,7 @@ void ADAQAcquisition::HandleScopeButtons()
       // If the ROOT data file is open but the user has not enabled
       // data storage, assume that the user wants to acquire data for
       // the specific amount of time dictated by the acquisition timer
-      if(OutputDataFile){
+      if(ROOTFileOpen){
 	if(OutputDataFile->IsOpen() and !DGScopeDataStorageEnable_CB->IsDown())
 	  DGScopeDataStorageEnable_CB->SetState(kButtonDown);
       }
@@ -2931,6 +2969,8 @@ void ADAQAcquisition::SetDGWidgetState(bool AcquiringData)
     DGScopeDCOffset_NEL[ch]->GetEntry()->SetState(WidgetState);
     DGScopeBaselineCalcMin_NEL[ch]->GetEntry()->SetState(WidgetState);
     DGScopeBaselineCalcMax_NEL[ch]->GetEntry()->SetState(WidgetState);
+    DGScopeZSThreshold_NEL[ch]->GetEntry()->SetState(WidgetState);
+    DGScopeZSSamples_NEL[ch]->GetEntry()->SetState(WidgetState);
   }
 
   DGScopeTriggerCoincidenceEnable_CB->SetState(ButtonState,true);
@@ -2945,6 +2985,11 @@ void ADAQAcquisition::SetDGWidgetState(bool AcquiringData)
   DGScopeHighRate_RB->SetEnabled(WidgetState);
   DGScopeUltraHighRate_RB->SetEnabled(WidgetState);
 
+  DGScopeMaxEventsBeforeTransfer_NEL->GetEntry()->SetState(WidgetState);
+  DGScopeDataReductionFactor_NEL->GetEntry()->SetState(WidgetState);
+
+  DGScopeZSMode_CBL->GetComboBox()->SetEnabled(WidgetState);
+
   DGScopeSpectrumBinNumber_NEL->GetEntry()->SetState(WidgetState);
   DGScopeSpectrumMinBin_NEL->GetEntry()->SetState(WidgetState);
   DGScopeSpectrumMaxBin_NEL->GetEntry()->SetState(WidgetState);
@@ -2955,14 +3000,13 @@ void ADAQAcquisition::SetDGWidgetState(bool AcquiringData)
   DGScopeSpectrumAnalysisULD_NEL->GetEntry()->SetState(WidgetState);
 
   DGScopeSpectrumAggregateRuns_CB->SetState(ButtonState,true);
-
-  DGScopeDataFileName_TEL->GetEntry()->SetState(AcquiringData);
-  DGScopeDataComment_TEL->GetEntry()->SetState(AcquiringData);
-
+  
   if(AcquiringData)
     DGScopeDataStorageCreateFile_TB->SetState(kButtonUp);
   else
     DGScopeDataStorageCreateFile_TB->SetState(kButtonDisabled);
+
+  DGScopeSpectrumRefreshRate_NEL->GetEntry()->SetState(WidgetState);
 }
 
 
@@ -4001,11 +4045,13 @@ void ADAQAcquisition::StopAcquisitionSafely()
   // data is written and the ROOT file is properly closed before
   // resetting widget state to prevent seg faults and that ROOT
   // file properly written.
-  if(OutputDataFile)
-    if(OutputDataFile->IsOpen()){
-      DGScopeDataStorageEnable_CB->SetState(kButtonUp);
+  if(ROOTFileOpen){
+    if(DGScopeDataStorageEnable_CB->IsDown())
+      DGScopeDataStorageEnable_CB->Clicked();
+    
+    if(OutputDataFile->IsOpen())
       DGScopeDataStorageCloseFile_TB->Clicked();
-    }
+  }
   
   // Determine if the acquisition timer is active
   if(AcquisitionTimerEnabled){
@@ -4021,8 +4067,6 @@ void ADAQAcquisition::StopAcquisitionSafely()
     // disabling acquisition so the widgets need to be fully
     // reset. (The DGScopeDataStorageCloseFile_TB click above allows
     // for continuing acquisition and new files.).
-    DGScopeDataFileName_TEL->GetEntry()->SetState(false);
-    DGScopeDataComment_TEL->GetEntry()->SetState(false);
     DGScopeDataStorageCreateFile_TB->SetState(kButtonDisabled);
     DGScopeDataStorageCloseFile_TB->SetState(kButtonDisabled);
     DGScopeDataStorageEnable_CB->SetState(kButtonUp);
