@@ -1953,9 +1953,12 @@ void ADAQAcquisition::HandleScopeButtons()
   TGTextButton *ActiveTextButton = (TGTextButton *) gTQSender;
   int ActiveButtonID = ActiveTextButton->WidgetId();
   
+  if(!VMEConnectionEstablished)
+    return;
+  
   // Return if the user has specified that the V1720 digitizer board
   // should be used during this session
-  if(!V1720Enable)
+  if(!V1720Enable )
     return;
   
   switch(ActiveButtonID){
