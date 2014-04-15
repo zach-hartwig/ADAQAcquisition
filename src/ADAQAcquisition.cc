@@ -1418,7 +1418,6 @@ void ADAQAcquisition::FillScopeFrame()
   DGScopeDataFileName_TB->Connect("Clicked()","ADAQAcquisition", this, "HandleScopeButtons()");
   DGScopeDataFileName_TB->Resize(175, 30);
   DGScopeDataFileName_TB->ChangeOptions(DGScopeDataFileName_TB->GetOptions() | kFixedSize);
-  DGScopeDataFileName_TB->SetState(kButtonDisabled);
 
   DGScopeDataStorage_GF->AddFrame(DGScopeDataFileName_TEL = new ADAQTextEntryWithLabel(DGScopeDataStorage_GF, "", -1),
 				      new TGLayoutHints(kLHintsNormal,10,5,5,0));
@@ -1426,7 +1425,6 @@ void ADAQAcquisition::FillScopeFrame()
   DGScopeDataFileName_TEL->GetEntry()->ChangeOptions(DGScopeDataFileName_TEL->GetOptions() | kFixedSize | kSunkenFrame);
   DGScopeDataFileName_TEL->GetEntry()->SetState(false);
   DGScopeDataFileName_TEL->GetEntry()->SetText("DefaultData.adaq");
-
 
   // ROOT text button to create a root file using the name in the text entry field above
   DGScopeDataStorage_GF->AddFrame(DGScopeDataStorageCreateFile_TB = new TGTextButton(DGScopeDataStorage_GF,"Create ADAQ file", DGScopeDataStorageCreateFile_TB_ID),
