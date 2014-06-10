@@ -39,10 +39,8 @@ using namespace boost::assign;
 ADAQAcquisition::ADAQAcquisition(int W, int H)
   : TGMainFrame(gClient->GetRoot()),
     DisplayWidth(W), DisplayHeight(H), 
-    V1718Enable(true),
-    V1720Enable(true), V1720BoardAddress(0x00420000),
-    V6534Enable(true), V6534BoardAddress(0x42420000),
-
+    V1718Enable(true), V1720Enable(true), V6534Enable(true),
+    V1720BoardAddress(0x00420000), V6534BoardAddress(0x42420000),
     VMEConnectionEstablished(false),
     HVMonitorEnable(false), DGScopeEnable(false),
     NumDataChannels(8), BuildInDebugMode(false),
@@ -307,37 +305,46 @@ void ADAQAcquisition::FillConnectionFrame()
   ModuleSettings_GF->SetTitlePos(TGGroupFrame::kCenter);
 
   vector<string> AddressTitle;
-  AddressTitle += "", "V1720 base address", "V6534 base address";
+  AddressTitle += "V1718 base address", "V1720 base address", "V6534 base address";
 
   vector<int> BoardEnableID, BoardAddressID, BoardAddress;
-  BoardEnableID += (int)0, (int)V1720BoardEnable_TB_ID, (int)V6534BoardEnable_TB_ID;
+  BoardEnableID += (int)V1718BoardEnable_TB_ID, (int)V1720BoardEnable_TB_ID, (int)V6534BoardEnable_TB_ID;
   BoardAddressID += (int)0, (int)V1720BoardAddress_ID, (int)V6534BoardAddress_ID;
   BoardAddress += (int)0, (int)V1720BoardAddress, (int)V6534BoardAddress;
 
   for(int board=0; board<3; board++){
     
-    // The V1718 board has no address/enable functionality. Insert a
-    // placeholder since the standard for vectors holding widgets for
-    // each board is to have three in order
-    if(board == 0){
-      BoardAddress_NEF.push_back(0);
-      BoardEnable_TB.push_back(0);
-      continue;
-    }
-
     TGVerticalFrame *BoardAddress_VF = new TGVerticalFrame(ModuleSettings_GF);
     BoardAddress_VF->AddFrame(new TGLabel(BoardAddress_VF, AddressTitle[board].c_str()), new TGLayoutHints(kLHintsCenterX, 5,5,5,0));
     
     TGHorizontalFrame *BoardAddress_HF = new TGHorizontalFrame(BoardAddress_VF);
     BoardAddress_HF->AddFrame(new TGLabel(BoardAddress_HF,"0x"), new TGLayoutHints(kLHintsExpandY, 5,0,0,5));
-    
-    BoardAddress_NEF.push_back(new TGNumberEntryField(BoardAddress_HF, BoardAddressID[board], 0,
-						      TGNumberFormat::kNESHex, 
-						      TGNumberFormat::kNEAPositive));
-    BoardAddress_NEF[board]->SetHexNumber(BoardAddress[board]);
-    BoardAddress_NEF[board]->Resize(80,20);
-    BoardAddress_HF->AddFrame(BoardAddress_NEF[board], new TGLayoutHints(kLHintsExpandY, 5, 5, 0, 5));
 
+    // The V1718 USB-VME board differs from the others in that, as the
+    // VME controller, it does not an explictly settable VME
+    // address. Its VME address is set automatically when a link is
+    // established (see the ADAQBridge class of the ADAQ library for
+    // details) Thus, there is special handling of the V1718 controls.
+    if(board == 0){
+      // Push back a zero to maintain an array size of 3
+      BoardAddress_NEF.push_back(0);
+
+      // Create a placeholder alerting the user to the automatically
+      // set V1718 VME address
+      TGTextEntry *V1718_TE = new TGTextEntry(BoardAddress_HF, "Auto. Set!", 0);
+      V1718_TE->SetAlignment(kTextCenterX);
+      V1718_TE->Resize(80,20);
+      BoardAddress_HF->AddFrame(V1718_TE, new TGLayoutHints(kLHintsExpandY, 5, 5, 0, 5));
+    }
+    else{
+      BoardAddress_NEF.push_back(new TGNumberEntryField(BoardAddress_HF, BoardAddressID[board], 0,
+							TGNumberFormat::kNESHex, 
+							TGNumberFormat::kNEAPositive));
+      BoardAddress_NEF[board]->SetHexNumber(BoardAddress[board]);
+      BoardAddress_NEF[board]->Resize(80,20);
+      BoardAddress_HF->AddFrame(BoardAddress_NEF[board], new TGLayoutHints(kLHintsExpandY, 5, 5, 0, 5));
+    }
+      
     BoardAddress_VF->AddFrame(BoardAddress_HF,new TGLayoutHints(kLHintsExpandY, 5,5,5,5));  
 
     BoardEnable_TB.push_back(new TGTextButton(BoardAddress_VF, "Board enabled", BoardEnableID[board]));
@@ -1602,6 +1609,20 @@ void ADAQAcquisition::HandleConnectionButtons()
       V1720Enable = true;
     }
     break;
+
+  case V1718BoardEnable_TB_ID:
+    if(BoardEnable_TB[V1718]->GetString() == "Board enabled"){
+      BoardEnable_TB[V1718]->SetText("Board disabled");
+      BoardEnable_TB[V1718]->SetBackgroundColor(ColorManager->Number2Pixel(2));
+      V1718Enable = false;
+    }
+    else if(BoardEnable_TB[V1718]->GetString() == "Board disabled"){
+      BoardEnable_TB[V1718]->SetText("Board enabled");
+      BoardEnable_TB[V1718]->SetBackgroundColor(ColorManager->Number2Pixel(8));
+      V1718Enable = true;
+    }
+    break;
+    
   }
 
   // Redirect std::cout back to the normal terminal output
@@ -1664,8 +1685,6 @@ void ADAQAcquisition::HandleRegisterButtons()
   // Perform a register read of the desired board
   if(Action == READ){
     addr32 = ReadAddress_NEF[Board]->GetHexNumber();
-
-    cout << V1718Enable << endl;
 
     if(Board == V1718 and V1718Enable){
       BRManager->GetRegisterValue(addr32, &data32);

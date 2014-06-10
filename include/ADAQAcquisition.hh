@@ -101,12 +101,9 @@ private:
   ADAQBridge *BRManager;
 
   // Use booleans and VME addresses
-  const bool V1718Enable;
-  bool V1720Enable;
-  int V1720BoardAddress;
-  bool V6534Enable;
-  int V6534BoardAddress;
-
+  bool V1718Enable, V1720Enable, V6534Enable;
+  int V1720BoardAddress, V6534BoardAddress;
+  
   bool VMEConnectionEstablished;
 
   // Variables for high voltage control
@@ -183,11 +180,12 @@ private:
 
   TGTextView *ConnectionOutput_TV;
 
+  vector<TGTextButton *> BoardEnable_TB;
+  vector<TGNumberEntryField *> BoardAddress_NEF;
+
   /////////////////
   // Register frame
-
-  vector<TGTextButton *> BoardEnable_TB;
-  vector<TGNumberEntryField *> BoardAddress_NEF, ReadAddress_NEF, ReadValueHex_NEF;
+  vector<TGNumberEntryField *> ReadAddress_NEF, ReadValueHex_NEF;
   vector<TGTextEntry *> ReadValueBinary_TE;
   vector<TGNumberEntryField *> WriteAddress_NEF, WriteValue_NEF;
   vector<TGTextButton *> Read_TB, Write_TB;
