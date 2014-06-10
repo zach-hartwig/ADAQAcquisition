@@ -119,12 +119,14 @@ enum{
   DGScopeChVerticalPosition_NEL_ID,
 
   DGScopeSpectrumCalibration_CB_ID,
-  DGScopeSpectrumCalibrationEnergyPulseUnit_NEL_ID,
+  DGScopeSpectrumCalibrationEnergy_NEL_ID,
   DGScopeSpectrumCalibrationPulseUnit_NEL_ID,
   DGScopeSpectrumCalibrationSetPoint_TB_ID,
   DGScopeSpectrumCalibrationCalibrate_TB_ID,
   DGScopeSpectrumCalibrationPlot_TB_ID,
   DGScopeSpectrumCalibrationReset_TB_ID,
+  DGScopeSpectrumCalibrationLoad_TB_ID,
+  DGScopeSpectrumCalibrationWrite_TB_ID,
   
   DGScopeSpectrumBinNumber_NEL_ID,
   DGScopeSpectrumMinBin_NEL_ID,
@@ -143,6 +145,7 @@ enum{
   DGScopeRecordLength_NEL_ID,
   DGScopePostTriggerSize_NEL_ID,
 
+  DGScopeDataFileName_TB_ID,
   DGScopeDataStorageCreateFile_TB_ID,
   DGScopeDataStorageCloseFile_TB_ID,
 

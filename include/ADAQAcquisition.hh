@@ -130,8 +130,9 @@ private:
   bool AcquisitionTimerEnabled;
   double AcquisitionTime_Start, AcquisitionTime_Stop;
 
-
+  
   // Strings for file names, extensions
+  string DataFileName, DataFileExtension;
   string SpectrumFileName, SpectrumFileExtension;
   string GraphicsFileName, GraphicsFileExtension;
 
@@ -151,6 +152,7 @@ private:
   bool BranchWaveformTree;
   ADAQRootMeasParams *MeasParams;
   TObjString *MeasComment;
+  bool ROOTFileOpen;
 
   vector<bool> UseCalibrationManager;
   vector<TGraph *> CalibrationManager;
@@ -284,6 +286,8 @@ private:
   TGTextButton *DGScopeSpectrumCalibrationCalibrate_TB;
   TGTextButton *DGScopeSpectrumCalibrationPlot_TB;
   TGTextButton *DGScopeSpectrumCalibrationReset_TB;
+  TGTextButton *DGScopeSpectrumCalibrationLoad_TB;
+  TGTextButton *DGScopeSpectrumCalibrationWrite_TB;
 
   ADAQNumberEntryWithLabel *DGScopeSpectrumBinNumber_NEL;
   ADAQNumberEntryWithLabel *DGScopeSpectrumMinBin_NEL;
@@ -315,8 +319,10 @@ private:
 
   ADAQNumberEntryWithLabel *DGScopeBaselineMin_NEL, *DGScopeBaselineMax_NEL;
 
-  ADAQTextEntryWithLabel *DGScopeDataFileName_TEL;
   ADAQTextEntryWithLabel *DGScopeDataComment_TEL;
+
+  TGTextButton *DGScopeDataFileName_TB;
+  ADAQTextEntryWithLabel *DGScopeDataFileName_TEL;
   TGTextButton *DGScopeDataStorageCreateFile_TB;
   TGTextButton *DGScopeDataStorageCloseFile_TB;
   TGCheckButton *DGScopeDataStorageEnable_CB;
