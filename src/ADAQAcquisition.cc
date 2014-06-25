@@ -39,14 +39,8 @@ using namespace boost::assign;
 ADAQAcquisition::ADAQAcquisition(int W, int H)
   : TGMainFrame(gClient->GetRoot()),
     DisplayWidth(W), DisplayHeight(H), 
-<<<<<<< HEAD
-    V1718Enable(true), V1720Enable(true), V6534Enable(true),
+    V1718Enable(true), V1720Enable(false), V6534Enable(false),
     V1720BoardAddress(0x00420000), V6534BoardAddress(0x42420000),
-=======
-    V1718Enable(true),
-    V1720Enable(true), V1720BoardAddress(0x00420000),
-    V6534Enable(true), V6534BoardAddress(0x42420000),
->>>>>>> d9936646f43d6b8635507f46849d929a58d69153
     VMEConnectionEstablished(false),
     HVMonitorEnable(false), DGScopeEnable(false),
     NumDataChannels(8), BuildInDebugMode(false),
@@ -1588,10 +1582,15 @@ void ADAQAcquisition::HandleConnectionButtons()
       }
       
       int V1718LinkOpen = -42;
-      if(V1718Enable and V1720LinkOpen == 0){
-	V1718LinkOpen = BRManager->OpenLink(DGManager->GetBoardHandle(), true);
-      }
 
+      if(V1718Enable){
+	if(!V1720Enable and !V6534Enable){
+	  V1718LinkOpen = BRManager->OpenLinkDirectly();
+	}
+	else if(V1720LinkOpen == 0)
+	  V1718LinkOpen = BRManager->OpenLinkViaDigitizer(DGManager->GetBoardHandle(), true);
+      }
+      
       int V6534LinkOpen = -42;
       if(V6534Enable){
 	V6534BoardAddress = BoardAddress_NEF[V6534]->GetHexNumber();
@@ -1601,7 +1600,7 @@ void ADAQAcquisition::HandleConnectionButtons()
 	  HVManager->SetToSafeState();
       }
 
-      if(V6534LinkOpen==0 or V1720LinkOpen==0){
+      if(V1718LinkOpen == 0 or V1720LinkOpen==0 or V6534LinkOpen==0){
 	V1718Connect_TB->SetBackgroundColor(ColorManager->Number2Pixel(8));
 	V1718Connect_TB->SetText("Connected: click to disconnect");
 	VMEConnectionEstablished = true;
@@ -1610,6 +1609,7 @@ void ADAQAcquisition::HandleConnectionButtons()
 	string InputString = NewBuffer.str();
 	TGText *InputText = new TGText;
 	InputText->LoadBuffer(InputString.c_str());
+
 
 	// Update the connection TGTextView with the status messages
 	ConnectionOutput_TV->AddText(InputText);
