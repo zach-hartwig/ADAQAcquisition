@@ -1,5 +1,5 @@
-#ifndef __ADAQAcquisition_hh__
-#define __ADAQAcquisition_hh__ 1
+#ifndef __AAInterface_hh__
+#define __AAInterface_hh__ 1
 
 #include <TGLabel.h>
 #include <TColor.h>
@@ -34,18 +34,18 @@
 using namespace std;
 
 #include "ADAQRootClasses.hh"
-#include "ADAQAcquisitionTypes.hh"
+#include "AATypes.hh"
 class ADAQHighVoltage;
 class ADAQDigitizer;
 class ADAQBridge;
  
 
-class ADAQAcquisition : public TGMainFrame
+class AAInterface : public TGMainFrame
 {
 public:
 
-  ADAQAcquisition(int Width, int Height);
-  ~ADAQAcquisition();
+  AAInterface(int Width, int Height);
+  ~AAInterface();
   
   // Create/fill the ROOT widgets("signals")
   void CreateTopLevelFrames();
@@ -342,8 +342,8 @@ private:
   TGCheckButton *DebugModeEnable_CB;
   ADAQNumberEntryWithLabel *DebugModeWaveformGenerationPause_NEL;
 
-  // Define the ADAQAcquisition class to ROOT 
-  ClassDef(ADAQAcquisition,1);
+  // Define the AAInterface class to ROOT 
+  ClassDef(AAInterface,1);
 };
 
 

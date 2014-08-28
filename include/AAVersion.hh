@@ -1,5 +1,5 @@
-#ifndef __Version_hh__
-#define __Version_hh__ 1
+#ifndef __AAVersion_hh__
+#define __AAVersion_hh__ 1
 
 const string VersionString = "Development";
 

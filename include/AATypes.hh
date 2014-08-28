@@ -152,4 +152,10 @@ enum{
   DGScopeCheckBufferStatus_TB_ID
 };
 
+struct ADAQChannelCalibrationData{
+  vector<int> PointID;
+  vector<double> Energy;
+  vector<double> PulseUnit;
+};
+
 #endif
