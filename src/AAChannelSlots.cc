@@ -1,6 +1,8 @@
 #include "AAChannelSlots.hh"
+#include "AAInterface.hh"
 
-AAChannelSlots::AAChannelSlots()
+AAChannelSlots::AAChannelSlots(AAInterface *TI)
+  : TheInterface(TI)
 {;}
 
 

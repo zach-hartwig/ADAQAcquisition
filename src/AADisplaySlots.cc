@@ -1,6 +1,8 @@
 #include "AADisplaySlots.hh"
+#include "AAInterface.hh"
 
-AADisplaySlots::AADisplaySlots()
+AADisplaySlots::AADisplaySlots(AAInterface *TI)
+  : TheInterface(TI)
 {;}
 
 

@@ -3,16 +3,20 @@
 
 #include <TObject.h>
 
+class AAInterface;
+
 class AATabSlots : public TObject
 {
 public:
-
-  AATabSlots();
+  AATabSlots(AAInterface *);
   ~AATabSlots();
-
+  
+  void HandleConnectionTextButtons();
+  
   ClassDef(AATabSlots, 0);
   
 private:
+  AAInterface *TheInterface;
 };
 
 #endif

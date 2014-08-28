@@ -1,6 +1,8 @@
 #include "AASubtabSlots.hh"
+#include "AAInterface.hh"
 
-AASubtabSlots::AASubtabSlots()
+AASubtabSlots::AASubtabSlots(AAInterface *TI)
+  : TheInterface(TI)
 {;}
 
 

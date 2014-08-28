@@ -3,16 +3,19 @@
 
 #include <TObject.h>
 
+class AAInterface;
+
 class AAChannelSlots : public TObject
 {
 public:
 
-  AAChannelSlots();
+  AAChannelSlots(AAInterface *);
   ~AAChannelSlots();
 
   ClassDef(AAChannelSlots, 0);
   
 private:
+  AAInterface *TheInterface;
 };
 
 #endif

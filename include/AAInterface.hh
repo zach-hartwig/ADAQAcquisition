@@ -38,10 +38,20 @@ using namespace std;
 class ADAQHighVoltage;
 class ADAQDigitizer;
 class ADAQBridge;
- 
+
+class AAChannelSlots;
+class AADisplaySlots;
+class AASubtabSlots;
+class AATabSlots;
+
 
 class AAInterface : public TGMainFrame
 {
+  friend class AAChannelSlots;
+  friend class AADisplaySlots;
+  friend class AASubtabSlots;
+  friend class AATabSlots;
+
 public:
 
   AAInterface(int Width, int Height);
@@ -341,6 +351,11 @@ private:
 
   TGCheckButton *DebugModeEnable_CB;
   ADAQNumberEntryWithLabel *DebugModeWaveformGenerationPause_NEL;
+
+  AAChannelSlots *ChannelSlots;
+  AADisplaySlots *DisplaySlots;
+  AASubtabSlots *SubtabSlots;
+  AATabSlots *TabSlots;
 
   // Define the AAInterface class to ROOT 
   ClassDef(AAInterface,1);

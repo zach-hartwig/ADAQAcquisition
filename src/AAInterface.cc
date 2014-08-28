@@ -35,6 +35,10 @@ using namespace boost::assign;
 #include "AATypes.hh"
 #include "AAVersion.hh"
 
+#include "AAChannelSlots.hh"
+#include "AADisplaySlots.hh"
+#include "AASubtabSlots.hh"
+#include "AATabSlots.hh"
 
 AAInterface::AAInterface(int W, int H)
   : TGMainFrame(gClient->GetRoot()),
@@ -70,6 +74,17 @@ AAInterface::AAInterface(int W, int H)
 
   BRManager = new ADAQBridge;
   BRManager->SetVerbose(true);
+
+
+  /////////////////////////////////////
+  // Initialize slot handler classes //
+  /////////////////////////////////////
+
+  ChannelSlots = new AAChannelSlots(this);
+  DisplaySlots = new AADisplaySlots(this);
+  SubtabSlots = new AASubtabSlots(this);
+  TabSlots = new AATabSlots(this);
+
   
   /////////////////////////////
   // Initialize HV variables //

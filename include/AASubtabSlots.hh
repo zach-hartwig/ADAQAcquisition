@@ -3,16 +3,19 @@
 
 #include <TObject.h>
 
+class AAInterface;
+
 class AASubtabSlots : public TObject
 {
 public:
 
-  AASubtabSlots();
+  AASubtabSlots(AAInterface *);
   ~AASubtabSlots();
 
   ClassDef(AASubtabSlots, 0);
   
 private:
+  AAInterface *TheInterface;
 };
 
 #endif
