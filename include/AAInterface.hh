@@ -55,32 +55,21 @@ public:
   AAInterface();
   ~AAInterface();
   
-  // Create/fill the ROOT widgets("signals")
+  // Create the GUI and populate with widgets
   void CreateTopLevelFrames();
   void FillConnectionFrame();
   void FillRegisterFrame();
   void FillPulserFrame();
   void FillVoltageFrame();
-  void FillScopeFrame();
+  void FillAcquisitionFrame();
 
-  // Create handlers for widget actions ("slots")
-  /*
-  void HandleConnectionButtons();
-  void HandleRegisterButtons();
-  void HandlePulserButtons();
-  void HandleVoltageButtons();
-  void HandleScopeButtons();
-  void HandleScopeNumberEntries();
-  void HandleRadioButtons();
-  void HandleComboBoxes(int, int);
-  void HandleCheckButtons();
-  */
   void HandleDisconnectAndTerminate(bool = true);
 
-
   // Enable/disable widgets
-  void SetHVWidgetState(int, bool);
-  void SetDGWidgetState(bool);
+  void SetVoltageChannelWidgetState(int, bool);
+  void SetVoltageWidgetState(bool, EButtonState);
+  void SetAcquisitionWidgetState(bool, EButtonState);
+  void SetCalibrationWidgetState(bool, EButtonState);
 
 private:
 

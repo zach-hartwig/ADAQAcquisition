@@ -69,10 +69,13 @@ AAInterface::AAInterface()
   // Boost::Assign functionality for its utility and concision
 
   // std::vector for HV channel labels
-  HVChannelLabels += "Channel 0 (-)", "Channel 1 (-)", "Channel 2 (-)", "Channel 3 (+)", "Channel 4 (+)", "Channel 5 (+)";
-
+  HVChannelLabels += 
+    "Channel 0 (-)", "Channel 1 (-)", "Channel 2 (-)", 
+    "Channel 3 (+)", "Channel 4 (+)", "Channel 5 (+)";
+  
   // std::vector to return the ROOT channel power widget ID from the HV channel number
-  HVChannelPower_TB_ID_Vec += (int)HVChannel0Power_TB_ID, (int)HVChannel1Power_TB_ID, (int)HVChannel2Power_TB_ID,
+  HVChannelPower_TB_ID_Vec += 
+    (int)HVChannel0Power_TB_ID, (int)HVChannel1Power_TB_ID, (int)HVChannel2Power_TB_ID,
     (int)HVChannel3Power_TB_ID, (int)HVChannel4Power_TB_ID, (int)HVChannel5Power_TB_ID;
   
   // std::map to return the HV channel number from the ROOT channel power widget ID
@@ -84,23 +87,39 @@ AAInterface::AAInterface()
   // Initialize DG variables //
   /////////////////////////////
 
-  DGChannelLabels += "Channel 0", "Channel 1", "Channel 2", "Channel 3", "Channel 4", "Channel 5", "Channel 6", "Channel 7";
+  DGChannelLabels += 
+    "Channel 0", "Channel 1", "Channel 2", "Channel 3", 
+    "Channel 4", "Channel 5", "Channel 6", "Channel 7";
 
-  DGScopeChEnable_CB_ID_Vec += (int)DGScopeCh0Enable_CB_ID, (int)DGScopeCh1Enable_CB_ID, (int)DGScopeCh2Enable_CB_ID, (int)DGScopeCh3Enable_CB_ID, 
-    (int)DGScopeCh4Enable_CB_ID, (int)DGScopeCh5Enable_CB_ID, (int)DGScopeCh6Enable_CB_ID, (int)DGScopeCh7Enable_CB_ID;
+  DGScopeChEnable_CB_ID_Vec += 
+    (int)DGScopeCh0Enable_CB_ID, (int)DGScopeCh1Enable_CB_ID, (int)DGScopeCh2Enable_CB_ID, 
+    (int)DGScopeCh3Enable_CB_ID, (int)DGScopeCh4Enable_CB_ID, (int)DGScopeCh5Enable_CB_ID, 
+    (int)DGScopeCh6Enable_CB_ID, (int)DGScopeCh7Enable_CB_ID;
 
-  DGScopeChDCOffset_NEL_ID_Vec += (int)DGScopeCh0DCOffset_NEL_ID, (int)DGScopeCh1DCOffset_NEL_ID, (int)DGScopeCh2DCOffset_NEL_ID, (int)DGScopeCh3DCOffset_NEL_ID, 
-    (int)DGScopeCh4DCOffset_NEL_ID, (int)DGScopeCh5DCOffset_NEL_ID, (int)DGScopeCh6DCOffset_NEL_ID, (int)DGScopeCh7DCOffset_NEL_ID;
+  DGScopeChDCOffset_NEL_ID_Vec += 
+    (int)DGScopeCh0DCOffset_NEL_ID, (int)DGScopeCh1DCOffset_NEL_ID, (int)DGScopeCh2DCOffset_NEL_ID, 
+    (int)DGScopeCh3DCOffset_NEL_ID, (int)DGScopeCh4DCOffset_NEL_ID, (int)DGScopeCh5DCOffset_NEL_ID, 
+    (int)DGScopeCh6DCOffset_NEL_ID, (int)DGScopeCh7DCOffset_NEL_ID;
 
-  DGScopeChTriggerThreshold_NEL_ID_Vec += (int)DGScopeCh0TriggerThreshold_NEL_ID, (int)DGScopeCh1TriggerThreshold_NEL_ID, (int)DGScopeCh2TriggerThreshold_NEL_ID, (int)DGScopeCh3TriggerThreshold_NEL_ID, (int)DGScopeCh4TriggerThreshold_NEL_ID, (int)DGScopeCh5TriggerThreshold_NEL_ID, (int)DGScopeCh6TriggerThreshold_NEL_ID, (int)DGScopeCh7TriggerThreshold_NEL_ID;
+  DGScopeChTriggerThreshold_NEL_ID_Vec += 
+    (int)DGScopeCh0TriggerThreshold_NEL_ID, (int)DGScopeCh1TriggerThreshold_NEL_ID, (int)DGScopeCh2TriggerThreshold_NEL_ID, 
+    (int)DGScopeCh3TriggerThreshold_NEL_ID, (int)DGScopeCh4TriggerThreshold_NEL_ID, (int)DGScopeCh5TriggerThreshold_NEL_ID, 
+    (int)DGScopeCh6TriggerThreshold_NEL_ID, (int)DGScopeCh7TriggerThreshold_NEL_ID;
 
-  DGScopeChBaselineCalcMin_NEL_ID_Vec += (int)DGScopeCh0BaselineCalcMin_NEL_ID, (int)DGScopeCh1BaselineCalcMin_NEL_ID, (int)DGScopeCh2BaselineCalcMin_NEL_ID, (int)DGScopeCh3BaselineCalcMin_NEL_ID, (int)DGScopeCh4BaselineCalcMin_NEL_ID, (int)DGScopeCh5BaselineCalcMin_NEL_ID, (int)DGScopeCh6BaselineCalcMin_NEL_ID, (int)DGScopeCh7BaselineCalcMin_NEL_ID;
+  DGScopeChBaselineCalcMin_NEL_ID_Vec += 
+    (int)DGScopeCh0BaselineCalcMin_NEL_ID, (int)DGScopeCh1BaselineCalcMin_NEL_ID, (int)DGScopeCh2BaselineCalcMin_NEL_ID, 
+    (int)DGScopeCh3BaselineCalcMin_NEL_ID, (int)DGScopeCh4BaselineCalcMin_NEL_ID, (int)DGScopeCh5BaselineCalcMin_NEL_ID,
+    (int)DGScopeCh6BaselineCalcMin_NEL_ID, (int)DGScopeCh7BaselineCalcMin_NEL_ID;
 
-  DGScopeChBaselineCalcMax_NEL_ID_Vec += (int)DGScopeCh0BaselineCalcMax_NEL_ID, (int)DGScopeCh1BaselineCalcMax_NEL_ID, (int)DGScopeCh2BaselineCalcMax_NEL_ID, (int)DGScopeCh3BaselineCalcMax_NEL_ID, (int)DGScopeCh4BaselineCalcMax_NEL_ID, (int)DGScopeCh5BaselineCalcMax_NEL_ID, (int)DGScopeCh6BaselineCalcMax_NEL_ID, (int)DGScopeCh7BaselineCalcMax_NEL_ID;
+  DGScopeChBaselineCalcMax_NEL_ID_Vec += 
+    (int)DGScopeCh0BaselineCalcMax_NEL_ID, (int)DGScopeCh1BaselineCalcMax_NEL_ID, (int)DGScopeCh2BaselineCalcMax_NEL_ID,
+    (int)DGScopeCh3BaselineCalcMax_NEL_ID, (int)DGScopeCh4BaselineCalcMax_NEL_ID, (int)DGScopeCh5BaselineCalcMax_NEL_ID, 
+    (int)DGScopeCh6BaselineCalcMax_NEL_ID, (int)DGScopeCh7BaselineCalcMax_NEL_ID;
   
   insert(DGScopeChTriggerThreshold_NEL_ID_Map)
-    ((int)DGScopeCh0TriggerThreshold_NEL_ID,0) ((int)DGScopeCh1TriggerThreshold_NEL_ID,1) ((int)DGScopeCh2TriggerThreshold_NEL_ID,2) ((int)DGScopeCh3TriggerThreshold_NEL_ID,3)
-    ((int)DGScopeCh4TriggerThreshold_NEL_ID,4) ((int)DGScopeCh5TriggerThreshold_NEL_ID,5) ((int)DGScopeCh6TriggerThreshold_NEL_ID,6) ((int)DGScopeCh7TriggerThreshold_NEL_ID,7);
+    ((int)DGScopeCh0TriggerThreshold_NEL_ID,0) ((int)DGScopeCh1TriggerThreshold_NEL_ID,1) ((int)DGScopeCh2TriggerThreshold_NEL_ID,2) 
+    ((int)DGScopeCh3TriggerThreshold_NEL_ID,3) ((int)DGScopeCh4TriggerThreshold_NEL_ID,4) ((int)DGScopeCh5TriggerThreshold_NEL_ID,5)
+    ((int)DGScopeCh6TriggerThreshold_NEL_ID,6) ((int)DGScopeCh7TriggerThreshold_NEL_ID,7);
 
 
   ////////////////////////////////////////
@@ -116,7 +135,7 @@ AAInterface::AAInterface()
   FillRegisterFrame();
   FillPulserFrame();
   FillVoltageFrame();
-  FillScopeFrame();
+  FillAcquisitionFrame();
 
 
   ////////////////////////////////
@@ -647,9 +666,6 @@ void AAInterface::FillVoltageFrame()
     (ch<3) ? (HVChannel_GF->SetBackgroundColor(ColorManager->Number2Pixel(22))) : (HVChannel_GF->SetBackgroundColor(ColorManager->Number2Pixel(16)));
   }
 
-
-
-
   TGGroupFrame *HVAllChannel_GF = new TGGroupFrame(HVChannelControls_VF, "All Channels", kHorizontalFrame);
   HVAllChannel_GF->SetTitlePos(TGGroupFrame::kCenter);
   HVChannelControls_VF->AddFrame(HVAllChannel_GF, new TGLayoutHints(kLHintsCenterX, 5,5,5,0));
@@ -665,7 +681,7 @@ void AAInterface::FillVoltageFrame()
 }
 
 
-void AAInterface::FillScopeFrame()
+void AAInterface::FillAcquisitionFrame()
 {
   //////////////////////////////
   // Fill left vertical panel //
@@ -742,7 +758,7 @@ void AAInterface::FillScopeFrame()
     // ADAQ number entry to set channel's trigger threshold [ADC]
     DGScopeChannelControl_GF->AddFrame(DGScopeChTriggerThreshold_NEL[ch] = new ADAQNumberEntryWithLabel(DGScopeChannelControl_GF, "Trig. Threshold (ADC)", DGScopeChTriggerThreshold_NEL_ID_Vec[ch]),
 				       new TGLayoutHints(kLHintsNormal));
-    DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)","AAInterface",this,"HandleScopeNumberEntries()");
+    DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
     DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
     DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->SetNumber(2000);
     DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->Resize(65,20);
@@ -750,7 +766,7 @@ void AAInterface::FillScopeFrame()
     // ADAQ number entry to set minimum sample for baseline calculation [sample]
     DGScopeChannelControl_GF->AddFrame(DGScopeBaselineCalcMin_NEL[ch] = new ADAQNumberEntryWithLabel(DGScopeChannelControl_GF, "Baseline min. (sample)", DGScopeChBaselineCalcMin_NEL_ID_Vec[ch]),
 				       new TGLayoutHints(kLHintsNormal));
-    DGScopeBaselineCalcMin_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)","AAInterface",this,"HandleScopeNumberEntries()");
+    DGScopeBaselineCalcMin_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
     
     DGScopeBaselineCalcMin_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
     DGScopeBaselineCalcMin_NEL[ch]->GetEntry()->SetNumber(10);
@@ -777,7 +793,6 @@ void AAInterface::FillScopeFrame()
     
   }
   
-
 
   ////////////////////////////////
   // Fill DGScope display frame //
@@ -831,7 +846,7 @@ void AAInterface::FillScopeFrame()
   // ROOT text button for starting/stopping data acquisition by the digitizer
   DGScopeDisplayButtons_HF->AddFrame(DGScopeStartStop_TB = new TGTextButton(DGScopeDisplayButtons_HF, "Stopped", DGScopeStartStop_TB_ID),
 				     new TGLayoutHints(kLHintsNormal,5,5,0,0));
-  DGScopeStartStop_TB->Connect("Clicked()","AAInterface",this,"HandleScopeButtons()");
+  DGScopeStartStop_TB->Connect("Clicked()", "AADisplaySlots", DisplaySlots, "HandleTextButtons()");
   DGScopeStartStop_TB->Resize(300,30);
   DGScopeStartStop_TB->ChangeOptions(DGScopeStartStop_TB->GetOptions() | kFixedSize);
   DGScopeStartStop_TB->SetBackgroundColor(ColorManager->Number2Pixel(2));
@@ -841,7 +856,7 @@ void AAInterface::FillScopeFrame()
   // ROOT text button for manually triggering of DGScope acquisition
   DGScopeDisplayButtons_HF->AddFrame(DGScopeTrigger_TB = new TGTextButton(DGScopeDisplayButtons_HF, "Manual trigger", DGScopeTrigger_TB_ID),
 				     new TGLayoutHints(kLHintsNormal,5,5,0,0));
-  DGScopeTrigger_TB->Connect("Clicked()","AAInterface",this,"HandleScopeButtons()");
+  DGScopeTrigger_TB->Connect("Clicked()", "AADisplaySlots", DisplaySlots, "HandleTextButtons()");
   DGScopeTrigger_TB->Resize(175,30);
   DGScopeTrigger_TB->ChangeOptions(DGScopeTrigger_TB->GetOptions() | kFixedSize);
   
@@ -849,7 +864,7 @@ void AAInterface::FillScopeFrame()
 				     new TGLayoutHints(kLHintsCenterX, 5,5,0,0));
   DGScopeUpdatePlot_TB->Resize(175,30);
   DGScopeUpdatePlot_TB->ChangeOptions(DGScopeUpdatePlot_TB->GetOptions() | kFixedSize);
-  DGScopeUpdatePlot_TB->Connect("Clicked()","AAInterface", this, "HandleScopeButtons()");
+  DGScopeUpdatePlot_TB->Connect("Clicked()", "AADisplaySlots", DisplaySlots, "HandleTextButtons()");
 
   TGHorizontalFrame *DGScopeDisplayControls_HF = new TGHorizontalFrame(DGScopeDisplay_GF);
   DGScopeDisplay_GF->AddFrame(DGScopeDisplayControls_HF,
@@ -995,15 +1010,14 @@ void AAInterface::FillScopeFrame()
 				   new TGLayoutHints(kLHintsNormal, 5,5,0,0));
   DGScopeAcquisitionTimerStart_TB->Resize(100, 30);
   DGScopeAcquisitionTimerStart_TB->ChangeOptions(DGScopeAcquisitionTimerStart_TB->GetOptions() | kFixedSize);
-  DGScopeAcquisitionTimerStart_TB->Connect("Clicked()", "AAInterface", this, "HandleScopeButtons()");
+  DGScopeAcquisitionTimerStart_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
   
   DGScopeTimerButtons_HF->AddFrame(DGScopeAcquisitionTimerAbort_TB = new TGTextButton(DGScopeTimerButtons_HF, "Abort timer", DGScopeAcquisitionTimerAbort_TB_ID),
 				   new TGLayoutHints(kLHintsNormal, 5,5,0,0));
   DGScopeAcquisitionTimerAbort_TB->Resize(100, 30);
   DGScopeAcquisitionTimerAbort_TB->ChangeOptions(DGScopeAcquisitionTimerAbort_TB->GetOptions() | kFixedSize);
-  DGScopeAcquisitionTimerAbort_TB->Connect("Clicked()", "AAInterface", this, "HandleScopeButtons()");
+  DGScopeAcquisitionTimerAbort_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
   
-
 
   // V1720 readout controls
   TGGroupFrame *DGScopeReadoutControls_GF = new TGGroupFrame(DGScopeSettingsFrame, "Readout", kVerticalFrame);
@@ -1018,7 +1032,7 @@ void AAInterface::FillScopeFrame()
 
   DGScopeReadoutControls_GF->AddFrame(DGScopeCheckBufferStatus_TB = new TGTextButton(DGScopeReadoutControls_GF, "Check V1720 Buffer", DGScopeCheckBufferStatus_TB_ID),
 				      new TGLayoutHints(kLHintsNormal, 5,5,5,0));
-  DGScopeCheckBufferStatus_TB->Connect("Clicked()","AAInterface",this,"HandleScopeButtons()");
+  DGScopeCheckBufferStatus_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
   DGScopeCheckBufferStatus_TB->Resize(150,30);
   DGScopeCheckBufferStatus_TB->ChangeOptions(DGScopeCheckBufferStatus_TB->GetOptions() | kFixedSize);
   
@@ -1065,7 +1079,7 @@ void AAInterface::FillScopeFrame()
   for(uint32_t ch=0; ch<8; ch++)
     DGScopeSpectrumChannel_CBL->GetComboBox()->AddEntry(DGChannelLabels[ch].c_str(),ch);
   DGScopeSpectrumChannel_CBL->GetComboBox()->Select(0);
-  DGScopeSpectrumChannel_CBL->GetComboBox()->Connect("Selected(int,int)", "AAInterface", this, "HandleComboBoxes(int,int)");
+  DGScopeSpectrumChannel_CBL->GetComboBox()->Connect("Selected(int,int)", "AASubtabSlots", SubtabSlots, "HandleComboBoxes(int,int)");
   
   // ADAQ number entry to specify number of bins used in the spectra histogram
   DGScopeSpectrumHistogram_GF->AddFrame(DGScopeSpectrumBinNumber_NEL = new ADAQNumberEntryWithLabel(DGScopeSpectrumHistogram_GF, "Number of bins  ", DGScopeSpectrumBinNumber_NEL_ID),
@@ -1108,11 +1122,11 @@ void AAInterface::FillScopeFrame()
   DGScopeSpectrumAnalysis_GF->AddFrame(DGScopeSpectrumAnalysis_BG, new TGLayoutHints(kLHintsNormal,-13,0,0,0));
   
   DGScopeSpectrumAnalysisHeight_RB = new TGRadioButton(DGScopeSpectrumAnalysis_BG, "PHS  ", DGScopeSpectrumAnalysisHeight_RB_ID);
-  DGScopeSpectrumAnalysisHeight_RB->Connect("Clicked()", "AAInterface", this, "HandleRadioButtons()");
+  DGScopeSpectrumAnalysisHeight_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
 
   
   DGScopeSpectrumAnalysisArea_RB = new TGRadioButton(DGScopeSpectrumAnalysis_BG, "PAS", DGScopeSpectrumAnalysisArea_RB_ID);
-  DGScopeSpectrumAnalysisArea_RB->Connect("Clicked()", "AAInterface", this, "HandleRadioButtons()");
+  DGScopeSpectrumAnalysisArea_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
   DGScopeSpectrumAnalysisArea_RB->SetState(kButtonDown);
   
   DGScopeSpectrumAnalysis_GF->AddFrame(DGScopeSpectrumAnalysisLLD_NEL = new ADAQNumberEntryWithLabel(DGScopeSpectrumAnalysis_GF, "LLD (ADC/energy)", -1),
@@ -1150,13 +1164,13 @@ void AAInterface::FillScopeFrame()
   // Energy calibration 
   SpectrumCalibration_HF0->AddFrame(DGScopeSpectrumCalibration_CB = new TGCheckButton(SpectrumCalibration_HF0, "Make it so", DGScopeSpectrumCalibration_CB_ID),
 				    new TGLayoutHints(kLHintsLeft, 0,0,5,0));
-  DGScopeSpectrumCalibration_CB->Connect("Clicked()", "AAInterface", this, "HandleCheckButtons()");
+  DGScopeSpectrumCalibration_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
   DGScopeSpectrumCalibration_CB->SetState(kButtonUp);
 
   
   SpectrumCalibration_HF0->AddFrame(DGScopeSpectrumUseCalibrationSlider_CB = new TGCheckButton(SpectrumCalibration_HF0, "Use slider", DGScopeSpectrumUseCalibrationSlider_CB_ID),
 				    new TGLayoutHints(kLHintsLeft,25,5,5,0));
-  DGScopeSpectrumUseCalibrationSlider_CB->Connect("Clicked()","AAInterface",this,"HandleCheckButtons()");
+  DGScopeSpectrumUseCalibrationSlider_CB->Connect("Clicked()","AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
   DGScopeSpectrumUseCalibrationSlider_CB->SetState(kButtonDown);
   DGScopeSpectrumUseCalibrationSlider_CB->SetEnabled(false);
 
@@ -1186,7 +1200,7 @@ void AAInterface::FillScopeFrame()
   DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->AddEntry("Calibration point 0",0);
   DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->Select(0);
   DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->SetEnabled(false);
-  DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->Connect("Selected(int,int)", "AAInterface", this, "HandleComboBoxes(int,int)");
+  DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->Connect("Selected(int,int)", "AASubtabSlots", SubtabSlots, "HandleComboBoxes(int,int)");
   DGScopeSpectrumUseCalibrationSlider_CB->SetState(kButtonDisabled);
   
   SpectrumCalibration_GF->AddFrame(DGScopeSpectrumCalibrationEnergy_NEL = new ADAQNumberEntryWithLabel(SpectrumCalibration_GF, "Energy (keV or MeV)", DGScopeSpectrumCalibrationEnergy_NEL_ID),
@@ -1195,7 +1209,7 @@ void AAInterface::FillScopeFrame()
   DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEANonNegative);
   DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->SetNumber(0.0);
   DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->SetState(false);
-  DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->Connect("ValueSet(long)", "AAInterface", this, "HandleScopeNumberEntries()");
+  DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->Connect("ValueSet(long)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
 
   SpectrumCalibration_GF->AddFrame(DGScopeSpectrumCalibrationPulseUnit_NEL = new ADAQNumberEntryWithLabel(SpectrumCalibration_GF, "Pulse unit (ADC)", DGScopeSpectrumCalibrationPulseUnit_NEL_ID),
 				       new TGLayoutHints(kLHintsLeft,0,0,0,5));
@@ -1203,7 +1217,7 @@ void AAInterface::FillScopeFrame()
   DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
   DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->SetNumber(1.0);
   DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->SetState(false);
-  DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->Connect("ValueSet(long)", "AAInterface", this, "HandleScopeNumberEntries()");
+  DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->Connect("ValueSet(long)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
 
   TGHorizontalFrame *SpectrumCalibration_HF2 = new TGHorizontalFrame(SpectrumCalibration_GF);
   SpectrumCalibration_GF->AddFrame(SpectrumCalibration_HF2);
@@ -1211,7 +1225,7 @@ void AAInterface::FillScopeFrame()
   // Set point text button
   SpectrumCalibration_HF2->AddFrame(DGScopeSpectrumCalibrationSetPoint_TB = new TGTextButton(SpectrumCalibration_HF2, "Set Pt.", DGScopeSpectrumCalibrationSetPoint_TB_ID),
 				    new TGLayoutHints(kLHintsNormal, 5,5,5,0));
-  DGScopeSpectrumCalibrationSetPoint_TB->Connect("Clicked()", "AAInterface", this, "HandleScopeButtons()");
+  DGScopeSpectrumCalibrationSetPoint_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
   DGScopeSpectrumCalibrationSetPoint_TB->Resize(100,25);
   DGScopeSpectrumCalibrationSetPoint_TB->ChangeOptions(DGScopeSpectrumCalibrationSetPoint_TB->GetOptions() | kFixedSize);
   DGScopeSpectrumCalibrationSetPoint_TB->SetState(kButtonDisabled);
@@ -1219,7 +1233,7 @@ void AAInterface::FillScopeFrame()
   // Calibrate text button
   SpectrumCalibration_HF2->AddFrame(DGScopeSpectrumCalibrationCalibrate_TB = new TGTextButton(SpectrumCalibration_HF2, "Calibrate", DGScopeSpectrumCalibrationCalibrate_TB_ID),
 				    new TGLayoutHints(kLHintsNormal, 0,0,5,0));
-  DGScopeSpectrumCalibrationCalibrate_TB->Connect("Clicked()", "AAInterface", this, "HandleScopeButtons()");
+  DGScopeSpectrumCalibrationCalibrate_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
   DGScopeSpectrumCalibrationCalibrate_TB->Resize(100,25);
   DGScopeSpectrumCalibrationCalibrate_TB->ChangeOptions(DGScopeSpectrumCalibrationCalibrate_TB->GetOptions() | kFixedSize);
   DGScopeSpectrumCalibrationCalibrate_TB->SetState(kButtonDisabled);
@@ -1230,7 +1244,7 @@ void AAInterface::FillScopeFrame()
   // Plot text button
   SpectrumCalibration_HF3->AddFrame(DGScopeSpectrumCalibrationPlot_TB = new TGTextButton(SpectrumCalibration_HF3, "Plot", DGScopeSpectrumCalibrationPlot_TB_ID),
 				    new TGLayoutHints(kLHintsNormal, 5,5,5,0));
-  DGScopeSpectrumCalibrationPlot_TB->Connect("Clicked()", "AAInterface", this, "HandleScopeButtons()");
+  DGScopeSpectrumCalibrationPlot_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
   DGScopeSpectrumCalibrationPlot_TB->Resize(100,25);
   DGScopeSpectrumCalibrationPlot_TB->ChangeOptions(DGScopeSpectrumCalibrationPlot_TB->GetOptions() | kFixedSize);
   DGScopeSpectrumCalibrationPlot_TB->SetState(kButtonDisabled);
@@ -1238,7 +1252,7 @@ void AAInterface::FillScopeFrame()
   // Reset text button
   SpectrumCalibration_HF3->AddFrame(DGScopeSpectrumCalibrationReset_TB = new TGTextButton(SpectrumCalibration_HF3, "Reset", DGScopeSpectrumCalibrationReset_TB_ID),
 				    new TGLayoutHints(kLHintsNormal, 0,0,5,0));
-  DGScopeSpectrumCalibrationReset_TB->Connect("Clicked()", "AAInterface", this, "HandleScopeButtons()");
+  DGScopeSpectrumCalibrationReset_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
   DGScopeSpectrumCalibrationReset_TB->Resize(100,25);
   DGScopeSpectrumCalibrationReset_TB->ChangeOptions(DGScopeSpectrumCalibrationReset_TB->GetOptions() | kFixedSize);
   DGScopeSpectrumCalibrationReset_TB->SetState(kButtonDisabled);
@@ -1250,7 +1264,7 @@ void AAInterface::FillScopeFrame()
   // Load from file text button
   SpectrumCalibration_HF4->AddFrame(DGScopeSpectrumCalibrationLoad_TB = new TGTextButton(SpectrumCalibration_HF4, "Load", DGScopeSpectrumCalibrationLoad_TB_ID),
 				    new TGLayoutHints(kLHintsNormal, 5,5,5,0));
-  DGScopeSpectrumCalibrationLoad_TB->Connect("Clicked()", "AAInterface", this, "HandleScopeButtons()");
+  DGScopeSpectrumCalibrationLoad_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
   DGScopeSpectrumCalibrationLoad_TB->Resize(100,25);
   DGScopeSpectrumCalibrationLoad_TB->ChangeOptions(DGScopeSpectrumCalibrationLoad_TB->GetOptions() | kFixedSize);
   DGScopeSpectrumCalibrationLoad_TB->SetState(kButtonDisabled);
@@ -1258,7 +1272,7 @@ void AAInterface::FillScopeFrame()
   // Write to file text button
   SpectrumCalibration_HF4->AddFrame(DGScopeSpectrumCalibrationWrite_TB = new TGTextButton(SpectrumCalibration_HF4, "Write", DGScopeSpectrumCalibrationWrite_TB_ID),
 				    new TGLayoutHints(kLHintsNormal, 0,0,5,0));
-  DGScopeSpectrumCalibrationWrite_TB->Connect("Clicked()", "AAInterface", this, "HandleScopeButtons()");
+  DGScopeSpectrumCalibrationWrite_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
   DGScopeSpectrumCalibrationWrite_TB->Resize(100,25);
   DGScopeSpectrumCalibrationWrite_TB->ChangeOptions(DGScopeSpectrumCalibrationLoad_TB->GetOptions() | kFixedSize);
   DGScopeSpectrumCalibrationWrite_TB->SetState(kButtonDisabled);
@@ -1355,7 +1369,7 @@ void AAInterface::FillScopeFrame()
   */
   DGScopeDataStorage_GF->AddFrame(DGScopeDataFileName_TB = new TGTextButton(DGScopeDataStorage_GF, "Data file name", DGScopeDataFileName_TB_ID),
 				  new TGLayoutHints(kLHintsNormal,10,5,5,0));
-  DGScopeDataFileName_TB->Connect("Clicked()","AAInterface", this, "HandleScopeButtons()");
+  DGScopeDataFileName_TB->Connect("Clicked()","AASubtabSlots", SubtabSlots, "HandleTextButtons()");
   DGScopeDataFileName_TB->Resize(175, 30);
   DGScopeDataFileName_TB->ChangeOptions(DGScopeDataFileName_TB->GetOptions() | kFixedSize);
 
@@ -1369,7 +1383,7 @@ void AAInterface::FillScopeFrame()
   // ROOT text button to create a root file using the name in the text entry field above
   DGScopeDataStorage_GF->AddFrame(DGScopeDataStorageCreateFile_TB = new TGTextButton(DGScopeDataStorage_GF,"Create ADAQ file", DGScopeDataStorageCreateFile_TB_ID),
 				  new TGLayoutHints(kLHintsNormal,10,5,8,5));
-  DGScopeDataStorageCreateFile_TB->Connect("Clicked()","AAInterface",this,"HandleScopeButtons()");
+  DGScopeDataStorageCreateFile_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
   DGScopeDataStorageCreateFile_TB->Resize(175,30);
   DGScopeDataStorageCreateFile_TB->ChangeOptions(DGScopeDataStorageCreateFile_TB->GetOptions() | kFixedSize);
   DGScopeDataStorageCreateFile_TB->SetState(kButtonDisabled);
@@ -1378,7 +1392,7 @@ void AAInterface::FillScopeFrame()
   // successfully write&close the ROOT file otherwise the ROOT file will have errors.
   DGScopeDataStorage_GF->AddFrame(DGScopeDataStorageCloseFile_TB = new TGTextButton(DGScopeDataStorage_GF,"Close ADAQ file", DGScopeDataStorageCloseFile_TB_ID),
 				  new TGLayoutHints(kLHintsNormal,10,5,0,5));
-  DGScopeDataStorageCloseFile_TB->Connect("Clicked()","AAInterface",this,"HandleScopeButtons()");
+  DGScopeDataStorageCloseFile_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
   DGScopeDataStorageCloseFile_TB->Resize(175,30);
   DGScopeDataStorageCloseFile_TB->ChangeOptions(DGScopeDataStorageCloseFile_TB->GetOptions() | kFixedSize);
   DGScopeDataStorageCloseFile_TB->SetState(kButtonDisabled);
@@ -1405,7 +1419,7 @@ void AAInterface::FillScopeFrame()
 				      new TGLayoutHints(kLHintsNormal, 5,5,5,0));
   DGScopeSpectrumFileName_TB->Resize(175, 30);
   DGScopeSpectrumFileName_TB->ChangeOptions(DGScopeSpectrumFileName_TB->GetOptions() | kFixedSize);
-  DGScopeSpectrumFileName_TB->Connect("Clicked()", "AAInterface", this, "HandleScopeButtons()");
+  DGScopeSpectrumFileName_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
   
   DGScopeSpectrumStorage_GF->AddFrame(DGScopeSpectrumFileName_TEL = new ADAQTextEntryWithLabel(DGScopeSpectrumStorage_GF, "", -1),
 				      new TGLayoutHints(kLHintsNormal, 5,5,5,0));
@@ -1421,7 +1435,7 @@ void AAInterface::FillScopeFrame()
 				      new TGLayoutHints(kLHintsNormal, 5,5,0,5));
   DGScopeSaveSpectrum_TB->Resize(175, 30);
   DGScopeSaveSpectrum_TB->ChangeOptions(DGScopeSaveSpectrum_TB->GetOptions() | kFixedSize);
-  DGScopeSaveSpectrum_TB->Connect("Clicked()","AAInterface", this, "HandleScopeButtons()");
+  DGScopeSaveSpectrum_TB->Connect("Clicked()","AASubtabSlots", SubtabSlots, "HandleTextButtons()");
 
 
   // Widgets for saving the canvas graphics to file
@@ -1434,7 +1448,7 @@ void AAInterface::FillScopeFrame()
 				      new TGLayoutHints(kLHintsNormal, 5,5,5,0));
   DGScopeCanvasFileName_TB->Resize(175, 30);
   DGScopeCanvasFileName_TB->ChangeOptions(DGScopeCanvasFileName_TB->GetOptions() | kFixedSize);
-  DGScopeCanvasFileName_TB->Connect("Clicked()", "AAInterface", this, "HandleScopeButtons()");
+  DGScopeCanvasFileName_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
   
   DGScopeCanvasStorage_GF->AddFrame(DGScopeCanvasFileName_TEL = new ADAQTextEntryWithLabel(DGScopeCanvasStorage_GF, "", -1),
 				    new TGLayoutHints(kLHintsNormal, 5,5,5,0));
@@ -1450,7 +1464,7 @@ void AAInterface::FillScopeFrame()
 				    new TGLayoutHints(kLHintsNormal,5,5,0,5));
   DGScopeSaveCanvas_TB->Resize(175, 30);
   DGScopeSaveCanvas_TB->ChangeOptions(DGScopeSaveCanvas_TB->GetOptions() | kFixedSize);
-  DGScopeSaveCanvas_TB->Connect("Clicked()","AAInterface",this,"HandleScopeButtons()");
+  DGScopeSaveCanvas_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
   
 
   ///////////////////
@@ -1475,84 +1489,6 @@ void AAInterface::FillScopeFrame()
 // Perform actions triggers by the text buttons on the Scope Frame
 void AAInterface::HandleScopeButtons()
 {
-  // Get pointers and the widget ID for the active (ie, clicked) text button
-  TGTextButton *ActiveTextButton = (TGTextButton *) gTQSender;
-  int ActiveButtonID = ActiveTextButton->WidgetId();
-  
-  if(!VMEConnectionEstablished)
-    return;
-  
-  // Return if the user has specified that the V1720 digitizer board
-  // should be used during this session
-  if(!V1720Enable )
-    return;
-  
-  switch(ActiveButtonID){
-    
-    ///////////////////////////////////
-    // Start/Stop DGScope acquisition
-  case DGScopeStartStop_TB_ID:{
-    
-    // If DGScope acquisition is started
-    if(ActiveTextButton->GetString()=="Stopped"){
-      // Update button color from red to green and update text to "Stop"
-      ActiveTextButton->SetBackgroundColor(ColorManager->Number2Pixel(8));
-      ActiveTextButton->SetForegroundColor(ColorManager->Number2Pixel(1));
-      ActiveTextButton->SetText("Acquiring");
-
-      // Set bool to enable the DGScope to update in real time (see
-      // AAInterface::RunDGScope) during data acquisition
-      DGScopeEnable = true;
-      
-      // Set the active ROOT canvas to the DGScope embedded canvas
-      DGScope_EC->GetCanvas()->cd(0);
-      
-      // Disable certain widgets while DGScope is acquiring
-      // data. These widgets tend to have values that are used to set
-      // V1720 parameters at the beginning of an acquisition cycle
-      // and, at present, cannot be changed during an acquisition
-      // cycle. Thus, disabling these widgets indicates to the user
-      // that setting them can only be done while DGScope is not active
-      SetDGWidgetState(true);
-      
-      // Run the DGScope
-      RunDGScope();
-    }
-
-    // If DGScope acquisition is being stopped...
-    else if(ActiveTextButton->GetString()=="Acquiring"){
-      // Update button color from green to red and update text to "Start"
-      ActiveTextButton->SetBackgroundColor(ColorManager->Number2Pixel(2));
-      ActiveTextButton->SetForegroundColor(ColorManager->Number2Pixel(1));
-      ActiveTextButton->SetText("Stopped");
-
-      // Set bool to disable the DGScope loop, reenable all widgets,
-      // and stop the digitizer from acquiring data
-      DGScopeEnable = false;
-      SetDGWidgetState(false);
-      DGManager->SWStopAcquisition();
-
-      // Determine if a ROOT file was open and receiving data; if so,
-      // ensure that the data is written and the ROOT file is closed
-      if(ROOTFileOpen){
-	if(DGScopeDataStorageEnable_CB->IsDown())
-	  DGScopeDataStorageEnable_CB->Clicked();
-	
-	if(OutputDataFile->IsOpen())
-	  DGScopeDataStorageCloseFile_TB->Clicked();
-      }
-    }
-    break;
-  }
-    
-    // Send a software signal to the V1720 to for a manually forced
-    // data trigger across all channels
-  case DGScopeTrigger_TB_ID:{
-    DGManager->SendSWTrigger();
-    break;
-  }
-
-
     // Check to see if the V1720 FPGA buffer is full; the text entry
     // widget will be updated to alert the user
   case DGScopeCheckBufferStatus_TB_ID:{
@@ -2178,20 +2114,6 @@ void AAInterface::HandleScopeButtons()
     break;
   }
     
-    
-  case DGScopeUpdatePlot_TB_ID:{
-    
-    int CurrentChannel = DGScopeSpectrumChannel_CBL->GetComboBox()->GetSelected();
-    
-    if(DGScopeUltraHighRate_RB->IsDown())
-      break;
-    else{
-      if(DGScopeSpectrum_H[CurrentChannel])
-	ForceSpectrumDrawing();
-      break;
-    }
-  }
-    
   case DGScopeAcquisitionTimerStart_TB_ID:{
     
     if(DGScopeStartStop_TB->GetString() != "Acquiring")
@@ -2235,208 +2157,9 @@ void AAInterface::HandleScopeButtons()
     break;
   }
 }
-
-
-// Perform actions triggers by DGScope number entries
-void AAInterface::HandleScopeNumberEntries()
-{
-  // Get the pointer and the widget ID for the active number entry
-  TGNumberEntry *ActiveEntry = (TGNumberEntry *) gTQSender;
-  int ActiveEntryID = ActiveEntry->WidgetId();
-
-  switch(ActiveEntryID){
-
-    // Set the channel trigger thresholds
-  case DGScopeCh0TriggerThreshold_NEL_ID:
-  case DGScopeCh1TriggerThreshold_NEL_ID:
-  case DGScopeCh2TriggerThreshold_NEL_ID:
-  case DGScopeCh3TriggerThreshold_NEL_ID:
-  case DGScopeCh4TriggerThreshold_NEL_ID:
-  case DGScopeCh5TriggerThreshold_NEL_ID:
-  case DGScopeCh6TriggerThreshold_NEL_ID:
-  case DGScopeCh7TriggerThreshold_NEL_ID:{
-
-    // Only enable setting if digitizer is currently acquiring
-    if(DGScopeEnable){
-
-      // Get the channel number to be set
-      uint32_t ch = DGScopeChTriggerThreshold_NEL_ID_Map[ActiveEntryID];
-      
-      // Get the trigger threshold value [ADC] to be set
-      uint32_t thr = DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->GetIntNumber();
-      
-      // Set the channel trigger threshold 
-      DGManager->SetChannelTriggerThreshold(ch, thr);
-    }
-  }
-    
-    // If the user enters the pulse unit in the provided number entry
-    // widget (which is updated as the user slides the pointer of the
-    // horizontal triple widget just under DGScope canvas) then update
-    // the position of the horizontal triple widget such that the
-    // drawn calibration line on th ecanvas matches the entered number
-  case DGScopeSpectrumCalibrationEnergy_NEL_ID:
-  case DGScopeSpectrumCalibrationPulseUnit_NEL_ID:{
-    double Value = 0.;
-    if(ActiveEntryID == DGScopeSpectrumCalibrationEnergy_NEL_ID)
-      Value = DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->GetNumber();
-    else
-      Value = DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->GetNumber();
-    
-    // Normalize value for slider position setting from 0 to 1
-    Value /= DGScopeSpectrumMaxBin_NEL->GetEntry()->GetNumber();
-    
-    DGScopeHorizontalScale_THS->SetPointerPosition(Value);
-    break;
-  }
-  }
-}
-
-void AAInterface::HandleRadioButtons()
-{
-  TGRadioButton *ActiveRadioButton = (TGRadioButton *) gTQSender;
-  int RadioButtonID = ActiveRadioButton->WidgetId();
-
-  switch(RadioButtonID){
-
-  case DGScopeSpectrumAnalysisHeight_RB_ID:
-    
-    if(DGScopeSpectrumAnalysisHeight_RB->IsDown()){
-      DGScopeSpectrumAnalysisLLD_NEL->GetEntry()->SetNumber(0);
-      DGScopeSpectrumAnalysisULD_NEL->GetEntry()->SetNumber(4095);
-    }
-
-    break;
-
-  case DGScopeSpectrumAnalysisArea_RB_ID:
-    
-    if(DGScopeSpectrumAnalysisArea_RB->IsDown()){
-      DGScopeSpectrumAnalysisLLD_NEL->GetEntry()->SetNumber(4000);
-      DGScopeSpectrumAnalysisULD_NEL->GetEntry()->SetNumber(100000);
-    }
-    
-    break;
-    
-  default:
-    break;
-  }
-}
-
-
-void AAInterface::HandleComboBoxes(int ComboBoxID, int SelectedID)
-{
-  switch(ComboBoxID){
-
-  case DGScopeSpectrumChannel_CBL_ID:{
-
-    // In order to ensure that the calibration set point combo box
-    // displays the correct number of calibration points, we need to
-    // rebuild the combo box entry list each time the user selects a
-    // new histogram channel to plot using this combo box
-
-    // Get the number of calibration points for the current histogram
-    // (SelectedID == histogram channel for this combo box)
-    int LastPointIndex = CalibrationData[SelectedID].PointID.size();
-
-    // Remove the previous entries from the combo box
-    int TotalEntries = DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->GetNumberOfEntries();
-    DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->RemoveEntries(0,TotalEntries-1);
-
-    // Recreate the entries for each calibration point in the present
-    // histogram calibration combo box
-    stringstream ss;
-    for(int i=0; i<=LastPointIndex; i++){
-      ss << "Calibration point " << i;
-      string Entry = ss.str();
-      DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->AddEntry(Entry.c_str(), i);
-      ss.str("");
-    }
-
-    // If the current histogram has calibration points then set the
-    // combo box to diplay the to-be-set point
-    if(LastPointIndex > 0){
-      DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->Select(LastPointIndex);
-      DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->SetNumber(0.);
-      DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->SetNumber(1.);
-    }
-
-    // ... otherwise display the no-calibration points values
-    else{
-      DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->Select(0);
-      DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->SetNumber(0);
-      DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->SetNumber(0);
-    }
-    break;
-  }
-
-  case DGScopeSpectrumCalibrationPoint_CBL_ID:{
-
-    int SpectrumChannel = DGScopeSpectrumChannel_CBL->GetComboBox()->GetSelected();    
-    int Size = CalibrationData[SpectrumChannel].PointID.size();
-
-    if(SelectedID <= (Size-1)){
-
-      double Energy = CalibrationData[SpectrumChannel].Energy.at(SelectedID);
-      double PulseUnit = CalibrationData[SpectrumChannel].PulseUnit.at(SelectedID);
-
-      DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->SetNumber(Energy);
-      DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->SetNumber(PulseUnit);
-
-      double Value = Energy/DGScopeSpectrumMaxBin_NEL->GetEntry()->GetNumber();
-
-      DGScopeHorizontalScale_THS->SetPointerPosition(Value);
-    }
-    else{
-      DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->SetNumber(0.);
-      DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->SetNumber(1.);
-    }
-    break;
-  }
-  }
-}
-  
-
-void AAInterface::HandleCheckButtons()
-{
-  TGCheckButton *ActiveCheckButton = (TGCheckButton *) gTQSender;
-  int CheckButtonID = ActiveCheckButton->WidgetId();
-  
-  switch(CheckButtonID){
-    
-    // Enable the calibration widgets
-  case DGScopeSpectrumCalibration_CB_ID:
-    if(DGScopeSpectrumCalibration_CB->IsDown()){
-      DGScopeSpectrumUseCalibrationSlider_CB->SetState(kButtonUp);
-      DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->SetEnabled(true);
-      DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->SetState(true);
-      DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->SetState(true);
-      DGScopeSpectrumCalibrationSetPoint_TB->SetState(kButtonUp);
-      DGScopeSpectrumCalibrationCalibrate_TB->SetState(kButtonUp);
-      DGScopeSpectrumCalibrationPlot_TB->SetState(kButtonUp);
-      DGScopeSpectrumCalibrationReset_TB->SetState(kButtonUp);
-      DGScopeSpectrumCalibrationLoad_TB->SetState(kButtonUp);
-      DGScopeSpectrumCalibrationWrite_TB->SetState(kButtonUp);
-    }
-
-    // Disable the calibration widgets
-    else{
-      DGScopeSpectrumUseCalibrationSlider_CB->SetState(kButtonDisabled);
-      DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->SetEnabled(false);
-      DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->SetState(false);
-      DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->SetState(false);
-      DGScopeSpectrumCalibrationSetPoint_TB->SetState(kButtonDisabled);
-      DGScopeSpectrumCalibrationCalibrate_TB->SetState(kButtonDisabled);
-      DGScopeSpectrumCalibrationPlot_TB->SetState(kButtonDisabled);
-      DGScopeSpectrumCalibrationReset_TB->SetState(kButtonDisabled);
-      DGScopeSpectrumCalibrationLoad_TB->SetState(kButtonDisabled);
-      DGScopeSpectrumCalibrationWrite_TB->SetState(kButtonDisabled);
-    }
-    break;
-  }
-}
 */
 
-// Performm actions that ensure a safe shutdown and disconnect of the
+// Perform actions that ensure a safe shutdown and disconnect of the
 // AAInterface software from the VME boards
 void AAInterface::HandleDisconnectAndTerminate(bool Terminate)
 {
@@ -2447,32 +2170,35 @@ void AAInterface::HandleDisconnectAndTerminate(bool Terminate)
 }
 
 
-// Set the state of the HV voltage and maximum current entry
-// widgets. When a specific channel is turned "on", it's HV and I
-// setting widgets are turned "off"
-void AAInterface::SetHVWidgetState(int HVChannel, bool HVActive)
+void AAInterface::SetVoltageChannelWidgetState(int HVChannel, bool HVActive)
 {
   bool WidgetState = true;
   if(HVActive)
     WidgetState = false;
-
+  
   HVChannelV_NEL[HVChannel]->GetEntry()->SetState(WidgetState);
   HVChannelI_NEL[HVChannel]->GetEntry()->SetState(WidgetState);
 }
 
 
-// Set the state of DGScope widgets that are used to set parameters to
-// program the V1720 digitizer at the beginning of a data acquisition
-// session. These widgets are disabled when DGScope is acquiring.
-void AAInterface::SetDGWidgetState(bool AcquiringData)
+void AAInterface::SetVoltageWidgetState(bool WidgetState, EButtonState ButtonState)
 {
-  EButtonState ButtonState = kButtonUp;
-  bool WidgetState = true;
-  if(AcquiringData){
-    ButtonState = kButtonDisabled;
-    WidgetState = false;
-  }
+  for(int ch=0; ch<6; ch++){
+    HVChannelV_NEL[ch]->GetEntry()->SetState(WidgetState);
+    HVChannelI_NEL[ch]->GetEntry()->SetState(WidgetState);
 
+    HVChannelVMonitor_NEFL[ch]->GetEntry()->SetState(WidgetState);
+    HVChannelIMonitor_NEFL[ch]->GetEntry()->SetState(WidgetState);
+    
+    HVChannelPower_TB[ch]->SetState(ButtonState);
+  }
+  
+  HVMonitorEnable_CB->SetState(ButtonState);
+}
+
+
+void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState ButtonState)
+{
   for(uint32_t ch=0; ch<8; ch++){
     DGScopeChannelEnable_CB[ch]->SetState(ButtonState,true);
     DGScopeDCOffset_NEL[ch]->GetEntry()->SetState(WidgetState);
@@ -2510,10 +2236,25 @@ void AAInterface::SetDGWidgetState(bool AcquiringData)
 
   DGScopeSpectrumAggregateRuns_CB->SetState(ButtonState,true);
   
-  if(AcquiringData)
+  if(TheVMEManager->GetDGAcquisitionEnable())
     DGScopeDataStorageCreateFile_TB->SetState(kButtonUp);
   else
     DGScopeDataStorageCreateFile_TB->SetState(kButtonDisabled);
-
+  
   DGScopeSpectrumRefreshRate_NEL->GetEntry()->SetState(WidgetState);
+}
+
+
+void AAInterface::SetCalibrationWidgetState(bool WidgetState, EButtonState ButtonState)
+{
+  DGScopeSpectrumUseCalibrationSlider_CB->SetState(ButtonState);
+  DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->SetEnabled(WidgetState);
+  DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->SetState(WidgetState);
+  DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->SetState(WidgetState);
+  DGScopeSpectrumCalibrationSetPoint_TB->SetState(ButtonState);
+  DGScopeSpectrumCalibrationCalibrate_TB->SetState(ButtonState);
+  DGScopeSpectrumCalibrationPlot_TB->SetState(ButtonState);
+  DGScopeSpectrumCalibrationReset_TB->SetState(ButtonState);
+  DGScopeSpectrumCalibrationLoad_TB->SetState(ButtonState);
+  DGScopeSpectrumCalibrationWrite_TB->SetState(kButtonUp);
 }

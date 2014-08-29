@@ -12,10 +12,12 @@ public:
   AADisplaySlots(AAInterface *);
   ~AADisplaySlots();
 
+  void HandleTextButtons();
+
   ClassDef(AADisplaySlots, 0);
   
 private:
-  AAInterface *TheInterface;
+  AAInterface *TI;
 };
 
 #endif

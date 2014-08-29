@@ -12,10 +12,12 @@ public:
   AAChannelSlots(AAInterface *);
   ~AAChannelSlots();
 
+  void HandleNumberEntries();
+
   ClassDef(AAChannelSlots, 0);
   
 private:
-  AAInterface *TheInterface;
+  AAInterface *TI;
 };
 
 #endif

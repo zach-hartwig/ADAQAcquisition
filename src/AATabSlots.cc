@@ -387,8 +387,8 @@ void AATabSlots::HandleVoltageTextButtons()
       TheVMEManager->GetHVManager()->SetVoltage(HVChannel, HVVoltageValue); 
       TheVMEManager->GetHVManager()->SetCurrent(HVChannel, HVCurrentValue);
       TheVMEManager->GetHVManager()->SetPowerOn(HVChannel);
-
-      TI->SetHVWidgetState(HVChannel, true);
+      
+      TI->SetVoltageChannelWidgetState(HVChannel, true);
     }
 
     // If the power is being turned from "ON" to "OFF"...
@@ -403,7 +403,7 @@ void AATabSlots::HandleVoltageTextButtons()
       
       // Reenable the widget status such that voltage and maximum
       // current can be modified
-      TI->SetHVWidgetState(HVChannel, false);
+      TI->SetVoltageChannelWidgetState(HVChannel, false);
     }
     break;
   }

@@ -12,10 +12,16 @@ public:
   AASubtabSlots(AAInterface *);
   ~AASubtabSlots();
 
+  void HandleCheckButtons();
+  void HandleComboBoxes(int, int);
+  void HandleNumberEntries();
+  void HandleRadioButtons();
+  void HandleTextButtons();
+
   ClassDef(AASubtabSlots, 0);
   
 private:
-  AAInterface *TheInterface;
+  AAInterface *TI;
 };
 
 #endif
