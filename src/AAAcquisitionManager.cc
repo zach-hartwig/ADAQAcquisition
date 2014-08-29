@@ -1,102 +1,32 @@
-#include "ADAQBridge.hh"
-#include "ADAQDigitizer.hh"
-#include "ADAQHighVoltage.hh"
+#include <iostream>
 
+#include "AAAcquisitionManager.hh"
 #include "AAVMEManager.hh"
 
 
-AAVMEManager *AAVMEManager::TheVMEManager = 0;
+AAAcquisitionManager *AAAcquisitionManager::TheAcquisitionManager = 0;
 
 
-AAVMEManager *AAVMEManager::GetInstance()
-{ return TheVMEManager; }
+AAAcquisitionManager *AAAcquisitionManager::GetInstance()
+{ return TheAcquisitionManager; }
 
 
-AAVMEManager::AAVMEManager()
-  : BREnable(true), DGEnable(true), HVEnable(true),
-    DGAddress(0x00420000), HVAddress(0x42420000),
-    VMEConnectionEstablished(false)
+AAAcquisitionManager::AAAcquisitionManager()
 {
-  if(TheVMEManager)
-    cout << "\nError! The VMEManager was constructed twice!\n" << endl;
-  TheVMEManager = this;
-
-  BRMgr = new ADAQBridge;
-  BRMgr->SetVerbose(true);
-
-  DGMgr = new ADAQDigitizer;
-  DGMgr->SetVerbose(true);
-
-  HVMgr = new ADAQHighVoltage;
-  HVMgr->SetVerbose(true);
+  if(TheAcquisitionManager)
+    cout << "\nError! The AcquisitionManager was constructed twice!\n" << endl;
+  TheAcquisitionManager = this;
 }
 
 
-AAVMEManager::~AAVMEManager()
+AAAcquisitionManager::~AAAcquisitionManager()
 {;}
 
 
-void AAVMEManager::InitializeDigitizers()
+void AAAcquisitionManager::StartAcquisition()
 {
-
-
-
-}
-
-
-void AAVMEManager::SafelyDisconnectVMEBoards()
-{
-  if(HVEnable){
-    HVMgr->SetToSafeState();
-    HVMgr->CloseLink();
-  }
-  
-  if(DGEnable)
-    DGMgr->CloseLink();
-  
-  if(BREnable)
-    BRMgr->CloseLink();
-}
-
-
-
-// Run the real-time updating of the ROOT number entry widgets that
-// display active voltage and drawn current from all channels
-//void AAInterface::RunHVMonitoring()
-//{
+  AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
   /*
-  // The high voltage and current will be displayed and updated in the
-  // dedicated number entry fields when HVMonitorEnable is true
-  while(HVMonitorEnable){
-    // Perform action in a separate thread to enable use of other GUI
-    // features while HV monitoring is taking place
-    gSystem->ProcessEvents();
-    
-    // Update the voltage and current displays every second
-    double delay = clock()+(1.0*CLOCKS_PER_SEC);
-    while(clock()<delay){gSystem->ProcessEvents();}
-
-    uint16_t Voltage, Current;
-    const int HVChannels = TheVMEManager->GetHVManager()->GetNumChannels();
-    for(int ch=0; ch<HVChannels; ch++){
-      // Get the present active voltage and current values
-      TheVMEManager->GetHVManager()->GetVoltage(ch, &Voltage);
-      TheVMEManager->GetHVManager()->GetCurrent(ch, &Current);
-      
-      // Update the appropriate number entry fields
-      HVChannelVMonitor_NEFL[ch]->GetEntry()->SetNumber(Voltage);
-      HVChannelIMonitor_NEFL[ch]->GetEntry()->SetNumber(Current);
-    }
-  }
-  */
-//}
-
-
-//void AAInterface::RunDGScope()
-//{
-  /*
-
-
   /////////////////////////////////////////////////
   // Initialize local and class member variables //
   /////////////////////////////////////////////////
@@ -501,6 +431,20 @@ void AAVMEManager::SafelyDisconnectVMEBoards()
 
   // The acquisition and data plotting loop is run provided that the
   // DGScopeEnable bool is true (see CyDAQRootGUI::HandleScopeTextButtons)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   while(DGScopeEnable){
 
     /////////////////////////////////////////////
@@ -963,6 +907,7 @@ void AAVMEManager::SafelyDisconnectVMEBoards()
   DGManager->FreeReadoutBuffer(&Buffer);
   */
 //}
+}
 
 /*
 void AAInterface::SaveSpectrumData()
@@ -1024,14 +969,14 @@ void AAInterface::SaveSpectrumData()
     }
   }
 }
-
-
+*/
 
 
 // Method to safely cease acquiring data, including writing and
 // closing of possibly opened ROOT files.
-void AAInterface::StopAcquisitionSafely()
+void AAAcquisitionManager::StopAcquisition()
 {
+/*
   // Stop the V1720 from acquiring data first thing
   TheVMEManager->GetDGManager()->SWStopAcquisition();
   
@@ -1078,8 +1023,10 @@ void AAInterface::StopAcquisitionSafely()
     DGScopeDataStorageEnable_CB->SetState(kButtonUp);
     DGScopeDataStorageEnable_CB->SetState(kButtonDisabled);
   }
-}
 */
+}
+
+
 
 // Method to generate a standard detector-esque artificial waveoforms
 // to be used in debugging mode when waveforms from the DAQ are not
@@ -1125,35 +1072,3 @@ void AAInterface::GenerateArtificialWaveform(int RecordLength, vector<int> &Volt
 }
 */
 
-
-
-// Run the real-time updating of the ROOT number entry widgets that
-// display active voltage and drawn current from all channels
-//void AAInterface::RunHVMonitoring()
-//{
-  /*
-  // The high voltage and current will be displayed and updated in the
-  // dedicated number entry fields when HVMonitorEnable is true
-  while(HVMonitorEnable){
-    // Perform action in a separate thread to enable use of other GUI
-    // features while HV monitoring is taking place
-    gSystem->ProcessEvents();
-    
-    // Update the voltage and current displays every second
-    double delay = clock()+(1.0*CLOCKS_PER_SEC);
-    while(clock()<delay){gSystem->ProcessEvents();}
-
-    uint16_t Voltage, Current;
-    const int HVChannels = TheVMEManager->GetHVManager()->GetNumChannels();
-    for(int ch=0; ch<HVChannels; ch++){
-      // Get the present active voltage and current values
-      TheVMEManager->GetHVManager()->GetVoltage(ch, &Voltage);
-      TheVMEManager->GetHVManager()->GetCurrent(ch, &Current);
-      
-      // Update the appropriate number entry fields
-      HVChannelVMonitor_NEFL[ch]->GetEntry()->SetNumber(Voltage);
-      HVChannelIMonitor_NEFL[ch]->GetEntry()->SetNumber(Current);
-    }
-  }
-  */
-//}

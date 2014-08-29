@@ -82,7 +82,7 @@ void AADisplaySlots::HandleTextButtons()
     
     int CurrentChannel = TI->DGScopeSpectrumChannel_CBL->GetComboBox()->GetSelected();
     
-    if(TI->DGScopeUltraHighRate_RB->IsDown())
+    if(TI->DGScopeUltraRate_RB->IsDown())
       break;
     else{
       //   if(TI->DGScopeSpectrum_H[CurrentChannel])

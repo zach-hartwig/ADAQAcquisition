@@ -113,7 +113,7 @@ enum{
   DGScopeWaveform_RB_ID,
   DGScopeSpectrum_RB_ID,
   DGScopeHighRate_RB_ID,
-  DGScopeUltraHighRate_RB_ID,
+  DGScopeUltraRate_RB_ID,
 
   DGScopeTriggerCoincidenceEnable_CB_ID,
   DGScopeChVerticalPosition_NEL_ID,
@@ -140,7 +140,7 @@ enum{
   DGScopeUpdatePlot_TB_ID,
   DGScopeSave_TB_ID,
 
-  DGScopeTriggerMode_CBL_ID,
+  DGScopeTriggerType_CBL_ID,
 
   DGScopeRecordLength_NEL_ID,
   DGScopePostTriggerSize_NEL_ID,

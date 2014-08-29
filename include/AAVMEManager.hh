@@ -21,8 +21,10 @@ public:
 
   static AAVMEManager *GetInstance();
 
-
   void SafelyDisconnectVMEBoards();
+
+  void InitializeDigitizers();
+
 
   /////////////////////////////////////
   // Set/get methods for member data //
@@ -34,7 +36,13 @@ public:
   void SetDGAcquisitionEnable(bool AE) {DGAcquisitionEnable = AE;}
   bool GetDGAcquisitionEnable() {return DGAcquisitionEnable;}
 
+  void SetAcquisitionTimerEnable(bool ATE) {AcquisitionTimerEnable = ATE;}
+  bool GetAcquisitionTimerEnable() {return AcquisitionTimerEnable;}
 
+  void SetAcquisitionTimeStart(double T) {AcquisitionTimeStart = T;}
+  void SetAcquisitionTimeStop(double T) {AcquisitionTimeStop = T;}
+  
+  
   // VME board enable booleans
 
   void SetBREnable(bool E) {BREnable = E;}
@@ -77,6 +85,11 @@ private:
 
   bool DGAcquisitionEnable;
 
+  //Objects for controlling timed acquisition periods
+  bool AcquisitionTimerEnable;
+  double AcquisitionTimeStart, AcquisitionTimeStop;
+
+
 
 
   // DGScope objects
@@ -97,9 +110,6 @@ private:
   */
 
   
-  // Objects for controlling timed acquisition periods
-  // bool AcquisitionTimerEnabled;
-  // double AcquisitionTime_Start, AcquisitionTime_Stop;
 
   // Strings for file names, extensions
   // string DataFileName, DataFileExtension;

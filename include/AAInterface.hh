@@ -1,7 +1,6 @@
 #ifndef __AAInterface_hh__
 #define __AAInterface_hh__ 1
 
-#include <TGLabel.h>
 #include <TColor.h>
 #include <TGButton.h>
 #include <TGButtonGroup.h>
@@ -12,20 +11,10 @@
 #include <TObject.h>
 #include <TRootEmbeddedCanvas.h>
 #include <TCanvas.h>
-#include <TGraph.h>
 #include <TLegend.h>
-#include <TTimer.h>
-#include <TGMenu.h>
 #include <TApplication.h>
-#include <TSystem.h>
-#include <TH1F.h>
-#include <TROOT.h>
-#include <TLine.h>
 #include <TGDoubleSlider.h>
 #include <TGTripleSlider.h>
-#include <TStyle.h>
-#include <TTree.h>
-#include <TRandom.h>
 #include <TGTextView.h>
 
 #include <vector>
@@ -33,10 +22,10 @@
 #include <string>
 using namespace std;
 
-#include "AAVMEManager.hh"
 #include "ADAQRootClasses.hh"
-#include "AATypes.hh"
 
+#include "AAVMEManager.hh"
+#include "AATypes.hh"
 class AAChannelSlots;
 class AADisplaySlots;
 class AASubtabSlots;
@@ -64,6 +53,8 @@ public:
   void FillAcquisitionFrame();
 
   void HandleDisconnectAndTerminate(bool = true);
+
+  void SaveSettings();
 
   // Enable/disable widgets
   void SetVoltageChannelWidgetState(int, bool);
@@ -181,6 +172,10 @@ private:
   ADAQNumberEntryWithLabel *DGScopeBaselineCalcMax_NEL[8];
   ADAQNumberEntryWithLabel *DGScopeZSThreshold_NEL[8];
   ADAQNumberEntryWithLabel *DGScopeZSSamples_NEL[8];
+  ADAQNumberEntryWithLabel *DGScopeZSForward_NEL[8];
+  ADAQNumberEntryWithLabel *DGScopeZSBackward_NEL[8];
+  TGRadioButton *DGScopeZSPosLogic_RB[8], *DGScopeZSNegLogic_RB[8];
+
   
   TRootEmbeddedCanvas *DGScope_EC;
   TGDoubleVSlider *DGScopeVerticalScale_DVS;
@@ -203,7 +198,8 @@ private:
   ADAQNumberEntryWithLabel *DGScopeDataReductionFactor_NEL;
   ADAQComboBoxWithLabel *DGScopeZSMode_CBL;
 
-  ADAQComboBoxWithLabel *DGScopeTriggerMode_CBL;
+  ADAQComboBoxWithLabel *DGScopeTriggerType_CBL;
+  ADAQComboBoxWithLabel *DGScopeTriggerEdge_CBL;
 
   ADAQNumberEntryWithLabel *DGScopeRecordLength_NEL;
   ADAQNumberEntryWithLabel *DGScopePostTriggerSize_NEL;
@@ -255,7 +251,7 @@ private:
 
   TGButtonGroup *DGScopeMode_BG;
   TGRadioButton *DGScopeWaveform_RB, *DGScopeSpectrum_RB;
-  TGRadioButton *DGScopeHighRate_RB, *DGScopeUltraHighRate_RB;
+  TGRadioButton *DGScopeHighRate_RB, *DGScopeUltraRate_RB;
 
   ADAQNumberEntryWithLabel *DGScopeBaselineMin_NEL, *DGScopeBaselineMax_NEL;
 

@@ -19,6 +19,7 @@
 using namespace std;
 
 // ADAQ 
+#include "AAAcquisitionManager.hh"
 #include "AAVMEManager.hh"
 #include "AAInterface.hh"
 
@@ -30,7 +31,10 @@ int main(int argc, char **argv)
 
   // Create the singleton VME manager
   AAVMEManager *TheVMEManager = new AAVMEManager;
-
+  
+  // Create the singleton acquisition manager
+  AAAcquisitionManager *TheACQManager = new AAAcquisitionManager;
+  
   // Create the graphical user interface
   AAInterface *TheInterface = new AAInterface;
   
@@ -39,6 +43,7 @@ int main(int argc, char **argv)
     
   // Garbage collection ..
   delete TheInterface;
+  delete TheACQManager;
   delete TheVMEManager;
   
   return 0;
