@@ -7,6 +7,12 @@
 #include <boost/cstdint.hpp>
 #endif
 
+#include <vector>
+
+class ADAQBridge;
+class ADAQDigitizer;
+class ADAQHighVoltage;
+
 class AAVMEManager : public TObject
 {
 public:
@@ -40,6 +46,12 @@ public:
   void SetHVAddress(long BA) {HVAddress = BA;}
   long GetHVAddress() {return HVAddress;}
 
+  // Get the VME board managers
+
+  ADAQBridge *GetBRManager() {return BRMgr;}
+  ADAQDigitizer *GetDGManager() {return DGMgr;}
+  ADAQHighVoltage *GetHVManager() {return HVMgr;}
+
   ClassDef(AAVMEManager, 0);
   
 private:
@@ -50,6 +62,30 @@ private:
   long DGAddress, HVAddress;
   
   bool VMEConnectionEstablished;
+
+  ADAQBridge *BRMgr;
+  ADAQDigitizer *DGMgr;
+  ADAQHighVoltage *HVMgr;
+
+
+
+  // DGScope objects
+  /*
+  TGraph *DGScopeWaveform_G[8];
+  TH1F *DGScopeSpectrum_H[8];
+
+  TFile *OutputDataFile;
+  TTree *WaveformTree;
+  bool BranchWaveformTree;
+  ADAQRootMeasParams *MeasParams;
+  TObjString *MeasComment;
+  bool ROOTFileOpen;
+
+  vector<bool> UseCalibrationManager;
+  vector<TGraph *> CalibrationManager;
+  vector<ADAQChannelCalibrationData> CalibrationData;
+  */
+
 };
 
 #endif

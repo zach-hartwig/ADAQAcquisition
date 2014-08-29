@@ -15,4 +15,13 @@ public:
 private:
 };
 
+  /*
+  TLegend *DGScopeWaveform_Leg;
+  TLine *DGScopeChannelTrigger_L[8];
+  TBox *DGScopeBaselineCalcRegion_B[8];
+  TLine *DGScopeSpectrumCalibration_L;
+  */
+
+
+
 #endif

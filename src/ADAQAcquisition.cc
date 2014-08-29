@@ -19,39 +19,27 @@
 using namespace std;
 
 // ADAQ 
+#include "AAVMEManager.hh"
 #include "AAInterface.hh"
 
-// The mandatory C++ main function
+
 int main(int argc, char **argv)
 {
-  // Create a standalone application that runs outside of a ROOT seesion
+  // Run ROOT in standalone mode
   TApplication *TheApplication = new TApplication("ADAQAcquisition", &argc, argv);
-  
-  // Create variables for width and height of the top-level GUI window
-  int Width = 1125;
-  int Height = 840;
 
-  // If the user specifies "small" for the first command line
-  // arguments then change the width and height settings
-  if(argc==2){
-    string arg1 = argv[1];
-    if(arg1 == "small"){
-      Width = 980;
-      Height = 650;
-    }
-    else
-      cout << "Error! Only argument allowed is 'small'!\n" << endl;
-  }
-  
-  // Create an object of type ADAQAcquisition and connect its "CloseWindow" function
-  AAInterface *MainFrame = new AAInterface(Width, Height);
-  //MainFrame->Connect("CloseWindow()", "AAInterface", MainFrame, "HandleDisconnectAndTerminate(bool)");
+  // Create the singleton VME manager
+  AAVMEManager *TheVMEManager = new AAVMEManager;
+
+  // Create the graphical user interface
+  AAInterface *TheInterface = new AAInterface;
   
   // Run the standalone application
   TheApplication->Run();
     
-  // Clean up memory upon completion
-  delete MainFrame;
+  // Garbage collection ..
+  delete TheInterface;
+  delete TheVMEManager;
   
   return 0;
 }

@@ -33,11 +33,9 @@
 #include <string>
 using namespace std;
 
+#include "AAVMEManager.hh"
 #include "ADAQRootClasses.hh"
 #include "AATypes.hh"
-class ADAQHighVoltage;
-class ADAQDigitizer;
-class ADAQBridge;
 
 class AAChannelSlots;
 class AADisplaySlots;
@@ -54,7 +52,7 @@ class AAInterface : public TGMainFrame
 
 public:
 
-  AAInterface(int Width, int Height);
+  AAInterface();
   ~AAInterface();
   
   // Create/fill the ROOT widgets("signals")
@@ -66,6 +64,7 @@ public:
   void FillScopeFrame();
 
   // Create handlers for widget actions ("slots")
+  /*
   void HandleConnectionButtons();
   void HandleRegisterButtons();
   void HandlePulserButtons();
@@ -76,22 +75,11 @@ public:
   void HandleComboBoxes(int, int);
   void HandleCheckButtons();
   void HandleDisconnectAndTerminate(bool = true);
+  */
 
   // Enable/disable widgets
   void SetHVWidgetState(int, bool);
   void SetDGWidgetState(bool);
-
-  // Real time actions
-  void RunHVMonitoring();
-  void RunDGScope();
-
-    // Special actions
-  void SaveSpectrumData();
-  void ForceSpectrumDrawing();
-  void StopAcquisitionSafely();
-  
-  // Method to generate artificial waveforms (Unused, ZSH 28 May 13)
-  void GenerateArtificialWaveform(int, vector<int> &, double *, double);
 
 private:
 
@@ -99,22 +87,8 @@ private:
   // General use variables //
   ///////////////////////////
 
-  // IDs for each module
-  enum{V1718, V1720, V6534};
-
   // Dimensions for interface window
-  const int DisplayWidth, DisplayHeight;
-
-  // Managers for the V6534 and V1720 VME boards
-  ADAQHighVoltage *HVManager;
-  ADAQDigitizer *DGManager;
-  ADAQBridge *BRManager;
-
-  // Use booleans and VME addresses
-  bool V1718Enable, V1720Enable, V6534Enable;
-  int V1720BoardAddress, V6534BoardAddress;
-  
-  bool VMEConnectionEstablished;
+  int DisplayWidth, DisplayHeight;
 
   // Variables for high voltage control
   bool HVMonitorEnable;
@@ -133,14 +107,10 @@ private:
   map<int,int> DGScopeChTriggerThreshold_NEL_ID_Map;
   const int NumDataChannels;
 
-  // Bool to control building code in debugging mode
-  bool BuildInDebugMode;
-
   // Objects for controlling timed acquisition periods
   bool AcquisitionTimerEnabled;
   double AcquisitionTime_Start, AcquisitionTime_Stop;
 
-  
   // Strings for file names, extensions
   string DataFileName, DataFileExtension;
   string SpectrumFileName, SpectrumFileExtension;
@@ -149,29 +119,11 @@ private:
   // Object to convert numeric color to pixel color
   TColor *ColorManager;
 
-    // A random number generator
-  TRandom *RNG;
+    // IDs for each module
+  enum{V1718, V1720, V6534};
+  const int NumVMEBoards;
 
-
-  // DGScope objects
-  TGraph *DGScopeWaveform_G[8];
-  TH1F *DGScopeSpectrum_H[8];
-
-  TFile *OutputDataFile;
-  TTree *WaveformTree;
-  bool BranchWaveformTree;
-  ADAQRootMeasParams *MeasParams;
-  TObjString *MeasComment;
-  bool ROOTFileOpen;
-
-  vector<bool> UseCalibrationManager;
-  vector<TGraph *> CalibrationManager;
-  vector<ADAQChannelCalibrationData> CalibrationData;
-
-  TLegend *DGScopeWaveform_Leg;
-  TLine *DGScopeChannelTrigger_L[8];
-  TBox *DGScopeBaselineCalcRegion_B[8];
-  TLine *DGScopeSpectrumCalibration_L;
+  AAVMEManager *TheVMEManager;
 
 
   /////////////////////////////
@@ -183,7 +135,6 @@ private:
   ////////////
   // Tab frame
   TGTab *TopLevelTabs;
-
 
   ///////////////////////////////
   // VME connection frame widgets
@@ -349,16 +300,13 @@ private:
   TGCheckButton *DGScopeSaveCanvasWithTimeExtension_CB;
   TGTextButton *DGScopeSaveCanvas_TB;
 
-  TGCheckButton *DebugModeEnable_CB;
-  ADAQNumberEntryWithLabel *DebugModeWaveformGenerationPause_NEL;
-
   AAChannelSlots *ChannelSlots;
   AADisplaySlots *DisplaySlots;
   AASubtabSlots *SubtabSlots;
   AATabSlots *TabSlots;
 
   // Define the AAInterface class to ROOT 
-  ClassDef(AAInterface,1);
+  ClassDef(AAInterface, 0);
 };
 
 
