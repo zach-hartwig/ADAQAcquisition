@@ -74,8 +74,9 @@ public:
   void HandleRadioButtons();
   void HandleComboBoxes(int, int);
   void HandleCheckButtons();
-  void HandleDisconnectAndTerminate(bool = true);
   */
+  void HandleDisconnectAndTerminate(bool = true);
+
 
   // Enable/disable widgets
   void SetHVWidgetState(int, bool);
@@ -90,14 +91,12 @@ private:
   // Dimensions for interface window
   int DisplayWidth, DisplayHeight;
 
-  // Variables for high voltage control
-  bool HVMonitorEnable;
+  // Variables for use with high voltage widgets
   vector<string> HVChannelLabels;
   vector<int> HVChannelPower_TB_ID_Vec;
   map<int,int> HVChannelPower_TB_ID_Map;
 
-  // Variables for digitizer control
-  bool DGScopeEnable;
+  // Variables for use with digitizer control
   vector<string> DGChannelLabels;
   vector<int> DGScopeChEnable_CB_ID_Vec;
   vector<int> DGScopeChDCOffset_NEL_ID_Vec;
@@ -106,15 +105,6 @@ private:
   vector<int> DGScopeChBaselineCalcMax_NEL_ID_Vec;
   map<int,int> DGScopeChTriggerThreshold_NEL_ID_Map;
   const int NumDataChannels;
-
-  // Objects for controlling timed acquisition periods
-  bool AcquisitionTimerEnabled;
-  double AcquisitionTime_Start, AcquisitionTime_Stop;
-
-  // Strings for file names, extensions
-  string DataFileName, DataFileExtension;
-  string SpectrumFileName, SpectrumFileExtension;
-  string GraphicsFileName, GraphicsFileExtension;
 
   // Object to convert numeric color to pixel color
   TColor *ColorManager;
@@ -139,7 +129,7 @@ private:
   ///////////////////////////////
   // VME connection frame widgets
   TGCompositeFrame *ConnectionTab, *ConnectionFrame;
-  TGTextButton *V1718Connect_TB;
+  TGTextButton *VMEConnect_TB;
 
   TGTextView *ConnectionOutput_TV;
 

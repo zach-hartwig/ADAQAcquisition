@@ -12,11 +12,14 @@ public:
   ~AATabSlots();
   
   void HandleConnectionTextButtons();
+  void HandleRegisterTextButtons();
+  void HandlePulserTextButtons();
+  void HandleVoltageTextButtons();
   
   ClassDef(AATabSlots, 0);
   
 private:
-  AAInterface *TheInterface;
+  AAInterface *TI;
 };
 
 #endif

@@ -6,7 +6,7 @@ enum{
   FileMenuExit_ID,
 
   // Widget IDs for the connection frame
-  V1718Connect_TB_ID,
+  VMEConnect_TB_ID,
 
   V1718BoardEnable_TB_ID,
   V1718BoardAddress_ID,

@@ -43,14 +43,7 @@ using namespace boost::assign;
 AAInterface::AAInterface()
   : TGMainFrame(gClient->GetRoot()),
     DisplayWidth(1125), DisplayHeight(840), 
-    HVMonitorEnable(false), DGScopeEnable(false),
-    NumDataChannels(8),
-    AcquisitionTimerEnabled(false), 
-    AcquisitionTime_Start(0.), AcquisitionTime_Stop(0.),
-    DataFileName("DefaultData"), DataFileExtension(".adaq"),
-    SpectrumFileName("DefaultSpectrum"), SpectrumFileExtension(".dat"),
-    GraphicsFileName("DefaultGraphics"), GraphicsFileExtension(".eps"),
-    ColorManager(new TColor), NumVMEBoards(3)
+    NumDataChannels(8), ColorManager(new TColor), NumVMEBoards(3)
 {
   // Allow environmental variable to control small version of GUI
   if(getenv("ADAQACQUISITION_SMALL")!=NULL){
@@ -216,12 +209,12 @@ void AAInterface::FillConnectionFrame()
   ConnectionFrame->AddFrame(Connection_GF, new TGLayoutHints(kLHintsTop | kLHintsCenterX, 5,5,5,5));
   Connection_GF->SetTitlePos(TGGroupFrame::kCenter);
   
-  Connection_GF->AddFrame(V1718Connect_TB = new TGTextButton(Connection_GF, "Disconnected: click to connect", V1718Connect_TB_ID),
+  Connection_GF->AddFrame(VMEConnect_TB = new TGTextButton(Connection_GF, "Disconnected: click to connect", VMEConnect_TB_ID),
 			    new TGLayoutHints(kLHintsExpandX, 5,5,25,5));
-  V1718Connect_TB->Connect("Clicked()","AAInterface",this,"HandleConnectionButtons()");
-  V1718Connect_TB->Resize(500,40);
-  V1718Connect_TB->SetBackgroundColor(ColorManager->Number2Pixel(2));
-  V1718Connect_TB->ChangeOptions(V1718Connect_TB->GetOptions() | kFixedSize);
+  VMEConnect_TB->Connect("Clicked()", "AATabSlots", TabSlots, "HandleConnectionTextButtons()");
+  VMEConnect_TB->Resize(500,40);
+  VMEConnect_TB->SetBackgroundColor(ColorManager->Number2Pixel(2));
+  VMEConnect_TB->ChangeOptions(VMEConnect_TB->GetOptions() | kFixedSize);
 
   // A text view window to capture/display std::cout information
 
@@ -284,7 +277,7 @@ void AAInterface::FillConnectionFrame()
     BoardAddress_VF->AddFrame(BoardAddress_HF,new TGLayoutHints(kLHintsExpandY, 5,5,5,5));  
 
     BoardEnable_TB.push_back(new TGTextButton(BoardAddress_VF, "Board enabled", BoardEnableID[board]));
-    BoardEnable_TB[board]->Connect("Clicked()","AAInterface",this,"HandleConnectionButtons()");
+    BoardEnable_TB[board]->Connect("Clicked()", "AATabSlots", TabSlots, "HandleConnectionTextButtons()");
     BoardEnable_TB[board]->Resize(110,25);
     BoardEnable_TB[board]->SetBackgroundColor(ColorManager->Number2Pixel(8));
     BoardEnable_TB[board]->ChangeOptions(BoardEnable_TB[board]->GetOptions() | kFixedSize);
@@ -389,7 +382,7 @@ void AAInterface::FillRegisterFrame()
     ReadCycle_GF->AddFrame(ReadCycleValue_HF2, new TGLayoutHints(kLHintsExpandY, 5,5,0,5));
 
     Read_TB.push_back(new TGTextButton(ReadCycle_GF, "VME Read", ReadID[board]));
-    Read_TB[board]->Connect("Clicked()","AAInterface",this,"HandleRegisterButtons()");
+    Read_TB[board]->Connect("Clicked()", "AATabSlots", TabSlots, "HandleRegisterTextButtons()");
     Read_TB[board]->Resize(RWButtonX, RWButtonY);
     Read_TB[board]->SetForegroundColor(RWFGColor);
     Read_TB[board]->SetBackgroundColor(RWBGColor);
@@ -439,7 +432,7 @@ void AAInterface::FillRegisterFrame()
     WriteCycle_GF->AddFrame(WriteCycleValue_HF, new TGLayoutHints(kLHintsExpandY, 5,5,5,5));
 
     Write_TB.push_back(new TGTextButton(WriteCycle_GF, "VME Write", WriteID[board]));
-    Write_TB[board]->Connect("Clicked()","AAInterface",this,"HandleRegisterButtons()");
+    Write_TB[board]->Connect("Clicked()", "AATabSlots", TabSlots, "HandleRegisterTextButtons()");
     Write_TB[board]->Resize(RWButtonX, RWButtonY);
     Write_TB[board]->SetForegroundColor(RWFGColor);
     Write_TB[board]->SetBackgroundColor(RWBGColor);
@@ -572,7 +565,7 @@ void AAInterface::FillPulserFrame()
     V1718PulserStartStop_TB[pulser]->SetBackgroundColor(ColorManager->Number2Pixel(kRed));
     V1718PulserStartStop_TB[pulser]->Resize(200,40);
     V1718PulserStartStop_TB[pulser]->ChangeOptions(V1718PulserStartStop_TB[pulser]->GetOptions() | kFixedSize);
-    V1718PulserStartStop_TB[pulser]->Connect("Pressed()","AAInterface",this,"HandlePulserButtons()");
+    V1718PulserStartStop_TB[pulser]->Connect("Pressed()", "AATabSlots", TabSlots, "HandlePulserTextButtons()");
   }  
 
 }
@@ -642,7 +635,7 @@ void AAInterface::FillVoltageFrame()
     // ID enumerator (see file "ADAQEnumerators.hh") for each channel
     HVChannel_GF->AddFrame(HVChannelPower_TB[ch] = new TGTextButton(HVChannel_GF, "OFF", HVChannelPower_TB_ID_Vec[ch]),
 			   new TGLayoutHints(kLHintsNormal,15,15,15,5));
-    HVChannelPower_TB[ch]->Connect("Pressed()","AAInterface",this,"HandleVoltageButtons()");
+    HVChannelPower_TB[ch]->Connect("Pressed()", "AATabSlots", TabSlots, "HandleVoltageTextButtons()");
     HVChannelPower_TB[ch]->SetToolTipText("Engage high voltage!");
     HVChannelPower_TB[ch]->Resize(110,50);
     HVChannelPower_TB[ch]->ChangeOptions(HVChannelPower_TB[ch]->GetOptions() | kFixedSize);
@@ -665,7 +658,7 @@ void AAInterface::FillVoltageFrame()
   // channel's set voltage and drawn current
   HVAllChannel_GF->AddFrame(HVMonitorEnable_CB = new TGCheckButton(HVAllChannel_GF, "Enable monitoring", HVEnableMonitoring_CB_ID),
 			    new TGLayoutHints(kLHintsNormal, 5,5,5,5));
-  HVMonitorEnable_CB->Connect("Clicked()", "AAInterface", this, "HandleVoltageButtons()");
+  HVMonitorEnable_CB->Connect("Clicked()", "AATabSlots", TabSlots, "HandleVoltageTextButtons()");
   HVMonitorEnable_CB->SetState(kButtonUp);
   
   VoltageFrame->AddFrame(HVChannelControls_VF, new TGLayoutHints(kLHintsTop | kLHintsCenterX, 5, 5, 5, 5));
@@ -1477,423 +1470,6 @@ void AAInterface::FillScopeFrame()
   
 
 /*
-// Handles all actions by buttons on the VME Connection frame
-void AAInterface::HandleConnectionButtons()
-{
-  // Get pointers and the widget ID for the active (ie, clicked) text button
-  TGTextButton *ActiveTextButton = (TGTextButton *) gTQSender;
-  int ActiveButtonID = ActiveTextButton->WidgetId();
-
-  enum{V1718, V1720, V6534};
-
-  // Temporarily redirect the std::cout messages to a local buffer
-  streambuf* StandardBuffer = cout.rdbuf();
-  ostringstream NewBuffer;
-  cout.rdbuf( NewBuffer.rdbuf() );
-
-  switch(ActiveButtonID){
-
-    // Connect AAInterface with VME boards
-  case V1718Connect_TB_ID:
-    
-    // If no connection is presently established...
-    if(!VMEConnectionEstablished){
-
-      int V1720LinkOpen = -42;
-      if(V1720Enable){
-	V1720BoardAddress = BoardAddress_NEF[V1720]->GetHexNumber();
-	V1720LinkOpen = DGManager->OpenLink(V1720BoardAddress);
-	DGManager->Initialize();
-      }
-      
-      int V1718LinkOpen = -42;
-
-      if(V1718Enable){
-	if(!V1720Enable and !V6534Enable){
-	  V1718LinkOpen = BRManager->OpenLinkDirectly();
-	}
-	else if(V1720LinkOpen == 0)
-	  V1718LinkOpen = BRManager->OpenLinkViaDigitizer(DGManager->GetBoardHandle(), true);
-      }
-      
-      int V6534LinkOpen = -42;
-      if(V6534Enable){
-	V6534BoardAddress = BoardAddress_NEF[V6534]->GetHexNumber();
-	V6534LinkOpen = HVManager->OpenLink(V6534BoardAddress);
-
-	if(V6534LinkOpen == 0)
-	  HVManager->SetToSafeState();
-      }
-
-      if(V1718LinkOpen == 0 or V1720LinkOpen==0 or V6534LinkOpen==0){
-	V1718Connect_TB->SetBackgroundColor(ColorManager->Number2Pixel(8));
-	V1718Connect_TB->SetText("Connected: click to disconnect");
-	VMEConnectionEstablished = true;
-
-	// Convert the new "std::cout" buffer into a TGText
-	string InputString = NewBuffer.str();
-	TGText *InputText = new TGText;
-	InputText->LoadBuffer(InputString.c_str());
-
-
-	// Update the connection TGTextView with the status messages
-	ConnectionOutput_TV->AddText(InputText);
-	ConnectionOutput_TV->ShowBottom();
-	ConnectionOutput_TV->Update();
-      }
-      else
-	V1718Connect_TB->SetBackgroundColor(ColorManager->Number2Pixel(2));
-    }
-
-    // If a connection is already established then terminate the connection
-    else if(VMEConnectionEstablished){
-
-      // Call the functions that accomplishes safe shutdown of the
-      // V6534 and V1720 boards (powering down voltages, turning all
-      // channels off, etc)
-      HandleDisconnectAndTerminate(false);
-
-      // Change the color and text of the button.
-      V1718Connect_TB->SetBackgroundColor(ColorManager->Number2Pixel(2));
-      V1718Connect_TB->SetText("Disconnected: click to connect");
-      VMEConnectionEstablished = false;
-
-      // Convert the new "std::cout" buffer into a TGText
-      string InputString = NewBuffer.str();
-      TGText *InputText = new TGText;
-      InputText->LoadBuffer(InputString.c_str());
-      
-      // Update the connection TGTextView with the status messages
-      ConnectionOutput_TV->AddText(InputText);
-      ConnectionOutput_TV->ShowBottom();
-      ConnectionOutput_TV->Update();
-    }
-    break;
-
-    // Set the V6534Enable boolean that controls whether or not the
-    // V6534 high voltage board should be presently used
-  case V6534BoardEnable_TB_ID:
-    if(BoardEnable_TB[V6534]->GetString() == "Board enabled"){
-      BoardEnable_TB[V6534]->SetText("Board disabled");
-      BoardEnable_TB[V6534]->SetBackgroundColor(ColorManager->Number2Pixel(2));
-      V6534Enable = false;
-    }
-    else if(BoardEnable_TB[V6534]->GetString() == "Board disabled"){
-      BoardEnable_TB[V6534]->SetText("Board enabled");
-      BoardEnable_TB[V6534]->SetBackgroundColor(ColorManager->Number2Pixel(8));
-      V6534Enable = true;
-    }
-    break;
-
-    // Set the V1720Enable boolean that controls whether or not the
-    // V1720 high voltage board should be presently used
-  case V1720BoardEnable_TB_ID:
-    if(BoardEnable_TB[V1720]->GetString() == "Board enabled"){
-      BoardEnable_TB[V1720]->SetText("Board disabled");
-      BoardEnable_TB[V1720]->SetBackgroundColor(ColorManager->Number2Pixel(2));
-      V1720Enable = false;
-    }
-    else if(BoardEnable_TB[V1720]->GetString() == "Board disabled"){
-      BoardEnable_TB[V1720]->SetText("Board enabled");
-      BoardEnable_TB[V1720]->SetBackgroundColor(ColorManager->Number2Pixel(8));
-      V1720Enable = true;
-    }
-    break;
-
-  case V1718BoardEnable_TB_ID:
-    if(BoardEnable_TB[V1718]->GetString() == "Board enabled"){
-      BoardEnable_TB[V1718]->SetText("Board disabled");
-      BoardEnable_TB[V1718]->SetBackgroundColor(ColorManager->Number2Pixel(2));
-      V1718Enable = false;
-    }
-    else if(BoardEnable_TB[V1718]->GetString() == "Board disabled"){
-      BoardEnable_TB[V1718]->SetText("Board enabled");
-      BoardEnable_TB[V1718]->SetBackgroundColor(ColorManager->Number2Pixel(8));
-      V1718Enable = true;
-    }
-    break;
-    
-  }
-
-  // Redirect std::cout back to the normal terminal output
-  cout.rdbuf(StandardBuffer);
-}
-
-void AAInterface::HandleRegisterButtons()
-{
-  // Get pointers and the widget ID for the active (ie, clicked) text button
-  TGTextButton *ActiveTextButton = (TGTextButton *) gTQSender;
-  int ActiveButtonID = ActiveTextButton->WidgetId();
-
-  // 32-bit integers to hold register addresses and data; 16-bit
-  // integer to hold data obtained from the V6534 board
-  uint32_t addr32 = 0;
-  uint32_t data32 = 0;
-  uint16_t data16 = 0;
-
-  // Create two enums for local parsing of the actions
-  enum{READ,WRITE};
-
-  // Use a case statement to two select the action and the board upon
-  // which the register read/write will take place
-  int Action = 0;
-  int Board = 0;
-  switch(ActiveButtonID){
-
-  case V1718Read_ID:
-    Action = READ;
-    Board = V1718;
-    break;
-
-  case V1718Write_ID:
-    Action = WRITE;
-    Board = V1718;
-    break;
-
-  case V1720Read_ID:
-    Action = READ;
-    Board = V1720;
-    break;
-
-  case V1720Write_ID:
-    Action = WRITE;
-    Board = V1720;
-    break;
-    
-  case V6534Read_ID:
-    Action = READ;
-    Board = V6534;
-    break;
-
-  case V6534Write_ID:
-    Action = WRITE;
-    Board = V6534;
-    break;
-  }
-
-  ///////////////////////////////////////////////
-  // Perform a register read of the desired board
-  if(Action == READ){
-    addr32 = ReadAddress_NEF[Board]->GetHexNumber();
-
-    if(Board == V1718 and V1718Enable){
-      BRManager->GetRegisterValue(addr32, &data32);
-      cout << data32 << endl;
-    }
-    else if(Board == V1720 and V1720Enable)
-      DGManager->GetRegisterValue(addr32, &data32);
-    else if(Board == V6534 and V6534Enable){
-      HVManager->GetRegisterValue(addr32, &data16);
-      data32 = data16;
-    }
-
-    // Update the hex widget with the register value
-    ReadValueHex_NEF[Board]->SetHexNumber(data32);
-
-    // Update the binary widget with the register value inserting
-    // spaces every 4 characters for easier reading
-    bitset<32> Value (data32);
-    string ValueString = Value.to_string();
-    int offset = 0;
-    for(int i=0; i<32/4; i++){
-      ValueString.insert(i*4+offset, " ");
-      offset++;
-    }
-    ReadValueBinary_TE[Board]->SetText(ValueString.c_str());
-  }
-
-  ////////////////////////////////////////////////
-  // Perform a register write of the desired board
-  else if(Action == WRITE){
-    addr32 = WriteAddress_NEF[Board]->GetHexNumber();
-    data32 = WriteValue_NEF[Board]->GetHexNumber();
-
-    if(Board == V1718)
-      BRManager->SetRegisterValue(addr32, data32);
-    if(Board == V1720 and V1720Enable) 
-      DGManager->SetRegisterValue(addr32, data32);
-    else if(Board == V6534 and V6534Enable)
-      HVManager->SetRegisterValue(addr32, data32);
-  }
-}
-
-
-void AAInterface::HandlePulserButtons()
-{
-  // Get pointers and the widget ID for the active (ie, clicked) text button
-  TGTextButton *ActiveTextButton = (TGTextButton *) gTQSender;
-  int ActiveButtonID = ActiveTextButton->WidgetId();
-
-  if(!VMEConnectionEstablished)
-    return;
-
-  enum {PulserA, PulserB};
-  int Pulser = -1;
-
-  switch(ActiveButtonID){
-
-  case V1718PulserA_TB_ID:
-    Pulser = PulserA;
-    break;
-
-  case V1718PulserB_TB_ID:
-    Pulser = PulserB;
-    break;
-  }
-
-  // Readout the widgets into structs provided by ADAQBridge class
-  PulserSettings PS;
-  PS.PulserToSet = Pulser;
-  PS.Period = V1718PulserPeriod_NEL[Pulser]->GetEntry()->GetIntNumber();
-  PS.Width = V1718PulserWidth_NEL[Pulser]->GetEntry()->GetIntNumber();
-  PS.TimeUnit = V1718PulserTimeUnit_CBL[Pulser]->GetComboBox()->GetSelected();
-  PS.PulseNumber = V1718PulserPulses_NEL[Pulser]->GetEntry()->GetIntNumber();
-  PS.StartSource = V1718PulserStartSource_CBL[Pulser]->GetComboBox()->GetSelected();
-  PS.StopSource = V1718PulserStopSource_CBL[Pulser]->GetComboBox()->GetSelected();
-
-  PulserOutputSettings POS;
-  POS.OutputLine = V1718PulserOutputLine_CBL[Pulser]->GetComboBox()->GetSelected();
-  POS.OutputPolarity = V1718PulserOutputPolarity_CBL[Pulser]->GetComboBox()->GetSelected();
-  POS.LEDPolarity = V1718PulserLEDPolarity_CBL[Pulser]->GetComboBox()->GetSelected();
-  POS.Source = V1718PulserSource_CBL[Pulser]->GetComboBox()->GetSelected();
-
-  // Update the pulser settings through the V1718 manager class
-  BRManager->SetPulserSettings(&PS);
-  BRManager->SetPulserOutputSettings(&POS);
-
-  if(ActiveTextButton->GetString()=="Stopped"){
-    // Update button color from red to green andn update text
-    ActiveTextButton->SetBackgroundColor(ColorManager->Number2Pixel(8));
-    ActiveTextButton->SetForegroundColor(ColorManager->Number2Pixel(1));
-    ActiveTextButton->SetText("Pulsing");
-
-    BRManager->StartPulser(Pulser);
-  }
-  else if(ActiveTextButton->GetString()=="Pulsing"){
-    // Update button color from green to red and update text
-    ActiveTextButton->SetBackgroundColor(ColorManager->Number2Pixel(2));
-    ActiveTextButton->SetForegroundColor(ColorManager->Number2Pixel(1));
-    ActiveTextButton->SetText("Stopped");
-
-    BRManager->StopPulser(Pulser);
-  }
-}
-
-
-// Perform actions that are activated by the text buttons on the HV frame
-void AAInterface::HandleVoltageButtons()
-{
-  // Get pointers and the widget ID for the active (ie, clicked) text button
-  TGTextButton *ActiveTextButton = (TGTextButton *) gTQSender;
-  int ActiveButtonID = ActiveTextButton->WidgetId();
-
-  // Return if the user has specified that the V6534 high voltage
-  // board should not be used during this session
-  if(!V6534Enable)
-    return;
-  
-  switch(ActiveButtonID){
-    
-    ///////////////////////
-    // HV Power Settings 
-    
-  case HVChannel0Power_TB_ID:
-  case HVChannel1Power_TB_ID:
-  case HVChannel2Power_TB_ID:
-  case HVChannel3Power_TB_ID:
-  case HVChannel4Power_TB_ID:
-  case HVChannel5Power_TB_ID:{
-    
-    // Determine the HV channel number corresponding to the clicked button
-    int HVChannel = HVChannelPower_TB_ID_Map[ActiveButtonID];
-
-    // If the power is being turned from "OFF" to "ON"...
-    if(ActiveTextButton->GetString()=="OFF"){
-      // Update the button color from red to green and set text to "ON"
-      ActiveTextButton->SetBackgroundColor(ColorManager->Number2Pixel(8));
-      ActiveTextButton->SetForegroundColor(ColorManager->Number2Pixel(1));
-      ActiveTextButton->SetText("ON");
-      
-      // Get the voltage and maximum current settings from the ROOT
-      // number entry widgets for the desired HV channel
-      int HVVoltageValue = HVChannelV_NEL[HVChannel]->GetEntry()->GetIntNumber();
-      int HVCurrentValue = HVChannelI_NEL[HVChannel]->GetEntry()->GetIntNumber();
-      
-      // Set the voltage and maxmimum current drawn and turn the HV channel on
-      HVManager->SetVoltage(HVChannel,HVVoltageValue); 
-      HVManager->SetCurrent(HVChannel,HVCurrentValue);
-      HVManager->SetPowerOn(HVChannel);
-
-      // Disable the state of the HV widgets corresponding to the
-      // channel that has just been turned on. 
-      //
-      // ZSH: We may want to update this feature to allow dynamic
-      // setting of the channel voltage and current
-      SetHVWidgetState(HVChannel, true);
-    }
-
-    // If the power is being turned from "ON" to "OFF"...
-    else if(ActiveTextButton->GetString()=="ON"){
-      // Update the button color from green to red and set text to "OFF"
-      ActiveTextButton->SetBackgroundColor(ColorManager->Number2Pixel(2));
-      ActiveTextButton->SetForegroundColor(ColorManager->Number2Pixel(1));
-      ActiveTextButton->SetText("OFF");
-
-      // Turn the HV channel off
-      HVManager->SetPowerOff(HVChannel);
-
-      // Reenable the widget status such that voltage and maximum
-      // current can be modified
-      SetHVWidgetState(HVChannel, false);
-    }
-    break;
-  }
-
-    //////////////////
-    // HV Monitoring 
-    
-    // Enable real-time monitoring of all channel's voltage and drawn current
-  case HVEnableMonitoring_CB_ID:{
-    
-    // If monitoring is being turned on....
-    if(HVMonitorEnable_CB->IsDown()){
-      
-      // Set bool to enable the HV monitoring loop (see
-      // AAInterface::RunHVMonitoring)
-      HVMonitorEnable = true;
-
-      // Enable the HV channel monitoring ROOT number entry field
-      // widgets to show that monitoring is turned on
-      for(int ch=0; ch<HVManager->GetNumChannels(); ch++){
-	HVChannelVMonitor_NEFL[ch]->GetEntry()->SetState(true);
-	HVChannelIMonitor_NEFL[ch]->GetEntry()->SetState(true);
-      }
-
-      // Run the HV monitoring
-      RunHVMonitoring();
-    }
-
-    // If monitoring is being turned off...
-    else{
-
-      // Disable the HV channel monitoring ROOT number entry field
-      // widgets to show that monitoring is turned off
-      for(int ch=0; ch<HVManager->GetNumChannels(); ch++){
-	HVChannelVMonitor_NEFL[ch]->GetEntry()->SetState(false);
-	HVChannelIMonitor_NEFL[ch]->GetEntry()->SetState(false);
-      }
-
-      // Set bool to disable HV monitoring loop
-      HVMonitorEnable = false;
-      break;
-    }
-  }
-    
-  default:
-    break;
-    
-  }
-}
 
 
 // Perform actions triggers by the text buttons on the Scope Frame
@@ -2858,34 +2434,18 @@ void AAInterface::HandleCheckButtons()
     break;
   }
 }
-
+*/
 
 // Performm actions that ensure a safe shutdown and disconnect of the
 // AAInterface software from the VME boards
-void AAInterface::HandleDisconnectAndTerminate(bool TerminateApplication)
+void AAInterface::HandleDisconnectAndTerminate(bool Terminate)
 {
-  // If the HVManager has been instantiated (ie, the V6534 is being
-  // used) then set the V6534 board to a safe state (all
-  // voltages/currents to 0, power to off) and then close the link to
-  // the V6534 board
-  if(V6534Enable){
-    HVManager->SetToSafeState();
-    HVManager->CloseLink();
-  }
+  TheVMEManager->SafelyDisconnectVMEBoards();
   
-  // If the DGManager has been instatiated (ie, the V1720 is being
-  // used) close the link to the V1720 board
-  if(V1720Enable)
-    DGManager->CloseLink();
-
-  if(V1718Enable)
-    BRManager->CloseLink();
-
-  // Close the standalone ROOT application
-  if(TerminateApplication)
+  if(Terminate)
     gApplication->Terminate();
 }
-*/
+
 
 // Set the state of the HV voltage and maximum current entry
 // widgets. When a specific channel is turned "on", it's HV and I

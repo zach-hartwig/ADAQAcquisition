@@ -21,10 +21,14 @@ public:
 
   static AAVMEManager *GetInstance();
 
+
+  void SafelyDisconnectVMEBoards();
+
   /////////////////////////////////////
   // Set/get methods for member data //
   /////////////////////////////////////
 
+  void SetVMEConnectionEstablished(bool CE) {VMEConnectionEstablished = CE;}
   bool GetVMEConnectionEstablished() {return VMEConnectionEstablished;}
 
   // VME board enable booleans
@@ -85,6 +89,17 @@ private:
   vector<TGraph *> CalibrationManager;
   vector<ADAQChannelCalibrationData> CalibrationData;
   */
+
+  
+  // Objects for controlling timed acquisition periods
+  // bool AcquisitionTimerEnabled;
+  // double AcquisitionTime_Start, AcquisitionTime_Stop;
+
+  // Strings for file names, extensions
+  // string DataFileName, DataFileExtension;
+  // string SpectrumFileName, SpectrumFileExtension;
+  // string GraphicsFileName, GraphicsFileExtension;
+
 
 };
 

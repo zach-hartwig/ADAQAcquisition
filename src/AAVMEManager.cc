@@ -36,6 +36,20 @@ AAVMEManager::~AAVMEManager()
 {;}
 
 
+void AAVMEManager::SafelyDisconnectVMEBoards()
+{
+  if(HVEnable){
+    HVMgr->SetToSafeState();
+    HVMgr->CloseLink();
+  }
+  
+  if(DGEnable)
+    DGMgr->CloseLink();
+  
+  if(BREnable)
+    BRMgr->CloseLink();
+}
+
 
 
 // Run the real-time updating of the ROOT number entry widgets that
