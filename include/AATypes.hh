@@ -1,15 +1,27 @@
-#ifndef __ADAQENUMERATORS_HH__
-#define __ADAQENUMERATORS_HH__ 1
+#ifndef __ADAQTypes_hh__
+#define __ADAQTypes_hh__ 1
 
 enum{
-  // Widget IDs for the menu frame
-  FileMenuExit_ID,
+  ////////////////////
+  // Connection tab //
+  ////////////////////
 
-  // Widget IDs for the connection frame
   VMEConnect_TB_ID,
 
   V1718BoardEnable_TB_ID,
   V1718BoardAddress_ID,
+
+  HVBoardEnable_TB_ID,
+  HVBoardAddress_ID,
+
+  DGBoardEnable_TB_ID,
+  DGBoardAddress_ID,
+
+  
+  ///////////////////
+  // Registers tab //
+  ///////////////////
+
   V1718ReadAddress_ID,
   V1718ReadValue_ID,
   V1718Read_ID,
@@ -17,8 +29,7 @@ enum{
   V1718WriteValue_ID,
   V1718Write_ID,
     
-  HVBoardEnable_TB_ID,
-  HVBoardAddress_ID,
+
   HVReadAddress_ID,
   HVReadValue_ID,
   HVRead_ID,
@@ -26,8 +37,7 @@ enum{
   HVWriteValue_ID,
   HVWrite_ID,
 
-  DGBoardEnable_TB_ID,
-  DGBoardAddress_ID,
+
   DGReadAddress_ID,
   DGReadValue_ID,
   DGRead_ID,
@@ -35,11 +45,18 @@ enum{
   DGWriteValue_ID,
   DGWrite_ID,
 
-  // Widget IDs for the pulser frame
+  ////////////////
+  // Pulser tab //
+  ////////////////
+
   V1718PulserA_TB_ID, 
   V1718PulserB_TB_ID,
 
-  // Widget IDs for the voltage frame
+
+  ///////////////////
+  // Voltage frame //
+  ///////////////////
+
   HVCh0Power_TB_ID,
   HVCh1Power_TB_ID,
   HVCh2Power_TB_ID,
@@ -49,7 +66,14 @@ enum{
   
   HVEnableMonitoring_CB_ID,
 
-  // Widget IDs for the scope frame
+
+  ///////////////////////
+  // Acquisition frame //
+  ///////////////////////
+
+  ////////////////////////////////////////////////////////////////////////
+  // Widget IDs for the channel subframe (right side of acquisition frame)
+
   DGCh0Enable_CB_ID,
   DGCh1Enable_CB_ID,
   DGCh2Enable_CB_ID,
@@ -95,33 +119,62 @@ enum{
   DGCh6BaselineCalcMax_NEL_ID,
   DGCh7BaselineCalcMax_NEL_ID,
 
-  AQTimerStart_TB_ID,
-  AQTimerAbort_TB_ID,
 
-  SpectrumChannel_CBL_ID,
-  SpectrumAnalysisHeight_RB_ID,
-  SpectrumAnalysisArea_RB_ID,
-  SpectrumCalibrationPoint_CBL_ID,
-  SpectrumUseCalibrationSlider_CB_ID,
-  SpectrumFileName_TB_ID,
-  SaveSpectrum_TB_ID,
-  CanvasFileName_TB_ID,
-  SaveCanvas_TB_ID,
+  ///////////////////////////////////////////////////////////////////////
+  // Widget IDs for the display subframe (top-right of acquisition frame)
+  
+  DisplayVerticalScale_DVS_ID,
+  DisplayHorizontalScale_THS_ID,
+  AQStartStop_TB_ID,
+  AQTrigger_TB_ID,
+  DisplayUpdate_TB_ID,
 
-  VerticalSlider_DVS_ID,
-  HorizontalSlider_THS_ID,
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Widget IDs for the acquisition subtabs (bottom-right of acquisition frame)
+
+  // Acquisition subtab
 
   AQWaveform_RB_ID,
   AQSpectrum_RB_ID,
   AQHighRate_RB_ID,
   AQUltraRate_RB_ID,
 
+  DGTriggerType_CBL_ID,
+  DGTriggerEdge_CBL_ID,
   DGTriggerCoincidenceEnable_CB_ID,
   DGTriggerCoincidenceLevel_CBL_ID,
 
-  DGChVerticalPosition_NEL_ID,
+  DGRecordLength_NEL_ID,
+  DGPostTriggerSize_NEL_ID,
+  AQTime_NEL_ID,
+  AQTimer_NEFL_ID,
+  AQTimerStart_TB_ID,
+  AQTimerAbort_TB_ID,
+
+  DGEventsBeforeReadout_NEL_ID,
+  CheckBufferStatus_TB_ID,
+  AQDataReductionEnable_CB_ID,
+  AQDataReductionFactor_NEL_ID,
+  DGZSEnable_CB_ID,
+
+  // Spectrum subtab
+
+  SpectrumChannel_CBL_ID,
+  SpectrumNumBins_NEL_ID,
+  SpectrumMinBin_NEL_ID,
+  SpectrumMaxBin_NEL_ID,
+
+  SpectrumPulseHeight_RB_ID,
+  SpectrumPulseArea_RB_ID,
+  SpectrumLLD_NEL_ID,
+  SpectrumULD_NEL_ID,
+  SpectrumLDTrigger_CB_ID,
+  SpectrumLDTriggerChannel_CBL_ID,
 
   SpectrumCalibration_CB_ID,
+  SpectrumCalibrationPoint_CBL_ID,
+  SpectrumUseCalibrationSlider_CB_ID,
   SpectrumCalibrationEnergy_NEL_ID,
   SpectrumCalibrationPulseUnit_NEL_ID,
   SpectrumCalibrationSetPoint_TB_ID,
@@ -130,30 +183,23 @@ enum{
   SpectrumCalibrationReset_TB_ID,
   SpectrumCalibrationLoad_TB_ID,
   SpectrumCalibrationWrite_TB_ID,
-  
-  SpectrumBinNumber_NEL_ID,
-  SpectrumMinBin_NEL_ID,
-  SpectrumMaxBin_NEL_ID,
-  SpectrumXAxisLog_CB_ID,
-  SpectrumYAxisLog_CB_ID,
-  SpectrumAggregateRuns_CB_ID,
 
-  AQStartStop_TB_ID,
-  AQTrigger_TB_ID,
-  DisplayUpdate_TB_ID,
-  Save_TB_ID,
+  // Graphics subtab
 
-  TriggerType_CBL_ID,
-  TriggerEdge_CBL_ID,
+  DisplayXAxisLog_CB_ID,
+  DisplayYAxisLog_CB_ID,
 
-  RecordLength_NEL_ID,
-  PostTriggerSize_NEL_ID,
+  // Data storage subtab
 
   DataFileName_TB_ID,
   DataStorageCreateFile_TB_ID,
   DataStorageCloseFile_TB_ID,
 
-  CheckBufferStatus_TB_ID
+  SpectrumFileName_TB_ID,
+  SaveSpectrum_TB_ID,
+
+  CanvasFileName_TB_ID,
+  SaveCanvas_TB_ID
 };
 
 struct ADAQChannelCalibrationData{

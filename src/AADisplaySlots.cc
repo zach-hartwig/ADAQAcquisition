@@ -80,7 +80,7 @@ void AADisplaySlots::HandleTextButtons()
 
   case DisplayUpdate_TB_ID:{
     
-    int CurrentChannel = TI->DGScopeSpectrumChannel_CBL->GetComboBox()->GetSelected();
+    int CurrentChannel = TI->SpectrumChannel_CBL->GetComboBox()->GetSelected();
     
     if(TI->AQUltraRate_RB->IsDown())
       break;

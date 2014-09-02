@@ -219,45 +219,44 @@ private:
   
   // Spectrum
 
-  ADAQComboBoxWithLabel*DGScopeSpectrumChannel_CBL;
-  ADAQNumberEntryWithLabel *DGScopeSpectrumBinNumber_NEL;
-  ADAQNumberEntryWithLabel *DGScopeSpectrumMinBin_NEL;
-  ADAQNumberEntryWithLabel *DGScopeSpectrumMaxBin_NEL;
+  ADAQComboBoxWithLabel *SpectrumChannel_CBL;
+  ADAQNumberEntryWithLabel *SpectrumNumBins_NEL;
+  ADAQNumberEntryWithLabel *SpectrumMinBin_NEL;
+  ADAQNumberEntryWithLabel *SpectrumMaxBin_NEL;
 
-  TGRadioButton *DGScopeSpectrumAnalysisHeight_RB;
-  TGRadioButton *DGScopeSpectrumAnalysisArea_RB;
-  ADAQNumberEntryWithLabel *DGScopeSpectrumAnalysisLLD_NEL;
-  ADAQNumberEntryWithLabel *DGScopeSpectrumAnalysisULD_NEL;
-  TGCheckButton *DGScopeSpectrumAnalysisLDTrigger_CB;
-  ADAQComboBoxWithLabel *DGScopeSpectrumAnalysisLDTriggerChannel_CBL;
+  TGRadioButton *SpectrumPulseHeight_RB;
+  TGRadioButton *SpectrumPulseArea_RB;
+  ADAQNumberEntryWithLabel *SpectrumLLD_NEL;
+  ADAQNumberEntryWithLabel *SpectrumULD_NEL;
+  TGCheckButton *SpectrumLDTrigger_CB;
+  ADAQComboBoxWithLabel *SpectrumLDTriggerChannel_CBL;
 
-  TGCheckButton *DGScopeSpectrumCalibration_CB;
-  TGCheckButton *DGScopeSpectrumUseCalibrationSlider_CB;
-  ADAQComboBoxWithLabel *DGScopeSpectrumCalibrationPoint_CBL;
-  ADAQNumberEntryWithLabel *DGScopeSpectrumCalibrationEnergy_NEL;
-  ADAQNumberEntryWithLabel *DGScopeSpectrumCalibrationPulseUnit_NEL;
-  TGTextButton *DGScopeSpectrumCalibrationSetPoint_TB;
-  TGTextButton *DGScopeSpectrumCalibrationCalibrate_TB;
-  TGTextButton *DGScopeSpectrumCalibrationPlot_TB;
-  TGTextButton *DGScopeSpectrumCalibrationReset_TB;
-  TGTextButton *DGScopeSpectrumCalibrationLoad_TB;
-  TGTextButton *DGScopeSpectrumCalibrationWrite_TB;
+  TGCheckButton *SpectrumCalibration_CB;
+  TGCheckButton *SpectrumUseCalibrationSlider_CB;
+  ADAQComboBoxWithLabel *SpectrumCalibrationPoint_CBL;
+  ADAQNumberEntryWithLabel *SpectrumCalibrationEnergy_NEL;
+  ADAQNumberEntryWithLabel *SpectrumCalibrationPulseUnit_NEL;
+  TGTextButton *SpectrumCalibrationSetPoint_TB;
+  TGTextButton *SpectrumCalibrationCalibrate_TB;
+  TGTextButton *SpectrumCalibrationPlot_TB;
+  TGTextButton *SpectrumCalibrationReset_TB;
+  TGTextButton *SpectrumCalibrationLoad_TB;
+  TGTextButton *SpectrumCalibrationWrite_TB;
 
   // Graphics
   
-  TGCheckButton *DGScopeSpectrumXAxisLog_CB;
-  TGCheckButton *DGScopeSpectrumYAxisLog_CB;
+  TGCheckButton *DisplayXAxisLog_CB;
+  TGCheckButton *DisplayXaxisLog_CB;
 
-  ADAQTextEntryWithLabel *DGScopeDisplayXTitle_TEL, *DGScopeDisplayYTitle_TEL, *DGScopeDisplayTitle_TEL;
-  ADAQNumberEntryWithLabel *DGScopeDisplayXTitleOffset_NEL, *DGScopeDisplayXTitleSize_NEL;
-  ADAQNumberEntryWithLabel *DGScopeDisplayYTitleOffset_NEL, *DGScopeDisplayYTitleSize_NEL;
+  ADAQTextEntryWithLabel *DisplayXTitle_TEL, *DisplayYTitle_TEL, *DisplayTitle_TEL;
+  ADAQNumberEntryWithLabel *DisplayXTitleOffset_NEL, *DisplayXTitleSize_NEL;
+  ADAQNumberEntryWithLabel *DisplayYTitleOffset_NEL, *DisplayYTitleSize_NEL;
 
-  TGCheckButton *DGScopeDisplayDrawLegend_CB;
-  TGRadioButton *DGScopeDisplayWaveformXAxisSample_RB;
-  TGRadioButton *DGScopeDisplayWaveformXAxisNanoseconds_RB;
-  TGRadioButton *DGScopeDisplayWaveformYAxisADC_RB;
-  TGRadioButton *DGScopeDisplayWaveformYAxisMillivolts_RB;
-
+  TGCheckButton *DisplayDrawLegend_CB;
+  TGRadioButton *DisplayWaveformXAxisSample_RB;
+  TGRadioButton *DisplayWaveformXAxisNanoseconds_RB;
+  TGRadioButton *DisplayWaveformYAxisADC_RB;
+  TGRadioButton *DisplayWaveformYAxisMillivolts_RB;
 
 
   // Persistent
@@ -288,7 +287,7 @@ private:
 
   // Miscellaneous
 
-  ADAQNumberEntryWithLabel *DGScopeSpectrumRefreshRate_NEL;
+  ADAQNumberEntryWithLabel *SpectrumRefreshRate_NEL;
 
 
   AAChannelSlots *ChannelSlots;

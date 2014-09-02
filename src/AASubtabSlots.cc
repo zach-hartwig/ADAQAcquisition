@@ -22,7 +22,7 @@ void AASubtabSlots::HandleCheckButtons()
     // Enable the calibration widgets
   case SpectrumCalibration_CB_ID:
 
-    if(TI->DGScopeSpectrumCalibration_CB->IsDown())
+    if(TI->SpectrumCalibration_CB->IsDown())
       TI->SetCalibrationWidgetState(true, kButtonUp);
     else
       TI->SetCalibrationWidgetState(false, kButtonDisabled);
@@ -42,7 +42,7 @@ void AASubtabSlots::HandleComboBoxes(int ActivexID, int SelectedID)
   /*
   switch(ActiveID){
     
-  case DGScopeSpectrumChannel_CBL_ID:{
+  case SpectrumChannel_CBL_ID:{
 
     // In order to ensure that the calibration set point combo box
     // displays the correct number of calibration points, we need to
@@ -54,8 +54,8 @@ void AASubtabSlots::HandleComboBoxes(int ActivexID, int SelectedID)
     int LastPointIndex = CalibrationData[SelectedID].PointID.size();
 
     // Remove the previous entries from the combo box
-    int TotalEntries = DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->GetNumberOfEntries();
-    DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->RemoveEntries(0,TotalEntries-1);
+    int TotalEntries = SpectrumCalibrationPoint_CBL->GetComboBox()->GetNumberOfEntries();
+    SpectrumCalibrationPoint_CBL->GetComboBox()->RemoveEntries(0,TotalEntries-1);
 
     // Recreate the entries for each calibration point in the present
     // histogram calibration combo box
@@ -63,30 +63,30 @@ void AASubtabSlots::HandleComboBoxes(int ActivexID, int SelectedID)
     for(int i=0; i<=LastPointIndex; i++){
       ss << "Calibration point " << i;
       string Entry = ss.str();
-      DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->AddEntry(Entry.c_str(), i);
+      SpectrumCalibrationPoint_CBL->GetComboBox()->AddEntry(Entry.c_str(), i);
       ss.str("");
     }
 
     // If the current histogram has calibration points then set the
     // combo box to diplay the to-be-set point
     if(LastPointIndex > 0){
-      DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->Select(LastPointIndex);
-      DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->SetNumber(0.);
-      DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->SetNumber(1.);
+      SpectrumCalibrationPoint_CBL->GetComboBox()->Select(LastPointIndex);
+      SpectrumCalibrationEnergy_NEL->GetEntry()->SetNumber(0.);
+      SpectrumCalibrationPulseUnit_NEL->GetEntry()->SetNumber(1.);
     }
 
     // ... otherwise display the no-calibration points values
     else{
-      DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->Select(0);
-      DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->SetNumber(0);
-      DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->SetNumber(0);
+      SpectrumCalibrationPoint_CBL->GetComboBox()->Select(0);
+      SpectrumCalibrationEnergy_NEL->GetEntry()->SetNumber(0);
+      SpectrumCalibrationPulseUnit_NEL->GetEntry()->SetNumber(0);
     }
     break;
   }
 
-  case DGScopeSpectrumCalibrationPoint_CBL_ID:{
+  case SpectrumCalibrationPoint_CBL_ID:{
 
-    int SpectrumChannel = DGScopeSpectrumChannel_CBL->GetComboBox()->GetSelected();    
+    int SpectrumChannel = SpectrumChannel_CBL->GetComboBox()->GetSelected();    
     int Size = CalibrationData[SpectrumChannel].PointID.size();
 
     if(SelectedID <= (Size-1)){
@@ -94,16 +94,16 @@ void AASubtabSlots::HandleComboBoxes(int ActivexID, int SelectedID)
       double Energy = CalibrationData[SpectrumChannel].Energy.at(SelectedID);
       double PulseUnit = CalibrationData[SpectrumChannel].PulseUnit.at(SelectedID);
 
-      DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->SetNumber(Energy);
-      DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->SetNumber(PulseUnit);
+      SpectrumCalibrationEnergy_NEL->GetEntry()->SetNumber(Energy);
+      SpectrumCalibrationPulseUnit_NEL->GetEntry()->SetNumber(PulseUnit);
 
-      double Value = Energy/DGScopeSpectrumMaxBin_NEL->GetEntry()->GetNumber();
+      double Value = Energy/SpectrumMaxBin_NEL->GetEntry()->GetNumber();
 
       DGScopeHorizontalScale_THS->SetPointerPosition(Value);
     }
     else{
-      DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->SetNumber(0.);
-      DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->SetNumber(1.);
+      SpectrumCalibrationEnergy_NEL->GetEntry()->SetNumber(0.);
+      SpectrumCalibrationPulseUnit_NEL->GetEntry()->SetNumber(1.);
     }
     break;
   }
@@ -126,12 +126,12 @@ void AASubtabSlots::HandleNumberEntries()
   case SpectrumCalibrationPulseUnit_NEL_ID:{
     double Value = 0.;
     if(ActiveID == SpectrumCalibrationEnergy_NEL_ID)
-      Value = TI->DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->GetNumber();
+      Value = TI->SpectrumCalibrationEnergy_NEL->GetEntry()->GetNumber();
     else
-      Value = TI->DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->GetNumber();
+      Value = TI->SpectrumCalibrationPulseUnit_NEL->GetEntry()->GetNumber();
     
     // Normalize value for slider position setting from 0 to 1
-    Value /= TI->DGScopeSpectrumMaxBin_NEL->GetEntry()->GetNumber();
+    Value /= TI->SpectrumMaxBin_NEL->GetEntry()->GetNumber();
     
     TI->DisplayHorizontalScale_THS->SetPointerPosition(Value);
     break;
@@ -225,16 +225,16 @@ void AASubtabSlots::HandleTextButtons()
   case SpectrumCalibrationSetPoint_TB_ID:{
 
     // Get the calibration point to be set
-    uint SetPoint = TI->DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->GetSelected();
+    uint SetPoint = TI->SpectrumCalibrationPoint_CBL->GetComboBox()->GetSelected();
 
     // Get the energy of the present calibration point
-    double Energy = TI->DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->GetNumber();
+    double Energy = TI->SpectrumCalibrationEnergy_NEL->GetEntry()->GetNumber();
 
     // Get the pulse unit value of the present calibration point
-    int PulseUnit = TI->DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->GetNumber();
+    int PulseUnit = TI->SpectrumCalibrationPulseUnit_NEL->GetEntry()->GetNumber();
 
     // Get the current channel being histogrammed in DGScope
-    int CurrentChannel = TI->DGScopeSpectrumChannel_CBL->GetComboBox()->GetSelected();
+    int CurrentChannel = TI->SpectrumChannel_CBL->GetComboBox()->GetSelected();
 
     /*
     if(SetPoint == CalibrationData[CurrentChannel].PointID.size()){
@@ -248,15 +248,15 @@ void AASubtabSlots::HandleTextButtons()
       stringstream ss;
       ss << (SetPoint+1);
       string NewPointLabel = "Calibration point " + ss.str();
-      DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->AddEntry(NewPointLabel.c_str(),SetPoint+1);
+      SpectrumCalibrationPoint_CBL->GetComboBox()->AddEntry(NewPointLabel.c_str(),SetPoint+1);
       
       // Set the combo box to display the new calibration point...
-      DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->Select(SetPoint+1);
+      SpectrumCalibrationPoint_CBL->GetComboBox()->Select(SetPoint+1);
       
       // ...and set the calibration energy and pulse unit ROOT number
       // entry widgets to their default "0.0" and "1.0" respectively,
-      DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->SetNumber(0.0);
-      DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->SetNumber(1.0);
+      SpectrumCalibrationEnergy_NEL->GetEntry()->SetNumber(0.0);
+      SpectrumCalibrationPulseUnit_NEL->GetEntry()->SetNumber(1.0);
     }
 
     // ...or if the user is re-setting previously set points then
@@ -274,7 +274,7 @@ void AASubtabSlots::HandleTextButtons()
 
     ///////////////////////////////////////////////
     // Create a new DGScope spectrum calibration
-  case DGScopeSpectrumCalibrationCalibrate_TB_ID:{
+  case SpectrumCalibrationCalibrate_TB_ID:{
 
     // If there are 2 or more points in the current channel's
     // calibration data set then create a new TGraph object. The
@@ -286,7 +286,7 @@ void AASubtabSlots::HandleTextButtons()
     // efficiently in the acquisition loop.
 
     // Get the current channel being histogrammed in DGScope
-    int CurrentChannel = DGScopeSpectrumChannel_CBL->GetComboBox()->GetSelected();
+    int CurrentChannel = SpectrumChannel_CBL->GetComboBox()->GetSelected();
     
     if(CalibrationData[CurrentChannel].PointID.size() >= 2){
 
@@ -306,16 +306,16 @@ void AASubtabSlots::HandleTextButtons()
       UseCalibrationManager[CurrentChannel] = true;
 
 
-      DGScopeSpectrumCalibrationCalibrate_TB->SetText("Calibrated");
-      DGScopeSpectrumCalibrationCalibrate_TB->SetForegroundColor(ColorManager->Number2Pixel(1));
-      DGScopeSpectrumCalibrationCalibrate_TB->SetBackgroundColor(ColorManager->Number2Pixel(8));
+      SpectrumCalibrationCalibrate_TB->SetText("Calibrated");
+      SpectrumCalibrationCalibrate_TB->SetForegroundColor(ColorManager->Number2Pixel(1));
+      SpectrumCalibrationCalibrate_TB->SetBackgroundColor(ColorManager->Number2Pixel(8));
     }
     break;
   }
     
-  case DGScopeSpectrumCalibrationPlot_TB_ID:{
+  case SpectrumCalibrationPlot_TB_ID:{
     
-    int CurrentChannel = DGScopeSpectrumChannel_CBL->GetComboBox()->GetSelected();
+    int CurrentChannel = SpectrumChannel_CBL->GetComboBox()->GetSelected();
     
     if(UseCalibrationManager[CurrentChannel]){
       TCanvas *Calibration_C = new TCanvas("Calibration_C","CalibrationManager TGraph",0,0,600,400);
@@ -347,10 +347,10 @@ void AASubtabSlots::HandleTextButtons()
     break;
   }
 
-  case DGScopeSpectrumCalibrationReset_TB_ID:{
+  case SpectrumCalibrationReset_TB_ID:{
 
     // Get the current channel being histogrammed in DGScope
-    int CurrentChannel = DGScopeSpectrumChannel_CBL->GetComboBox()->GetSelected();
+    int CurrentChannel = SpectrumChannel_CBL->GetComboBox()->GetSelected();
 
     // Clear the channel calibration vectors for the current channel
     CalibrationData[CurrentChannel].PointID.clear();
@@ -368,20 +368,20 @@ void AASubtabSlots::HandleTextButtons()
     UseCalibrationManager[CurrentChannel] = false;
     
     // Reset the calibration widgets
-    DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->RemoveAll();
-    DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->AddEntry("Calibration point 0", 0);
-    DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->Select(0);
-    DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->SetNumber(0.0);
-    DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->SetNumber(1.0);
+    SpectrumCalibrationPoint_CBL->GetComboBox()->RemoveAll();
+    SpectrumCalibrationPoint_CBL->GetComboBox()->AddEntry("Calibration point 0", 0);
+    SpectrumCalibrationPoint_CBL->GetComboBox()->Select(0);
+    SpectrumCalibrationEnergy_NEL->GetEntry()->SetNumber(0.0);
+    SpectrumCalibrationPulseUnit_NEL->GetEntry()->SetNumber(1.0);
 
-    DGScopeSpectrumCalibrationCalibrate_TB->SetText("Calibrate");
-    DGScopeSpectrumCalibrationCalibrate_TB->SetForegroundColor(ColorManager->Number2Pixel(1));
-    DGScopeSpectrumCalibrationCalibrate_TB->SetBackgroundColor(ColorManager->Number2Pixel(18));
+    SpectrumCalibrationCalibrate_TB->SetText("Calibrate");
+    SpectrumCalibrationCalibrate_TB->SetForegroundColor(ColorManager->Number2Pixel(1));
+    SpectrumCalibrationCalibrate_TB->SetBackgroundColor(ColorManager->Number2Pixel(18));
     
     break;
   }
 
-  case DGScopeSpectrumCalibrationLoad_TB_ID:{
+  case SpectrumCalibrationLoad_TB_ID:{
 
     const char *FileTypes[] = {"ADAQ calibration file", "*.acal",
 			       "All",                   "*.*",
@@ -397,7 +397,7 @@ void AASubtabSlots::HandleTextButtons()
 
     else{
       
-      int CurrentChannel = DGScopeSpectrumChannel_CBL->GetComboBox()->GetSelected();
+      int CurrentChannel = SpectrumChannel_CBL->GetComboBox()->GetSelected();
 
       string CalibrationFileName = FileInformation.fFilename;
 
@@ -408,7 +408,7 @@ void AASubtabSlots::HandleTextButtons()
 	ifstream In(CalibrationFileName.c_str());
 
 	// Reset any preexisting calibrations
-	DGScopeSpectrumCalibrationReset_TB->Clicked();
+	SpectrumCalibrationReset_TB->Clicked();
 
 	// An index to control the set point
 	int SetPoint = 0;
@@ -431,22 +431,22 @@ void AASubtabSlots::HandleTextButtons()
 	  stringstream ss;
 	  ss << (SetPoint+1);
 	  string NewPointLabel = "Calibration point " + ss.str();
-	  DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->AddEntry(NewPointLabel.c_str(),SetPoint+1);
+	  SpectrumCalibrationPoint_CBL->GetComboBox()->AddEntry(NewPointLabel.c_str(),SetPoint+1);
 	  
 	  // Set the combo box to display the new calibration point...
-	  DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->Select(SetPoint+1);
+	  SpectrumCalibrationPoint_CBL->GetComboBox()->Select(SetPoint+1);
 
 	  SetPoint++;
 	}
 
 	// Use the loaded calibration points to set the calibration
-	DGScopeSpectrumCalibrationCalibrate_TB->Clicked();
+	SpectrumCalibrationCalibrate_TB->Clicked();
       }
     }
     break;
   }
 
-  case DGScopeSpectrumCalibrationWrite_TB_ID:{
+  case SpectrumCalibrationWrite_TB_ID:{
     
     const char *FileTypes[] = {"ADAQ calibration file", "*.acal",
 			       "All",                   "*.*",
@@ -462,7 +462,7 @@ void AASubtabSlots::HandleTextButtons()
 
     else{
       
-      int CurrentChannel = DGScopeSpectrumChannel_CBL->GetComboBox()->GetSelected();
+      int CurrentChannel = SpectrumChannel_CBL->GetComboBox()->GetSelected();
 
       string CalibrationFileName = FileInformation.fFilename;
 
@@ -706,7 +706,7 @@ void AASubtabSlots::HandleTextButtons()
     break;
   }
 
-  case DGScopeSpectrumFileName_TB_ID:{
+  case SpectrumFileName_TB_ID:{
     
     // Set the allowable file type extensions. These will be used to
     // determine the format of the data output to file
@@ -752,7 +752,7 @@ void AASubtabSlots::HandleTextButtons()
       if(Found != string::npos)
 	FileName_StripPath = FileName_StripPath.substr(Found+1, FileName_StripPath.size());
       
-      DGScopeSpectrumFileName_TEL->GetEntry()->SetText(FileName_StripPath.c_str());
+      SpectrumFileName_TEL->GetEntry()->SetText(FileName_StripPath.c_str());
     }
     break;
   }
@@ -840,20 +840,20 @@ void AASubtabSlots::HandleRadioButtons()
   
   switch(ActiveID){
     
-  case SpectrumAnalysisHeight_RB_ID:
+  case SpectrumPulseHeight_RB_ID:
     
-    if(TI->DGScopeSpectrumAnalysisHeight_RB->IsDown()){
-      TI->DGScopeSpectrumAnalysisLLD_NEL->GetEntry()->SetNumber(0);
-      TI->DGScopeSpectrumAnalysisULD_NEL->GetEntry()->SetNumber(4095);
+    if(TI->SpectrumPulseHeight_RB->IsDown()){
+      TI->SpectrumLLD_NEL->GetEntry()->SetNumber(0);
+      TI->SpectrumULD_NEL->GetEntry()->SetNumber(4095);
     }
 
     break;
 
-  case SpectrumAnalysisArea_RB_ID:
+  case SpectrumPulseArea_RB_ID:
     
-    if(TI->DGScopeSpectrumAnalysisArea_RB->IsDown()){
-      TI->DGScopeSpectrumAnalysisLLD_NEL->GetEntry()->SetNumber(4000);
-      TI->DGScopeSpectrumAnalysisULD_NEL->GetEntry()->SetNumber(100000);
+    if(TI->SpectrumPulseArea_RB->IsDown()){
+      TI->SpectrumLLD_NEL->GetEntry()->SetNumber(4000);
+      TI->SpectrumULD_NEL->GetEntry()->SetNumber(100000);
     }
 
     break;

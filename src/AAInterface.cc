@@ -187,20 +187,20 @@ void AAInterface::CreateTopLevelFrames()
   ///////////////
   // Tab frame //
   ///////////////
-
+  
   TGHorizontalFrame *TabFrame = new TGHorizontalFrame(TopFrame);
   TabFrame->SetBackgroundColor(ColorManager->Number2Pixel(15));
-
+  
   TopLevelTabs = new TGTab(TabFrame, 800, 700);
-
+  
   ConnectionTab = TopLevelTabs->AddTab(" VME Connection ");
   ConnectionFrame = new TGCompositeFrame(ConnectionTab, 60, 20, kVerticalFrame);
   ConnectionTab->AddFrame(ConnectionFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 5,5,5,5));
-
+  
   RegisterTab = TopLevelTabs->AddTab(" Register R/W ");
   RegisterFrame = new TGCompositeFrame(RegisterTab, 200, 20, kVerticalFrame);
   RegisterTab->AddFrame(RegisterFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 5,5,5,5));
-
+  
   PulserTab = TopLevelTabs->AddTab(" Pulsers ");
   PulserFrame = new TGCompositeFrame(PulserTab, 60, 20, kVerticalFrame);
   PulserTab->AddFrame(PulserFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 5,5,5,5));
@@ -743,7 +743,7 @@ void AAInterface::FillAcquisitionFrame()
 
 
     // ADAQ number entry to set channel's vertical position on graph [ADC]
-    DGChannelControl_GF->AddFrame(DGChVerticalPosition_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "Vert. Position (ADC)", DGChVerticalPosition_NEL_ID),
+    DGChannelControl_GF->AddFrame(DGChVerticalPosition_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "Vert. Position (ADC)", -1),
 				  new TGLayoutHints(kLHintsNormal));
     DGChVerticalPosition_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
     DGChVerticalPosition_NEL[ch]->GetEntry()->SetNumber(0);
@@ -843,7 +843,7 @@ void AAInterface::FillAcquisitionFrame()
 				       new TGLayoutHints(kLHintsNormal, 0, 0, 5, 0));
   DisplayVerticalScale_DVS->SetRange(0,1);
   DisplayVerticalScale_DVS->SetPosition(0,1);
-
+  
   // ROOT embdedded canvas for display of waveforms and spectra
   DGScopeDisplayAndSlider_HF->AddFrame(DisplayCanvas_EC = new TRootEmbeddedCanvas("DisplayCanvas_EC", DGScopeDisplayAndSlider_HF, 650, 400),
 				       new TGLayoutHints(kLHintsCenterX, 5,5,0,0));
@@ -909,38 +909,40 @@ void AAInterface::FillAcquisitionFrame()
   // controls graphical display, such as setting axis titles and
   // position. The "Data Storage" tab contains options for storing
   // acquired data in ROOT files.
+ 
+  TGHorizontalFrame *SubtabFrame = new TGHorizontalFrame(DGDisplayAndControls_VF);
 
-  TGHorizontalFrame *DGScopeControlTabs_HF = new TGHorizontalFrame(DGDisplayAndControls_VF);
-  TGTab *DGScopeControlTabs = new TGTab(DGScopeControlTabs_HF);
-  DGScopeControlTabs_HF->AddFrame(DGScopeControlTabs, new TGLayoutHints(kLHintsNormal,10,10,0,0));
+  TGTab *AQControlSubtabs = new TGTab(SubtabFrame);
 
-  TGCompositeFrame *DGScopeSettingsTab = DGScopeControlTabs->AddTab("Acquisition control");
-  TGCompositeFrame *DGScopeSettingsFrame = new TGCompositeFrame(DGScopeSettingsTab,0,0,kHorizontalFrame);
-  DGScopeSettingsTab->AddFrame(DGScopeSettingsFrame);
-
-  TGCompositeFrame *DGScopeSpectrumTab = DGScopeControlTabs->AddTab("Spectrum creation");
-  TGCompositeFrame *DGScopeSpectrumFrame = new TGCompositeFrame(DGScopeSpectrumTab,0,0,kHorizontalFrame);
-  DGScopeSpectrumTab->AddFrame(DGScopeSpectrumFrame);
-
-  TGCompositeFrame *DGScopeDisplaySettingsTab = DGScopeControlTabs->AddTab("Graphic settings");
-  TGCompositeFrame *DGScopeDisplaySettingsFrame = new TGCompositeFrame(DGScopeDisplaySettingsTab,0,0,kHorizontalFrame);
-  DGScopeDisplaySettingsTab->AddFrame(DGScopeDisplaySettingsFrame);
+  TGCompositeFrame *AcquisitionSubtab = AQControlSubtabs->AddTab("Acquisition control");
+  TGCompositeFrame *AcquisitionSubframe = new TGCompositeFrame(AcquisitionSubtab, 0, 0, kHorizontalFrame);
+  AcquisitionSubtab->AddFrame(AcquisitionSubframe);
   
-  TGCompositeFrame *DGScopeDataStorageTab = DGScopeControlTabs->AddTab("Peristent storage");
-  TGCompositeFrame *DGScopeDataStorageFrame = new TGCompositeFrame(DGScopeDataStorageTab,0,0,kHorizontalFrame);
-  DGScopeDataStorageTab->AddFrame(DGScopeDataStorageFrame);
+  TGCompositeFrame *SpectrumSubtab = AQControlSubtabs->AddTab("Spectrum creation");
+  TGCompositeFrame *SpectrumSubframe = new TGCompositeFrame(SpectrumSubtab, 0, 0, kHorizontalFrame);
+  SpectrumSubtab->AddFrame(SpectrumSubframe);
+  
+  TGCompositeFrame *GraphicsSubtab = AQControlSubtabs->AddTab("Graphics settings");
+  TGCompositeFrame *GraphicsSubframe = new TGCompositeFrame(GraphicsSubtab, 0, 0, kHorizontalFrame);
+  GraphicsSubtab->AddFrame(GraphicsSubframe);
+  
+  TGCompositeFrame *DataSubtab = AQControlSubtabs->AddTab("Peristent storage");
+  TGCompositeFrame *DataSubframe = new TGCompositeFrame(DataSubtab, 0, 0, kHorizontalFrame);
+  DataSubtab->AddFrame(DataSubframe);
 
-  TGCompositeFrame *DGScopeMiscTab = DGScopeControlTabs->AddTab("Miscellaneous");
-  TGCompositeFrame *DGScopeMiscFrame = new TGCompositeFrame(DGScopeMiscTab,0,0,kHorizontalFrame);
-  DGScopeMiscTab->AddFrame(DGScopeMiscFrame);
+  TGCompositeFrame *MiscSubtab = AQControlSubtabs->AddTab("Miscellaneous");
+  TGCompositeFrame *MiscSubframe = new TGCompositeFrame(MiscSubtab, 0, 0, kHorizontalFrame);
+  MiscSubtab->AddFrame(MiscSubframe);
+
+  SubtabFrame->AddFrame(AQControlSubtabs, new TGLayoutHints(kLHintsTop, 0,0,0,0));
 
 
   ////////////////////
   // Scope settings //
   ////////////////////
 
-  TGVerticalFrame *DGScopeModeAndTrigger_VF = new TGVerticalFrame(DGScopeSettingsFrame);
-  DGScopeSettingsFrame->AddFrame(DGScopeModeAndTrigger_VF, new TGLayoutHints(kLHintsNormal,0,0,0,0));
+  TGVerticalFrame *DGScopeModeAndTrigger_VF = new TGVerticalFrame(AcquisitionSubframe);
+  AcquisitionSubframe->AddFrame(DGScopeModeAndTrigger_VF, new TGLayoutHints(kLHintsNormal,0,0,0,0));
 
   ////////////////
   // Mode controls 
@@ -972,7 +974,7 @@ void AAInterface::FillAcquisitionFrame()
 
 
   // ADAQ combo box to enable specification of trigger type
-  DGTriggerControls_GF->AddFrame(DGTriggerType_CBL = new ADAQComboBoxWithLabel(DGTriggerControls_GF, "Type", TriggerType_CBL_ID),
+  DGTriggerControls_GF->AddFrame(DGTriggerType_CBL = new ADAQComboBoxWithLabel(DGTriggerControls_GF, "Type", DGTriggerType_CBL_ID),
 				 new TGLayoutHints(kLHintsNormal,5,5,5,0));
   DGTriggerType_CBL->GetComboBox()->AddEntry("External (NIM)",0);
   DGTriggerType_CBL->GetComboBox()->AddEntry("External (TTL)",1);
@@ -983,7 +985,7 @@ void AAInterface::FillAcquisitionFrame()
   DGTriggerType_CBL->GetComboBox()->ChangeOptions(DGTriggerType_CBL->GetComboBox()->GetOptions() | kFixedSize);
 
   // ADAQ combo box to enable specification of trigger type
-  DGTriggerControls_GF->AddFrame(DGTriggerEdge_CBL = new ADAQComboBoxWithLabel(DGTriggerControls_GF, "Edge", TriggerEdge_CBL_ID),
+  DGTriggerControls_GF->AddFrame(DGTriggerEdge_CBL = new ADAQComboBoxWithLabel(DGTriggerControls_GF, "Edge", DGTriggerEdge_CBL_ID),
 				 new TGLayoutHints(kLHintsNormal,5,5,0,5));
   DGTriggerEdge_CBL->GetComboBox()->AddEntry("Rising",0);
   DGTriggerEdge_CBL->GetComboBox()->AddEntry("Falling",1);
@@ -1006,36 +1008,35 @@ void AAInterface::FillAcquisitionFrame()
   DGTriggerCoincidenceLevel_CBL->GetComboBox()->Select(1);
 
 
-  
   ///////////////////////
   // Acquisition controls
 
-  TGGroupFrame *DGScopeAcquisitionControls_GF = new TGGroupFrame(DGScopeSettingsFrame, "Acquisition", kVerticalFrame);
+  TGGroupFrame *DGScopeAcquisitionControls_GF = new TGGroupFrame(AcquisitionSubframe, "Acquisition", kVerticalFrame);
   DGScopeAcquisitionControls_GF->SetTitlePos(TGGroupFrame::kCenter);
-  DGScopeSettingsFrame->AddFrame(DGScopeAcquisitionControls_GF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
+  AcquisitionSubframe->AddFrame(DGScopeAcquisitionControls_GF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
 
   // ADAQ number entry specifying number of samples
-  DGScopeAcquisitionControls_GF->AddFrame(DGRecordLength_NEL = new ADAQNumberEntryWithLabel(DGScopeAcquisitionControls_GF, "Record length (#)", RecordLength_NEL_ID),
+  DGScopeAcquisitionControls_GF->AddFrame(DGRecordLength_NEL = new ADAQNumberEntryWithLabel(DGScopeAcquisitionControls_GF, "Record length (#)", DGRecordLength_NEL_ID),
 					  new TGLayoutHints(kLHintsNormal,5,5,5,0));
   DGRecordLength_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
   DGRecordLength_NEL->GetEntry()->SetNumber(2000);
 
   // ADAQ number entry specifying the percentage of the acquisition
   // window that is behind (or after) the triggern (all channels)
-  DGScopeAcquisitionControls_GF->AddFrame(DGPostTrigger_NEL = new ADAQNumberEntryWithLabel(DGScopeAcquisitionControls_GF, "Post trigger (%)", PostTriggerSize_NEL_ID),
+  DGScopeAcquisitionControls_GF->AddFrame(DGPostTrigger_NEL = new ADAQNumberEntryWithLabel(DGScopeAcquisitionControls_GF, "Post trigger (%)", DGPostTriggerSize_NEL_ID),
 					  new TGLayoutHints(kLHintsNormal,5,5,0,5));
   DGPostTrigger_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
   DGPostTrigger_NEL->GetEntry()->SetNumLimits(TGNumberFormat::kNELLimitMinMax);
   DGPostTrigger_NEL->GetEntry()->SetLimitValues(0,100);
   DGPostTrigger_NEL->GetEntry()->SetNumber(50);
   
-  DGScopeAcquisitionControls_GF->AddFrame(AQTime_NEL = new ADAQNumberEntryWithLabel(DGScopeAcquisitionControls_GF, "Acquisition time (s)", -1),
+  DGScopeAcquisitionControls_GF->AddFrame(AQTime_NEL = new ADAQNumberEntryWithLabel(DGScopeAcquisitionControls_GF, "Acquisition time (s)", AQTime_NEL_ID),
 					  new TGLayoutHints(kLHintsNormal,5,5,5,0));
   AQTime_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
   AQTime_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
   AQTime_NEL->GetEntry()->SetNumber(10);
 
-  DGScopeAcquisitionControls_GF->AddFrame(AQTimer_NEFL = new ADAQNumberEntryFieldWithLabel(DGScopeAcquisitionControls_GF, "Countdown", -1),
+  DGScopeAcquisitionControls_GF->AddFrame(AQTimer_NEFL = new ADAQNumberEntryFieldWithLabel(DGScopeAcquisitionControls_GF, "Countdown", AQTimer_NEFL_ID),
 					  new TGLayoutHints(kLHintsNormal,5,5,0,5));
   AQTimer_NEFL->GetEntry()->SetFormat(TGNumberFormat::kNESMinSec);
   AQTimer_NEFL->GetEntry()->SetNumber(10);
@@ -1058,11 +1059,11 @@ void AAInterface::FillAcquisitionFrame()
   
 
   // V1720 readout controls
-  TGGroupFrame *DGScopeReadoutControls_GF = new TGGroupFrame(DGScopeSettingsFrame, "Readout", kVerticalFrame);
+  TGGroupFrame *DGScopeReadoutControls_GF = new TGGroupFrame(AcquisitionSubframe, "Readout", kVerticalFrame);
   DGScopeReadoutControls_GF->SetTitlePos(TGGroupFrame::kCenter);
-  DGScopeSettingsFrame->AddFrame(DGScopeReadoutControls_GF, new TGLayoutHints(kLHintsNormal, 5,5,5,5));
+  AcquisitionSubframe->AddFrame(DGScopeReadoutControls_GF, new TGLayoutHints(kLHintsNormal, 5,5,5,5));
   
-  DGScopeReadoutControls_GF->AddFrame(DGEventsBeforeReadout_NEL = new ADAQNumberEntryWithLabel(DGScopeReadoutControls_GF, "Events before readout", -1),
+  DGScopeReadoutControls_GF->AddFrame(DGEventsBeforeReadout_NEL = new ADAQNumberEntryWithLabel(DGScopeReadoutControls_GF, "Events before readout", DGEventsBeforeReadout_NEL_ID),
 				      new TGLayoutHints(kLHintsNormal, 5,5,5,5));
   DGEventsBeforeReadout_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
   DGEventsBeforeReadout_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
@@ -1081,16 +1082,16 @@ void AAInterface::FillAcquisitionFrame()
   DGBufferStatus_TE->ChangeOptions(DGBufferStatus_TE->GetOptions() | kFixedSize);
 
 
-  DGScopeReadoutControls_GF->AddFrame(AQDataReductionEnable_CB = new TGCheckButton(DGScopeReadoutControls_GF, "Enable data reduction", -1),
+  DGScopeReadoutControls_GF->AddFrame(AQDataReductionEnable_CB = new TGCheckButton(DGScopeReadoutControls_GF, "Enable data reduction", AQDataReductionEnable_CB_ID),
 				      new TGLayoutHints(kLHintsNormal, 5,5,5,0));
 
-  DGScopeReadoutControls_GF->AddFrame(AQDataReductionFactor_NEL = new ADAQNumberEntryWithLabel(DGScopeReadoutControls_GF, "Data reduction factor", -1),
+  DGScopeReadoutControls_GF->AddFrame(AQDataReductionFactor_NEL = new ADAQNumberEntryWithLabel(DGScopeReadoutControls_GF, "Data reduction factor", AQDataReductionFactor_NEL_ID),
 				      new TGLayoutHints(kLHintsNormal, 5,5,0,5));
   AQDataReductionFactor_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
   AQDataReductionFactor_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
   AQDataReductionFactor_NEL->GetEntry()->SetNumber(1);
 
-  DGScopeReadoutControls_GF->AddFrame(DGZSEnable_CB = new TGCheckButton(DGScopeReadoutControls_GF, "Enable zero-suppression", -1),
+  DGScopeReadoutControls_GF->AddFrame(DGZSEnable_CB = new TGCheckButton(DGScopeReadoutControls_GF, "Enable zero-suppression", DGZSEnable_CB_ID),
 				      new TGLayoutHints(kLHintsNormal, 5,5,0,5));
   
 
@@ -1102,105 +1103,105 @@ void AAInterface::FillAcquisitionFrame()
   ////////////
   // Histogram  
 
-  TGGroupFrame *DGScopeSpectrumHistogram_GF = new TGGroupFrame(DGScopeSpectrumFrame, "Histogram", kVerticalFrame);
-  DGScopeSpectrumHistogram_GF->SetTitlePos(TGGroupFrame::kCenter);
-  DGScopeSpectrumFrame->AddFrame(DGScopeSpectrumHistogram_GF, new TGLayoutHints(kLHintsNormal,5,5,0,0));
+  TGGroupFrame *SpectrumHistogram_GF = new TGGroupFrame(SpectrumSubframe, "Histogram", kVerticalFrame);
+  SpectrumHistogram_GF->SetTitlePos(TGGroupFrame::kCenter);
+  SpectrumSubframe->AddFrame(SpectrumHistogram_GF, new TGLayoutHints(kLHintsNormal,5,5,0,0));
 
   // ADAQ combo box for selecting the channel for display spectrum
-  DGScopeSpectrumHistogram_GF->AddFrame(DGScopeSpectrumChannel_CBL = new ADAQComboBoxWithLabel(DGScopeSpectrumHistogram_GF, "", SpectrumChannel_CBL_ID),
+  SpectrumHistogram_GF->AddFrame(SpectrumChannel_CBL = new ADAQComboBoxWithLabel(SpectrumHistogram_GF, "", SpectrumChannel_CBL_ID),
 					new TGLayoutHints(kLHintsNormal,0,0,5,5));
   for(uint32_t ch=0; ch<8; ch++)
-    DGScopeSpectrumChannel_CBL->GetComboBox()->AddEntry(DGChannelLabels[ch].c_str(),ch);
-  DGScopeSpectrumChannel_CBL->GetComboBox()->Select(0);
-  DGScopeSpectrumChannel_CBL->GetComboBox()->Connect("Selected(int,int)", "AASubtabSlots", SubtabSlots, "HandleComboBoxes(int,int)");
+    SpectrumChannel_CBL->GetComboBox()->AddEntry(DGChannelLabels[ch].c_str(),ch);
+  SpectrumChannel_CBL->GetComboBox()->Select(0);
+  SpectrumChannel_CBL->GetComboBox()->Connect("Selected(int,int)", "AASubtabSlots", SubtabSlots, "HandleComboBoxes(int,int)");
   
   // ADAQ number entry to specify number of bins used in the spectra histogram
-  DGScopeSpectrumHistogram_GF->AddFrame(DGScopeSpectrumBinNumber_NEL = new ADAQNumberEntryWithLabel(DGScopeSpectrumHistogram_GF, "Number of bins  ", SpectrumBinNumber_NEL_ID),
+  SpectrumHistogram_GF->AddFrame(SpectrumNumBins_NEL = new ADAQNumberEntryWithLabel(SpectrumHistogram_GF, "Number of bins  ", SpectrumNumBins_NEL_ID),
 					new TGLayoutHints(kLHintsLeft,0,0,5,0));
-  DGScopeSpectrumBinNumber_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-  DGScopeSpectrumBinNumber_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
-  DGScopeSpectrumBinNumber_NEL->GetEntry()->SetNumber(100);
+  SpectrumNumBins_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+  SpectrumNumBins_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+  SpectrumNumBins_NEL->GetEntry()->SetNumber(100);
 
   // ADAQ number entry to specify the maximum bin in the spectra histogram
-  DGScopeSpectrumHistogram_GF->AddFrame(DGScopeSpectrumMinBin_NEL = new ADAQNumberEntryWithLabel(DGScopeSpectrumHistogram_GF, "Minimum bin", SpectrumMinBin_NEL_ID),
+  SpectrumHistogram_GF->AddFrame(SpectrumMinBin_NEL = new ADAQNumberEntryWithLabel(SpectrumHistogram_GF, "Minimum bin", SpectrumMinBin_NEL_ID),
 					new TGLayoutHints(kLHintsLeft,0,0,0,0));
-  DGScopeSpectrumMinBin_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
-  DGScopeSpectrumMinBin_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEANonNegative);
-  DGScopeSpectrumMinBin_NEL->GetEntry()->SetNumber(0.);
+  SpectrumMinBin_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
+  SpectrumMinBin_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEANonNegative);
+  SpectrumMinBin_NEL->GetEntry()->SetNumber(0.);
 
-  DGScopeSpectrumHistogram_GF->AddFrame(DGScopeSpectrumMaxBin_NEL = new ADAQNumberEntryWithLabel(DGScopeSpectrumHistogram_GF, "Maximum bin", SpectrumMaxBin_NEL_ID),
+  SpectrumHistogram_GF->AddFrame(SpectrumMaxBin_NEL = new ADAQNumberEntryWithLabel(SpectrumHistogram_GF, "Maximum bin", SpectrumMaxBin_NEL_ID),
 					new TGLayoutHints(kLHintsLeft,0,0,0,5));
-  DGScopeSpectrumMaxBin_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-  DGScopeSpectrumMaxBin_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEANonNegative);
-  DGScopeSpectrumMaxBin_NEL->GetEntry()->SetNumber(30000.);
+  SpectrumMaxBin_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+  SpectrumMaxBin_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEANonNegative);
+  SpectrumMaxBin_NEL->GetEntry()->SetNumber(30000.);
 
-  TGHorizontalFrame *DGScopeSpectrumAxis_HF = new TGHorizontalFrame(DGScopeSpectrumHistogram_GF);
-  DGScopeSpectrumHistogram_GF->AddFrame(DGScopeSpectrumAxis_HF, new TGLayoutHints(kLHintsNormal,0,0,0,0));
+  TGHorizontalFrame *SpectrumAxis_HF = new TGHorizontalFrame(SpectrumHistogram_GF);
+  SpectrumHistogram_GF->AddFrame(SpectrumAxis_HF, new TGLayoutHints(kLHintsNormal,0,0,0,0));
 
 
   /////////////////
   // Pulse analysis
 
-  TGGroupFrame *DGScopeSpectrumAnalysis_GF = new TGGroupFrame(DGScopeSpectrumFrame,"Analysis",kVerticalFrame);
-  DGScopeSpectrumAnalysis_GF->SetTitlePos(TGGroupFrame::kCenter);
-  DGScopeSpectrumFrame->AddFrame(DGScopeSpectrumAnalysis_GF);
+  TGGroupFrame *SpectrumAnalysis_GF = new TGGroupFrame(SpectrumSubframe,"Analysis",kVerticalFrame);
+  SpectrumAnalysis_GF->SetTitlePos(TGGroupFrame::kCenter);
+  SpectrumSubframe->AddFrame(SpectrumAnalysis_GF);
 
-  TGHButtonGroup *DGScopeSpectrumAnalysis_BG = new TGHButtonGroup(DGScopeSpectrumAnalysis_GF,"Analysis");
-  DGScopeSpectrumAnalysis_BG->SetBorderDrawn(false);
-  DGScopeSpectrumAnalysis_GF->AddFrame(DGScopeSpectrumAnalysis_BG, new TGLayoutHints(kLHintsNormal,-13,0,0,0));
+  TGHButtonGroup *SpectrumAnalysis_BG = new TGHButtonGroup(SpectrumAnalysis_GF,"Analysis");
+  SpectrumAnalysis_BG->SetBorderDrawn(false);
+  SpectrumAnalysis_GF->AddFrame(SpectrumAnalysis_BG, new TGLayoutHints(kLHintsNormal,-13,0,0,0));
   
-  DGScopeSpectrumAnalysisHeight_RB = new TGRadioButton(DGScopeSpectrumAnalysis_BG, "PHS  ", SpectrumAnalysisHeight_RB_ID);
-  DGScopeSpectrumAnalysisHeight_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
+  SpectrumPulseHeight_RB = new TGRadioButton(SpectrumAnalysis_BG, "PHS  ", SpectrumPulseHeight_RB_ID);
+  SpectrumPulseHeight_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
+  
+  
+  SpectrumPulseArea_RB = new TGRadioButton(SpectrumAnalysis_BG, "PAS", SpectrumPulseArea_RB_ID);
+  SpectrumPulseArea_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
+  SpectrumPulseArea_RB->SetState(kButtonDown);
+  
+  SpectrumAnalysis_GF->AddFrame(SpectrumLLD_NEL = new ADAQNumberEntryWithLabel(SpectrumAnalysis_GF, "LLD (ADC/energy)", SpectrumLLD_NEL_ID),
+				new TGLayoutHints(kLHintsNormal,0,0,-2,0));
+  SpectrumLLD_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+  SpectrumLLD_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEANonNegative);
+  SpectrumLLD_NEL->GetEntry()->SetNumber(0);
 
-  
-  DGScopeSpectrumAnalysisArea_RB = new TGRadioButton(DGScopeSpectrumAnalysis_BG, "PAS", SpectrumAnalysisArea_RB_ID);
-  DGScopeSpectrumAnalysisArea_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
-  DGScopeSpectrumAnalysisArea_RB->SetState(kButtonDown);
-  
-  DGScopeSpectrumAnalysis_GF->AddFrame(DGScopeSpectrumAnalysisLLD_NEL = new ADAQNumberEntryWithLabel(DGScopeSpectrumAnalysis_GF, "LLD (ADC/energy)", -1),
-				       new TGLayoutHints(kLHintsNormal,0,0,-2,0));
-  DGScopeSpectrumAnalysisLLD_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-  DGScopeSpectrumAnalysisLLD_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEANonNegative);
-  DGScopeSpectrumAnalysisLLD_NEL->GetEntry()->SetNumber(0);
+  SpectrumAnalysis_GF->AddFrame(SpectrumULD_NEL = new ADAQNumberEntryWithLabel(SpectrumAnalysis_GF, "ULD (ADC/energy)", SpectrumULD_NEL_ID),
+				new TGLayoutHints(kLHintsNormal,0,0,0,0));
+  SpectrumULD_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+  SpectrumULD_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEANonNegative);
+  SpectrumULD_NEL->GetEntry()->SetNumber(100000);
 
-  DGScopeSpectrumAnalysis_GF->AddFrame(DGScopeSpectrumAnalysisULD_NEL = new ADAQNumberEntryWithLabel(DGScopeSpectrumAnalysis_GF, "ULD (ADC/energy)", -1),
-				       new TGLayoutHints(kLHintsNormal,0,0,0,0));
-  DGScopeSpectrumAnalysisULD_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-  DGScopeSpectrumAnalysisULD_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEANonNegative);
-  DGScopeSpectrumAnalysisULD_NEL->GetEntry()->SetNumber(100000);
-
-  DGScopeSpectrumAnalysis_GF->AddFrame(DGScopeSpectrumAnalysisLDTrigger_CB = new TGCheckButton(DGScopeSpectrumAnalysis_GF,"LD trigger to file", -1),
-				       new TGLayoutHints(kLHintsNormal,0,0,0,0));
+  SpectrumAnalysis_GF->AddFrame(SpectrumLDTrigger_CB = new TGCheckButton(SpectrumAnalysis_GF,"LD trigger to file", SpectrumLDTrigger_CB_ID),
+				new TGLayoutHints(kLHintsNormal,0,0,0,0));
   
-  DGScopeSpectrumAnalysis_GF->AddFrame(DGScopeSpectrumAnalysisLDTriggerChannel_CBL = new ADAQComboBoxWithLabel(DGScopeSpectrumAnalysis_GF, "LD Channel", -1),
-				       new TGLayoutHints(kLHintsNormal,0,0,0,5));
+  SpectrumAnalysis_GF->AddFrame(SpectrumLDTriggerChannel_CBL = new ADAQComboBoxWithLabel(SpectrumAnalysis_GF, "LD Channel", SpectrumLDTriggerChannel_CBL_ID),
+				new TGLayoutHints(kLHintsNormal,0,0,0,5));
   
   for(uint32_t ch=0; ch<8; ch++)
-    DGScopeSpectrumAnalysisLDTriggerChannel_CBL->GetComboBox()->AddEntry(DGChannelLabels[ch].c_str(),ch);
-  DGScopeSpectrumAnalysisLDTriggerChannel_CBL->GetComboBox()->Select(0);
+    SpectrumLDTriggerChannel_CBL->GetComboBox()->AddEntry(DGChannelLabels[ch].c_str(),ch);
+  SpectrumLDTriggerChannel_CBL->GetComboBox()->Select(0);
 
   
   //////////////
   // Calibration
-
-  TGGroupFrame *SpectrumCalibration_GF = new TGGroupFrame(DGScopeSpectrumFrame, "Energy calibration", kVerticalFrame);
-  DGScopeSpectrumFrame->AddFrame(SpectrumCalibration_GF, new TGLayoutHints(kLHintsNormal,5,5,0,0));
+  
+  TGGroupFrame *SpectrumCalibration_GF = new TGGroupFrame(SpectrumSubframe, "Energy calibration", kVerticalFrame);
+  SpectrumSubframe->AddFrame(SpectrumCalibration_GF, new TGLayoutHints(kLHintsNormal,5,5,0,0));
   
   TGHorizontalFrame *SpectrumCalibration_HF0 = new TGHorizontalFrame(SpectrumCalibration_GF);
   SpectrumCalibration_GF->AddFrame(SpectrumCalibration_HF0, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
   
   // Energy calibration 
-  SpectrumCalibration_HF0->AddFrame(DGScopeSpectrumCalibration_CB = new TGCheckButton(SpectrumCalibration_HF0, "Make it so", SpectrumCalibration_CB_ID),
+  SpectrumCalibration_HF0->AddFrame(SpectrumCalibration_CB = new TGCheckButton(SpectrumCalibration_HF0, "Make it so", SpectrumCalibration_CB_ID),
 				    new TGLayoutHints(kLHintsLeft, 0,0,5,0));
-  DGScopeSpectrumCalibration_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
-  DGScopeSpectrumCalibration_CB->SetState(kButtonUp);
+  SpectrumCalibration_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
+  SpectrumCalibration_CB->SetState(kButtonUp);
 
   
-  SpectrumCalibration_HF0->AddFrame(DGScopeSpectrumUseCalibrationSlider_CB = new TGCheckButton(SpectrumCalibration_HF0, "Use slider", SpectrumUseCalibrationSlider_CB_ID),
+  SpectrumCalibration_HF0->AddFrame(SpectrumUseCalibrationSlider_CB = new TGCheckButton(SpectrumCalibration_HF0, "Use slider", SpectrumUseCalibrationSlider_CB_ID),
 				    new TGLayoutHints(kLHintsLeft,25,5,5,0));
-  DGScopeSpectrumUseCalibrationSlider_CB->Connect("Clicked()","AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
-  DGScopeSpectrumUseCalibrationSlider_CB->SetState(kButtonDown);
-  DGScopeSpectrumUseCalibrationSlider_CB->SetEnabled(false);
+  SpectrumUseCalibrationSlider_CB->Connect("Clicked()","AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
+  SpectrumUseCalibrationSlider_CB->SetState(kButtonDown);
+  SpectrumUseCalibrationSlider_CB->SetEnabled(false);
 
   /*
   SpectrumCalibration_HF1->AddFrame(SpectrumCalibrationStandard_RB = new TGRadioButton(SpectrumCalibration_HF1, "Standard", SpectrumCalibrationStandard_RB_ID),
@@ -1222,88 +1223,89 @@ void AAInterface::FillAcquisitionFrame()
   TGHorizontalFrame *SpectrumCalibration_HF1 = new TGHorizontalFrame(SpectrumCalibration_GF);
   SpectrumCalibration_GF->AddFrame(SpectrumCalibration_HF1, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
 
-  SpectrumCalibration_HF1->AddFrame(DGScopeSpectrumCalibrationPoint_CBL = new ADAQComboBoxWithLabel(SpectrumCalibration_HF1, "", SpectrumCalibrationPoint_CBL_ID),
+  SpectrumCalibration_HF1->AddFrame(SpectrumCalibrationPoint_CBL = new ADAQComboBoxWithLabel(SpectrumCalibration_HF1, "", SpectrumCalibrationPoint_CBL_ID),
 				    new TGLayoutHints(kLHintsNormal, 0,0,10,3));
-  DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->Resize(150,20);
-  DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->AddEntry("Calibration point 0",0);
-  DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->Select(0);
-  DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->SetEnabled(false);
-  DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->Connect("Selected(int,int)", "AASubtabSlots", SubtabSlots, "HandleComboBoxes(int,int)");
-  DGScopeSpectrumUseCalibrationSlider_CB->SetState(kButtonDisabled);
+  SpectrumCalibrationPoint_CBL->GetComboBox()->Resize(150,20);
+  SpectrumCalibrationPoint_CBL->GetComboBox()->AddEntry("Calibration point 0",0);
+  SpectrumCalibrationPoint_CBL->GetComboBox()->Select(0);
+  SpectrumCalibrationPoint_CBL->GetComboBox()->SetEnabled(false);
+  SpectrumCalibrationPoint_CBL->GetComboBox()->Connect("Selected(int,int)", "AASubtabSlots", SubtabSlots, "HandleComboBoxes(int,int)");
+  SpectrumUseCalibrationSlider_CB->SetState(kButtonDisabled);
   
-  SpectrumCalibration_GF->AddFrame(DGScopeSpectrumCalibrationEnergy_NEL = new ADAQNumberEntryWithLabel(SpectrumCalibration_GF, "Energy (keV or MeV)", SpectrumCalibrationEnergy_NEL_ID),
+  SpectrumCalibration_GF->AddFrame(SpectrumCalibrationEnergy_NEL = new ADAQNumberEntryWithLabel(SpectrumCalibration_GF, "Energy (keV or MeV)", SpectrumCalibrationEnergy_NEL_ID),
 				   new TGLayoutHints(kLHintsLeft,0,0,0,0));
-  DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
-  DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEANonNegative);
-  DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->SetNumber(0.0);
-  DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->SetState(false);
-  DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->Connect("ValueSet(long)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
+  SpectrumCalibrationEnergy_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
+  SpectrumCalibrationEnergy_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEANonNegative);
+  SpectrumCalibrationEnergy_NEL->GetEntry()->SetNumber(0.0);
+  SpectrumCalibrationEnergy_NEL->GetEntry()->SetState(false);
+  SpectrumCalibrationEnergy_NEL->GetEntry()->Connect("ValueSet(long)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
 
-  SpectrumCalibration_GF->AddFrame(DGScopeSpectrumCalibrationPulseUnit_NEL = new ADAQNumberEntryWithLabel(SpectrumCalibration_GF, "Pulse unit (ADC)", SpectrumCalibrationPulseUnit_NEL_ID),
+  SpectrumCalibration_GF->AddFrame(SpectrumCalibrationPulseUnit_NEL = new ADAQNumberEntryWithLabel(SpectrumCalibration_GF, "Pulse unit (ADC)", SpectrumCalibrationPulseUnit_NEL_ID),
 				       new TGLayoutHints(kLHintsLeft,0,0,0,5));
-  DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
-  DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
-  DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->SetNumber(1.0);
-  DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->SetState(false);
-  DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->Connect("ValueSet(long)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
+  SpectrumCalibrationPulseUnit_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
+  SpectrumCalibrationPulseUnit_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+  SpectrumCalibrationPulseUnit_NEL->GetEntry()->SetNumber(1.0);
+  SpectrumCalibrationPulseUnit_NEL->GetEntry()->SetState(false);
+  SpectrumCalibrationPulseUnit_NEL->GetEntry()->Connect("ValueSet(long)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
 
   TGHorizontalFrame *SpectrumCalibration_HF2 = new TGHorizontalFrame(SpectrumCalibration_GF);
   SpectrumCalibration_GF->AddFrame(SpectrumCalibration_HF2);
   
   // Set point text button
-  SpectrumCalibration_HF2->AddFrame(DGScopeSpectrumCalibrationSetPoint_TB = new TGTextButton(SpectrumCalibration_HF2, "Set Pt.", SpectrumCalibrationSetPoint_TB_ID),
+  SpectrumCalibration_HF2->AddFrame(SpectrumCalibrationSetPoint_TB = new TGTextButton(SpectrumCalibration_HF2, "Set Pt.", SpectrumCalibrationSetPoint_TB_ID),
 				    new TGLayoutHints(kLHintsNormal, 5,5,5,0));
-  DGScopeSpectrumCalibrationSetPoint_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
-  DGScopeSpectrumCalibrationSetPoint_TB->Resize(100,25);
-  DGScopeSpectrumCalibrationSetPoint_TB->ChangeOptions(DGScopeSpectrumCalibrationSetPoint_TB->GetOptions() | kFixedSize);
-  DGScopeSpectrumCalibrationSetPoint_TB->SetState(kButtonDisabled);
+  SpectrumCalibrationSetPoint_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
+  SpectrumCalibrationSetPoint_TB->Resize(100,25);
+  SpectrumCalibrationSetPoint_TB->ChangeOptions(SpectrumCalibrationSetPoint_TB->GetOptions() | kFixedSize);
+  SpectrumCalibrationSetPoint_TB->SetState(kButtonDisabled);
 
   // Calibrate text button
-  SpectrumCalibration_HF2->AddFrame(DGScopeSpectrumCalibrationCalibrate_TB = new TGTextButton(SpectrumCalibration_HF2, "Calibrate", SpectrumCalibrationCalibrate_TB_ID),
+  SpectrumCalibration_HF2->AddFrame(SpectrumCalibrationCalibrate_TB = new TGTextButton(SpectrumCalibration_HF2, "Calibrate", SpectrumCalibrationCalibrate_TB_ID),
 				    new TGLayoutHints(kLHintsNormal, 0,0,5,0));
-  DGScopeSpectrumCalibrationCalibrate_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
-  DGScopeSpectrumCalibrationCalibrate_TB->Resize(100,25);
-  DGScopeSpectrumCalibrationCalibrate_TB->ChangeOptions(DGScopeSpectrumCalibrationCalibrate_TB->GetOptions() | kFixedSize);
-  DGScopeSpectrumCalibrationCalibrate_TB->SetState(kButtonDisabled);
+  SpectrumCalibrationCalibrate_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
+  SpectrumCalibrationCalibrate_TB->Resize(100,25);
+  SpectrumCalibrationCalibrate_TB->ChangeOptions(SpectrumCalibrationCalibrate_TB->GetOptions() | kFixedSize);
+  SpectrumCalibrationCalibrate_TB->SetState(kButtonDisabled);
   
   TGHorizontalFrame *SpectrumCalibration_HF3 = new TGHorizontalFrame(SpectrumCalibration_GF);
   SpectrumCalibration_GF->AddFrame(SpectrumCalibration_HF3);
   
   // Plot text button
-  SpectrumCalibration_HF3->AddFrame(DGScopeSpectrumCalibrationPlot_TB = new TGTextButton(SpectrumCalibration_HF3, "Plot", SpectrumCalibrationPlot_TB_ID),
+  SpectrumCalibration_HF3->AddFrame(SpectrumCalibrationPlot_TB = new TGTextButton(SpectrumCalibration_HF3, "Plot", SpectrumCalibrationPlot_TB_ID),
 				    new TGLayoutHints(kLHintsNormal, 5,5,5,0));
-  DGScopeSpectrumCalibrationPlot_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
-  DGScopeSpectrumCalibrationPlot_TB->Resize(100,25);
-  DGScopeSpectrumCalibrationPlot_TB->ChangeOptions(DGScopeSpectrumCalibrationPlot_TB->GetOptions() | kFixedSize);
-  DGScopeSpectrumCalibrationPlot_TB->SetState(kButtonDisabled);
+  SpectrumCalibrationPlot_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
+  SpectrumCalibrationPlot_TB->Resize(100,25);
+  SpectrumCalibrationPlot_TB->ChangeOptions(SpectrumCalibrationPlot_TB->GetOptions() | kFixedSize);
+  SpectrumCalibrationPlot_TB->SetState(kButtonDisabled);
 
   // Reset text button
-  SpectrumCalibration_HF3->AddFrame(DGScopeSpectrumCalibrationReset_TB = new TGTextButton(SpectrumCalibration_HF3, "Reset", SpectrumCalibrationReset_TB_ID),
+  SpectrumCalibration_HF3->AddFrame(SpectrumCalibrationReset_TB = new TGTextButton(SpectrumCalibration_HF3, "Reset", SpectrumCalibrationReset_TB_ID),
 				    new TGLayoutHints(kLHintsNormal, 0,0,5,0));
-  DGScopeSpectrumCalibrationReset_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
-  DGScopeSpectrumCalibrationReset_TB->Resize(100,25);
-  DGScopeSpectrumCalibrationReset_TB->ChangeOptions(DGScopeSpectrumCalibrationReset_TB->GetOptions() | kFixedSize);
-  DGScopeSpectrumCalibrationReset_TB->SetState(kButtonDisabled);
+  SpectrumCalibrationReset_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
+  SpectrumCalibrationReset_TB->Resize(100,25);
+  SpectrumCalibrationReset_TB->ChangeOptions(SpectrumCalibrationReset_TB->GetOptions() | kFixedSize);
+  SpectrumCalibrationReset_TB->SetState(kButtonDisabled);
 
 
   TGHorizontalFrame *SpectrumCalibration_HF4 = new TGHorizontalFrame(SpectrumCalibration_GF);
   SpectrumCalibration_GF->AddFrame(SpectrumCalibration_HF4);
 
   // Load from file text button
-  SpectrumCalibration_HF4->AddFrame(DGScopeSpectrumCalibrationLoad_TB = new TGTextButton(SpectrumCalibration_HF4, "Load", SpectrumCalibrationLoad_TB_ID),
+  SpectrumCalibration_HF4->AddFrame(SpectrumCalibrationLoad_TB = new TGTextButton(SpectrumCalibration_HF4, "Load", SpectrumCalibrationLoad_TB_ID),
 				    new TGLayoutHints(kLHintsNormal, 5,5,5,0));
-  DGScopeSpectrumCalibrationLoad_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
-  DGScopeSpectrumCalibrationLoad_TB->Resize(100,25);
-  DGScopeSpectrumCalibrationLoad_TB->ChangeOptions(DGScopeSpectrumCalibrationLoad_TB->GetOptions() | kFixedSize);
-  DGScopeSpectrumCalibrationLoad_TB->SetState(kButtonDisabled);
+  SpectrumCalibrationLoad_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
+  SpectrumCalibrationLoad_TB->Resize(100,25);
+  SpectrumCalibrationLoad_TB->ChangeOptions(SpectrumCalibrationLoad_TB->GetOptions() | kFixedSize);
+  SpectrumCalibrationLoad_TB->SetState(kButtonDisabled);
 
   // Write to file text button
-  SpectrumCalibration_HF4->AddFrame(DGScopeSpectrumCalibrationWrite_TB = new TGTextButton(SpectrumCalibration_HF4, "Write", SpectrumCalibrationWrite_TB_ID),
+  SpectrumCalibration_HF4->AddFrame(SpectrumCalibrationWrite_TB = new TGTextButton(SpectrumCalibration_HF4, "Write", SpectrumCalibrationWrite_TB_ID),
 				    new TGLayoutHints(kLHintsNormal, 0,0,5,0));
-  DGScopeSpectrumCalibrationWrite_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
-  DGScopeSpectrumCalibrationWrite_TB->Resize(100,25);
-  DGScopeSpectrumCalibrationWrite_TB->ChangeOptions(DGScopeSpectrumCalibrationLoad_TB->GetOptions() | kFixedSize);
-  DGScopeSpectrumCalibrationWrite_TB->SetState(kButtonDisabled);
+  SpectrumCalibrationWrite_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
+  SpectrumCalibrationWrite_TB->Resize(100,25);
+  SpectrumCalibrationWrite_TB->ChangeOptions(SpectrumCalibrationLoad_TB->GetOptions() | kFixedSize);
+  SpectrumCalibrationWrite_TB->SetState(kButtonDisabled);
+
 
   //////////////////////
   // Display settings //
@@ -1312,75 +1314,76 @@ void AAInterface::FillAcquisitionFrame()
   ////////////////////////////
   // Title names and positions 
 
-  TGGroupFrame *DGScopeDisplayTitle_GF = new TGGroupFrame(DGScopeDisplaySettingsFrame, "Titles", kVerticalFrame);
-  DGScopeDisplayTitle_GF->SetTitlePos(TGGroupFrame::kCenter);
-  DGScopeDisplaySettingsFrame->AddFrame(DGScopeDisplayTitle_GF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
+  TGGroupFrame *DisplayTitle_GF = new TGGroupFrame(GraphicsSubframe, "Titles", kVerticalFrame);
+  DisplayTitle_GF->SetTitlePos(TGGroupFrame::kCenter);
+  GraphicsSubframe->AddFrame(DisplayTitle_GF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
 
   // ADAQ text entries and number entries for specifying the DGScope title, axes title, and axes position
 
-  DGScopeDisplayTitle_GF->AddFrame(DGScopeDisplayXTitle_TEL = new ADAQTextEntryWithLabel(DGScopeDisplayTitle_GF, "X-axis title", -1),
+  DisplayTitle_GF->AddFrame(DisplayXTitle_TEL = new ADAQTextEntryWithLabel(DisplayTitle_GF, "X-axis title", -1),
 				   new TGLayoutHints(kLHintsNormal,5,5,5,0));
-  DGScopeDisplayXTitle_TEL->GetEntry()->SetText("");
+  DisplayXTitle_TEL->GetEntry()->SetText("");
 
-  DGScopeDisplayTitle_GF->AddFrame(DGScopeDisplayXTitleOffset_NEL = new ADAQNumberEntryWithLabel(DGScopeDisplayTitle_GF, "X-axis title offset", -1),
+  DisplayTitle_GF->AddFrame(DisplayXTitleOffset_NEL = new ADAQNumberEntryWithLabel(DisplayTitle_GF, "X-axis title offset", -1),
 				   new TGLayoutHints(kLHintsNormal,5,5,0,5));
-  DGScopeDisplayXTitleOffset_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
-  DGScopeDisplayXTitleOffset_NEL->GetEntry()->SetNumber(1.2);
+  DisplayXTitleOffset_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
+  DisplayXTitleOffset_NEL->GetEntry()->SetNumber(1.2);
 
-  DGScopeDisplayTitle_GF->AddFrame(DGScopeDisplayYTitle_TEL = new ADAQTextEntryWithLabel(DGScopeDisplayTitle_GF, "Y-axis label", -1),
+  DisplayTitle_GF->AddFrame(DisplayYTitle_TEL = new ADAQTextEntryWithLabel(DisplayTitle_GF, "Y-axis label", -1),
 				   new TGLayoutHints(kLHintsNormal,5,5,5,0));
-  DGScopeDisplayYTitle_TEL->GetEntry()->SetText("");
+  DisplayYTitle_TEL->GetEntry()->SetText("");
 
-  DGScopeDisplayTitle_GF->AddFrame(DGScopeDisplayYTitleOffset_NEL = new ADAQNumberEntryWithLabel(DGScopeDisplayTitle_GF, "Y-axis offset", -1),
+  DisplayTitle_GF->AddFrame(DisplayYTitleOffset_NEL = new ADAQNumberEntryWithLabel(DisplayTitle_GF, "Y-axis offset", -1),
 				   new TGLayoutHints(kLHintsNormal,5,5,0,5));
-  DGScopeDisplayYTitleOffset_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
-  DGScopeDisplayYTitleOffset_NEL->GetEntry()->SetNumber(1.5);
+  DisplayYTitleOffset_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
+  DisplayYTitleOffset_NEL->GetEntry()->SetNumber(1.5);
   
-  DGScopeDisplayTitle_GF->AddFrame(DGScopeDisplayTitle_TEL = new ADAQTextEntryWithLabel(DGScopeDisplayTitle_GF, "Graph Title", -1),
+  DisplayTitle_GF->AddFrame(DisplayTitle_TEL = new ADAQTextEntryWithLabel(DisplayTitle_GF, "Graph Title", -1),
 				   new TGLayoutHints(kLHintsNormal,5,5,5,5));
 
   //////////////////////////
   // Graphical attributes //
   //////////////////////////
   
-  TGGroupFrame *DGScopeDisplaySettings_GF = new TGGroupFrame(DGScopeDisplaySettingsFrame, "Display", kVerticalFrame);
-  DGScopeDisplaySettings_GF->SetTitlePos(TGGroupFrame::kCenter);
-  DGScopeDisplaySettingsFrame->AddFrame(DGScopeDisplaySettings_GF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
+  TGGroupFrame *DisplaySettings_GF = new TGGroupFrame(GraphicsSubframe, "Display", kVerticalFrame);
+  DisplaySettings_GF->SetTitlePos(TGGroupFrame::kCenter);
+  GraphicsSubframe->AddFrame(DisplaySettings_GF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
 
   // ROOT check button to enable/disable plotting of the legend
-  DGScopeDisplaySettings_GF->AddFrame(DGScopeDisplayDrawLegend_CB = new TGCheckButton(DGScopeDisplaySettings_GF, "Draw legend", -1),
+  DisplaySettings_GF->AddFrame(DisplayDrawLegend_CB = new TGCheckButton(DisplaySettings_GF, "Draw legend", -1),
 				      new TGLayoutHints(kLHintsNormal,0,0,5,0));
 
   // ROOT check buttons for specifying if X and Y axes on spectra should be logarithmic
-  DGScopeDisplaySettings_GF->AddFrame(DGScopeSpectrumXAxisLog_CB = new TGCheckButton(DGScopeDisplaySettings_GF, "Log. X-axis  ", SpectrumXAxisLog_CB_ID),
-				      new TGLayoutHints(kLHintsLeft,0,0,0,0));
-  DGScopeDisplaySettings_GF->AddFrame(DGScopeSpectrumYAxisLog_CB = new TGCheckButton(DGScopeDisplaySettings_GF, "Log. Y-axis", SpectrumYAxisLog_CB_ID),
-				      new TGLayoutHints(kLHintsLeft,0,0,0,0));
+  DisplaySettings_GF->AddFrame(DisplayXAxisLog_CB = new TGCheckButton(DisplaySettings_GF, "Log. X-axis  ", DisplayXAxisLog_CB_ID),
+			       new TGLayoutHints(kLHintsLeft,0,0,0,0));
+  
+  DisplaySettings_GF->AddFrame(DisplayXAxisLog_CB = new TGCheckButton(DisplaySettings_GF, "Log. Y-axis", DisplayYAxisLog_CB_ID),
+			       new TGLayoutHints(kLHintsLeft,0,0,0,0));
+  
+  TGButtonGroup *DisplayWaveformXAxis_BG = new TGButtonGroup(DisplaySettings_GF,"Waveform X axis",kHorizontalFrame);
+  DisplaySettings_GF->AddFrame(DisplayWaveformXAxis_BG, new TGLayoutHints(kLHintsNormal,5,0,5,0));
+  
+  DisplayWaveformXAxisSample_RB = new TGRadioButton(DisplayWaveformXAxis_BG, "Sample", -1);
+  DisplayWaveformXAxisSample_RB->SetState(kButtonDown);
+  
+  DisplayWaveformXAxisNanoseconds_RB = new TGRadioButton(DisplayWaveformXAxis_BG, "ns", -1);
 
-  TGButtonGroup *DGScopeDisplayWaveformXAxis_BG = new TGButtonGroup(DGScopeDisplaySettings_GF,"Waveform X axis",kHorizontalFrame);
-  DGScopeDisplaySettings_GF->AddFrame(DGScopeDisplayWaveformXAxis_BG, new TGLayoutHints(kLHintsNormal,5,0,5,0));
+  TGButtonGroup *DisplayWaveformYAxis_BG = new TGButtonGroup(DisplaySettings_GF,"Waveform Y axis",kHorizontalFrame);
+  DisplaySettings_GF->AddFrame(DisplayWaveformYAxis_BG, new TGLayoutHints(kLHintsNormal,5,0,5,0));
   
-  DGScopeDisplayWaveformXAxisSample_RB = new TGRadioButton(DGScopeDisplayWaveformXAxis_BG, "Sample", -1);
-  DGScopeDisplayWaveformXAxisSample_RB->SetState(kButtonDown);
+  DisplayWaveformYAxisADC_RB = new TGRadioButton(DisplayWaveformYAxis_BG, "ADC", -1);
+  DisplayWaveformYAxisADC_RB->SetState(kButtonDown);
   
-  DGScopeDisplayWaveformXAxisNanoseconds_RB = new TGRadioButton(DGScopeDisplayWaveformXAxis_BG, "ns", -1);
-
-  TGButtonGroup *DGScopeDisplayWaveformYAxis_BG = new TGButtonGroup(DGScopeDisplaySettings_GF,"Waveform Y axis",kHorizontalFrame);
-  DGScopeDisplaySettings_GF->AddFrame(DGScopeDisplayWaveformYAxis_BG, new TGLayoutHints(kLHintsNormal,5,0,5,0));
-  
-  DGScopeDisplayWaveformYAxisADC_RB = new TGRadioButton(DGScopeDisplayWaveformYAxis_BG, "ADC", -1);
-  DGScopeDisplayWaveformYAxisADC_RB->SetState(kButtonDown);
-  
-  DGScopeDisplayWaveformYAxisMillivolts_RB = new TGRadioButton(DGScopeDisplayWaveformYAxis_BG, "mV", -1);
+  DisplayWaveformYAxisMillivolts_RB = new TGRadioButton(DisplayWaveformYAxis_BG, "mV", -1);
 
 
   //////////////////
   // Data storage //
   //////////////////
 
-  TGGroupFrame *DGScopeDataStorage_GF = new TGGroupFrame(DGScopeDataStorageFrame, "Waveform storage", kVerticalFrame);
+  TGGroupFrame *DGScopeDataStorage_GF = new TGGroupFrame(DataSubframe, "Waveform storage", kVerticalFrame);
   DGScopeDataStorage_GF->SetTitlePos(TGGroupFrame::kCenter);
-  DGScopeDataStorageFrame->AddFrame(DGScopeDataStorage_GF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
+  DataSubframe->AddFrame(DGScopeDataStorage_GF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
 
   // ADAQ text entry for setting the ROOT file name
   /*
@@ -1432,16 +1435,16 @@ void AAInterface::FillAcquisitionFrame()
   DGScopeDataStorageEnable_CB->SetState(kButtonDisabled);
   
   DGDisplayAndControls_VF->AddFrame(DGScopeDisplay_GF, new TGLayoutHints(kLHintsCenterX,5,5,5,5));
-  DGDisplayAndControls_VF->AddFrame(DGScopeControlTabs_HF, new TGLayoutHints(kLHintsCenterX,5,5,5,5));
+  DGDisplayAndControls_VF->AddFrame(SubtabFrame, new TGLayoutHints(kLHintsCenterX,5,5,5,5));
 
   AcquisitionFrame->AddFrame(DGDisplayAndControls_VF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
 
 
   // Widgets for saving the spectrum data to file
 
-  TGGroupFrame *DGScopeSpectrumStorage_GF = new TGGroupFrame(DGScopeDataStorageFrame, "Spectrum output", kVerticalFrame);
+  TGGroupFrame *DGScopeSpectrumStorage_GF = new TGGroupFrame(DataSubframe, "Spectrum output", kVerticalFrame);
   DGScopeSpectrumStorage_GF->SetTitlePos(TGGroupFrame::kCenter);
-  DGScopeDataStorageFrame->AddFrame(DGScopeSpectrumStorage_GF, new TGLayoutHints(kLHintsNormal,0,5,5,5));
+  DataSubframe->AddFrame(DGScopeSpectrumStorage_GF, new TGLayoutHints(kLHintsNormal,0,5,5,5));
 
   DGScopeSpectrumStorage_GF->AddFrame(DGScopeSpectrumFileName_TB = new TGTextButton(DGScopeSpectrumStorage_GF, "Spectrum file name", SpectrumFileName_TB_ID),
 				      new TGLayoutHints(kLHintsNormal, 5,5,5,0));
@@ -1468,9 +1471,9 @@ void AAInterface::FillAcquisitionFrame()
 
   // Widgets for saving the canvas graphics to file
   
-  TGGroupFrame *DGScopeCanvasStorage_GF = new TGGroupFrame(DGScopeDataStorageFrame, "Canvas output", kVerticalFrame);
+  TGGroupFrame *DGScopeCanvasStorage_GF = new TGGroupFrame(DataSubframe, "Canvas output", kVerticalFrame);
   DGScopeCanvasStorage_GF->SetTitlePos(TGGroupFrame::kCenter);
-  DGScopeDataStorageFrame->AddFrame(DGScopeCanvasStorage_GF, new TGLayoutHints(kLHintsNormal,0,0,5,5));
+  DataSubframe->AddFrame(DGScopeCanvasStorage_GF, new TGLayoutHints(kLHintsNormal,0,0,5,5));
 
   DGScopeCanvasStorage_GF->AddFrame(DGScopeCanvasFileName_TB = new TGTextButton(DGScopeCanvasStorage_GF, "Canvas file name", CanvasFileName_TB_ID),
 				      new TGLayoutHints(kLHintsNormal, 5,5,5,0));
@@ -1499,15 +1502,15 @@ void AAInterface::FillAcquisitionFrame()
   // Miscellaneous //
   ///////////////////
 
-  TGGroupFrame *DGScopeMisc_GF = new TGGroupFrame(DGScopeMiscFrame, "Extra options", kVerticalFrame);
+  TGGroupFrame *DGScopeMisc_GF = new TGGroupFrame(MiscSubframe, "Extra options", kVerticalFrame);
   DGScopeMisc_GF->SetTitlePos(TGGroupFrame::kCenter);
-  DGScopeMiscFrame->AddFrame(DGScopeMisc_GF, new TGLayoutHints(kLHintsNormal, 5,5,5,5));
+  MiscSubframe->AddFrame(DGScopeMisc_GF, new TGLayoutHints(kLHintsNormal, 5,5,5,5));
 
-  DGScopeMisc_GF->AddFrame(DGScopeSpectrumRefreshRate_NEL = new ADAQNumberEntryWithLabel(DGScopeMisc_GF, "Spectrum refresh rate", -1),
+  DGScopeMisc_GF->AddFrame(SpectrumRefreshRate_NEL = new ADAQNumberEntryWithLabel(DGScopeMisc_GF, "Spectrum refresh rate", -1),
 			   new TGLayoutHints(kLHintsNormal, 5,5,5,5));
-  DGScopeSpectrumRefreshRate_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-  DGScopeSpectrumRefreshRate_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
-  DGScopeSpectrumRefreshRate_NEL->GetEntry()->SetNumber(100);
+  SpectrumRefreshRate_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+  SpectrumRefreshRate_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+  SpectrumRefreshRate_NEL->GetEntry()->SetNumber(100);
 }
   
 
@@ -1580,36 +1583,38 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
 
   DGZSEnable_CB->SetState(ButtonState);
 
-  DGScopeSpectrumBinNumber_NEL->GetEntry()->SetState(WidgetState);
-  DGScopeSpectrumMinBin_NEL->GetEntry()->SetState(WidgetState);
-  DGScopeSpectrumMaxBin_NEL->GetEntry()->SetState(WidgetState);
+  SpectrumNumBins_NEL->GetEntry()->SetState(WidgetState);
+  SpectrumMinBin_NEL->GetEntry()->SetState(WidgetState);
+  SpectrumMaxBin_NEL->GetEntry()->SetState(WidgetState);
 
-  DGScopeSpectrumAnalysisHeight_RB->SetEnabled(WidgetState);
-  DGScopeSpectrumAnalysisArea_RB->SetEnabled(WidgetState);
-  DGScopeSpectrumAnalysisLLD_NEL->GetEntry()->SetState(WidgetState);
-  DGScopeSpectrumAnalysisULD_NEL->GetEntry()->SetState(WidgetState);
+  SpectrumPulseHeight_RB->SetEnabled(WidgetState);
+  SpectrumPulseArea_RB->SetEnabled(WidgetState);
+  SpectrumLLD_NEL->GetEntry()->SetState(WidgetState);
+  SpectrumULD_NEL->GetEntry()->SetState(WidgetState);
+  SpectrumLDTrigger_CB->SetState(ButtonState);
+  SpectrumLDTriggerChannel_CBL->GetComboBox()->SetEnabled(WidgetState);
 
   if(TheVMEManager->GetDGAcquisitionEnable())
     DGScopeDataStorageCreateFile_TB->SetState(kButtonUp);
   else
     DGScopeDataStorageCreateFile_TB->SetState(kButtonDisabled);
   
-  DGScopeSpectrumRefreshRate_NEL->GetEntry()->SetState(WidgetState);
+  SpectrumRefreshRate_NEL->GetEntry()->SetState(WidgetState);
 }
 
 
 void AAInterface::SetCalibrationWidgetState(bool WidgetState, EButtonState ButtonState)
 {
-  DGScopeSpectrumUseCalibrationSlider_CB->SetState(ButtonState);
-  DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->SetEnabled(WidgetState);
-  DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->SetState(WidgetState);
-  DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->SetState(WidgetState);
-  DGScopeSpectrumCalibrationSetPoint_TB->SetState(ButtonState);
-  DGScopeSpectrumCalibrationCalibrate_TB->SetState(ButtonState);
-  DGScopeSpectrumCalibrationPlot_TB->SetState(ButtonState);
-  DGScopeSpectrumCalibrationReset_TB->SetState(ButtonState);
-  DGScopeSpectrumCalibrationLoad_TB->SetState(ButtonState);
-  DGScopeSpectrumCalibrationWrite_TB->SetState(kButtonUp);
+  SpectrumUseCalibrationSlider_CB->SetState(ButtonState);
+  SpectrumCalibrationPoint_CBL->GetComboBox()->SetEnabled(WidgetState);
+  SpectrumCalibrationPulseUnit_NEL->GetEntry()->SetState(WidgetState);
+  SpectrumCalibrationEnergy_NEL->GetEntry()->SetState(WidgetState);
+  SpectrumCalibrationSetPoint_TB->SetState(ButtonState);
+  SpectrumCalibrationCalibrate_TB->SetState(ButtonState);
+  SpectrumCalibrationPlot_TB->SetState(ButtonState);
+  SpectrumCalibrationReset_TB->SetState(ButtonState);
+  SpectrumCalibrationLoad_TB->SetState(ButtonState);
+  SpectrumCalibrationWrite_TB->SetState(kButtonUp);
 }
 
 
@@ -1662,26 +1667,26 @@ void AAInterface::SaveSettings()
   ///////////////////////////
   // Spectrum creation subtab
 
-  WidgetSettings->SpectrumChannel = DGScopeSpectrumChannel_CBL->GetComboBox()->GetSelected();
-  WidgetSettings->SpectrumNumBins = DGScopeSpectrumBinNumber_NEL->GetEntry()->GetIntNumber();
-  WidgetSettings->SpectrumMinBin = DGScopeSpectrumMinBin_NEL->GetEntry()->GetIntNumber();
-  WidgetSettings->SpectrumMaxBin = DGScopeSpectrumMinBin_NEL->GetEntry()->GetIntNumber();
+  WidgetSettings->SpectrumChannel = SpectrumChannel_CBL->GetComboBox()->GetSelected();
+  WidgetSettings->SpectrumNumBins = SpectrumNumBins_NEL->GetEntry()->GetIntNumber();
+  WidgetSettings->SpectrumMinBin = SpectrumMinBin_NEL->GetEntry()->GetIntNumber();
+  WidgetSettings->SpectrumMaxBin = SpectrumMinBin_NEL->GetEntry()->GetIntNumber();
 
-  WidgetSettings->SpectrumPulseHeight = DGScopeSpectrumAnalysisHeight_RB->IsDown();
-  WidgetSettings->SpectrumPulseArea = DGScopeSpectrumAnalysisArea_RB->IsDown();
-  WidgetSettings->SpectrumLLD = DGScopeSpectrumAnalysisLLD_NEL->GetEntry()->GetIntNumber();
-  WidgetSettings->SpectrumULD = DGScopeSpectrumAnalysisULD_NEL->GetEntry()->GetIntNumber();
-  WidgetSettings->LDEnable = DGScopeSpectrumAnalysisLDTrigger_CB->IsDown();
-  WidgetSettings->LDChannel = DGScopeSpectrumAnalysisLDTriggerChannel_CBL->GetComboBox()->GetSelected();
+  WidgetSettings->SpectrumPulseHeight = SpectrumPulseHeight_RB->IsDown();
+  WidgetSettings->SpectrumPulseArea = SpectrumPulseArea_RB->IsDown();
+  WidgetSettings->SpectrumLLD = SpectrumLLD_NEL->GetEntry()->GetIntNumber();
+  WidgetSettings->SpectrumULD = SpectrumULD_NEL->GetEntry()->GetIntNumber();
+  WidgetSettings->LDEnable = SpectrumLDTrigger_CB->IsDown();
+  WidgetSettings->LDChannel = SpectrumLDTriggerChannel_CBL->GetComboBox()->GetSelected();
 
-  WidgetSettings->SpectrumCalibrationEnable = DGScopeSpectrumCalibration_CB->IsDown();
-  WidgetSettings->SpectrumCalibrationUseSlider = DGScopeSpectrumUseCalibrationSlider_CB->IsDown();
+  WidgetSettings->SpectrumCalibrationEnable = SpectrumCalibration_CB->IsDown();
+  WidgetSettings->SpectrumCalibrationUseSlider = SpectrumUseCalibrationSlider_CB->IsDown();
 
   
   //////////////////////////
   // Graphic settings subtab
 
-  WidgetSettings->PlotXAxisInSamples = DGScopeDisplayWaveformXAxisSample_RB->IsDown();
-  WidgetSettings->PlotYAxisInADC = DGScopeDisplayWaveformYAxisADC_RB->IsDown();
-  WidgetSettings->PlotLegend = DGScopeDisplayDrawLegend_CB->IsDown();
+  WidgetSettings->PlotXAxisInSamples = DisplayWaveformXAxisSample_RB->IsDown();
+  WidgetSettings->PlotYAxisInADC = DisplayWaveformYAxisADC_RB->IsDown();
+  WidgetSettings->PlotLegend = DisplayDrawLegend_CB->IsDown();
 }
