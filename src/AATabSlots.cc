@@ -128,7 +128,7 @@ void AATabSlots::HandleConnectionTextButtons()
     // Set the V6534Enable boolean that controls whether or not the
     // V6534 high voltage board should be presently used
 
-  case V6534BoardEnable_TB_ID:
+  case HVBoardEnable_TB_ID:
     if(TI->BoardEnable_TB[V6534]->GetString() == "Board enabled"){
       TI->BoardEnable_TB[V6534]->SetText("Board disabled");
       TI->BoardEnable_TB[V6534]->SetBackgroundColor(TI->ColorManager->Number2Pixel(2));
@@ -143,7 +143,7 @@ void AATabSlots::HandleConnectionTextButtons()
 
     // Set the V1720Enable boolean that controls whether or not the
     // V1720 high voltage board should be presently used
-  case V1720BoardEnable_TB_ID:
+  case DGBoardEnable_TB_ID:
     if(TI->BoardEnable_TB[V1720]->GetString() == "Board enabled"){
       TI->BoardEnable_TB[V1720]->SetText("Board disabled");
       TI->BoardEnable_TB[V1720]->SetBackgroundColor(TI->ColorManager->Number2Pixel(2));
@@ -213,22 +213,22 @@ void AATabSlots::HandleRegisterTextButtons()
     Board = V1718;
     break;
 
-  case V1720Read_ID:
+  case DGRead_ID:
     Action = READ;
     Board = V1720;
     break;
 
-  case V1720Write_ID:
+  case DGWrite_ID:
     Action = WRITE;
     Board = V1720;
     break;
     
-  case V6534Read_ID:
+  case HVRead_ID:
     Action = READ;
     Board = V6534;
     break;
 
-  case V6534Write_ID:
+  case HVWrite_ID:
     Action = WRITE;
     Board = V6534;
     break;
@@ -361,15 +361,15 @@ void AATabSlots::HandleVoltageTextButtons()
     ///////////////////////
     // HV Power Settings 
     
-  case HVChannel0Power_TB_ID:
-  case HVChannel1Power_TB_ID:
-  case HVChannel2Power_TB_ID:
-  case HVChannel3Power_TB_ID:
-  case HVChannel4Power_TB_ID:
-  case HVChannel5Power_TB_ID:{
+  case HVCh0Power_TB_ID:
+  case HVCh1Power_TB_ID:
+  case HVCh2Power_TB_ID:
+  case HVCh3Power_TB_ID:
+  case HVCh4Power_TB_ID:
+  case HVCh5Power_TB_ID:{
     
     // Determine the HV channel number corresponding to the clicked button
-    int HVChannel = TI->HVChannelPower_TB_ID_Map[TextButtonID];
+    int HVChannel = TI->HVChPower_TB_ID_Map[TextButtonID];
 
     // If the power is being turned from "OFF" to "ON"...
     if(TextButton->GetString()=="OFF"){
@@ -380,8 +380,8 @@ void AATabSlots::HandleVoltageTextButtons()
       
       // Get the voltage and maximum current settings from the ROOT
       // number entry widgets for the desired HV channel
-      int HVVoltageValue = TI->HVChannelV_NEL[HVChannel]->GetEntry()->GetIntNumber();
-      int HVCurrentValue = TI->HVChannelI_NEL[HVChannel]->GetEntry()->GetIntNumber();
+      int HVVoltageValue = TI->HVChVoltage_NEL[HVChannel]->GetEntry()->GetIntNumber();
+      int HVCurrentValue = TI->HVChCurrent_NEL[HVChannel]->GetEntry()->GetIntNumber();
       
       // Set the voltage and maxmimum current drawn and turn the HV channel on
       TheVMEManager->GetHVManager()->SetVoltage(HVChannel, HVVoltageValue); 
@@ -426,8 +426,8 @@ void AATabSlots::HandleVoltageTextButtons()
       // Enable the HV channel monitoring ROOT number entry field
       // widgets to show that monitoring is turned on
       for(int ch=0; ch<HVChannels; ch++){
-	TI->HVChannelVMonitor_NEFL[ch]->GetEntry()->SetState(true);
-	TI->HVChannelIMonitor_NEFL[ch]->GetEntry()->SetState(true);
+	TI->HVChVoltageMonitor_NEFL[ch]->GetEntry()->SetState(true);
+	TI->HVChCurrentMonitor_NEFL[ch]->GetEntry()->SetState(true);
       }
 
       // Run the HV monitoring
@@ -440,8 +440,8 @@ void AATabSlots::HandleVoltageTextButtons()
       // Disable the HV channel monitoring ROOT number entry field
       // widgets to show that monitoring is turned off
       for(int ch=0; ch<HVChannels; ch++){
-	TI->HVChannelVMonitor_NEFL[ch]->GetEntry()->SetState(false);
-	TI->HVChannelIMonitor_NEFL[ch]->GetEntry()->SetState(false);
+	TI->HVChVoltageMonitor_NEFL[ch]->GetEntry()->SetState(false);
+	TI->HVChCurrentMonitor_NEFL[ch]->GetEntry()->SetState(false);
       }
 
       // Set bool to disable HV monitoring loop

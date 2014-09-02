@@ -51,7 +51,7 @@ public:
   uint32_t AcquisitionTime;
 
   // Readout
-  uint32_t VMETransferEvents;
+  uint32_t EventsBeforeReadout;
   bool EnableDataReduction;
   uint32_t DataReductionFactor;
   bool EnableZeroSuppression;

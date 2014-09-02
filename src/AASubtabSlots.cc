@@ -20,7 +20,7 @@ void AASubtabSlots::HandleCheckButtons()
   switch(ActiveID){
 
     // Enable the calibration widgets
-  case DGScopeSpectrumCalibration_CB_ID:
+  case SpectrumCalibration_CB_ID:
 
     if(TI->DGScopeSpectrumCalibration_CB->IsDown())
       TI->SetCalibrationWidgetState(true, kButtonUp);
@@ -122,10 +122,10 @@ void AASubtabSlots::HandleNumberEntries()
 
   switch(ActiveID){
     
-  case DGScopeSpectrumCalibrationEnergy_NEL_ID:
-  case DGScopeSpectrumCalibrationPulseUnit_NEL_ID:{
+  case SpectrumCalibrationEnergy_NEL_ID:
+  case SpectrumCalibrationPulseUnit_NEL_ID:{
     double Value = 0.;
-    if(ActiveID == DGScopeSpectrumCalibrationEnergy_NEL_ID)
+    if(ActiveID == SpectrumCalibrationEnergy_NEL_ID)
       Value = TI->DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->GetNumber();
     else
       Value = TI->DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->GetNumber();
@@ -133,7 +133,7 @@ void AASubtabSlots::HandleNumberEntries()
     // Normalize value for slider position setting from 0 to 1
     Value /= TI->DGScopeSpectrumMaxBin_NEL->GetEntry()->GetNumber();
     
-    TI->DGScopeHorizontalScale_THS->SetPointerPosition(Value);
+    TI->DisplayHorizontalScale_THS->SetPointerPosition(Value);
     break;
   }
   }
@@ -152,9 +152,9 @@ void AASubtabSlots::HandleTextButtons()
     //////////////////
     // Acquisition tab 
 
-  case DGScopeAcquisitionTimerStart_TB_ID:{
+  case AQTimerStart_TB_ID:{
     
-    if(TI->DGScopeStartStop_TB->GetString() != "Acquiring")
+    if(TI->AQStartStop_TB->GetString() != "Acquiring")
       break;
     
     if(ActiveButton->GetString() == "Start timer"){
@@ -168,7 +168,7 @@ void AASubtabSlots::HandleTextButtons()
       TheVMEManager->SetAcquisitionTimeStart( time(NULL) );
 
       // Get the stop time (i.e. amount of time to run in seconds)
-      TheVMEManager->SetAcquisitionTimeStop( TI->DGScopeAcquisitionTime_NEL->GetEntry()->GetNumber() );
+      TheVMEManager->SetAcquisitionTimeStop( TI->AQTime_NEL->GetEntry()->GetNumber() );
 
       // Set the bool that will trigger the check of the timer against
       // the current time within the acquisition loop in RunDGScope()
@@ -185,14 +185,14 @@ void AASubtabSlots::HandleTextButtons()
     break;
   }
 
-  case DGScopeAcquisitionTimerAbort_TB_ID:{
+  case AQTimerAbort_TB_ID:{
     if(TheVMEManager->GetDGAcquisitionEnable() and
        TheVMEManager->GetAcquisitionTimerEnable())
       {}//StopAcquisitionSafely();
     break;
   }
 
-  case DGScopeCheckBufferStatus_TB_ID:{
+  case CheckBufferStatus_TB_ID:{
 
     int DGChannels = TheVMEManager->GetDGManager()->GetNumChannels();
 
@@ -210,9 +210,9 @@ void AASubtabSlots::HandleTextButtons()
     }
     
     if(BufferFull)
-      TI->DGScopeBufferStatus_TE->SetText("Buffers are FULL");
+      TI->DGBufferStatus_TE->SetText("Buffers are FULL");
     else
-      TI->DGScopeBufferStatus_TE->SetText("Buffers are OK");
+      TI->DGBufferStatus_TE->SetText("Buffers are OK");
     
     break;
   }
@@ -222,7 +222,7 @@ void AASubtabSlots::HandleTextButtons()
 
     /////////////////////////////////////////////////
     // Add a new DGScope spectrum calibration point
-  case DGScopeSpectrumCalibrationSetPoint_TB_ID:{
+  case SpectrumCalibrationSetPoint_TB_ID:{
 
     // Get the calibration point to be set
     uint SetPoint = TI->DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->GetSelected();
@@ -840,7 +840,7 @@ void AASubtabSlots::HandleRadioButtons()
   
   switch(ActiveID){
     
-  case DGScopeSpectrumAnalysisHeight_RB_ID:
+  case SpectrumAnalysisHeight_RB_ID:
     
     if(TI->DGScopeSpectrumAnalysisHeight_RB->IsDown()){
       TI->DGScopeSpectrumAnalysisLLD_NEL->GetEntry()->SetNumber(0);
@@ -849,7 +849,7 @@ void AASubtabSlots::HandleRadioButtons()
 
     break;
 
-  case DGScopeSpectrumAnalysisArea_RB_ID:
+  case SpectrumAnalysisArea_RB_ID:
     
     if(TI->DGScopeSpectrumAnalysisArea_RB->IsDown()){
       TI->DGScopeSpectrumAnalysisLLD_NEL->GetEntry()->SetNumber(4000);

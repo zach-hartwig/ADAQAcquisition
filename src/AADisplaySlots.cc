@@ -25,7 +25,7 @@ void AADisplaySlots::HandleTextButtons()
 
   switch(ActiveID){
     
-  case DGScopeStartStop_TB_ID:{
+  case AQStartStop_TB_ID:{
     
     // If DGScope acquisition is started
     if(ActiveButton->GetString()=="Stopped"){
@@ -73,16 +73,16 @@ void AADisplaySlots::HandleTextButtons()
     break;
   }
     
-  case DGScopeTrigger_TB_ID:{
+  case AQTrigger_TB_ID:{
     TheVMEManager->GetDGManager()->SendSWTrigger();
     break;
   }
 
-  case DGScopeUpdatePlot_TB_ID:{
+  case DisplayUpdate_TB_ID:{
     
     int CurrentChannel = TI->DGScopeSpectrumChannel_CBL->GetComboBox()->GetSelected();
     
-    if(TI->DGScopeUltraRate_RB->IsDown())
+    if(TI->AQUltraRate_RB->IsDown())
       break;
     else{
       //   if(TI->DGScopeSpectrum_H[CurrentChannel])

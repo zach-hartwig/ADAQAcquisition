@@ -74,19 +74,19 @@ AAInterface::AAInterface()
   // Boost::Assign functionality for its utility and concision
 
   // std::vector for HV channel labels
-  HVChannelLabels += 
+  HVChLabels += 
     "Channel 0 (-)", "Channel 1 (-)", "Channel 2 (-)", 
     "Channel 3 (+)", "Channel 4 (+)", "Channel 5 (+)";
   
   // std::vector to return the ROOT channel power widget ID from the HV channel number
-  HVChannelPower_TB_ID_Vec += 
-    (int)HVChannel0Power_TB_ID, (int)HVChannel1Power_TB_ID, (int)HVChannel2Power_TB_ID,
-    (int)HVChannel3Power_TB_ID, (int)HVChannel4Power_TB_ID, (int)HVChannel5Power_TB_ID;
+  HVChPower_TB_ID_Vec += 
+    (int)HVCh0Power_TB_ID, (int)HVCh1Power_TB_ID, (int)HVCh2Power_TB_ID,
+    (int)HVCh3Power_TB_ID, (int)HVCh4Power_TB_ID, (int)HVCh5Power_TB_ID;
   
   // std::map to return the HV channel number from the ROOT channel power widget ID
-  insert(HVChannelPower_TB_ID_Map) 
-    ((int)HVChannel0Power_TB_ID,0) ((int)HVChannel1Power_TB_ID,1) ((int)HVChannel2Power_TB_ID,2)
-    ((int)HVChannel3Power_TB_ID,3) ((int)HVChannel4Power_TB_ID,4) ((int)HVChannel5Power_TB_ID,5);
+  insert(HVChPower_TB_ID_Map) 
+    ((int)HVCh0Power_TB_ID,0) ((int)HVCh1Power_TB_ID,1) ((int)HVCh2Power_TB_ID,2)
+    ((int)HVCh3Power_TB_ID,3) ((int)HVCh4Power_TB_ID,4) ((int)HVCh5Power_TB_ID,5);
 
   /////////////////////////////
   // Initialize DG variables //
@@ -96,35 +96,35 @@ AAInterface::AAInterface()
     "Channel 0", "Channel 1", "Channel 2", "Channel 3", 
     "Channel 4", "Channel 5", "Channel 6", "Channel 7";
 
-  DGScopeChEnable_CB_ID_Vec += 
-    (int)DGScopeCh0Enable_CB_ID, (int)DGScopeCh1Enable_CB_ID, (int)DGScopeCh2Enable_CB_ID, 
-    (int)DGScopeCh3Enable_CB_ID, (int)DGScopeCh4Enable_CB_ID, (int)DGScopeCh5Enable_CB_ID, 
-    (int)DGScopeCh6Enable_CB_ID, (int)DGScopeCh7Enable_CB_ID;
-
-  DGScopeChDCOffset_NEL_ID_Vec += 
-    (int)DGScopeCh0DCOffset_NEL_ID, (int)DGScopeCh1DCOffset_NEL_ID, (int)DGScopeCh2DCOffset_NEL_ID, 
-    (int)DGScopeCh3DCOffset_NEL_ID, (int)DGScopeCh4DCOffset_NEL_ID, (int)DGScopeCh5DCOffset_NEL_ID, 
-    (int)DGScopeCh6DCOffset_NEL_ID, (int)DGScopeCh7DCOffset_NEL_ID;
-
-  DGScopeChTriggerThreshold_NEL_ID_Vec += 
-    (int)DGScopeCh0TriggerThreshold_NEL_ID, (int)DGScopeCh1TriggerThreshold_NEL_ID, (int)DGScopeCh2TriggerThreshold_NEL_ID, 
-    (int)DGScopeCh3TriggerThreshold_NEL_ID, (int)DGScopeCh4TriggerThreshold_NEL_ID, (int)DGScopeCh5TriggerThreshold_NEL_ID, 
-    (int)DGScopeCh6TriggerThreshold_NEL_ID, (int)DGScopeCh7TriggerThreshold_NEL_ID;
-
-  DGScopeChBaselineCalcMin_NEL_ID_Vec += 
-    (int)DGScopeCh0BaselineCalcMin_NEL_ID, (int)DGScopeCh1BaselineCalcMin_NEL_ID, (int)DGScopeCh2BaselineCalcMin_NEL_ID, 
-    (int)DGScopeCh3BaselineCalcMin_NEL_ID, (int)DGScopeCh4BaselineCalcMin_NEL_ID, (int)DGScopeCh5BaselineCalcMin_NEL_ID,
-    (int)DGScopeCh6BaselineCalcMin_NEL_ID, (int)DGScopeCh7BaselineCalcMin_NEL_ID;
-
-  DGScopeChBaselineCalcMax_NEL_ID_Vec += 
-    (int)DGScopeCh0BaselineCalcMax_NEL_ID, (int)DGScopeCh1BaselineCalcMax_NEL_ID, (int)DGScopeCh2BaselineCalcMax_NEL_ID,
-    (int)DGScopeCh3BaselineCalcMax_NEL_ID, (int)DGScopeCh4BaselineCalcMax_NEL_ID, (int)DGScopeCh5BaselineCalcMax_NEL_ID, 
-    (int)DGScopeCh6BaselineCalcMax_NEL_ID, (int)DGScopeCh7BaselineCalcMax_NEL_ID;
+  DGChEnable_CB_ID_Vec += 
+    (int)DGCh0Enable_CB_ID, (int)DGCh1Enable_CB_ID, (int)DGCh2Enable_CB_ID, 
+    (int)DGCh3Enable_CB_ID, (int)DGCh4Enable_CB_ID, (int)DGCh5Enable_CB_ID, 
+    (int)DGCh6Enable_CB_ID, (int)DGCh7Enable_CB_ID;
   
-  insert(DGScopeChTriggerThreshold_NEL_ID_Map)
-    ((int)DGScopeCh0TriggerThreshold_NEL_ID,0) ((int)DGScopeCh1TriggerThreshold_NEL_ID,1) ((int)DGScopeCh2TriggerThreshold_NEL_ID,2) 
-    ((int)DGScopeCh3TriggerThreshold_NEL_ID,3) ((int)DGScopeCh4TriggerThreshold_NEL_ID,4) ((int)DGScopeCh5TriggerThreshold_NEL_ID,5)
-    ((int)DGScopeCh6TriggerThreshold_NEL_ID,6) ((int)DGScopeCh7TriggerThreshold_NEL_ID,7);
+  DGChDCOffset_NEL_ID_Vec += 
+    (int)DGCh0DCOffset_NEL_ID, (int)DGCh1DCOffset_NEL_ID, (int)DGCh2DCOffset_NEL_ID, 
+    (int)DGCh3DCOffset_NEL_ID, (int)DGCh4DCOffset_NEL_ID, (int)DGCh5DCOffset_NEL_ID, 
+    (int)DGCh6DCOffset_NEL_ID, (int)DGCh7DCOffset_NEL_ID;
+
+  DGChTriggerThreshold_NEL_ID_Vec += 
+    (int)DGCh0TriggerThreshold_NEL_ID, (int)DGCh1TriggerThreshold_NEL_ID, (int)DGCh2TriggerThreshold_NEL_ID, 
+    (int)DGCh3TriggerThreshold_NEL_ID, (int)DGCh4TriggerThreshold_NEL_ID, (int)DGCh5TriggerThreshold_NEL_ID, 
+    (int)DGCh6TriggerThreshold_NEL_ID, (int)DGCh7TriggerThreshold_NEL_ID;
+
+  DGChBaselineCalcMin_NEL_ID_Vec += 
+    (int)DGCh0BaselineCalcMin_NEL_ID, (int)DGCh1BaselineCalcMin_NEL_ID, (int)DGCh2BaselineCalcMin_NEL_ID, 
+    (int)DGCh3BaselineCalcMin_NEL_ID, (int)DGCh4BaselineCalcMin_NEL_ID, (int)DGCh5BaselineCalcMin_NEL_ID,
+    (int)DGCh6BaselineCalcMin_NEL_ID, (int)DGCh7BaselineCalcMin_NEL_ID;
+
+  DGChBaselineCalcMax_NEL_ID_Vec += 
+    (int)DGCh0BaselineCalcMax_NEL_ID, (int)DGCh1BaselineCalcMax_NEL_ID, (int)DGCh2BaselineCalcMax_NEL_ID,
+    (int)DGCh3BaselineCalcMax_NEL_ID, (int)DGCh4BaselineCalcMax_NEL_ID, (int)DGCh5BaselineCalcMax_NEL_ID, 
+    (int)DGCh6BaselineCalcMax_NEL_ID, (int)DGCh7BaselineCalcMax_NEL_ID;
+  
+  insert(DGChTriggerThreshold_NEL_ID_Map)
+    ((int)DGCh0TriggerThreshold_NEL_ID,0) ((int)DGCh1TriggerThreshold_NEL_ID,1) ((int)DGCh2TriggerThreshold_NEL_ID,2) 
+    ((int)DGCh3TriggerThreshold_NEL_ID,3) ((int)DGCh4TriggerThreshold_NEL_ID,4) ((int)DGCh5TriggerThreshold_NEL_ID,5)
+    ((int)DGCh6TriggerThreshold_NEL_ID,6) ((int)DGCh7TriggerThreshold_NEL_ID,7);
 
 
   ////////////////////////////////////////
@@ -209,9 +209,9 @@ void AAInterface::CreateTopLevelFrames()
   VoltageFrame = new TGCompositeFrame(VoltageTab, 60, 20, kHorizontalFrame);
   VoltageTab->AddFrame(VoltageFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 5,5,5,5));
 
-  ScopeTab = TopLevelTabs->AddTab(" Acquisition ");
-  ScopeFrame = new TGCompositeFrame(ScopeTab, 60, 20, kHorizontalFrame);
-  ScopeTab->AddFrame(ScopeFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 5,5,5,5));
+  AcquisitionTab = TopLevelTabs->AddTab(" Acquisition ");
+  AcquisitionFrame = new TGCompositeFrame(AcquisitionTab, 60, 20, kHorizontalFrame);
+  AcquisitionTab->AddFrame(AcquisitionFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 5,5,5,5));
 
   TabFrame->AddFrame(TopLevelTabs, new TGLayoutHints(kLHintsTop, 5,5,5,5));
 
@@ -256,8 +256,8 @@ void AAInterface::FillConnectionFrame()
   AddressTitle += "V1718 base address", "V1720 base address", "V6534 base address";
 
   vector<int> BoardEnableID, BoardAddressID, BoardAddress;
-  BoardEnableID += (int)V1718BoardEnable_TB_ID, (int)V1720BoardEnable_TB_ID, (int)V6534BoardEnable_TB_ID;
-  BoardAddressID += (int)0, (int)V1720BoardAddress_ID, (int)V6534BoardAddress_ID;
+  BoardEnableID += (int)V1718BoardEnable_TB_ID, (int)DGBoardEnable_TB_ID, (int)HVBoardEnable_TB_ID;
+  BoardAddressID += (int)0, (int)DGBoardAddress_ID, (int)DGBoardAddress_ID;
 
   BoardAddress += (int)0, (int)TheVMEManager->GetDGAddress(), (int)TheVMEManager->GetHVAddress();
 
@@ -323,16 +323,16 @@ void AAInterface::FillRegisterFrame()
 {
   const int NumVMEBoards = 3;
 
-  string FrameTitle[NumVMEBoards] = {"V1718 VME/USB Module", "V1720 Digitizer Module", "V6534 High Voltage Module"};
+  string FrameTitle[NumVMEBoards] = {"V1718 VME/USB Module", "CAEN Digitizer Module", "CAEN High Voltage Module"};
 
-  int ReadAddressID[NumVMEBoards] = {V1718ReadAddress_ID, V1720ReadAddress_ID, V6534ReadAddress_ID};
-  int ReadValueID[NumVMEBoards] = {V1718ReadValue_ID, V1720ReadValue_ID, V6534ReadValue_ID};
+  int ReadAddressID[NumVMEBoards] = {V1718ReadAddress_ID, DGReadAddress_ID, HVReadAddress_ID};
+  int ReadValueID[NumVMEBoards] = {V1718ReadValue_ID, DGReadValue_ID, HVReadValue_ID};
 
-  int WriteAddressID[NumVMEBoards] = {V1718WriteAddress_ID, V1720WriteAddress_ID, V6534WriteAddress_ID};
-  int WriteValueID[NumVMEBoards] = {V1718WriteValue_ID, V1720WriteValue_ID, V6534WriteValue_ID};
+  int WriteAddressID[NumVMEBoards] = {V1718WriteAddress_ID, DGWriteAddress_ID, HVWriteAddress_ID};
+  int WriteValueID[NumVMEBoards] = {V1718WriteValue_ID, DGWriteValue_ID, HVWriteValue_ID};
 
-  int ReadID[NumVMEBoards] = {V1718Read_ID, V1720Read_ID, V6534Read_ID};
-  int WriteID[NumVMEBoards] = {V1718Write_ID, V1720Write_ID, V6534Write_ID};
+  int ReadID[NumVMEBoards] = {V1718Read_ID, DGRead_ID, HVRead_ID};
+  int WriteID[NumVMEBoards] = {V1718Write_ID, DGWrite_ID, HVWrite_ID};
 
   const int RWButtonX = 250;
   const int RWButtonY = 30;
@@ -618,7 +618,7 @@ void AAInterface::FillVoltageFrame()
   
   for(int ch=0; ch<HVChannels; ch++){
     
-    TGGroupFrame *HVChannel_GF = new TGGroupFrame(HVChannelControls_VF, HVChannelLabels[ch].c_str(), kHorizontalFrame);
+    TGGroupFrame *HVChannel_GF = new TGGroupFrame(HVChannelControls_VF, HVChLabels[ch].c_str(), kHorizontalFrame);
     HVChannel_GF->SetTitlePos(TGGroupFrame::kCenter);
     HVChannelControls_VF->AddFrame(HVChannel_GF, new TGLayoutHints(kLHintsTop | kLHintsLeft, 5,5,5,0));
     
@@ -626,45 +626,45 @@ void AAInterface::FillVoltageFrame()
     HVChannel_GF->AddFrame(HVChannelSet_VF, new TGLayoutHints(kLHintsTop | kLHintsLeft, 15,15,5,0));
     
     // ADAQ number entry for setting the channel voltage
-    HVChannelSet_VF->AddFrame(HVChannelV_NEL[ch] = new ADAQNumberEntryWithLabel(HVChannelSet_VF, "Set Voltage [V]",-1),
+    HVChannelSet_VF->AddFrame(HVChVoltage_NEL[ch] = new ADAQNumberEntryWithLabel(HVChannelSet_VF, "Set Voltage [V]",-1),
 			      new TGLayoutHints(kLHintsTop | kLHintsLeft, 5,5,5,0));
-    HVChannelV_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-    HVChannelV_NEL[ch]->GetEntry()->SetNumLimits(TGNumberFormat::kNELLimitMinMax);
-    HVChannelV_NEL[ch]->GetEntry()->SetLimitValues(0, TheVMEManager->GetHVManager()->GetMaxVoltage());
-    HVChannelV_NEL[ch]->GetEntry()->SetNumber(0);
+    HVChVoltage_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+    HVChVoltage_NEL[ch]->GetEntry()->SetNumLimits(TGNumberFormat::kNELLimitMinMax);
+    HVChVoltage_NEL[ch]->GetEntry()->SetLimitValues(0, TheVMEManager->GetHVManager()->GetMaxVoltage());
+    HVChVoltage_NEL[ch]->GetEntry()->SetNumber(0);
     
     // ADAQ number entry for setting maximum channel current that can be drawn
-    HVChannelSet_VF->AddFrame(HVChannelI_NEL[ch] = new ADAQNumberEntryWithLabel(HVChannelSet_VF, "Set Current [uA]",-1),
+    HVChannelSet_VF->AddFrame(HVChCurrent_NEL[ch] = new ADAQNumberEntryWithLabel(HVChannelSet_VF, "Set Current [uA]",-1),
 			      new TGLayoutHints(kLHintsTop | kLHintsLeft, 5,5,5,0));
-    HVChannelI_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-    HVChannelI_NEL[ch]->GetEntry()->SetNumLimits(TGNumberFormat::kNELLimitMinMax);
-    HVChannelI_NEL[ch]->GetEntry()->SetLimitValues(0, TheVMEManager->GetHVManager()->GetMaxCurrent());
-    HVChannelI_NEL[ch]->GetEntry()->SetNumber(0);
+    HVChCurrent_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+    HVChCurrent_NEL[ch]->GetEntry()->SetNumLimits(TGNumberFormat::kNELLimitMinMax);
+    HVChCurrent_NEL[ch]->GetEntry()->SetLimitValues(0, TheVMEManager->GetHVManager()->GetMaxCurrent());
+    HVChCurrent_NEL[ch]->GetEntry()->SetNumber(0);
 
     TGVerticalFrame *HVChannelGet_VF = new TGVerticalFrame(HVChannel_GF);
     HVChannel_GF->AddFrame(HVChannelGet_VF, new TGLayoutHints(kLHintsTop | kLHintsLeft, 15,15,5,0));
 
     // ADAQ number entry field for displaying the real-time channel voltage [in volts]
-    HVChannelGet_VF->AddFrame(HVChannelVMonitor_NEFL[ch] = new ADAQNumberEntryFieldWithLabel(HVChannelGet_VF, "Active Voltage [V]", -1),
+    HVChannelGet_VF->AddFrame(HVChVoltageMonitor_NEFL[ch] = new ADAQNumberEntryFieldWithLabel(HVChannelGet_VF, "Active Voltage [V]", -1),
 			      new TGLayoutHints(kLHintsNormal, 5,5,5,0));
-    HVChannelVMonitor_NEFL[ch]->GetEntry()->SetState(false);
+    HVChVoltageMonitor_NEFL[ch]->GetEntry()->SetState(false);
     
     // ADAQ number entry field for display the real-time channel current [in microamps]
-    HVChannelGet_VF->AddFrame(HVChannelIMonitor_NEFL[ch] = new ADAQNumberEntryFieldWithLabel(HVChannelGet_VF, "Active Current [uA]", -1),
+    HVChannelGet_VF->AddFrame(HVChCurrentMonitor_NEFL[ch] = new ADAQNumberEntryFieldWithLabel(HVChannelGet_VF, "Active Current [uA]", -1),
 			      new TGLayoutHints(kLHintsNormal, 5,5,5,0));
-    HVChannelIMonitor_NEFL[ch]->GetEntry()->SetState(false);
+    HVChCurrentMonitor_NEFL[ch]->GetEntry()->SetState(false);
 
     // ROOT text button to control channel power. The widget ID is set
     // using a std::vector to assign a unique ID from the ADAQ widget
     // ID enumerator (see file "ADAQEnumerators.hh") for each channel
-    HVChannel_GF->AddFrame(HVChannelPower_TB[ch] = new TGTextButton(HVChannel_GF, "OFF", HVChannelPower_TB_ID_Vec[ch]),
+    HVChannel_GF->AddFrame(HVChPower_TB[ch] = new TGTextButton(HVChannel_GF, "OFF", HVChPower_TB_ID_Vec[ch]),
 			   new TGLayoutHints(kLHintsNormal,15,15,15,5));
-    HVChannelPower_TB[ch]->Connect("Pressed()", "AATabSlots", TabSlots, "HandleVoltageTextButtons()");
-    HVChannelPower_TB[ch]->SetToolTipText("Engage high voltage!");
-    HVChannelPower_TB[ch]->Resize(110,50);
-    HVChannelPower_TB[ch]->ChangeOptions(HVChannelPower_TB[ch]->GetOptions() | kFixedSize);
-    HVChannelPower_TB[ch]->SetBackgroundColor(ColorManager->Number2Pixel(2));
-    HVChannelPower_TB[ch]->SetForegroundColor(ColorManager->Number2Pixel(1));
+    HVChPower_TB[ch]->Connect("Pressed()", "AATabSlots", TabSlots, "HandleVoltageTextButtons()");
+    HVChPower_TB[ch]->SetToolTipText("Engage high voltage!");
+    HVChPower_TB[ch]->Resize(110,50);
+    HVChPower_TB[ch]->ChangeOptions(HVChPower_TB[ch]->GetOptions() | kFixedSize);
+    HVChPower_TB[ch]->SetBackgroundColor(ColorManager->Number2Pixel(2));
+    HVChPower_TB[ch]->SetForegroundColor(ColorManager->Number2Pixel(1));
     
     // Modify the widget background to distinguish the negative voltage 
     // (V6534 channels 0,1,2) from the positive voltage (V6534 channels 3,4,5)
@@ -685,23 +685,23 @@ void AAInterface::FillVoltageFrame()
   VoltageFrame->AddFrame(HVChannelControls_VF, new TGLayoutHints(kLHintsTop | kLHintsCenterX, 5, 5, 5, 5));
 }
 
-
+ 
 void AAInterface::FillAcquisitionFrame()
 {
   //////////////////////////////
   // Fill left vertical panel //
   //////////////////////////////
-  // The left-most vertical subframe on the DGScope frame is contains
-  // channel-specific settings for each of the 8 digitizer
-  // channels. The subframe makes use of the TGCanvas class to
-  // incorporate sliders that can be used to view all channel widgets
-  // in a smaller frame. Pro'n'shit if I do say so myself. And I do.
+  // The left-most vertical subframe in the acquisition frame contains
+  // eight digitizer (DG) channel-specific settings. The subframe
+  // makes use of the TGCanvas class to incorporate sliders that can
+  // be used to view all channel widgets in a smalle frame. Pro'n'shit
+  // if I do say so myself. And I do.
 
-  TGCanvas *DGScopeChannelControls_C = new TGCanvas(ScopeFrame,300,100,kSunkenFrame);
-  ScopeFrame->AddFrame(DGScopeChannelControls_C, new TGLayoutHints(kLHintsExpandX | kLHintsExpandY));
+  TGCanvas *DGChannelControls_C = new TGCanvas(AcquisitionFrame,300,100,kSunkenFrame);
+  AcquisitionFrame->AddFrame(DGChannelControls_C, new TGLayoutHints(kLHintsExpandX | kLHintsExpandY));
   
-  TGVerticalFrame *DGScopeChannelControls_VF = new TGVerticalFrame(DGScopeChannelControls_C->GetViewPort(),10,10);
-  DGScopeChannelControls_C->SetContainer(DGScopeChannelControls_VF);
+  TGVerticalFrame *DGChannelControls_VF = new TGVerticalFrame(DGChannelControls_C->GetViewPort(),10,10);
+  DGChannelControls_C->SetContainer(DGChannelControls_VF);
 
   // The widgets and layouts for control of channel-relevant
   // parameters for each of the 8 digitizers is identical although the
@@ -713,101 +713,99 @@ void AAInterface::FillAcquisitionFrame()
   for(int ch=0; ch<NumDataChannels; ch++){
 
     // Each channel's widgets are grouped under its own TGGroupFrame.
-    TGGroupFrame *DGScopeChannelControl_GF = new TGGroupFrame(DGScopeChannelControls_VF, DGChannelLabels[ch].c_str(), kVerticalFrame);
-    DGScopeChannelControls_VF->AddFrame(DGScopeChannelControl_GF, new TGLayoutHints(kLHintsCenterX, 5, 5, 5, 0));
-    DGScopeChannelControl_GF->SetTitlePos(TGGroupFrame::kLeft);
-
+    TGGroupFrame *DGChannelControl_GF = new TGGroupFrame(DGChannelControls_VF, DGChannelLabels[ch].c_str(), kVerticalFrame);
+    DGChannelControls_VF->AddFrame(DGChannelControl_GF, new TGLayoutHints(kLHintsCenterX, 5, 5, 5, 0));
+    DGChannelControl_GF->SetTitlePos(TGGroupFrame::kLeft);
+    
     // Horizontal frame to hold the "enable" and "pulse polarity" buttons
-    TGHorizontalFrame *DGScopeChannelControl_HF = new TGHorizontalFrame(DGScopeChannelControl_GF);
-    DGScopeChannelControl_GF->AddFrame(DGScopeChannelControl_HF);
+    TGHorizontalFrame *DGChannelControl_HF = new TGHorizontalFrame(DGChannelControl_GF);
+    DGChannelControl_GF->AddFrame(DGChannelControl_HF);
     
     // ROOT check button to enable channel for digitization
-    DGScopeChannelControl_HF->AddFrame(DGScopeChannelEnable_CB[ch] = new TGCheckButton(DGScopeChannelControl_HF, "Enable", DGScopeChEnable_CB_ID_Vec[ch]),
-				       new TGLayoutHints(kLHintsCenterY,0,0,0,0));
-    if(ch==0) 
-      DGScopeChannelEnable_CB[ch]->SetState(kButtonDown);
+    DGChannelControl_HF->AddFrame(DGChEnable_CB[ch] = new TGCheckButton(DGChannelControl_HF, "Enable", DGChEnable_CB_ID_Vec[ch]),
+				  new TGLayoutHints(kLHintsCenterY,0,0,0,0));
+    if(ch == 0) 
+      DGChEnable_CB[ch]->SetState(kButtonDown);
 
     // TGLabel for the pulse polarity radio buttons
-    DGScopeChannelControl_HF->AddFrame(new TGLabel(DGScopeChannelControl_HF,"Pulse \n polarity"),
+    DGChannelControl_HF->AddFrame(new TGLabel(DGChannelControl_HF,"Pulse \n polarity"),
 				       new TGLayoutHints(kLHintsCenterY,25,0,5,0));
 
-    // ROOT radio buttons to select the pulse polarity ("-" means
-    // below the baseline; "+" means above the baseline)
-    TGHButtonGroup *DGScopeChannelPolarity_BG = new TGHButtonGroup(DGScopeChannelControl_HF, "Pulse Polarity");//, kHorizontalFrame);
-    DGScopeChannelPolarity_BG->SetTitlePos(TGButtonGroup::kCenter);
-    DGScopeChannelPolarity_BG->SetBorderDrawn(false);
-    DGScopeChannelControl_HF->AddFrame(DGScopeChannelPolarity_BG, new TGLayoutHints(kLHintsRight,-1,-15,-10,-10));
+    TGHButtonGroup *DGChPolarity_BG = new TGHButtonGroup(DGChannelControl_HF, "");
+    DGChPolarity_BG->SetTitlePos(TGButtonGroup::kCenter);
+    DGChPolarity_BG->SetBorderDrawn(false);
+    DGChannelControl_HF->AddFrame(DGChPolarity_BG, new TGLayoutHints(kLHintsRight,-1,-15,-10,-10));
 
-    DGScopeChannelPosPolarity_RB[ch] = new TGRadioButton(DGScopeChannelPolarity_BG, "+  ", -1);
-    DGScopeChannelNegPolarity_RB[ch] = new TGRadioButton(DGScopeChannelPolarity_BG, "-", -1);
-    DGScopeChannelNegPolarity_RB[ch]->SetState(kButtonDown);
-    DGScopeChannelPolarity_BG->Show();
+    DGChPosPolarity_RB[ch] = new TGRadioButton(DGChPolarity_BG, "+  ", -1);
+    DGChNegPolarity_RB[ch] = new TGRadioButton(DGChPolarity_BG, "-", -1);
+    DGChNegPolarity_RB[ch]->SetState(kButtonDown);
+    DGChPolarity_BG->Show();
 
 
     // ADAQ number entry to set channel's vertical position on graph [ADC]
-    DGScopeChannelControl_GF->AddFrame(DGScopeVerticalPosition_NEL[ch] = new ADAQNumberEntryWithLabel(DGScopeChannelControl_GF, "Vert. Position (ADC)", DGScopeChVerticalPosition_NEL_ID),
-				       new TGLayoutHints(kLHintsNormal));
-    DGScopeVerticalPosition_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-    DGScopeVerticalPosition_NEL[ch]->GetEntry()->SetNumber(0);
-    DGScopeVerticalPosition_NEL[ch]->GetEntry()->Resize(55,20);
+    DGChannelControl_GF->AddFrame(DGChVerticalPosition_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "Vert. Position (ADC)", DGChVerticalPosition_NEL_ID),
+				  new TGLayoutHints(kLHintsNormal));
+    DGChVerticalPosition_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+    DGChVerticalPosition_NEL[ch]->GetEntry()->SetNumber(0);
+    DGChVerticalPosition_NEL[ch]->GetEntry()->Resize(55,20);
 
     // ADAQ number entry to set channel's DAC offset 
-    DGScopeChannelControl_GF->AddFrame(DGScopeDCOffset_NEL[ch] = new ADAQNumberEntryWithLabel(DGScopeChannelControl_GF, "DC offset (hex)", DGScopeChDCOffset_NEL_ID_Vec[ch]),
-				       new TGLayoutHints(kLHintsNormal));
-    DGScopeDCOffset_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESHex);
-    DGScopeDCOffset_NEL[ch]->GetEntry()->SetNumLimits(TGNumberFormat::kNELLimitMinMax);
-    DGScopeDCOffset_NEL[ch]->GetEntry()->SetLimitValues(0x0000,0xffff);
-    DGScopeDCOffset_NEL[ch]->GetEntry()->SetNumber(0x8000);
-    DGScopeDCOffset_NEL[ch]->GetEntry()->Resize(55,20);
-
+    DGChannelControl_GF->AddFrame(DGChDCOffset_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "DC offset (hex)", DGChDCOffset_NEL_ID_Vec[ch]),
+				  new TGLayoutHints(kLHintsNormal));
+    DGChDCOffset_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESHex);
+    DGChDCOffset_NEL[ch]->GetEntry()->SetNumLimits(TGNumberFormat::kNELLimitMinMax);
+    DGChDCOffset_NEL[ch]->GetEntry()->SetLimitValues(0x0000,0xffff);
+    DGChDCOffset_NEL[ch]->GetEntry()->SetNumber(0x8000);
+    DGChDCOffset_NEL[ch]->GetEntry()->Resize(55,20);
+    
     // ADAQ number entry to set channel's trigger threshold [ADC]
-    DGScopeChannelControl_GF->AddFrame(DGScopeChTriggerThreshold_NEL[ch] = new ADAQNumberEntryWithLabel(DGScopeChannelControl_GF, "Trig. Threshold (ADC)", DGScopeChTriggerThreshold_NEL_ID_Vec[ch]),
+    DGChannelControl_GF->AddFrame(DGChTriggerThreshold_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "Trig. Threshold (ADC)", DGChTriggerThreshold_NEL_ID_Vec[ch]),
 				       new TGLayoutHints(kLHintsNormal));
-    DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
-    DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-    DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->SetNumber(2000);
-    DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->Resize(55,20);
+    DGChTriggerThreshold_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
+    DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+    DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumber(2000);
+    DGChTriggerThreshold_NEL[ch]->GetEntry()->Resize(55,20);
     
     // ADAQ number entry to set minimum sample for baseline calculation [sample]
-    DGScopeChannelControl_GF->AddFrame(DGScopeBaselineCalcMin_NEL[ch] = new ADAQNumberEntryWithLabel(DGScopeChannelControl_GF, "Baseline min. (sample)", DGScopeChBaselineCalcMin_NEL_ID_Vec[ch]),
-				       new TGLayoutHints(kLHintsNormal));
-    DGScopeBaselineCalcMin_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
+    DGChannelControl_GF->AddFrame(DGChBaselineCalcMin_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "Baseline min. (sample)", DGChBaselineCalcMin_NEL_ID_Vec[ch]),
+				  new TGLayoutHints(kLHintsNormal));
+    DGChBaselineCalcMin_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
     
-    DGScopeBaselineCalcMin_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-    DGScopeBaselineCalcMin_NEL[ch]->GetEntry()->SetNumber(10);
-    DGScopeBaselineCalcMin_NEL[ch]->GetEntry()->Resize(55,20);
+    DGChBaselineCalcMin_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+    DGChBaselineCalcMin_NEL[ch]->GetEntry()->SetNumber(10);
+    DGChBaselineCalcMin_NEL[ch]->GetEntry()->Resize(55,20);
 
     // ADAQ number entry to set maximum sample for baseline calculation [sample]
-    DGScopeChannelControl_GF->AddFrame(DGScopeBaselineCalcMax_NEL[ch] = new ADAQNumberEntryWithLabel(DGScopeChannelControl_GF, "Baseline max. (sample)", DGScopeChBaselineCalcMax_NEL_ID_Vec[ch]),
+    DGChannelControl_GF->AddFrame(DGChBaselineCalcMax_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "Baseline max. (sample)", DGChBaselineCalcMax_NEL_ID_Vec[ch]),
+				  new TGLayoutHints(kLHintsNormal));
+    DGChBaselineCalcMax_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+    DGChBaselineCalcMax_NEL[ch]->GetEntry()->SetNumber(45);
+    DGChBaselineCalcMax_NEL[ch]->GetEntry()->Resize(55,20);
+
+    DGChannelControl_GF->AddFrame(DGChZSThreshold_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "ZS threshold (ADC)", -1),
 				       new TGLayoutHints(kLHintsNormal));
-    DGScopeBaselineCalcMax_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-    DGScopeBaselineCalcMax_NEL[ch]->GetEntry()->SetNumber(45);
-    DGScopeBaselineCalcMax_NEL[ch]->GetEntry()->Resize(55,20);
-
-    DGScopeChannelControl_GF->AddFrame(DGScopeZSThreshold_NEL[ch] = new ADAQNumberEntryWithLabel(DGScopeChannelControl_GF, "ZS threshold (ADC)", -1),
-				       new TGLayoutHints(kLHintsNormal));
-    DGScopeZSThreshold_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-    DGScopeZSThreshold_NEL[ch]->GetEntry()->SetNumber(0);
-    DGScopeZSThreshold_NEL[ch]->GetEntry()->Resize(55,20);
+    DGChZSThreshold_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+    DGChZSThreshold_NEL[ch]->GetEntry()->SetNumber(0);
+    DGChZSThreshold_NEL[ch]->GetEntry()->Resize(55,20);
 
 
-    TGHorizontalFrame *ZS_HF0 = new TGHorizontalFrame(DGScopeChannelControl_GF);
-    DGScopeChannelControl_GF->AddFrame(ZS_HF0, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+    TGHorizontalFrame *ZS_HF0 = new TGHorizontalFrame(DGChannelControl_GF);
+    DGChannelControl_GF->AddFrame(ZS_HF0, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
 
-    ZS_HF0->AddFrame(DGScopeZSForward_NEL[ch] = new ADAQNumberEntryWithLabel(ZS_HF0, "ZS Frwd", -1),
+    ZS_HF0->AddFrame(DGChZSForward_NEL[ch] = new ADAQNumberEntryWithLabel(ZS_HF0, "ZS Frwd", -1),
 		     new TGLayoutHints(kLHintsNormal, 0,0,0,0));
-    DGScopeZSForward_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-    DGScopeZSForward_NEL[ch]->GetEntry()->SetNumber(0);
-    DGScopeZSForward_NEL[ch]->GetEntry()->Resize(55,20);
+    DGChZSForward_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+    DGChZSForward_NEL[ch]->GetEntry()->SetNumber(0);
+    DGChZSForward_NEL[ch]->GetEntry()->Resize(55,20);
 
-    ZS_HF0->AddFrame(DGScopeZSBackward_NEL[ch] = new ADAQNumberEntryWithLabel(ZS_HF0, "ZS Back", -1),
+    ZS_HF0->AddFrame(DGChZSBackward_NEL[ch] = new ADAQNumberEntryWithLabel(ZS_HF0, "ZS Back", -1),
 		     new TGLayoutHints(kLHintsNormal, 10,0,0,0));
-    DGScopeZSBackward_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-    DGScopeZSBackward_NEL[ch]->GetEntry()->SetNumber(0);
-    DGScopeZSBackward_NEL[ch]->GetEntry()->Resize(55,20);
+    DGChZSBackward_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+    DGChZSBackward_NEL[ch]->GetEntry()->SetNumber(0);
+    DGChZSBackward_NEL[ch]->GetEntry()->Resize(55,20);
 
-    TGHorizontalFrame *ZS_HF1 = new TGHorizontalFrame(DGScopeChannelControl_GF);
-    DGScopeChannelControl_GF->AddFrame(ZS_HF1, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+    TGHorizontalFrame *ZS_HF1 = new TGHorizontalFrame(DGChannelControl_GF);
+    DGChannelControl_GF->AddFrame(ZS_HF1, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
 
     ZS_HF1->AddFrame(new TGLabel(ZS_HF1, "ZS Logic"),
 		     new TGLayoutHints(kLHintsNormal, 60,0,5,0));
@@ -816,15 +814,15 @@ void AAInterface::FillAcquisitionFrame()
     ZSLogicButtons_BG->SetBorderDrawn(false);
     ZS_HF1->AddFrame(ZSLogicButtons_BG, new TGLayoutHints(kLHintsNormal, -1,-15,-10,-10));
 
-    DGScopeZSPosLogic_RB[ch] = new TGRadioButton(ZSLogicButtons_BG, "+  ", -1);
-    DGScopeZSPosLogic_RB[ch]->SetState(kButtonDown);
+    DGChZSPosLogic_RB[ch] = new TGRadioButton(ZSLogicButtons_BG, "+  ", -1);
+    DGChZSPosLogic_RB[ch]->SetState(kButtonDown);
     
-    DGScopeZSNegLogic_RB[ch] = new TGRadioButton(ZSLogicButtons_BG, "-", -1);
+    DGChZSNegLogic_RB[ch] = new TGRadioButton(ZSLogicButtons_BG, "-", -1);
   }
   
 
   ////////////////////////////////
-  // Fill DGScope display frame //
+  // Fill DG display frame //
   ////////////////////////////////
   // The display frame contains the ROOT TRootEmbeddedCanvas, which
   // displays the waveforms and pulse heigh spectra, and two sliders,
@@ -832,68 +830,68 @@ void AAInterface::FillAcquisitionFrame()
   // along with spectrum calibration via the 3rd slider on the
   // horizontal axis.
 
-  TGVerticalFrame *DGScopeDisplayAndControls_VF = new TGVerticalFrame(ScopeFrame);
+  TGVerticalFrame *DGDisplayAndControls_VF = new TGVerticalFrame(AcquisitionFrame);
   
-  TGGroupFrame *DGScopeDisplay_GF = new TGGroupFrame(DGScopeDisplayAndControls_VF, "Multipurpose Display", kVerticalFrame);
+  TGGroupFrame *DGScopeDisplay_GF = new TGGroupFrame(DGDisplayAndControls_VF, "Multipurpose Display", kVerticalFrame);
   DGScopeDisplay_GF->SetTitlePos(TGGroupFrame::kCenter);
   
   TGHorizontalFrame *DGScopeDisplayAndSlider_HF = new TGHorizontalFrame(DGScopeDisplay_GF);
   DGScopeDisplay_GF->AddFrame(DGScopeDisplayAndSlider_HF, new TGLayoutHints(kLHintsNormal,0,0,5,0));
 
   // ROOT double slider for control of the min/max of vertical axis, ie, zoom
-  DGScopeDisplayAndSlider_HF->AddFrame(DGScopeVerticalScale_DVS = new TGDoubleVSlider(DGScopeDisplayAndSlider_HF, 400, kDoubleScaleBoth, -1, kVerticalFrame, ColorManager->Number2Pixel(17),true,false),
+  DGScopeDisplayAndSlider_HF->AddFrame(DisplayVerticalScale_DVS = new TGDoubleVSlider(DGScopeDisplayAndSlider_HF, 400, kDoubleScaleBoth, -1, kVerticalFrame, ColorManager->Number2Pixel(17),true,false),
 				       new TGLayoutHints(kLHintsNormal, 0, 0, 5, 0));
-  DGScopeVerticalScale_DVS->SetRange(0,1);
-  DGScopeVerticalScale_DVS->SetPosition(0,1);
+  DisplayVerticalScale_DVS->SetRange(0,1);
+  DisplayVerticalScale_DVS->SetPosition(0,1);
 
   // ROOT embdedded canvas for display of waveforms and spectra
-  DGScopeDisplayAndSlider_HF->AddFrame(DGScope_EC = new TRootEmbeddedCanvas("DGScope_EC", DGScopeDisplayAndSlider_HF, 650, 400),
+  DGScopeDisplayAndSlider_HF->AddFrame(DisplayCanvas_EC = new TRootEmbeddedCanvas("DisplayCanvas_EC", DGScopeDisplayAndSlider_HF, 650, 400),
 				       new TGLayoutHints(kLHintsCenterX, 5,5,0,0));
-  DGScope_EC->GetCanvas()->SetFillColor(0);
-  DGScope_EC->GetCanvas()->SetFrameFillColor(19);
-  DGScope_EC->GetCanvas()->SetGrid();
-  DGScope_EC->GetCanvas()->SetBorderMode(0);
-  DGScope_EC->GetCanvas()->SetLeftMargin(0.12);
-  DGScope_EC->GetCanvas()->SetBottomMargin(0.12);
-  DGScope_EC->GetCanvas()->SetTopMargin(0.08);
-  DGScope_EC->GetCanvas()->SetRightMargin(0.1);
+  DisplayCanvas_EC->GetCanvas()->SetFillColor(0);
+  DisplayCanvas_EC->GetCanvas()->SetFrameFillColor(19);
+  DisplayCanvas_EC->GetCanvas()->SetGrid();
+  DisplayCanvas_EC->GetCanvas()->SetBorderMode(0);
+  DisplayCanvas_EC->GetCanvas()->SetLeftMargin(0.12);
+  DisplayCanvas_EC->GetCanvas()->SetBottomMargin(0.12);
+  DisplayCanvas_EC->GetCanvas()->SetTopMargin(0.08);
+  DisplayCanvas_EC->GetCanvas()->SetRightMargin(0.1);
 
   // ROOT triple slider. The "double" slider features are used to //
   // control the min/max of the horizontal axis, ie, zoom; The "third"
   // slider is used for graphical valibration of the pulse height
   // spectrum when DGScope is set to "calibration mode" while
   // acquiring data in "spectrum mode"
-  DGScopeDisplay_GF->AddFrame(DGScopeHorizontalScale_THS = new TGTripleHSlider(DGScopeDisplay_GF, 650, kDoubleScaleBoth, -1, kVerticalFrame, ColorManager->Number2Pixel(17)),
+  DGScopeDisplay_GF->AddFrame(DisplayHorizontalScale_THS = new TGTripleHSlider(DGScopeDisplay_GF, 650, kDoubleScaleBoth, -1, kVerticalFrame, ColorManager->Number2Pixel(17)),
 			      new TGLayoutHints(kLHintsRight, 5, 5, 5, 5));
-  DGScopeHorizontalScale_THS->SetRange(0,1);
-  DGScopeHorizontalScale_THS->SetPosition(0,1);
-  DGScopeHorizontalScale_THS->SetPointerPosition(0.5);
+  DisplayHorizontalScale_THS->SetRange(0,1);
+  DisplayHorizontalScale_THS->SetPosition(0,1);
+  DisplayHorizontalScale_THS->SetPointerPosition(0.5);
 
   TGHorizontalFrame *DGScopeDisplayButtons_HF = new TGHorizontalFrame(DGScopeDisplay_GF);
   DGScopeDisplay_GF->AddFrame(DGScopeDisplayButtons_HF, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
 
   // ROOT text button for starting/stopping data acquisition by the digitizer
-  DGScopeDisplayButtons_HF->AddFrame(DGScopeStartStop_TB = new TGTextButton(DGScopeDisplayButtons_HF, "Stopped", DGScopeStartStop_TB_ID),
+  DGScopeDisplayButtons_HF->AddFrame(AQStartStop_TB = new TGTextButton(DGScopeDisplayButtons_HF, "Stopped", AQStartStop_TB_ID),
 				     new TGLayoutHints(kLHintsNormal,5,5,0,0));
-  DGScopeStartStop_TB->Connect("Clicked()", "AADisplaySlots", DisplaySlots, "HandleTextButtons()");
-  DGScopeStartStop_TB->Resize(300,30);
-  DGScopeStartStop_TB->ChangeOptions(DGScopeStartStop_TB->GetOptions() | kFixedSize);
-  DGScopeStartStop_TB->SetBackgroundColor(ColorManager->Number2Pixel(2));
-  DGScopeStartStop_TB->SetForegroundColor(ColorManager->Number2Pixel(1));
+  AQStartStop_TB->Connect("Clicked()", "AADisplaySlots", DisplaySlots, "HandleTextButtons()");
+  AQStartStop_TB->Resize(300,30);
+  AQStartStop_TB->ChangeOptions(AQStartStop_TB->GetOptions() | kFixedSize);
+  AQStartStop_TB->SetBackgroundColor(ColorManager->Number2Pixel(2));
+  AQStartStop_TB->SetForegroundColor(ColorManager->Number2Pixel(1));
 
 
   // ROOT text button for manually triggering of DGScope acquisition
-  DGScopeDisplayButtons_HF->AddFrame(DGScopeTrigger_TB = new TGTextButton(DGScopeDisplayButtons_HF, "Manual trigger", DGScopeTrigger_TB_ID),
+  DGScopeDisplayButtons_HF->AddFrame(AQTrigger_TB = new TGTextButton(DGScopeDisplayButtons_HF, "Manual trigger", AQTrigger_TB_ID),
 				     new TGLayoutHints(kLHintsNormal,5,5,0,0));
-  DGScopeTrigger_TB->Connect("Clicked()", "AADisplaySlots", DisplaySlots, "HandleTextButtons()");
-  DGScopeTrigger_TB->Resize(175,30);
-  DGScopeTrigger_TB->ChangeOptions(DGScopeTrigger_TB->GetOptions() | kFixedSize);
+  AQTrigger_TB->Connect("Clicked()", "AADisplaySlots", DisplaySlots, "HandleTextButtons()");
+  AQTrigger_TB->Resize(175,30);
+  AQTrigger_TB->ChangeOptions(AQTrigger_TB->GetOptions() | kFixedSize);
   
-  DGScopeDisplayButtons_HF->AddFrame(DGScopeUpdatePlot_TB = new TGTextButton(DGScopeDisplayButtons_HF, "Update plot", DGScopeUpdatePlot_TB_ID),
+  DGScopeDisplayButtons_HF->AddFrame(DisplayUpdate_TB = new TGTextButton(DGScopeDisplayButtons_HF, "Update display", DisplayUpdate_TB_ID),
 				     new TGLayoutHints(kLHintsCenterX, 5,5,0,0));
-  DGScopeUpdatePlot_TB->Resize(175,30);
-  DGScopeUpdatePlot_TB->ChangeOptions(DGScopeUpdatePlot_TB->GetOptions() | kFixedSize);
-  DGScopeUpdatePlot_TB->Connect("Clicked()", "AADisplaySlots", DisplaySlots, "HandleTextButtons()");
+  DisplayUpdate_TB->Resize(175,30);
+  DisplayUpdate_TB->ChangeOptions(DisplayUpdate_TB->GetOptions() | kFixedSize);
+  DisplayUpdate_TB->Connect("Clicked()", "AADisplaySlots", DisplaySlots, "HandleTextButtons()");
 
   TGHorizontalFrame *DGScopeDisplayControls_HF = new TGHorizontalFrame(DGScopeDisplay_GF);
   DGScopeDisplay_GF->AddFrame(DGScopeDisplayControls_HF,
@@ -912,7 +910,7 @@ void AAInterface::FillAcquisitionFrame()
   // position. The "Data Storage" tab contains options for storing
   // acquired data in ROOT files.
 
-  TGHorizontalFrame *DGScopeControlTabs_HF = new TGHorizontalFrame(DGScopeDisplayAndControls_VF);
+  TGHorizontalFrame *DGScopeControlTabs_HF = new TGHorizontalFrame(DGDisplayAndControls_VF);
   TGTab *DGScopeControlTabs = new TGTab(DGScopeControlTabs_HF);
   DGScopeControlTabs_HF->AddFrame(DGScopeControlTabs, new TGLayoutHints(kLHintsNormal,10,10,0,0));
 
@@ -954,58 +952,58 @@ void AAInterface::FillAcquisitionFrame()
   DGScopeMode_BG->SetTitlePos(TGButtonGroup::kCenter);
   DGScopeModeAndTrigger_VF->AddFrame(DGScopeMode_BG, new TGLayoutHints(kLHintsExpandX,5,5,5,5));
   
-  DGScopeWaveform_RB = new TGRadioButton(DGScopeMode_BG, "Digitized waveform", DGScopeWaveform_RB_ID);
-  DGScopeWaveform_RB->SetState(kButtonDown);
+  AQWaveform_RB = new TGRadioButton(DGScopeMode_BG, "Digitized waveform", AQWaveform_RB_ID);
+  AQWaveform_RB->SetState(kButtonDown);
 
-  DGScopeSpectrum_RB = new TGRadioButton(DGScopeMode_BG, "Pulse spectrum", DGScopeSpectrum_RB_ID);
+  AQSpectrum_RB = new TGRadioButton(DGScopeMode_BG, "Pulse spectrum", AQSpectrum_RB_ID);
 
-  DGScopeHighRate_RB = new TGRadioButton(DGScopeMode_BG, "High-rate (updateable)", DGScopeHighRate_RB_ID);
+  AQHighRate_RB = new TGRadioButton(DGScopeMode_BG, "High-rate (updateable)", AQHighRate_RB_ID);
 
-  DGScopeUltraRate_RB = new TGRadioButton(DGScopeMode_BG, "Ultra-rate (non-updateable)", DGScopeUltraRate_RB_ID);
+  AQUltraRate_RB = new TGRadioButton(DGScopeMode_BG, "Ultra-rate (non-updateable)", AQUltraRate_RB_ID);
   
   DGScopeMode_BG->Show();
 
   ///////////////////
   // Trigger controls
   
-  TGGroupFrame *DGScopeTriggerControls_GF = new TGGroupFrame(DGScopeModeAndTrigger_VF, "Trigger Control", kVerticalFrame);
-  DGScopeTriggerControls_GF->SetTitlePos(TGGroupFrame::kCenter);
-  DGScopeModeAndTrigger_VF->AddFrame(DGScopeTriggerControls_GF, new TGLayoutHints(kLHintsCenterX,5,5,0,0));
+  TGGroupFrame *DGTriggerControls_GF = new TGGroupFrame(DGScopeModeAndTrigger_VF, "Trigger Control", kVerticalFrame);
+  DGTriggerControls_GF->SetTitlePos(TGGroupFrame::kCenter);
+  DGScopeModeAndTrigger_VF->AddFrame(DGTriggerControls_GF, new TGLayoutHints(kLHintsCenterX,5,5,0,0));
 
 
   // ADAQ combo box to enable specification of trigger type
-  DGScopeTriggerControls_GF->AddFrame(DGScopeTriggerType_CBL = new ADAQComboBoxWithLabel(DGScopeTriggerControls_GF, "Type", DGScopeTriggerType_CBL_ID),
-				      new TGLayoutHints(kLHintsNormal,5,5,5,0));
-  DGScopeTriggerType_CBL->GetComboBox()->AddEntry("External (NIM)",0);
-  DGScopeTriggerType_CBL->GetComboBox()->AddEntry("External (TTL)",1);
-  DGScopeTriggerType_CBL->GetComboBox()->AddEntry("Automatic",2);
-  DGScopeTriggerType_CBL->GetComboBox()->AddEntry("Software",3);
-  DGScopeTriggerType_CBL->GetComboBox()->Select(2);
-  DGScopeTriggerType_CBL->GetComboBox()->Resize(110,20);
-  DGScopeTriggerType_CBL->GetComboBox()->ChangeOptions(DGScopeTriggerType_CBL->GetComboBox()->GetOptions() | kFixedSize);
+  DGTriggerControls_GF->AddFrame(DGTriggerType_CBL = new ADAQComboBoxWithLabel(DGTriggerControls_GF, "Type", TriggerType_CBL_ID),
+				 new TGLayoutHints(kLHintsNormal,5,5,5,0));
+  DGTriggerType_CBL->GetComboBox()->AddEntry("External (NIM)",0);
+  DGTriggerType_CBL->GetComboBox()->AddEntry("External (TTL)",1);
+  DGTriggerType_CBL->GetComboBox()->AddEntry("Automatic",2);
+  DGTriggerType_CBL->GetComboBox()->AddEntry("Software",3);
+  DGTriggerType_CBL->GetComboBox()->Select(2);
+  DGTriggerType_CBL->GetComboBox()->Resize(110,20);
+  DGTriggerType_CBL->GetComboBox()->ChangeOptions(DGTriggerType_CBL->GetComboBox()->GetOptions() | kFixedSize);
 
   // ADAQ combo box to enable specification of trigger type
-  DGScopeTriggerControls_GF->AddFrame(DGScopeTriggerEdge_CBL = new ADAQComboBoxWithLabel(DGScopeTriggerControls_GF, "Edge", DGScopeTriggerEdge_CBL_ID),
-				      new TGLayoutHints(kLHintsNormal,5,5,0,5));
-  DGScopeTriggerEdge_CBL->GetComboBox()->AddEntry("Rising",0);
-  DGScopeTriggerEdge_CBL->GetComboBox()->AddEntry("Falling",1);
-  DGScopeTriggerEdge_CBL->GetComboBox()->Select(0);
-  DGScopeTriggerEdge_CBL->GetComboBox()->Resize(110,20);
-  DGScopeTriggerEdge_CBL->GetComboBox()->ChangeOptions(DGScopeTriggerEdge_CBL->GetComboBox()->GetOptions() | kFixedSize);
+  DGTriggerControls_GF->AddFrame(DGTriggerEdge_CBL = new ADAQComboBoxWithLabel(DGTriggerControls_GF, "Edge", TriggerEdge_CBL_ID),
+				 new TGLayoutHints(kLHintsNormal,5,5,0,5));
+  DGTriggerEdge_CBL->GetComboBox()->AddEntry("Rising",0);
+  DGTriggerEdge_CBL->GetComboBox()->AddEntry("Falling",1);
+  DGTriggerEdge_CBL->GetComboBox()->Select(0);
+  DGTriggerEdge_CBL->GetComboBox()->Resize(110,20);
+  DGTriggerEdge_CBL->GetComboBox()->ChangeOptions(DGTriggerEdge_CBL->GetComboBox()->GetOptions() | kFixedSize);
   
-  DGScopeTriggerControls_GF->AddFrame(DGScopeTriggerCoincidenceEnable_CB = new TGCheckButton(DGScopeTriggerControls_GF, "Coincidence triggering",DGScopeTriggerCoincidenceEnable_CB_ID),
+  DGTriggerControls_GF->AddFrame(DGTriggerCoincidenceEnable_CB = new TGCheckButton(DGTriggerControls_GF, "Coincidence triggering", DGTriggerCoincidenceEnable_CB_ID),
 				      new TGLayoutHints(kLHintsNormal,5,5,0,0));
   
-  DGScopeTriggerControls_GF->AddFrame(DGScopeTriggerCoincidenceLevel_CBL = new ADAQComboBoxWithLabel(DGScopeTriggerControls_GF, "Level", -1),
+  DGTriggerControls_GF->AddFrame(DGTriggerCoincidenceLevel_CBL = new ADAQComboBoxWithLabel(DGTriggerControls_GF, "Level", DGTriggerCoincidenceLevel_CBL_ID),
 				      new TGLayoutHints(kLHintsNormal,5,5,0,0));
-  DGScopeTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("2 channel",1);
-  DGScopeTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("3 channel",2);
-  DGScopeTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("4 channel",3);
-  DGScopeTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("5 channel",4);
-  DGScopeTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("6 channel",5);
-  DGScopeTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("7 channel",6);
-  DGScopeTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("8 channel",7);
-  DGScopeTriggerCoincidenceLevel_CBL->GetComboBox()->Select(1);
+  DGTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("2 channel",1);
+  DGTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("3 channel",2);
+  DGTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("4 channel",3);
+  DGTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("5 channel",4);
+  DGTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("6 channel",5);
+  DGTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("7 channel",6);
+  DGTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("8 channel",7);
+  DGTriggerCoincidenceLevel_CBL->GetComboBox()->Select(1);
 
 
   
@@ -1017,46 +1015,46 @@ void AAInterface::FillAcquisitionFrame()
   DGScopeSettingsFrame->AddFrame(DGScopeAcquisitionControls_GF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
 
   // ADAQ number entry specifying number of samples
-  DGScopeAcquisitionControls_GF->AddFrame(DGScopeRecordLength_NEL = new ADAQNumberEntryWithLabel(DGScopeAcquisitionControls_GF, "Record length (#)", DGScopeRecordLength_NEL_ID),
+  DGScopeAcquisitionControls_GF->AddFrame(DGRecordLength_NEL = new ADAQNumberEntryWithLabel(DGScopeAcquisitionControls_GF, "Record length (#)", RecordLength_NEL_ID),
 					  new TGLayoutHints(kLHintsNormal,5,5,5,0));
-  DGScopeRecordLength_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-  DGScopeRecordLength_NEL->GetEntry()->SetNumber(2000);
+  DGRecordLength_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+  DGRecordLength_NEL->GetEntry()->SetNumber(2000);
 
   // ADAQ number entry specifying the percentage of the acquisition
   // window that is behind (or after) the triggern (all channels)
-  DGScopeAcquisitionControls_GF->AddFrame(DGScopePostTriggerSize_NEL = new ADAQNumberEntryWithLabel(DGScopeAcquisitionControls_GF, "Post trigger (%)", DGScopePostTriggerSize_NEL_ID),
+  DGScopeAcquisitionControls_GF->AddFrame(DGPostTrigger_NEL = new ADAQNumberEntryWithLabel(DGScopeAcquisitionControls_GF, "Post trigger (%)", PostTriggerSize_NEL_ID),
 					  new TGLayoutHints(kLHintsNormal,5,5,0,5));
-  DGScopePostTriggerSize_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-  DGScopePostTriggerSize_NEL->GetEntry()->SetNumLimits(TGNumberFormat::kNELLimitMinMax);
-  DGScopePostTriggerSize_NEL->GetEntry()->SetLimitValues(0,100);
-  DGScopePostTriggerSize_NEL->GetEntry()->SetNumber(50);
+  DGPostTrigger_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+  DGPostTrigger_NEL->GetEntry()->SetNumLimits(TGNumberFormat::kNELLimitMinMax);
+  DGPostTrigger_NEL->GetEntry()->SetLimitValues(0,100);
+  DGPostTrigger_NEL->GetEntry()->SetNumber(50);
   
-  DGScopeAcquisitionControls_GF->AddFrame(DGScopeAcquisitionTime_NEL = new ADAQNumberEntryWithLabel(DGScopeAcquisitionControls_GF, "Acquisition time (s)", -1),
+  DGScopeAcquisitionControls_GF->AddFrame(AQTime_NEL = new ADAQNumberEntryWithLabel(DGScopeAcquisitionControls_GF, "Acquisition time (s)", -1),
 					  new TGLayoutHints(kLHintsNormal,5,5,5,0));
-  DGScopeAcquisitionTime_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
-  DGScopeAcquisitionTime_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
-  DGScopeAcquisitionTime_NEL->GetEntry()->SetNumber(10);
+  AQTime_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
+  AQTime_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+  AQTime_NEL->GetEntry()->SetNumber(10);
 
-  DGScopeAcquisitionControls_GF->AddFrame(DGScopeAcquisitionTimer_NEFL = new ADAQNumberEntryFieldWithLabel(DGScopeAcquisitionControls_GF, "Countdown", -1),
+  DGScopeAcquisitionControls_GF->AddFrame(AQTimer_NEFL = new ADAQNumberEntryFieldWithLabel(DGScopeAcquisitionControls_GF, "Countdown", -1),
 					  new TGLayoutHints(kLHintsNormal,5,5,0,5));
-  DGScopeAcquisitionTimer_NEFL->GetEntry()->SetFormat(TGNumberFormat::kNESMinSec);
-  DGScopeAcquisitionTimer_NEFL->GetEntry()->SetNumber(10);
-  DGScopeAcquisitionTimer_NEFL->GetEntry()->SetState(false);
+  AQTimer_NEFL->GetEntry()->SetFormat(TGNumberFormat::kNESMinSec);
+  AQTimer_NEFL->GetEntry()->SetNumber(10);
+  AQTimer_NEFL->GetEntry()->SetState(false);
 
   TGHorizontalFrame *DGScopeTimerButtons_HF = new TGHorizontalFrame(DGScopeAcquisitionControls_GF);
   DGScopeAcquisitionControls_GF->AddFrame(DGScopeTimerButtons_HF);
   
-  DGScopeTimerButtons_HF->AddFrame(DGScopeAcquisitionTimerStart_TB = new TGTextButton(DGScopeTimerButtons_HF, "Start timer", DGScopeAcquisitionTimerStart_TB_ID),
+  DGScopeTimerButtons_HF->AddFrame(AQTimerStart_TB = new TGTextButton(DGScopeTimerButtons_HF, "Start timer", AQTimerStart_TB_ID),
 				   new TGLayoutHints(kLHintsNormal, 5,5,0,0));
-  DGScopeAcquisitionTimerStart_TB->Resize(100, 30);
-  DGScopeAcquisitionTimerStart_TB->ChangeOptions(DGScopeAcquisitionTimerStart_TB->GetOptions() | kFixedSize);
-  DGScopeAcquisitionTimerStart_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
+  AQTimerStart_TB->Resize(100, 30);
+  AQTimerStart_TB->ChangeOptions(AQTimerStart_TB->GetOptions() | kFixedSize);
+  AQTimerStart_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
   
-  DGScopeTimerButtons_HF->AddFrame(DGScopeAcquisitionTimerAbort_TB = new TGTextButton(DGScopeTimerButtons_HF, "Abort timer", DGScopeAcquisitionTimerAbort_TB_ID),
+  DGScopeTimerButtons_HF->AddFrame(AQTimerAbort_TB = new TGTextButton(DGScopeTimerButtons_HF, "Abort timer", AQTimerAbort_TB_ID),
 				   new TGLayoutHints(kLHintsNormal, 5,5,0,0));
-  DGScopeAcquisitionTimerAbort_TB->Resize(100, 30);
-  DGScopeAcquisitionTimerAbort_TB->ChangeOptions(DGScopeAcquisitionTimerAbort_TB->GetOptions() | kFixedSize);
-  DGScopeAcquisitionTimerAbort_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
+  AQTimerAbort_TB->Resize(100, 30);
+  AQTimerAbort_TB->ChangeOptions(AQTimerAbort_TB->GetOptions() | kFixedSize);
+  AQTimerAbort_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
   
 
   // V1720 readout controls
@@ -1064,35 +1062,35 @@ void AAInterface::FillAcquisitionFrame()
   DGScopeReadoutControls_GF->SetTitlePos(TGGroupFrame::kCenter);
   DGScopeSettingsFrame->AddFrame(DGScopeReadoutControls_GF, new TGLayoutHints(kLHintsNormal, 5,5,5,5));
   
-  DGScopeReadoutControls_GF->AddFrame(DGScopeMaxEventsBeforeTransfer_NEL = new ADAQNumberEntryWithLabel(DGScopeReadoutControls_GF, "Events before readout", -1),
+  DGScopeReadoutControls_GF->AddFrame(DGEventsBeforeReadout_NEL = new ADAQNumberEntryWithLabel(DGScopeReadoutControls_GF, "Events before readout", -1),
 				      new TGLayoutHints(kLHintsNormal, 5,5,5,5));
-  DGScopeMaxEventsBeforeTransfer_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-  DGScopeMaxEventsBeforeTransfer_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
-  DGScopeMaxEventsBeforeTransfer_NEL->GetEntry()->SetNumber(5);
-
-  DGScopeReadoutControls_GF->AddFrame(DGScopeCheckBufferStatus_TB = new TGTextButton(DGScopeReadoutControls_GF, "Check FPGA Buffer", DGScopeCheckBufferStatus_TB_ID),
+  DGEventsBeforeReadout_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+  DGEventsBeforeReadout_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+  DGEventsBeforeReadout_NEL->GetEntry()->SetNumber(5);
+ 
+  DGScopeReadoutControls_GF->AddFrame(DGCheckBufferStatus_TB = new TGTextButton(DGScopeReadoutControls_GF, "Check FPGA Buffer", CheckBufferStatus_TB_ID),
 				      new TGLayoutHints(kLHintsNormal, 5,5,5,0));
-  DGScopeCheckBufferStatus_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
-  DGScopeCheckBufferStatus_TB->Resize(150,30);
-  DGScopeCheckBufferStatus_TB->ChangeOptions(DGScopeCheckBufferStatus_TB->GetOptions() | kFixedSize);
+  DGCheckBufferStatus_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
+  DGCheckBufferStatus_TB->Resize(150,30);
+  DGCheckBufferStatus_TB->ChangeOptions(DGCheckBufferStatus_TB->GetOptions() | kFixedSize);
   
-  DGScopeReadoutControls_GF->AddFrame(DGScopeBufferStatus_TE = new TGTextEntry(DGScopeReadoutControls_GF, "<Click above check!>",-1),
+  DGScopeReadoutControls_GF->AddFrame(DGBufferStatus_TE = new TGTextEntry(DGScopeReadoutControls_GF, "<Click above check!>",-1),
 				      new TGLayoutHints(kLHintsNormal, 5,5,5,5));
-  DGScopeBufferStatus_TE->SetAlignment(kTextCenterX);
-  DGScopeBufferStatus_TE->Resize(200,30);
-  DGScopeBufferStatus_TE->ChangeOptions(DGScopeBufferStatus_TE->GetOptions() | kFixedSize);
+  DGBufferStatus_TE->SetAlignment(kTextCenterX);
+  DGBufferStatus_TE->Resize(200,30);
+  DGBufferStatus_TE->ChangeOptions(DGBufferStatus_TE->GetOptions() | kFixedSize);
 
 
-  DGScopeReadoutControls_GF->AddFrame(DGScopeUseDataReduction_CB = new TGCheckButton(DGScopeReadoutControls_GF, "Enable data reduction", -1),
+  DGScopeReadoutControls_GF->AddFrame(AQDataReductionEnable_CB = new TGCheckButton(DGScopeReadoutControls_GF, "Enable data reduction", -1),
 				      new TGLayoutHints(kLHintsNormal, 5,5,5,0));
 
-  DGScopeReadoutControls_GF->AddFrame(DGScopeDataReductionFactor_NEL = new ADAQNumberEntryWithLabel(DGScopeReadoutControls_GF, "Data reduction factor", -1),
+  DGScopeReadoutControls_GF->AddFrame(AQDataReductionFactor_NEL = new ADAQNumberEntryWithLabel(DGScopeReadoutControls_GF, "Data reduction factor", -1),
 				      new TGLayoutHints(kLHintsNormal, 5,5,0,5));
-  DGScopeDataReductionFactor_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-  DGScopeDataReductionFactor_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
-  DGScopeDataReductionFactor_NEL->GetEntry()->SetNumber(1);
+  AQDataReductionFactor_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+  AQDataReductionFactor_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+  AQDataReductionFactor_NEL->GetEntry()->SetNumber(1);
 
-  DGScopeReadoutControls_GF->AddFrame(DGScopeZSEnable_CB = new TGCheckButton(DGScopeReadoutControls_GF, "Enable zero-suppression", -1),
+  DGScopeReadoutControls_GF->AddFrame(DGZSEnable_CB = new TGCheckButton(DGScopeReadoutControls_GF, "Enable zero-suppression", -1),
 				      new TGLayoutHints(kLHintsNormal, 5,5,0,5));
   
 
@@ -1109,7 +1107,7 @@ void AAInterface::FillAcquisitionFrame()
   DGScopeSpectrumFrame->AddFrame(DGScopeSpectrumHistogram_GF, new TGLayoutHints(kLHintsNormal,5,5,0,0));
 
   // ADAQ combo box for selecting the channel for display spectrum
-  DGScopeSpectrumHistogram_GF->AddFrame(DGScopeSpectrumChannel_CBL = new ADAQComboBoxWithLabel(DGScopeSpectrumHistogram_GF, "", DGScopeSpectrumChannel_CBL_ID),
+  DGScopeSpectrumHistogram_GF->AddFrame(DGScopeSpectrumChannel_CBL = new ADAQComboBoxWithLabel(DGScopeSpectrumHistogram_GF, "", SpectrumChannel_CBL_ID),
 					new TGLayoutHints(kLHintsNormal,0,0,5,5));
   for(uint32_t ch=0; ch<8; ch++)
     DGScopeSpectrumChannel_CBL->GetComboBox()->AddEntry(DGChannelLabels[ch].c_str(),ch);
@@ -1117,20 +1115,20 @@ void AAInterface::FillAcquisitionFrame()
   DGScopeSpectrumChannel_CBL->GetComboBox()->Connect("Selected(int,int)", "AASubtabSlots", SubtabSlots, "HandleComboBoxes(int,int)");
   
   // ADAQ number entry to specify number of bins used in the spectra histogram
-  DGScopeSpectrumHistogram_GF->AddFrame(DGScopeSpectrumBinNumber_NEL = new ADAQNumberEntryWithLabel(DGScopeSpectrumHistogram_GF, "Number of bins  ", DGScopeSpectrumBinNumber_NEL_ID),
+  DGScopeSpectrumHistogram_GF->AddFrame(DGScopeSpectrumBinNumber_NEL = new ADAQNumberEntryWithLabel(DGScopeSpectrumHistogram_GF, "Number of bins  ", SpectrumBinNumber_NEL_ID),
 					new TGLayoutHints(kLHintsLeft,0,0,5,0));
   DGScopeSpectrumBinNumber_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
   DGScopeSpectrumBinNumber_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
   DGScopeSpectrumBinNumber_NEL->GetEntry()->SetNumber(100);
 
   // ADAQ number entry to specify the maximum bin in the spectra histogram
-  DGScopeSpectrumHistogram_GF->AddFrame(DGScopeSpectrumMinBin_NEL = new ADAQNumberEntryWithLabel(DGScopeSpectrumHistogram_GF, "Minimum bin", DGScopeSpectrumMinBin_NEL_ID),
+  DGScopeSpectrumHistogram_GF->AddFrame(DGScopeSpectrumMinBin_NEL = new ADAQNumberEntryWithLabel(DGScopeSpectrumHistogram_GF, "Minimum bin", SpectrumMinBin_NEL_ID),
 					new TGLayoutHints(kLHintsLeft,0,0,0,0));
   DGScopeSpectrumMinBin_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
   DGScopeSpectrumMinBin_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEANonNegative);
   DGScopeSpectrumMinBin_NEL->GetEntry()->SetNumber(0.);
 
-  DGScopeSpectrumHistogram_GF->AddFrame(DGScopeSpectrumMaxBin_NEL = new ADAQNumberEntryWithLabel(DGScopeSpectrumHistogram_GF, "Maximum bin", DGScopeSpectrumMaxBin_NEL_ID),
+  DGScopeSpectrumHistogram_GF->AddFrame(DGScopeSpectrumMaxBin_NEL = new ADAQNumberEntryWithLabel(DGScopeSpectrumHistogram_GF, "Maximum bin", SpectrumMaxBin_NEL_ID),
 					new TGLayoutHints(kLHintsLeft,0,0,0,5));
   DGScopeSpectrumMaxBin_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
   DGScopeSpectrumMaxBin_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEANonNegative);
@@ -1138,11 +1136,6 @@ void AAInterface::FillAcquisitionFrame()
 
   TGHorizontalFrame *DGScopeSpectrumAxis_HF = new TGHorizontalFrame(DGScopeSpectrumHistogram_GF);
   DGScopeSpectrumHistogram_GF->AddFrame(DGScopeSpectrumAxis_HF, new TGLayoutHints(kLHintsNormal,0,0,0,0));
-
-  // ROOT check button that allows multiple runs ("run" == acquisition
-  // on and then off) to sum into the same histogram
-  DGScopeSpectrumHistogram_GF->AddFrame(DGScopeSpectrumAggregateRuns_CB = new TGCheckButton(DGScopeSpectrumHistogram_GF, "Aggregate runs", DGScopeSpectrumAggregateRuns_CB_ID),
-					new TGLayoutHints(kLHintsLeft,0,0,5,5));
 
 
   /////////////////
@@ -1156,11 +1149,11 @@ void AAInterface::FillAcquisitionFrame()
   DGScopeSpectrumAnalysis_BG->SetBorderDrawn(false);
   DGScopeSpectrumAnalysis_GF->AddFrame(DGScopeSpectrumAnalysis_BG, new TGLayoutHints(kLHintsNormal,-13,0,0,0));
   
-  DGScopeSpectrumAnalysisHeight_RB = new TGRadioButton(DGScopeSpectrumAnalysis_BG, "PHS  ", DGScopeSpectrumAnalysisHeight_RB_ID);
+  DGScopeSpectrumAnalysisHeight_RB = new TGRadioButton(DGScopeSpectrumAnalysis_BG, "PHS  ", SpectrumAnalysisHeight_RB_ID);
   DGScopeSpectrumAnalysisHeight_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
 
   
-  DGScopeSpectrumAnalysisArea_RB = new TGRadioButton(DGScopeSpectrumAnalysis_BG, "PAS", DGScopeSpectrumAnalysisArea_RB_ID);
+  DGScopeSpectrumAnalysisArea_RB = new TGRadioButton(DGScopeSpectrumAnalysis_BG, "PAS", SpectrumAnalysisArea_RB_ID);
   DGScopeSpectrumAnalysisArea_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
   DGScopeSpectrumAnalysisArea_RB->SetState(kButtonDown);
   
@@ -1197,13 +1190,13 @@ void AAInterface::FillAcquisitionFrame()
   SpectrumCalibration_GF->AddFrame(SpectrumCalibration_HF0, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
   
   // Energy calibration 
-  SpectrumCalibration_HF0->AddFrame(DGScopeSpectrumCalibration_CB = new TGCheckButton(SpectrumCalibration_HF0, "Make it so", DGScopeSpectrumCalibration_CB_ID),
+  SpectrumCalibration_HF0->AddFrame(DGScopeSpectrumCalibration_CB = new TGCheckButton(SpectrumCalibration_HF0, "Make it so", SpectrumCalibration_CB_ID),
 				    new TGLayoutHints(kLHintsLeft, 0,0,5,0));
   DGScopeSpectrumCalibration_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
   DGScopeSpectrumCalibration_CB->SetState(kButtonUp);
 
   
-  SpectrumCalibration_HF0->AddFrame(DGScopeSpectrumUseCalibrationSlider_CB = new TGCheckButton(SpectrumCalibration_HF0, "Use slider", DGScopeSpectrumUseCalibrationSlider_CB_ID),
+  SpectrumCalibration_HF0->AddFrame(DGScopeSpectrumUseCalibrationSlider_CB = new TGCheckButton(SpectrumCalibration_HF0, "Use slider", SpectrumUseCalibrationSlider_CB_ID),
 				    new TGLayoutHints(kLHintsLeft,25,5,5,0));
   DGScopeSpectrumUseCalibrationSlider_CB->Connect("Clicked()","AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
   DGScopeSpectrumUseCalibrationSlider_CB->SetState(kButtonDown);
@@ -1229,7 +1222,7 @@ void AAInterface::FillAcquisitionFrame()
   TGHorizontalFrame *SpectrumCalibration_HF1 = new TGHorizontalFrame(SpectrumCalibration_GF);
   SpectrumCalibration_GF->AddFrame(SpectrumCalibration_HF1, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
 
-  SpectrumCalibration_HF1->AddFrame(DGScopeSpectrumCalibrationPoint_CBL = new ADAQComboBoxWithLabel(SpectrumCalibration_HF1, "", DGScopeSpectrumCalibrationPoint_CBL_ID),
+  SpectrumCalibration_HF1->AddFrame(DGScopeSpectrumCalibrationPoint_CBL = new ADAQComboBoxWithLabel(SpectrumCalibration_HF1, "", SpectrumCalibrationPoint_CBL_ID),
 				    new TGLayoutHints(kLHintsNormal, 0,0,10,3));
   DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->Resize(150,20);
   DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->AddEntry("Calibration point 0",0);
@@ -1238,7 +1231,7 @@ void AAInterface::FillAcquisitionFrame()
   DGScopeSpectrumCalibrationPoint_CBL->GetComboBox()->Connect("Selected(int,int)", "AASubtabSlots", SubtabSlots, "HandleComboBoxes(int,int)");
   DGScopeSpectrumUseCalibrationSlider_CB->SetState(kButtonDisabled);
   
-  SpectrumCalibration_GF->AddFrame(DGScopeSpectrumCalibrationEnergy_NEL = new ADAQNumberEntryWithLabel(SpectrumCalibration_GF, "Energy (keV or MeV)", DGScopeSpectrumCalibrationEnergy_NEL_ID),
+  SpectrumCalibration_GF->AddFrame(DGScopeSpectrumCalibrationEnergy_NEL = new ADAQNumberEntryWithLabel(SpectrumCalibration_GF, "Energy (keV or MeV)", SpectrumCalibrationEnergy_NEL_ID),
 				   new TGLayoutHints(kLHintsLeft,0,0,0,0));
   DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
   DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEANonNegative);
@@ -1246,7 +1239,7 @@ void AAInterface::FillAcquisitionFrame()
   DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->SetState(false);
   DGScopeSpectrumCalibrationEnergy_NEL->GetEntry()->Connect("ValueSet(long)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
 
-  SpectrumCalibration_GF->AddFrame(DGScopeSpectrumCalibrationPulseUnit_NEL = new ADAQNumberEntryWithLabel(SpectrumCalibration_GF, "Pulse unit (ADC)", DGScopeSpectrumCalibrationPulseUnit_NEL_ID),
+  SpectrumCalibration_GF->AddFrame(DGScopeSpectrumCalibrationPulseUnit_NEL = new ADAQNumberEntryWithLabel(SpectrumCalibration_GF, "Pulse unit (ADC)", SpectrumCalibrationPulseUnit_NEL_ID),
 				       new TGLayoutHints(kLHintsLeft,0,0,0,5));
   DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
   DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
@@ -1258,7 +1251,7 @@ void AAInterface::FillAcquisitionFrame()
   SpectrumCalibration_GF->AddFrame(SpectrumCalibration_HF2);
   
   // Set point text button
-  SpectrumCalibration_HF2->AddFrame(DGScopeSpectrumCalibrationSetPoint_TB = new TGTextButton(SpectrumCalibration_HF2, "Set Pt.", DGScopeSpectrumCalibrationSetPoint_TB_ID),
+  SpectrumCalibration_HF2->AddFrame(DGScopeSpectrumCalibrationSetPoint_TB = new TGTextButton(SpectrumCalibration_HF2, "Set Pt.", SpectrumCalibrationSetPoint_TB_ID),
 				    new TGLayoutHints(kLHintsNormal, 5,5,5,0));
   DGScopeSpectrumCalibrationSetPoint_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
   DGScopeSpectrumCalibrationSetPoint_TB->Resize(100,25);
@@ -1266,7 +1259,7 @@ void AAInterface::FillAcquisitionFrame()
   DGScopeSpectrumCalibrationSetPoint_TB->SetState(kButtonDisabled);
 
   // Calibrate text button
-  SpectrumCalibration_HF2->AddFrame(DGScopeSpectrumCalibrationCalibrate_TB = new TGTextButton(SpectrumCalibration_HF2, "Calibrate", DGScopeSpectrumCalibrationCalibrate_TB_ID),
+  SpectrumCalibration_HF2->AddFrame(DGScopeSpectrumCalibrationCalibrate_TB = new TGTextButton(SpectrumCalibration_HF2, "Calibrate", SpectrumCalibrationCalibrate_TB_ID),
 				    new TGLayoutHints(kLHintsNormal, 0,0,5,0));
   DGScopeSpectrumCalibrationCalibrate_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
   DGScopeSpectrumCalibrationCalibrate_TB->Resize(100,25);
@@ -1277,7 +1270,7 @@ void AAInterface::FillAcquisitionFrame()
   SpectrumCalibration_GF->AddFrame(SpectrumCalibration_HF3);
   
   // Plot text button
-  SpectrumCalibration_HF3->AddFrame(DGScopeSpectrumCalibrationPlot_TB = new TGTextButton(SpectrumCalibration_HF3, "Plot", DGScopeSpectrumCalibrationPlot_TB_ID),
+  SpectrumCalibration_HF3->AddFrame(DGScopeSpectrumCalibrationPlot_TB = new TGTextButton(SpectrumCalibration_HF3, "Plot", SpectrumCalibrationPlot_TB_ID),
 				    new TGLayoutHints(kLHintsNormal, 5,5,5,0));
   DGScopeSpectrumCalibrationPlot_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
   DGScopeSpectrumCalibrationPlot_TB->Resize(100,25);
@@ -1285,7 +1278,7 @@ void AAInterface::FillAcquisitionFrame()
   DGScopeSpectrumCalibrationPlot_TB->SetState(kButtonDisabled);
 
   // Reset text button
-  SpectrumCalibration_HF3->AddFrame(DGScopeSpectrumCalibrationReset_TB = new TGTextButton(SpectrumCalibration_HF3, "Reset", DGScopeSpectrumCalibrationReset_TB_ID),
+  SpectrumCalibration_HF3->AddFrame(DGScopeSpectrumCalibrationReset_TB = new TGTextButton(SpectrumCalibration_HF3, "Reset", SpectrumCalibrationReset_TB_ID),
 				    new TGLayoutHints(kLHintsNormal, 0,0,5,0));
   DGScopeSpectrumCalibrationReset_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
   DGScopeSpectrumCalibrationReset_TB->Resize(100,25);
@@ -1297,7 +1290,7 @@ void AAInterface::FillAcquisitionFrame()
   SpectrumCalibration_GF->AddFrame(SpectrumCalibration_HF4);
 
   // Load from file text button
-  SpectrumCalibration_HF4->AddFrame(DGScopeSpectrumCalibrationLoad_TB = new TGTextButton(SpectrumCalibration_HF4, "Load", DGScopeSpectrumCalibrationLoad_TB_ID),
+  SpectrumCalibration_HF4->AddFrame(DGScopeSpectrumCalibrationLoad_TB = new TGTextButton(SpectrumCalibration_HF4, "Load", SpectrumCalibrationLoad_TB_ID),
 				    new TGLayoutHints(kLHintsNormal, 5,5,5,0));
   DGScopeSpectrumCalibrationLoad_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
   DGScopeSpectrumCalibrationLoad_TB->Resize(100,25);
@@ -1305,7 +1298,7 @@ void AAInterface::FillAcquisitionFrame()
   DGScopeSpectrumCalibrationLoad_TB->SetState(kButtonDisabled);
 
   // Write to file text button
-  SpectrumCalibration_HF4->AddFrame(DGScopeSpectrumCalibrationWrite_TB = new TGTextButton(SpectrumCalibration_HF4, "Write", DGScopeSpectrumCalibrationWrite_TB_ID),
+  SpectrumCalibration_HF4->AddFrame(DGScopeSpectrumCalibrationWrite_TB = new TGTextButton(SpectrumCalibration_HF4, "Write", SpectrumCalibrationWrite_TB_ID),
 				    new TGLayoutHints(kLHintsNormal, 0,0,5,0));
   DGScopeSpectrumCalibrationWrite_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
   DGScopeSpectrumCalibrationWrite_TB->Resize(100,25);
@@ -1359,9 +1352,9 @@ void AAInterface::FillAcquisitionFrame()
 				      new TGLayoutHints(kLHintsNormal,0,0,5,0));
 
   // ROOT check buttons for specifying if X and Y axes on spectra should be logarithmic
-  DGScopeDisplaySettings_GF->AddFrame(DGScopeSpectrumXAxisLog_CB = new TGCheckButton(DGScopeDisplaySettings_GF, "Log. X-axis  ", DGScopeSpectrumXAxisLog_CB_ID),
+  DGScopeDisplaySettings_GF->AddFrame(DGScopeSpectrumXAxisLog_CB = new TGCheckButton(DGScopeDisplaySettings_GF, "Log. X-axis  ", SpectrumXAxisLog_CB_ID),
 				      new TGLayoutHints(kLHintsLeft,0,0,0,0));
-  DGScopeDisplaySettings_GF->AddFrame(DGScopeSpectrumYAxisLog_CB = new TGCheckButton(DGScopeDisplaySettings_GF, "Log. Y-axis", DGScopeSpectrumYAxisLog_CB_ID),
+  DGScopeDisplaySettings_GF->AddFrame(DGScopeSpectrumYAxisLog_CB = new TGCheckButton(DGScopeDisplaySettings_GF, "Log. Y-axis", SpectrumYAxisLog_CB_ID),
 				      new TGLayoutHints(kLHintsLeft,0,0,0,0));
 
   TGButtonGroup *DGScopeDisplayWaveformXAxis_BG = new TGButtonGroup(DGScopeDisplaySettings_GF,"Waveform X axis",kHorizontalFrame);
@@ -1402,7 +1395,7 @@ void AAInterface::FillAcquisitionFrame()
 				  new TGLayoutHints(kLHintsNormal,5,5,5,5));
   DGScopeDataComment_TEL->GetEntry()->SetState(false);
   */
-  DGScopeDataStorage_GF->AddFrame(DGScopeDataFileName_TB = new TGTextButton(DGScopeDataStorage_GF, "Data file name", DGScopeDataFileName_TB_ID),
+  DGScopeDataStorage_GF->AddFrame(DGScopeDataFileName_TB = new TGTextButton(DGScopeDataStorage_GF, "Data file name", DataFileName_TB_ID),
 				  new TGLayoutHints(kLHintsNormal,10,5,5,0));
   DGScopeDataFileName_TB->Connect("Clicked()","AASubtabSlots", SubtabSlots, "HandleTextButtons()");
   DGScopeDataFileName_TB->Resize(175, 30);
@@ -1416,7 +1409,7 @@ void AAInterface::FillAcquisitionFrame()
   DGScopeDataFileName_TEL->GetEntry()->SetText("DefaultData.adaq");
 
   // ROOT text button to create a root file using the name in the text entry field above
-  DGScopeDataStorage_GF->AddFrame(DGScopeDataStorageCreateFile_TB = new TGTextButton(DGScopeDataStorage_GF,"Create ADAQ file", DGScopeDataStorageCreateFile_TB_ID),
+  DGScopeDataStorage_GF->AddFrame(DGScopeDataStorageCreateFile_TB = new TGTextButton(DGScopeDataStorage_GF,"Create ADAQ file", DataStorageCreateFile_TB_ID),
 				  new TGLayoutHints(kLHintsNormal,10,5,8,5));
   DGScopeDataStorageCreateFile_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
   DGScopeDataStorageCreateFile_TB->Resize(175,30);
@@ -1425,7 +1418,7 @@ void AAInterface::FillAcquisitionFrame()
 
   // ROOT text button to write all data to the ROOT file and close it. This button MUST be clicked to 
   // successfully write&close the ROOT file otherwise the ROOT file will have errors.
-  DGScopeDataStorage_GF->AddFrame(DGScopeDataStorageCloseFile_TB = new TGTextButton(DGScopeDataStorage_GF,"Close ADAQ file", DGScopeDataStorageCloseFile_TB_ID),
+  DGScopeDataStorage_GF->AddFrame(DGScopeDataStorageCloseFile_TB = new TGTextButton(DGScopeDataStorage_GF,"Close ADAQ file", DataStorageCloseFile_TB_ID),
 				  new TGLayoutHints(kLHintsNormal,10,5,0,5));
   DGScopeDataStorageCloseFile_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
   DGScopeDataStorageCloseFile_TB->Resize(175,30);
@@ -1438,10 +1431,10 @@ void AAInterface::FillAcquisitionFrame()
 				  new TGLayoutHints(kLHintsNormal,10,5,5,5));
   DGScopeDataStorageEnable_CB->SetState(kButtonDisabled);
   
-  DGScopeDisplayAndControls_VF->AddFrame(DGScopeDisplay_GF, new TGLayoutHints(kLHintsCenterX,5,5,5,5));
-  DGScopeDisplayAndControls_VF->AddFrame(DGScopeControlTabs_HF, new TGLayoutHints(kLHintsCenterX,5,5,5,5));
+  DGDisplayAndControls_VF->AddFrame(DGScopeDisplay_GF, new TGLayoutHints(kLHintsCenterX,5,5,5,5));
+  DGDisplayAndControls_VF->AddFrame(DGScopeControlTabs_HF, new TGLayoutHints(kLHintsCenterX,5,5,5,5));
 
-  ScopeFrame->AddFrame(DGScopeDisplayAndControls_VF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
+  AcquisitionFrame->AddFrame(DGDisplayAndControls_VF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
 
 
   // Widgets for saving the spectrum data to file
@@ -1450,7 +1443,7 @@ void AAInterface::FillAcquisitionFrame()
   DGScopeSpectrumStorage_GF->SetTitlePos(TGGroupFrame::kCenter);
   DGScopeDataStorageFrame->AddFrame(DGScopeSpectrumStorage_GF, new TGLayoutHints(kLHintsNormal,0,5,5,5));
 
-  DGScopeSpectrumStorage_GF->AddFrame(DGScopeSpectrumFileName_TB = new TGTextButton(DGScopeSpectrumStorage_GF, "Spectrum file name", DGScopeSpectrumFileName_TB_ID),
+  DGScopeSpectrumStorage_GF->AddFrame(DGScopeSpectrumFileName_TB = new TGTextButton(DGScopeSpectrumStorage_GF, "Spectrum file name", SpectrumFileName_TB_ID),
 				      new TGLayoutHints(kLHintsNormal, 5,5,5,0));
   DGScopeSpectrumFileName_TB->Resize(175, 30);
   DGScopeSpectrumFileName_TB->ChangeOptions(DGScopeSpectrumFileName_TB->GetOptions() | kFixedSize);
@@ -1466,7 +1459,7 @@ void AAInterface::FillAcquisitionFrame()
   DGScopeSpectrumStorage_GF->AddFrame(DGScopeSaveSpectrumWithTimeExtension_CB = new TGCheckButton(DGScopeSpectrumStorage_GF, "Add time to file name", -1),
 				      new TGLayoutHints(kLHintsNormal, 5,5,5,5));
   
-  DGScopeSpectrumStorage_GF->AddFrame(DGScopeSaveSpectrum_TB = new TGTextButton(DGScopeSpectrumStorage_GF, "Save spectrum data", DGScopeSaveSpectrum_TB_ID),
+  DGScopeSpectrumStorage_GF->AddFrame(DGScopeSaveSpectrum_TB = new TGTextButton(DGScopeSpectrumStorage_GF, "Save spectrum data", SaveSpectrum_TB_ID),
 				      new TGLayoutHints(kLHintsNormal, 5,5,0,5));
   DGScopeSaveSpectrum_TB->Resize(175, 30);
   DGScopeSaveSpectrum_TB->ChangeOptions(DGScopeSaveSpectrum_TB->GetOptions() | kFixedSize);
@@ -1479,7 +1472,7 @@ void AAInterface::FillAcquisitionFrame()
   DGScopeCanvasStorage_GF->SetTitlePos(TGGroupFrame::kCenter);
   DGScopeDataStorageFrame->AddFrame(DGScopeCanvasStorage_GF, new TGLayoutHints(kLHintsNormal,0,0,5,5));
 
-  DGScopeCanvasStorage_GF->AddFrame(DGScopeCanvasFileName_TB = new TGTextButton(DGScopeCanvasStorage_GF, "Canvas file name", DGScopeCanvasFileName_TB_ID),
+  DGScopeCanvasStorage_GF->AddFrame(DGScopeCanvasFileName_TB = new TGTextButton(DGScopeCanvasStorage_GF, "Canvas file name", CanvasFileName_TB_ID),
 				      new TGLayoutHints(kLHintsNormal, 5,5,5,0));
   DGScopeCanvasFileName_TB->Resize(175, 30);
   DGScopeCanvasFileName_TB->ChangeOptions(DGScopeCanvasFileName_TB->GetOptions() | kFixedSize);
@@ -1495,7 +1488,7 @@ void AAInterface::FillAcquisitionFrame()
   DGScopeCanvasStorage_GF->AddFrame(DGScopeSaveCanvasWithTimeExtension_CB = new TGCheckButton(DGScopeCanvasStorage_GF, "Add time to file name", -1),
 				    new TGLayoutHints(kLHintsNormal, 5,5,5,5));
   
-  DGScopeCanvasStorage_GF->AddFrame(DGScopeSaveCanvas_TB = new TGTextButton(DGScopeCanvasStorage_GF, "Save canvas graphics", DGScopeSaveCanvas_TB_ID),
+  DGScopeCanvasStorage_GF->AddFrame(DGScopeSaveCanvas_TB = new TGTextButton(DGScopeCanvasStorage_GF, "Save canvas graphics", SaveCanvas_TB_ID),
 				    new TGLayoutHints(kLHintsNormal,5,5,0,5));
   DGScopeSaveCanvas_TB->Resize(175, 30);
   DGScopeSaveCanvas_TB->ChangeOptions(DGScopeSaveCanvas_TB->GetOptions() | kFixedSize);
@@ -1535,23 +1528,22 @@ void AAInterface::SetVoltageChannelWidgetState(int HVChannel, bool HVActive)
   if(HVActive)
     WidgetState = false;
   
-  HVChannelV_NEL[HVChannel]->GetEntry()->SetState(WidgetState);
-  HVChannelI_NEL[HVChannel]->GetEntry()->SetState(WidgetState);
+  HVChVoltage_NEL[HVChannel]->GetEntry()->SetState(WidgetState);
+  HVChCurrent_NEL[HVChannel]->GetEntry()->SetState(WidgetState);
 }
 
 
 void AAInterface::SetVoltageWidgetState(bool WidgetState, EButtonState ButtonState)
 {
   for(int ch=0; ch<6; ch++){
-    HVChannelV_NEL[ch]->GetEntry()->SetState(WidgetState);
-    HVChannelI_NEL[ch]->GetEntry()->SetState(WidgetState);
+    HVChVoltage_NEL[ch]->GetEntry()->SetState(WidgetState);
+    HVChCurrent_NEL[ch]->GetEntry()->SetState(WidgetState);
 
-    HVChannelVMonitor_NEFL[ch]->GetEntry()->SetState(WidgetState);
-    HVChannelIMonitor_NEFL[ch]->GetEntry()->SetState(WidgetState);
+    HVChVoltageMonitor_NEFL[ch]->GetEntry()->SetState(WidgetState);
+    HVChCurrentMonitor_NEFL[ch]->GetEntry()->SetState(WidgetState);
     
-    HVChannelPower_TB[ch]->SetState(ButtonState);
+    HVChPower_TB[ch]->SetState(ButtonState);
   }
-  
   HVMonitorEnable_CB->SetState(ButtonState);
 }
 
@@ -1559,30 +1551,34 @@ void AAInterface::SetVoltageWidgetState(bool WidgetState, EButtonState ButtonSta
 void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState ButtonState)
 {
   for(uint32_t ch=0; ch<8; ch++){
-    DGScopeChannelEnable_CB[ch]->SetState(ButtonState,true);
-    DGScopeDCOffset_NEL[ch]->GetEntry()->SetState(WidgetState);
-    DGScopeBaselineCalcMin_NEL[ch]->GetEntry()->SetState(WidgetState);
-    DGScopeBaselineCalcMax_NEL[ch]->GetEntry()->SetState(WidgetState);
-    DGScopeZSThreshold_NEL[ch]->GetEntry()->SetState(WidgetState);
-    DGScopeZSSamples_NEL[ch]->GetEntry()->SetState(WidgetState);
+    DGChEnable_CB[ch]->SetState(ButtonState,true);
+    DGChDCOffset_NEL[ch]->GetEntry()->SetState(WidgetState);
+    DGChBaselineCalcMin_NEL[ch]->GetEntry()->SetState(WidgetState);
+    DGChBaselineCalcMax_NEL[ch]->GetEntry()->SetState(WidgetState);
+    DGChZSThreshold_NEL[ch]->GetEntry()->SetState(WidgetState);
+    DGChZSBackward_NEL[ch]->GetEntry()->SetState(WidgetState);
+    DGChZSForward_NEL[ch]->GetEntry()->SetState(WidgetState);
+    DGChZSPosLogic_RB[ch]->SetState(ButtonState);
+    DGChZSNegLogic_RB[ch]->SetState(ButtonState);
   }
 
-  DGScopeTriggerCoincidenceEnable_CB->SetState(ButtonState,true);
-  DGScopeTriggerCoincidenceLevel_CBL->GetComboBox()->SetEnabled(WidgetState);
-  DGScopeTriggerType_CBL->GetComboBox()->SetEnabled(WidgetState);
+  DGTriggerCoincidenceEnable_CB->SetState(ButtonState,true);
+  DGTriggerCoincidenceLevel_CBL->GetComboBox()->SetEnabled(WidgetState);
+  DGTriggerType_CBL->GetComboBox()->SetEnabled(WidgetState);
+  DGTriggerEdge_CBL->GetComboBox()->SetEnabled(WidgetState);
 
-  DGScopeRecordLength_NEL->GetEntry()->SetState(WidgetState);
-  DGScopePostTriggerSize_NEL->GetEntry()->SetState(WidgetState);
+  DGRecordLength_NEL->GetEntry()->SetState(WidgetState);
+  DGPostTrigger_NEL->GetEntry()->SetState(WidgetState);
 
-  DGScopeWaveform_RB->SetEnabled(WidgetState);
-  DGScopeSpectrum_RB->SetEnabled(WidgetState);
-  DGScopeHighRate_RB->SetEnabled(WidgetState);
-  DGScopeUltraRate_RB->SetEnabled(WidgetState);
+  AQWaveform_RB->SetEnabled(WidgetState);
+  AQSpectrum_RB->SetEnabled(WidgetState);
+  AQHighRate_RB->SetEnabled(WidgetState);
+  AQUltraRate_RB->SetEnabled(WidgetState);
 
-  DGScopeMaxEventsBeforeTransfer_NEL->GetEntry()->SetState(WidgetState);
-  DGScopeDataReductionFactor_NEL->GetEntry()->SetState(WidgetState);
+  DGEventsBeforeReadout_NEL->GetEntry()->SetState(WidgetState);
+  AQDataReductionFactor_NEL->GetEntry()->SetState(WidgetState);
 
-  DGScopeZSEnable_CB->SetState(ButtonState);
+  DGZSEnable_CB->SetState(ButtonState);
 
   DGScopeSpectrumBinNumber_NEL->GetEntry()->SetState(WidgetState);
   DGScopeSpectrumMinBin_NEL->GetEntry()->SetState(WidgetState);
@@ -1593,8 +1589,6 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
   DGScopeSpectrumAnalysisLLD_NEL->GetEntry()->SetState(WidgetState);
   DGScopeSpectrumAnalysisULD_NEL->GetEntry()->SetState(WidgetState);
 
-  DGScopeSpectrumAggregateRuns_CB->SetState(ButtonState,true);
-  
   if(TheVMEManager->GetDGAcquisitionEnable())
     DGScopeDataStorageCreateFile_TB->SetState(kButtonUp);
   else
@@ -1623,46 +1617,46 @@ void AAInterface::SaveSettings()
 {
   // Acquisition channel 
   for(int ch=0; ch<NumDataChannels; ch++){
-    WidgetSettings->ChEnable[ch] = DGScopeChannelEnable_CB[ch]->IsDown();
-    WidgetSettings->ChPosPolarity[ch] = DGScopeChannelPosPolarity_RB[ch]->IsDown();
-    WidgetSettings->ChNegPolarity[ch] = DGScopeChannelNegPolarity_RB[ch]->IsDown();
-    WidgetSettings->ChVertPos[ch] = DGScopeVerticalPosition_NEL[ch]->GetEntry()->GetIntNumber();
-    WidgetSettings->ChDCOffset[ch] = DGScopeDCOffset_NEL[ch]->GetEntry()->GetHexNumber();
-    WidgetSettings->ChTriggerThreshold[ch] = DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->GetIntNumber();
-    WidgetSettings->ChBaselineCalcMin[ch] = DGScopeBaselineCalcMin_NEL[ch]->GetEntry()->GetIntNumber();
-    WidgetSettings->ChBaselineCalcMax[ch] = DGScopeBaselineCalcMax_NEL[ch]->GetEntry()->GetIntNumber();
-    WidgetSettings->ChZSThreshold[8] = DGScopeZSThreshold_NEL[ch]->GetEntry()->GetIntNumber();
-    WidgetSettings->ChZSForward[8] = DGScopeZSForward_NEL[ch]->GetEntry()->GetIntNumber();
-    WidgetSettings->ChZSBackward[8] = DGScopeZSBackward_NEL[ch]->GetEntry()->GetIntNumber();
-    WidgetSettings->ChZSPosLogic[8] = DGScopeZSPosLogic_RB[ch]->IsDown();
-    WidgetSettings->ChZSNegLogic[8] = DGScopeZSNegLogic_RB[ch]->IsDown();
+    WidgetSettings->ChEnable[ch] = DGChEnable_CB[ch]->IsDown();
+    WidgetSettings->ChPosPolarity[ch] = DGChPosPolarity_RB[ch]->IsDown();
+    WidgetSettings->ChNegPolarity[ch] = DGChNegPolarity_RB[ch]->IsDown();
+    WidgetSettings->ChVertPos[ch] = DGChVerticalPosition_NEL[ch]->GetEntry()->GetIntNumber();
+    WidgetSettings->ChDCOffset[ch] = DGChDCOffset_NEL[ch]->GetEntry()->GetHexNumber();
+    WidgetSettings->ChTriggerThreshold[ch] = DGChTriggerThreshold_NEL[ch]->GetEntry()->GetIntNumber();
+    WidgetSettings->ChBaselineCalcMin[ch] = DGChBaselineCalcMin_NEL[ch]->GetEntry()->GetIntNumber();
+    WidgetSettings->ChBaselineCalcMax[ch] = DGChBaselineCalcMax_NEL[ch]->GetEntry()->GetIntNumber();
+    WidgetSettings->ChZSThreshold[8] = DGChZSThreshold_NEL[ch]->GetEntry()->GetIntNumber();
+    WidgetSettings->ChZSForward[8] = DGChZSForward_NEL[ch]->GetEntry()->GetIntNumber();
+    WidgetSettings->ChZSBackward[8] = DGChZSBackward_NEL[ch]->GetEntry()->GetIntNumber();
+    WidgetSettings->ChZSPosLogic[8] = DGChZSPosLogic_RB[ch]->IsDown();
+    WidgetSettings->ChZSNegLogic[8] = DGChZSNegLogic_RB[ch]->IsDown();
   }
 
   /////////////////////////////
   // Acquisition control subtab
 
   // Scope display
-  WidgetSettings->WaveformMode = DGScopeWaveform_RB->IsDown();
-  WidgetSettings->SpectrumMode = DGScopeSpectrum_RB->IsDown();
-  WidgetSettings->HighRateMode = DGScopeHighRate_RB->IsDown();
-  WidgetSettings->UltraRateMode = DGScopeUltraRate_RB->IsDown();
+  WidgetSettings->WaveformMode = AQWaveform_RB->IsDown();
+  WidgetSettings->SpectrumMode = AQSpectrum_RB->IsDown();
+  WidgetSettings->HighRateMode = AQHighRate_RB->IsDown();
+  WidgetSettings->UltraRateMode = AQUltraRate_RB->IsDown();
 
   // Trigger control settings
-  WidgetSettings->TriggerCoincidenceEnable = DGScopeTriggerCoincidenceEnable_CB->IsDown();
-  WidgetSettings->TriggerCoincidenceLevel = DGScopeTriggerCoincidenceLevel_CBL->GetComboBox()->GetSelected();
-  WidgetSettings->TriggerType = DGScopeTriggerType_CBL->GetComboBox()->GetSelected();
-  WidgetSettings->TriggerEdge = DGScopeTriggerEdge_CBL->GetComboBox()->GetSelected();
+  WidgetSettings->TriggerCoincidenceEnable = DGTriggerCoincidenceEnable_CB->IsDown();
+  WidgetSettings->TriggerCoincidenceLevel = DGTriggerCoincidenceLevel_CBL->GetComboBox()->GetSelected();
+  WidgetSettings->TriggerType = DGTriggerType_CBL->GetComboBox()->GetSelected();
+  WidgetSettings->TriggerEdge = DGTriggerEdge_CBL->GetComboBox()->GetSelected();
 
   // Acquisition
-  WidgetSettings->RecordLength = DGScopeRecordLength_NEL->GetEntry()->GetIntNumber();
-  WidgetSettings->PostTrigger = DGScopePostTriggerSize_NEL->GetEntry()->GetIntNumber();
-  WidgetSettings->AcquisitionTime = DGScopeAcquisitionTime_NEL->GetEntry()->GetIntNumber();
+  WidgetSettings->RecordLength = DGRecordLength_NEL->GetEntry()->GetIntNumber();
+  WidgetSettings->PostTrigger = DGPostTrigger_NEL->GetEntry()->GetIntNumber();
+  WidgetSettings->AcquisitionTime = AQTime_NEL->GetEntry()->GetIntNumber();
 
   // Readout
-  WidgetSettings->VMETransferEvents = DGScopeMaxEventsBeforeTransfer_NEL->GetEntry()->GetIntNumber();
-  WidgetSettings->EnableDataReduction = DGScopeUseDataReduction_CB->IsDown();
-  WidgetSettings->DataReductionFactor = DGScopeDataReductionFactor_NEL->GetEntry()->GetIntNumber();
-  WidgetSettings->EnableZeroSuppression = DGScopeZSEnable_CB->IsDown();
+  WidgetSettings->EventsBeforeReadout = DGEventsBeforeReadout_NEL->GetEntry()->GetIntNumber();
+  WidgetSettings->EnableDataReduction = AQDataReductionEnable_CB->IsDown();
+  WidgetSettings->DataReductionFactor = AQDataReductionFactor_NEL->GetEntry()->GetIntNumber();
+  WidgetSettings->EnableZeroSuppression = DGZSEnable_CB->IsDown();
 
   
   ///////////////////////////

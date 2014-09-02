@@ -73,18 +73,18 @@ private:
   int DisplayWidth, DisplayHeight;
 
   // Variables for use with high voltage widgets
-  vector<string> HVChannelLabels;
-  vector<int> HVChannelPower_TB_ID_Vec;
-  map<int,int> HVChannelPower_TB_ID_Map;
+  vector<string> HVChLabels;
+  vector<int> HVChPower_TB_ID_Vec;
+  map<int,int> HVChPower_TB_ID_Map;
 
   // Variables for use with digitizer control
   vector<string> DGChannelLabels;
-  vector<int> DGScopeChEnable_CB_ID_Vec;
-  vector<int> DGScopeChDCOffset_NEL_ID_Vec;
-  vector<int> DGScopeChTriggerThreshold_NEL_ID_Vec;
-  vector<int> DGScopeChBaselineCalcMin_NEL_ID_Vec;
-  vector<int> DGScopeChBaselineCalcMax_NEL_ID_Vec;
-  map<int,int> DGScopeChTriggerThreshold_NEL_ID_Map;
+  vector<int> DGChEnable_CB_ID_Vec;
+  vector<int> DGChDCOffset_NEL_ID_Vec;
+  vector<int> DGChTriggerThreshold_NEL_ID_Vec;
+  vector<int> DGChBaselineCalcMin_NEL_ID_Vec;
+  vector<int> DGChBaselineCalcMax_NEL_ID_Vec;
+  map<int,int> DGChTriggerThreshold_NEL_ID_Map;
   const int NumDataChannels;
 
   // Object to convert numeric color to pixel color
@@ -103,45 +103,49 @@ private:
   // ROOT GUI widget objects //
   /////////////////////////////
   
-  TGVerticalFrame *TopFrame;
-
   ////////////
   // Tab frame
+
   TGTab *TopLevelTabs;
-
-  ///////////////////////////////
-  // VME connection frame widgets
+  TGVerticalFrame *TopFrame;
   TGCompositeFrame *ConnectionTab, *ConnectionFrame;
+  TGCompositeFrame *RegisterTab, *RegisterFrame;
+  TGCompositeFrame *PulserTab, *PulserFrame;
+  TGCompositeFrame *VoltageTab, *VoltageFrame;
+  TGCompositeFrame *AcquisitionTab, *AcquisitionFrame;
+
+
+  /////////////////////////
+  // VME connection widgets
+
   TGTextButton *VMEConnect_TB;
-
   TGTextView *ConnectionOutput_TV;
-
-  vector<TGTextButton *> BoardEnable_TB;
   vector<TGNumberEntryField *> BoardAddress_NEF;
+  vector<TGTextButton *> BoardEnable_TB;
+
 
   /////////////////
   // Register frame
+
   vector<TGNumberEntryField *> ReadAddress_NEF, ReadValueHex_NEF;
   vector<TGTextEntry *> ReadValueBinary_TE;
   vector<TGNumberEntryField *> WriteAddress_NEF, WriteValue_NEF;
   vector<TGTextButton *> Read_TB, Write_TB;
 
+  TGTextButton *HVBoardEnable_TB;
+  TGNumberEntryField *HVBoardAddress_NEF, *HVReadAddress_NEF, *HVReadValue_NEF;
+  TGNumberEntryField *HVWriteAddress_NEF, *HVWriteValue_NEF;
+  TGTextButton *HVRead_TB, *HVWrite_TB;
 
-  TGTextButton *V6534BoardEnable_TB;
-  TGNumberEntryField *V1720BoardAddress_NEF, *V1720ReadAddress_NEF, *V1720ReadValue_NEF;
-  TGNumberEntryField *V1720WriteAddress_NEF, *V1720WriteValue_NEF;
-  TGTextButton *V1720Read_TB, *V1720Write_TB;
-  
-  TGTextButton *V1720BoardEnable_TB;
-  TGNumberEntryField *V6534BoardAddress_NEF, *V6534ReadAddress_NEF, *V6534ReadValue_NEF;
-  TGNumberEntryField *V6534WriteAddress_NEF, *V6534WriteValue_NEF;
-  TGTextButton *V6534Read_TB, *V6534Write_TB;
+  TGTextButton *DGBoardEnable_TB;
+  TGNumberEntryField *DGBoardAddress_NEF, *DGReadAddress_NEF, *DGReadValue_NEF;
+  TGNumberEntryField *DGWriteAddress_NEF, *DGWriteValue_NEF;
+  TGTextButton *DGRead_TB, *DGWrite_TB;
 
-  TGCompositeFrame *RegisterTab, *RegisterFrame;
   
   ///////////////
   // Pulser frame 
-  TGCompositeFrame *PulserTab, *PulserFrame;
+
   ADAQComboBoxWithLabel *V1718PulserTimeUnit_CBL[2];
   ADAQNumberEntryWithLabel *V1718PulserPeriod_NEL[2], *V1718PulserWidth_NEL[2];
   ADAQNumberEntryWithLabel *V1718PulserPulses_NEL[2];
@@ -151,73 +155,84 @@ private:
   ADAQComboBoxWithLabel *V1718PulserLEDPolarity_CBL[2], *V1718PulserSource_CBL[2];
   TGTextButton *V1718PulserStartStop_TB[2];
 
+
   /////////////////////////////
   // High voltage frame widgets
-  TGCompositeFrame *VoltageTab, *VoltageFrame;
 
-  ADAQNumberEntryWithLabel *HVChannelV_NEL[6], *HVChannelI_NEL[6];
-  ADAQNumberEntryFieldWithLabel *HVChannelVMonitor_NEFL[6], *HVChannelIMonitor_NEFL[6];
-  TGTextButton *HVChannelPower_TB[6];
+  ADAQNumberEntryWithLabel *HVChVoltage_NEL[6], *HVChCurrent_NEL[6];
+  ADAQNumberEntryFieldWithLabel *HVChVoltageMonitor_NEFL[6], *HVChCurrentMonitor_NEFL[6];
+  TGTextButton *HVChPower_TB[6];
 
   TGCheckButton *HVMonitorEnable_CB;
 
   //////////////////////
   // Scope frame widgets
-  TGCompositeFrame *ScopeTab, *ScopeFrame;
 
-  TGCheckButton *DGScopeChannelEnable_CB[8];
-  TGRadioButton *DGScopeChannelPosPolarity_RB[8];
-  TGRadioButton *DGScopeChannelNegPolarity_RB[8];
-  ADAQNumberEntryWithLabel *DGScopeDCOffset_NEL[8];
-  ADAQNumberEntryWithLabel *DGScopeVerticalPosition_NEL[8];
-  ADAQNumberEntryWithLabel *DGScopeChTriggerThreshold_NEL[8];
-  ADAQNumberEntryWithLabel *DGScopeBaselineCalcMin_NEL[8];
-  ADAQNumberEntryWithLabel *DGScopeBaselineCalcMax_NEL[8];
-  ADAQNumberEntryWithLabel *DGScopeZSThreshold_NEL[8];
-  ADAQNumberEntryWithLabel *DGScopeZSSamples_NEL[8];
-  ADAQNumberEntryWithLabel *DGScopeZSForward_NEL[8];
-  ADAQNumberEntryWithLabel *DGScopeZSBackward_NEL[8];
-  TGRadioButton *DGScopeZSPosLogic_RB[8], *DGScopeZSNegLogic_RB[8];
+  // Channel-specific widgets (in the left columnar subframe)
 
+  TGCheckButton *DGChEnable_CB[8];
+  TGRadioButton *DGChPosPolarity_RB[8];
+  TGRadioButton *DGChNegPolarity_RB[8];
+  ADAQNumberEntryWithLabel *DGChDCOffset_NEL[8];
+  ADAQNumberEntryWithLabel *DGChVerticalPosition_NEL[8];
+  ADAQNumberEntryWithLabel *DGChTriggerThreshold_NEL[8];
+  ADAQNumberEntryWithLabel *DGChBaselineCalcMin_NEL[8];
+  ADAQNumberEntryWithLabel *DGChBaselineCalcMax_NEL[8];
+  ADAQNumberEntryWithLabel *DGChZSThreshold_NEL[8];
+  ADAQNumberEntryWithLabel *DGChZSSamples_NEL[8];
+  ADAQNumberEntryWithLabel *DGChZSForward_NEL[8];
+  ADAQNumberEntryWithLabel *DGChZSBackward_NEL[8];
+  TGRadioButton *DGChZSPosLogic_RB[8], *DGChZSNegLogic_RB[8];
   
-  TRootEmbeddedCanvas *DGScope_EC;
-  TGDoubleVSlider *DGScopeVerticalScale_DVS;
-  TGTripleHSlider *DGScopeHorizontalScale_THS;
-  TGTextButton *DGScopeStartStop_TB, *DGScopeTrigger_TB, *DGScopeUpdatePlot_TB;
+  // Display specific widgets (in the upper-right subframe)
 
-  TGCheckButton *DGScopeSpectrumUseCalibrationSlider_CB;
+  TRootEmbeddedCanvas *DisplayCanvas_EC;
+  TGDoubleVSlider *DisplayVerticalScale_DVS;
+  TGTripleHSlider *DisplayHorizontalScale_THS;
+  TGTextButton *AQStartStop_TB, *AQTrigger_TB, *DisplayUpdate_TB;
 
-  TGTextButton *DGScopeSave_TB;
+  // Subtab specific widgets (in the bottom-right subframe)
+  
+  // Acquisition subtab
 
-  ADAQNumberEntryWithLabel *DGScopeAcquisitionTime_NEL;  
-  ADAQNumberEntryFieldWithLabel *DGScopeAcquisitionTimer_NEFL;
-  TGTextButton *DGScopeAcquisitionTimerStart_TB, *DGScopeAcquisitionTimerAbort_TB;
-    
-  ADAQNumberEntryWithLabel *DGScopeMaxEventsBeforeTransfer_NEL;
+  TGRadioButton *AQWaveform_RB, *AQSpectrum_RB;
+  TGRadioButton *AQHighRate_RB, *AQUltraRate_RB;
 
-  TGTextButton *DGScopeCheckBufferStatus_TB;
-  TGTextEntry *DGScopeBufferStatus_TE;
-  TGCheckButton *DGScopeUseDataReduction_CB;
-  ADAQNumberEntryWithLabel *DGScopeDataReductionFactor_NEL;
-  TGCheckButton *DGScopeZSEnable_CB;
+  ADAQComboBoxWithLabel *DGTriggerType_CBL;
+  ADAQComboBoxWithLabel *DGTriggerEdge_CBL;
+  TGCheckButton *DGTriggerCoincidenceEnable_CB;
+  ADAQComboBoxWithLabel *DGTriggerCoincidenceLevel_CBL;
 
-  ADAQComboBoxWithLabel *DGScopeTriggerType_CBL;
-  ADAQComboBoxWithLabel *DGScopeTriggerEdge_CBL;
+  ADAQNumberEntryWithLabel *DGRecordLength_NEL;
+  ADAQNumberEntryWithLabel *DGPostTrigger_NEL;
+  ADAQNumberEntryWithLabel *AQTime_NEL;  
+  ADAQNumberEntryFieldWithLabel *AQTimer_NEFL;
+  TGTextButton *AQTimerStart_TB, *AQTimerAbort_TB;
 
-  ADAQNumberEntryWithLabel *DGScopeRecordLength_NEL;
-  ADAQNumberEntryWithLabel *DGScopePostTriggerSize_NEL;
+  ADAQNumberEntryWithLabel *DGEventsBeforeReadout_NEL;
+  TGTextButton *DGCheckBufferStatus_TB;
+  TGTextEntry *DGBufferStatus_TE;
 
-  TGCheckButton *DGScopeTriggerCoincidenceEnable_CB;
-  ADAQComboBoxWithLabel *DGScopeTriggerCoincidenceLevel_CBL;
+  TGCheckButton *AQDataReductionEnable_CB;
+  ADAQNumberEntryWithLabel *AQDataReductionFactor_NEL;
+  TGCheckButton *DGZSEnable_CB;
+  
+  // Spectrum
+
+  ADAQComboBoxWithLabel*DGScopeSpectrumChannel_CBL;
+  ADAQNumberEntryWithLabel *DGScopeSpectrumBinNumber_NEL;
+  ADAQNumberEntryWithLabel *DGScopeSpectrumMinBin_NEL;
+  ADAQNumberEntryWithLabel *DGScopeSpectrumMaxBin_NEL;
 
   TGRadioButton *DGScopeSpectrumAnalysisHeight_RB;
   TGRadioButton *DGScopeSpectrumAnalysisArea_RB;
-
   ADAQNumberEntryWithLabel *DGScopeSpectrumAnalysisLLD_NEL;
   ADAQNumberEntryWithLabel *DGScopeSpectrumAnalysisULD_NEL;
   TGCheckButton *DGScopeSpectrumAnalysisLDTrigger_CB;
   ADAQComboBoxWithLabel *DGScopeSpectrumAnalysisLDTriggerChannel_CBL;
 
+  TGCheckButton *DGScopeSpectrumCalibration_CB;
+  TGCheckButton *DGScopeSpectrumUseCalibrationSlider_CB;
   ADAQComboBoxWithLabel *DGScopeSpectrumCalibrationPoint_CBL;
   ADAQNumberEntryWithLabel *DGScopeSpectrumCalibrationEnergy_NEL;
   ADAQNumberEntryWithLabel *DGScopeSpectrumCalibrationPulseUnit_NEL;
@@ -228,15 +243,10 @@ private:
   TGTextButton *DGScopeSpectrumCalibrationLoad_TB;
   TGTextButton *DGScopeSpectrumCalibrationWrite_TB;
 
-  ADAQNumberEntryWithLabel *DGScopeSpectrumBinNumber_NEL;
-  ADAQNumberEntryWithLabel *DGScopeSpectrumMinBin_NEL;
-  ADAQNumberEntryWithLabel *DGScopeSpectrumMaxBin_NEL;
-  TGCheckButton *DGScopeSpectrumCalibration_CB;
+  // Graphics
+  
   TGCheckButton *DGScopeSpectrumXAxisLog_CB;
   TGCheckButton *DGScopeSpectrumYAxisLog_CB;
-  TGCheckButton *DGScopeSpectrumAggregateRuns_CB;
-
-  ADAQComboBoxWithLabel*DGScopeSpectrumChannel_CBL;
 
   ADAQTextEntryWithLabel *DGScopeDisplayXTitle_TEL, *DGScopeDisplayYTitle_TEL, *DGScopeDisplayTitle_TEL;
   ADAQNumberEntryWithLabel *DGScopeDisplayXTitleOffset_NEL, *DGScopeDisplayXTitleSize_NEL;
@@ -248,25 +258,20 @@ private:
   TGRadioButton *DGScopeDisplayWaveformYAxisADC_RB;
   TGRadioButton *DGScopeDisplayWaveformYAxisMillivolts_RB;
 
-  ADAQTextEntryWithLabel *DGScopeDisplayOutputFileName_TEL;
 
-  ADAQComboBoxWithLabel *DGScopeDisplayOutputFileType_CBL;
 
-  TGButtonGroup *DGScopeMode_BG;
-  TGRadioButton *DGScopeWaveform_RB, *DGScopeSpectrum_RB;
-  TGRadioButton *DGScopeHighRate_RB, *DGScopeUltraRate_RB;
+  // Persistent
 
-  ADAQNumberEntryWithLabel *DGScopeBaselineMin_NEL, *DGScopeBaselineMax_NEL;
+  TGTextButton *DGScopeSave_TB;
 
   ADAQTextEntryWithLabel *DGScopeDataComment_TEL;
+
 
   TGTextButton *DGScopeDataFileName_TB;
   ADAQTextEntryWithLabel *DGScopeDataFileName_TEL;
   TGTextButton *DGScopeDataStorageCreateFile_TB;
   TGTextButton *DGScopeDataStorageCloseFile_TB;
   TGCheckButton *DGScopeDataStorageEnable_CB;
-
-  ADAQNumberEntryWithLabel *DGScopeSpectrumRefreshRate_NEL;
 
   TGTextButton *DGScopeSpectrumFileName_TB;
   ADAQTextEntryWithLabel *DGScopeSpectrumFileName_TEL;
@@ -277,6 +282,14 @@ private:
   ADAQTextEntryWithLabel *DGScopeCanvasFileName_TEL;
   TGCheckButton *DGScopeSaveCanvasWithTimeExtension_CB;
   TGTextButton *DGScopeSaveCanvas_TB;
+
+  ADAQTextEntryWithLabel *DGScopeDisplayOutputFileName_TEL;
+  ADAQComboBoxWithLabel *DGScopeDisplayOutputFileType_CBL;
+
+  // Miscellaneous
+
+  ADAQNumberEntryWithLabel *DGScopeSpectrumRefreshRate_NEL;
+
 
   AAChannelSlots *ChannelSlots;
   AADisplaySlots *DisplaySlots;
