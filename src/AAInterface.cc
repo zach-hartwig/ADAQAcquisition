@@ -40,10 +40,11 @@ using namespace boost::assign;
 #include "AASubtabSlots.hh"
 #include "AATabSlots.hh"
 #include "AASettings.hh"
+#include "AAAcquisitionManager.hh"
 
 AAInterface::AAInterface()
   : TGMainFrame(gClient->GetRoot()),
-    DisplayWidth(1125), DisplayHeight(840), 
+    DisplayWidth(1100), DisplayHeight(840), 
     NumDataChannels(8), ColorManager(new TColor), NumVMEBoards(3)
 {
   // Allow environmental variable to control small version of GUI
@@ -253,7 +254,7 @@ void AAInterface::FillConnectionFrame()
   ModuleSettings_GF->SetTitlePos(TGGroupFrame::kCenter);
 
   vector<string> AddressTitle;
-  AddressTitle += "V1718 base address", "V1720 base address", "V6534 base address";
+  AddressTitle += "V1718 base address", "Digitizer base address", "High voltage base address";
 
   vector<int> BoardEnableID, BoardAddressID, BoardAddress;
   BoardEnableID += (int)V1718BoardEnable_TB_ID, (int)DGBoardEnable_TB_ID, (int)HVBoardEnable_TB_ID;
@@ -315,6 +316,21 @@ void AAInterface::FillConnectionFrame()
     }
     ModuleSettings_GF->AddFrame(BoardAddress_VF, 
 				new TGLayoutHints(kLHintsTop | kLHintsCenterX, borderLeft,borderRight,5,5));
+  }
+
+  if(!TheVMEManager->GetBREnable()){
+    BoardEnable_TB[V1718]->SetText("Board disabled");
+    BoardEnable_TB[V1718]->SetBackgroundColor(ColorManager->Number2Pixel(2));
+  }
+
+  if(!TheVMEManager->GetDGEnable()){
+    BoardEnable_TB[V1720]->SetText("Board disabled");
+    BoardEnable_TB[V1720]->SetBackgroundColor(ColorManager->Number2Pixel(2));
+  }
+
+  if(!TheVMEManager->GetHVEnable()){
+    BoardEnable_TB[V6534]->SetText("Board disabled");
+    BoardEnable_TB[V6534]->SetBackgroundColor(ColorManager->Number2Pixel(2));
   }
 }
 
@@ -994,10 +1010,11 @@ void AAInterface::FillAcquisitionFrame()
   DGTriggerEdge_CBL->GetComboBox()->ChangeOptions(DGTriggerEdge_CBL->GetComboBox()->GetOptions() | kFixedSize);
   
   DGTriggerControls_GF->AddFrame(DGTriggerCoincidenceEnable_CB = new TGCheckButton(DGTriggerControls_GF, "Coincidence triggering", DGTriggerCoincidenceEnable_CB_ID),
-				      new TGLayoutHints(kLHintsNormal,5,5,0,0));
+				 new TGLayoutHints(kLHintsNormal,5,5,0,0));
+  DGTriggerCoincidenceEnable_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
   
   DGTriggerControls_GF->AddFrame(DGTriggerCoincidenceLevel_CBL = new ADAQComboBoxWithLabel(DGTriggerControls_GF, "Level", DGTriggerCoincidenceLevel_CBL_ID),
-				      new TGLayoutHints(kLHintsNormal,5,5,0,0));
+				 new TGLayoutHints(kLHintsNormal,5,5,0,0));
   DGTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("2 channel",1);
   DGTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("3 channel",2);
   DGTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("4 channel",3);
@@ -1006,6 +1023,8 @@ void AAInterface::FillAcquisitionFrame()
   DGTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("7 channel",6);
   DGTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("8 channel",7);
   DGTriggerCoincidenceLevel_CBL->GetComboBox()->Select(1);
+  DGTriggerCoincidenceLevel_CBL->GetComboBox()->SetEnabled(false);
+  
 
 
   ///////////////////////
@@ -1555,6 +1574,8 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
 {
   for(uint32_t ch=0; ch<8; ch++){
     DGChEnable_CB[ch]->SetState(ButtonState,true);
+    DGChPosPolarity_RB[ch]->SetState(ButtonState);
+    DGChNegPolarity_RB[ch]->SetState(ButtonState);
     DGChDCOffset_NEL[ch]->GetEntry()->SetState(WidgetState);
     DGChBaselineCalcMin_NEL[ch]->GetEntry()->SetState(WidgetState);
     DGChBaselineCalcMax_NEL[ch]->GetEntry()->SetState(WidgetState);
@@ -1565,22 +1586,21 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
     DGChZSNegLogic_RB[ch]->SetState(ButtonState);
   }
 
-  DGTriggerCoincidenceEnable_CB->SetState(ButtonState,true);
-  DGTriggerCoincidenceLevel_CBL->GetComboBox()->SetEnabled(WidgetState);
-  DGTriggerType_CBL->GetComboBox()->SetEnabled(WidgetState);
-  DGTriggerEdge_CBL->GetComboBox()->SetEnabled(WidgetState);
-
-  DGRecordLength_NEL->GetEntry()->SetState(WidgetState);
-  DGPostTrigger_NEL->GetEntry()->SetState(WidgetState);
-
   AQWaveform_RB->SetEnabled(WidgetState);
   AQSpectrum_RB->SetEnabled(WidgetState);
   AQHighRate_RB->SetEnabled(WidgetState);
   AQUltraRate_RB->SetEnabled(WidgetState);
 
-  DGEventsBeforeReadout_NEL->GetEntry()->SetState(WidgetState);
-  AQDataReductionFactor_NEL->GetEntry()->SetState(WidgetState);
+  DGTriggerType_CBL->GetComboBox()->SetEnabled(WidgetState);
+  DGTriggerEdge_CBL->GetComboBox()->SetEnabled(WidgetState);
+  DGTriggerCoincidenceEnable_CB->SetState(ButtonState,true);
 
+  DGRecordLength_NEL->GetEntry()->SetState(WidgetState);
+  DGPostTrigger_NEL->GetEntry()->SetState(WidgetState);
+
+  DGEventsBeforeReadout_NEL->GetEntry()->SetState(WidgetState);
+  AQDataReductionEnable_CB->SetState(ButtonState);
+  AQDataReductionFactor_NEL->GetEntry()->SetState(WidgetState);
   DGZSEnable_CB->SetState(ButtonState);
 
   SpectrumNumBins_NEL->GetEntry()->SetState(WidgetState);
@@ -1594,7 +1614,7 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
   SpectrumLDTrigger_CB->SetState(ButtonState);
   SpectrumLDTriggerChannel_CBL->GetComboBox()->SetEnabled(WidgetState);
 
-  if(TheVMEManager->GetDGAcquisitionEnable())
+  if(AAAcquisitionManager::GetInstance()->GetAcquisitionEnable())
     DGScopeDataStorageCreateFile_TB->SetState(kButtonUp);
   else
     DGScopeDataStorageCreateFile_TB->SetState(kButtonDisabled);
@@ -1659,9 +1679,9 @@ void AAInterface::SaveSettings()
 
   // Readout
   WidgetSettings->EventsBeforeReadout = DGEventsBeforeReadout_NEL->GetEntry()->GetIntNumber();
-  WidgetSettings->EnableDataReduction = AQDataReductionEnable_CB->IsDown();
+  WidgetSettings->DataReductionEnable = AQDataReductionEnable_CB->IsDown();
   WidgetSettings->DataReductionFactor = AQDataReductionFactor_NEL->GetEntry()->GetIntNumber();
-  WidgetSettings->EnableZeroSuppression = DGZSEnable_CB->IsDown();
+  WidgetSettings->ZeroSuppressionEnable = DGZSEnable_CB->IsDown();
 
   
   ///////////////////////////

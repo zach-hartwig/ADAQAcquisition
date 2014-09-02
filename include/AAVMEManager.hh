@@ -23,9 +23,9 @@ public:
 
   static AAVMEManager *GetInstance();
 
-  void SafelyDisconnectVMEBoards();
+  void ProgramDigitizers();
 
-  void InitializeDigitizers();
+  void SafelyDisconnectVMEBoards();
 
 
   /////////////////////////////////////
@@ -35,17 +35,7 @@ public:
   void SetVMEConnectionEstablished(bool CE) {VMEConnectionEstablished = CE;}
   bool GetVMEConnectionEstablished() {return VMEConnectionEstablished;}
 
-  void SetDGAcquisitionEnable(bool AE) {DGAcquisitionEnable = AE;}
-  bool GetDGAcquisitionEnable() {return DGAcquisitionEnable;}
-
-  void SetAcquisitionTimerEnable(bool ATE) {AcquisitionTimerEnable = ATE;}
-  bool GetAcquisitionTimerEnable() {return AcquisitionTimerEnable;}
-
-  void SetAcquisitionTimeStart(double T) {AcquisitionTimeStart = T;}
-  void SetAcquisitionTimeStop(double T) {AcquisitionTimeStop = T;}
-
   void SetWidgetSettings(AASettings *WS) {WidgetSettings = WS;}
-  
   
   // VME board enable booleans
 
@@ -86,12 +76,6 @@ private:
   ADAQBridge *BRMgr;
   ADAQDigitizer *DGMgr;
   ADAQHighVoltage *HVMgr;
-
-  bool DGAcquisitionEnable;
-
-  //Objects for controlling timed acquisition periods
-  bool AcquisitionTimerEnable;
-  double AcquisitionTimeStart, AcquisitionTimeStop;
 
   AASettings *WidgetSettings;
 

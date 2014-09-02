@@ -13,8 +13,8 @@ AAVMEManager *AAVMEManager::GetInstance()
 
 
 AAVMEManager::AAVMEManager()
-  : BREnable(true), DGEnable(true), HVEnable(true),
-    DGAddress(0x00420000), HVAddress(0x42420000),
+  : BREnable(false), DGEnable(true), HVEnable(false),
+    DGAddress(0x00000000), HVAddress(0x42420000),
     VMEConnectionEstablished(false)
 {
   if(TheVMEManager)
@@ -36,11 +36,106 @@ AAVMEManager::~AAVMEManager()
 {;}
 
 
-void AAVMEManager::InitializeDigitizers()
+void AAVMEManager::ProgramDigitizers()
 {
+  DGMgr->Reset();
+
+  uint32_t DGNumChEnabled;
+  uint32_t DGChEnableMask;
+
+  ////////////////////////////
+  // Channel-specific settings
+
+  for(int ch=0; ch<DGMgr->GetNumChannels(); ch++){
+    // Calculate the channel enable mask, where each hex digit
+    // represents channel state as "0" == disabled, "1" == enabled
+    if(WidgetSettings->ChEnable[ch]){
+      uint32_t Ch = 0x00000001<<ch;
+      DGChEnableMask |= Ch;
+      DGNumChEnabled++;
+    }
+    
+    DGMgr->SetChannelDCOffset(ch, WidgetSettings->ChDCOffset[ch]);
+    DGMgr->SetChannelTriggerThreshold(ch, WidgetSettings->ChTriggerThreshold[ch]);
+    
+    DGMgr->SetZLEChannelSettings(ch,
+				 WidgetSettings->ChZSThreshold[ch],
+				 WidgetSettings->ChZSBackward[ch],
+				 WidgetSettings->ChZSForward[ch],
+				 WidgetSettings->ChZSPosLogic[ch]);
+  }
+
+  DGMgr->SetChannelEnableMask(DGChEnableMask);
 
 
+  ///////////////////
+  // Trigger settings
 
+  // Trigger type
+
+  switch(WidgetSettings->TriggerType){
+
+  case 0: // External (NIM logic)
+    DGMgr->EnableExternalTrigger("NIM");
+    DGMgr->EnableAutoTrigger(DGChEnableMask);
+    DGMgr->DisableSWTrigger();
+
+  case 1: // External (TTL logic)
+    DGMgr->EnableExternalTrigger("TTL");
+    DGMgr->EnableAutoTrigger(DGChEnableMask);
+    DGMgr->DisableSWTrigger();
+    
+  case 2: // Automatic
+    DGMgr->DisableExternalTrigger();
+    DGMgr->EnableAutoTrigger(DGChEnableMask);
+    DGMgr->DisableSWTrigger();
+
+  case 3: // Software
+    DGMgr->DisableExternalTrigger();
+    DGMgr->DisableAutoTrigger(DGChEnableMask);
+    DGMgr->EnableSWTrigger();
+
+  default:
+    break;
+  }
+
+  // Trigger edge (channel-specific but treated as group setting)
+  
+  for(int ch=0; ch<DGMgr->GetNumChannels(); ch++){
+    switch(WidgetSettings->TriggerEdge){
+      
+    case 0: // Rising edge
+      DGMgr->SetTriggerEdge(ch, "Rising");
+      
+    case 1: // Falling edge
+      DGMgr->SetTriggerEdge(ch, "Falling");
+      
+    default:
+      break;
+    }
+  }
+  
+  if(WidgetSettings->TriggerCoincidenceEnable and
+     WidgetSettings->TriggerCoincidenceLevel < DGNumChEnabled)
+    DGMgr->SetTriggerCoincidence(true, WidgetSettings->TriggerCoincidenceLevel);
+
+
+  ///////////////////////
+  // Acquisition settings
+
+  DGMgr->SetRecordLength(WidgetSettings->RecordLength);
+  DGMgr->SetPostTriggerSize(WidgetSettings->PostTrigger);
+
+
+  ///////////////////
+  // Readout settings
+
+  DGMgr->SetMaxNumEventsBLT(WidgetSettings->EventsBeforeReadout);
+
+  if(WidgetSettings->ZeroSuppressionEnable)
+    DGMgr->SetZSMode("ZLE");
+  else
+    DGMgr->SetZSMode("None");
 }
 
 
@@ -94,18 +189,7 @@ void AAVMEManager::SafelyDisconnectVMEBoards()
 
 //void AAInterface::RunDGScope()
 //{
-  /*
-
-
-  /////////////////////////////////////////////////
-  // Initialize local and class member variables //
-  /////////////////////////////////////////////////
-
-  /////////////////////////////////////////
-  // Variables for V1720 digitizer settings
-
-  // Get the record length, ie, number of 4ns samples in acquisition window
-  uint32_t RecordLength = DGScopeRecordLength_NEL->GetEntry()->GetIntNumber();
+/*
 
   // Get the data thinning factor 
   bool UseDataReduction = DGScopeUseDataReduction_CB->IsDown();
@@ -119,16 +203,11 @@ void AAVMEManager::SafelyDisconnectVMEBoards()
     StopAcquisitionSafely();
   }
   
-  // Get the percentage of acquisition window that occurs after the trigger
-  uint32_t PostTriggerSize = DGScopePostTriggerSize_NEL->GetEntry()->GetIntNumber();
-
   // Variables for graphing the digitized waveforms as time versus
   // voltage. Units are determined by the user's selections when the
   // arrays are filled inside the acquisition loop
   double Time_graph[RecordLength], Voltage_graph[RecordLength]; 
 
-  // The following variables must be set / composed of values from
-  // all 8 digitzer channels. Declare them and then initialize.
    
   // Variables for channel trigger thresholds, calculation of the
   // channel baselines
@@ -145,27 +224,12 @@ void AAVMEManager::SafelyDisconnectVMEBoards()
 
   for(int ch=0; ch<NumDataChannels; ch++){
 
-    // Get each channel's trigger threshold]
-    ChannelTriggerThreshold[ch] = DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->GetIntNumber(); // [ADC]
-
     // Get each channel's baseline calculation region (min, max, length)
     BaselineCalcMin[ch] = DGScopeBaselineCalcMin_NEL[ch]->GetEntry()->GetIntNumber(); // [sample]
     BaselineCalcMax[ch] = DGScopeBaselineCalcMax_NEL[ch]->GetEntry()->GetIntNumber(); // [sample]
     BaselineCalcLength[ch] = BaselineCalcMax[ch]-BaselineCalcMin[ch]; // [sample]
     BaselineCalcResult[ch] = 0; // [ADC] Result is calculated during acquisition
 
-    // Calculate the channel enable mask, which is a 32-bit integer
-    // describing which of the 8 digitizer channels are enabled. A
-    // 32-bit integer has 8 bytes or 8 "hex" digits; a hex digit set
-    // to "1" in the n-th position in the hex representation indicates
-    // that the n-th channel is enabled. For example, if the
-    // ChannelEnableMask is equal to 0x00110100 then channels 2, 4 and
-    // 5 are enabled for digitization
-    if(DGScopeChannelEnable_CB[ch]->IsDisabledAndSelected()){
-      uint32_t Ch = 0x00000001<<ch;
-      ChannelEnableMask |= Ch;
-      NumDGChannelsEnabled++;
-    }
   }
 
   // Ensure that at least one channel is enabled in the channel
@@ -187,9 +251,6 @@ void AAVMEManager::SafelyDisconnectVMEBoards()
     LowestEnabledChannel++;
   }
 
-  // Get the desired triggering mode (external, automatic, or software)
-  int TriggerMode = DGScopeTriggerMode_CBL->GetComboBox()->GetSelected(); 
-   
   // Get the trigger coincidence level (number of channels in coincidence - 1);
   uint32_t TriggerCoincidenceLevel = DGScopeTriggerCoincidenceLevel_CBL->GetComboBox()->GetSelected();
    
@@ -406,59 +467,6 @@ void AAVMEManager::SafelyDisconnectVMEBoards()
     DGManager->SetRegisterValue(FrontPanelIOControlRegister, FrontPanelIOControlValue);
 
     break;
-  }
-
-    // Mode: External trigger (TTL logic input signal)
-  case 1:{
-    DGManager->SetExtTriggerInputMode(CAEN_DGTZ_TRGMODE_ACQ_ONLY);
-    DGManager->SetChannelSelfTrigger(CAEN_DGTZ_TRGMODE_DISABLED, ChannelEnableMask);
-    DGManager->SetSWTriggerMode(CAEN_DGTZ_TRGMODE_DISABLED);
-
-    // Get the value of the front panel I/O control register
-    uint32_t FrontPanelIOControlRegister = 0x811C;
-    uint32_t FrontPanelIOControlValue = 0;
-    DGManager->GetRegisterValue(FrontPanelIOControlRegister, &FrontPanelIOControlValue);
-
-    // When Bit[0] of 0x811C == 1, TTL logic is used for input; so set
-    // Bit[0] using bitwise ops
-    FrontPanelIOControlValue |= 1<<0;
-    DGManager->SetRegisterValue(FrontPanelIOControlRegister, FrontPanelIOControlValue);
-  }
-
-    // Mode: Automatic channel threshold triggering
-  case 2:
-    DGManager->SetExtTriggerInputMode(CAEN_DGTZ_TRGMODE_DISABLED);
-    DGManager->SetChannelSelfTrigger(CAEN_DGTZ_TRGMODE_ACQ_ONLY, ChannelEnableMask);
-    DGManager->SetSWTriggerMode(CAEN_DGTZ_TRGMODE_DISABLED);
-    break;
-
-    // Mode: Software trigger
-  case 3:
-    DGManager->SetExtTriggerInputMode(CAEN_DGTZ_TRGMODE_DISABLED);
-    DGManager->SetChannelSelfTrigger(CAEN_DGTZ_TRGMODE_DISABLED, ChannelEnableMask);
-    DGManager->SetSWTriggerMode(CAEN_DGTZ_TRGMODE_ACQ_ONLY);
-    break;
-  }
-
-  // Set the record length of the acquisition window
-  DGManager->SetRecordLength(RecordLength);
-
-  // Set the channel enable mask
-  DGManager->SetChannelEnableMask(ChannelEnableMask);
-
-  // Set the Zero-Supperssion mode
-  DGManager->SetZeroSuppressionMode(DGScopeZSMode_CBL->GetComboBox()->GetSelected());
-
-  // If the digitizer is to be operated in coincidence mode and "the
-  // conditions are right" as Oye says, set the trigger source mask by
-  // "or" bit operating  bits 24:26 of the preset trigger coincidence
-  // level variable into the digitizer's trigger source enable mask
-  if(TriggerCoincidenceLevel<NumDGChannelsEnabled 
-     and DGScopeTriggerCoincidenceEnable_CB->IsDisabledAndSelected()){
-    uint32_t TriggerSourceEnableMask = 0;
-    DGManager->GetRegisterValue(0x810C,&TriggerSourceEnableMask);
-    TriggerSourceEnableMask = TriggerSourceEnableMask | TriggerCoincidenceLevel_BitShifted;
-    DGManager->SetRegisterValue(0x810C,TriggerSourceEnableMask);
   }
 
   // Set the maximum number of events that will be accumulated before

@@ -30,6 +30,8 @@ void AATabSlots::HandleConnectionTextButtons()
   TGTextButton *TextButton = (TGTextButton *) gTQSender;
   int TextButtonID = TextButton->WidgetId();
 
+  TI->SaveSettings();
+
   AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
 
   // TEMPORARY
@@ -180,6 +182,8 @@ void AATabSlots::HandleRegisterTextButtons()
   TGTextButton *TextButton = (TGTextButton *) gTQSender;
   int TextButtonID = TextButton->WidgetId();
 
+  TI->SaveSettings();
+
   AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
 
   if(!TheVMEManager->GetVMEConnectionEstablished())
@@ -288,6 +292,8 @@ void AATabSlots::HandlePulserTextButtons()
 {
   TGTextButton *TextButton = (TGTextButton *) gTQSender;
   int TextButtonID = TextButton->WidgetId();
+
+  TI->SaveSettings();
 
   AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
   

@@ -30,11 +30,30 @@ public:
   void StartAcquisition();
   void StopAcquisition();
 
+  void SetAcquisitionEnable(bool ATE) {AcquisitionEnable = true;}
+  bool GetAcquisitionEnable() {return AcquisitionEnable;}
+  
+  void SetAcquisitionTimerEnable(bool ATE) {AcquisitionTimerEnable = ATE;}
+  bool GetAcquisitionTimerEnable() {return AcquisitionTimerEnable;}
+
+  void SetAcquisitionTimeStart(double T) {AcquisitionTimeStart = T;}
+  void SetAcquisitionTimeStop(double T) {AcquisitionTimeStop = T;}
 
   ClassDef(AAAcquisitionManager, 0);
   
 private:
   static AAAcquisitionManager *TheAcquisitionManager;
+
+  bool AcquisitionEnable;
+
+
+  //Objects for controlling timed acquisition periods
+  bool AcquisitionTimerEnable;
+  double AcquisitionTimeStart, AcquisitionTimeStop;
+
+
+
+
 
   TGraph *Waveform_G[8];
   TH1F *Spectrum_H[8];

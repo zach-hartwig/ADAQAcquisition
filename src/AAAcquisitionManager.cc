@@ -1,3 +1,5 @@
+#include <TSystem.h>
+
 #include <iostream>
 
 #include "AAAcquisitionManager.hh"
@@ -12,6 +14,7 @@ AAAcquisitionManager *AAAcquisitionManager::GetInstance()
 
 
 AAAcquisitionManager::AAAcquisitionManager()
+  : AcquisitionEnable(false)
 {
   if(TheAcquisitionManager)
     cout << "\nError! The AcquisitionManager was constructed twice!\n" << endl;
@@ -26,6 +29,90 @@ AAAcquisitionManager::~AAAcquisitionManager()
 void AAAcquisitionManager::StartAcquisition()
 {
   AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
+
+  AcquisitionEnable = true;
+
+  time_t AcquisitionTimeNow = 0;
+  time_t AcquisitionTimePrev = 0;
+
+  while(AcquisitionEnable){
+    
+    gSystem->ProcessEvents();
+    
+    cout << "Acquiring data ..." << endl;
+    usleep(100000);
+
+
+    if(AcquisitionTimerEnable){
+
+      // Calculate the elapsed time since timer started
+      AcquisitionTimePrev = AcquisitionTimeNow;
+      AcquisitionTimeNow = time(NULL) - AcquisitionTimeStart; // [seconds]
+      
+      // Update the ROOT widget only every second to notify the user
+      // of progress in the countdown. Note that the
+      // AcquisitionTime_* variables are integers. Therefore, this
+      // conditional will only be satisfied right when the second
+      // ticks over and "_Prev" time is different from"_Now" time
+      // for only a single pass of the while loop. This should
+      // maximize efficiency of the acquisition loop.
+      if(AcquisitionTimePrev != AcquisitionTimeNow){
+	int Countdown = AcquisitionTimeStop - AcquisitionTimeNow;
+
+	cout << Countdown << endl;
+
+	//DGScopeAcquisitionTimer_NEFL->GetEntry()->SetNumber(Countdown);
+      }
+      
+      // If the timer has reached zero, i.e. the acquisition loop has
+      // run for the duration specified then turn the acquisition off
+      if(AcquisitionTimeNow >= AcquisitionTimeStop)
+	StopAcquisition();
+    }
+  }
+}
+
+
+void AAAcquisitionManager::StopAcquisition()
+{
+  AcquisitionEnable = false;
+
+  if(AcquisitionTimerEnable)
+    AcquisitionTimerEnable = false;
+
+  if(ROOTFileOpen){
+  }
+}
+  
+
+
+
+/*
+  // Stop the V1720 from acquiring data first thing
+  TheVMEManager->GetDGManager()->SWStopAcquisition();
+  
+  // Determine if a ROOT file was open and receiving data when the
+  // user clicked to stop acquiring data; if so, ensure that the
+  // data is written and the ROOT file is properly closed before
+  // resetting widget state to prevent seg faults and that ROOT
+  // file properly written.
+  if(ROOTFileOpen){
+    if(DGScopeDataStorageEnable_CB->IsDown())
+      DGScopeDataStorageEnable_CB->Clicked();
+    
+    if(OutputDataFile->IsOpen())
+      DGScopeDataStorageCloseFile_TB->Clicked();
+  }
+  
+  // Determine if the acquisition timer is active
+  }
+*/
+
+
+
+
+  
+
   /*
   /////////////////////////////////////////////////
   // Initialize local and class member variables //
@@ -432,26 +519,13 @@ void AAAcquisitionManager::StartAcquisition()
   // The acquisition and data plotting loop is run provided that the
   // DGScopeEnable bool is true (see CyDAQRootGUI::HandleScopeTextButtons)
 
+  while(AcquisitionEnable){
 
-
-
-
-
-
-
-
-
-
-
-
-
-  while(DGScopeEnable){
 
     /////////////////////////////////////////////
     // Create separate ROOT thread for processing
 
-    // Run the processes in a seperate thread to maintain full access
-    // to all GUI functions in the main processing thread
+
     gSystem->ProcessEvents();
 
     ///////////////////////////
@@ -899,15 +973,16 @@ void AAAcquisitionManager::StartAcquisition()
     //    cout << std::dec 
     //	 << "Elapsed time: " << elapsedA_sec << "s \t " << elapsedA_nsec << "ns" 
     //	 << endl;
-
-  } // End DGScope acquisition 'while' loop
+*/
+  //  } // End DGScope acquisition 'while' loop
   
   // Once the acquisition session has concluded, free the memory that
   // was allocated to the V1720 and PC event buffers
-  DGManager->FreeReadoutBuffer(&Buffer);
-  */
+  //DGManager->FreeReadoutBuffer(&Buffer);
+
 //}
-}
+
+
 
 /*
 void AAInterface::SaveSpectrumData()
@@ -970,62 +1045,6 @@ void AAInterface::SaveSpectrumData()
   }
 }
 */
-
-
-// Method to safely cease acquiring data, including writing and
-// closing of possibly opened ROOT files.
-void AAAcquisitionManager::StopAcquisition()
-{
-/*
-  // Stop the V1720 from acquiring data first thing
-  TheVMEManager->GetDGManager()->SWStopAcquisition();
-  
-  // Update button color from green to red and update text to "Start"
-  DGScopeStartStop_TB->SetBackgroundColor(ColorManager->Number2Pixel(2));
-  DGScopeStartStop_TB->SetForegroundColor(ColorManager->Number2Pixel(1));
-  DGScopeStartStop_TB->SetText("Stopped");
-  
-  // Set bool to disable the DGScope loop
-  DGScopeEnable = false;
-  
-  // Set the appropriate state for the relevant widgets
-  SetDGWidgetState(false);
-  
-  // Determine if a ROOT file was open and receiving data when the
-  // user clicked to stop acquiring data; if so, ensure that the
-  // data is written and the ROOT file is properly closed before
-  // resetting widget state to prevent seg faults and that ROOT
-  // file properly written.
-  if(ROOTFileOpen){
-    if(DGScopeDataStorageEnable_CB->IsDown())
-      DGScopeDataStorageEnable_CB->Clicked();
-    
-    if(OutputDataFile->IsOpen())
-      DGScopeDataStorageCloseFile_TB->Clicked();
-  }
-  
-  // Determine if the acquisition timer is active
-  if(AcquisitionTimerEnabled){
-    // Reset the attributes of the timer start text button
-    DGScopeAcquisitionTimerStart_TB->SetBackgroundColor(ColorManager->Number2Pixel(18));
-    DGScopeAcquisitionTimerStart_TB->SetText("Start timer");
-    
-    // Set the acquisition enabled boolean to false
-    AcquisitionTimerEnabled = false;
-
-    // When the acquisition time trigger StopAcquisitionSafely()
-    // method, we are not only closing the ROOT file but also
-    // disabling acquisition so the widgets need to be fully
-    // reset. (The DGScopeDataStorageCloseFile_TB click above allows
-    // for continuing acquisition and new files.).
-    DGScopeDataStorageCreateFile_TB->SetState(kButtonDisabled);
-    DGScopeDataStorageCloseFile_TB->SetState(kButtonDisabled);
-    DGScopeDataStorageEnable_CB->SetState(kButtonUp);
-    DGScopeDataStorageEnable_CB->SetState(kButtonDisabled);
-  }
-*/
-}
-
 
 
 // Method to generate a standard detector-esque artificial waveoforms

@@ -2,6 +2,9 @@
 
 #include "AADisplaySlots.hh"
 #include "AAInterface.hh"
+#include "AAVMEManager.hh"
+#include "AAAcquisitionManager.hh"
+
 
 AADisplaySlots::AADisplaySlots(AAInterface *TheInterface)
   : TI(TheInterface)
@@ -18,10 +21,14 @@ void AADisplaySlots::HandleTextButtons()
   TGTextButton *ActiveButton = (TGTextButton *) gTQSender;
   int ActiveID = ActiveButton->WidgetId();
 
+  TI->SaveSettings();
+
   AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
 
-  if(!TheVMEManager->GetVMEConnectionEstablished())
-    return;
+  AAAcquisitionManager *TheACQManager = AAAcquisitionManager::GetInstance();
+
+  //  if(!TheVMEManager->GetVMEConnectionEstablished())
+  //    return;
 
   switch(ActiveID){
     
@@ -34,14 +41,14 @@ void AADisplaySlots::HandleTextButtons()
       ActiveButton->SetForegroundColor(TI->ColorManager->Number2Pixel(1));
       ActiveButton->SetText("Acquiring");
 
-      // Begin acquisition
-      TheVMEManager->SetDGAcquisitionEnable(true);
-
       // Update widget state for acquisition-on
-      TI->SetAcquisitionWidgetState(true, kButtonUp);
-      
-      // Run the DGScope
-      //RunDGScope();
+      TI->SetAcquisitionWidgetState(false, kButtonDisabled);
+
+      // Program the digitizers with the current settings
+      TheVMEManager->ProgramDigitizers();
+
+      // Start data acquisition
+      TheACQManager->StartAcquisition();
     }
 
     // If DGScope acquisition is being stopped...
@@ -51,12 +58,25 @@ void AADisplaySlots::HandleTextButtons()
       ActiveButton->SetForegroundColor(TI->ColorManager->Number2Pixel(1));
       ActiveButton->SetText("Stopped");
 
-      // Stop acquisition
-      TheVMEManager->SetDGAcquisitionEnable(false);
-      TheVMEManager->GetDGManager()->SWStopAcquisition();
-      
+      // Stop data acquisition
+      TheACQManager->StopAcquisition();
+
       // Update widget state for acquisition-off
-      TI->SetAcquisitionWidgetState(false, kButtonDisabled);
+      TI->SetAcquisitionWidgetState(true, kButtonUp);
+
+      
+      if(TheACQManager->GetAcquisitionTimerEnable()){
+	TI->AQTimerStart_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(18));
+	TI->AQTimerStart_TB->SetText("Start timer");
+	
+	TheACQManager->SetAcquisitionTimerEnable(false);
+      }
+
+      TI->DGScopeDataStorageCreateFile_TB->SetState(kButtonDisabled);
+      TI->DGScopeDataStorageCloseFile_TB->SetState(kButtonDisabled);
+      TI->DGScopeDataStorageEnable_CB->SetState(kButtonUp);
+      TI->DGScopeDataStorageEnable_CB->SetState(kButtonDisabled);
+      
 
       // Determine if a ROOT file was open and receiving data; if so,
       // ensure that the data is written and the ROOT file is closed

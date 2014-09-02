@@ -2,6 +2,8 @@
 
 #include "AASubtabSlots.hh"
 #include "AAInterface.hh"
+#include "AAVMEManager.hh"
+#include "AAAcquisitionManager.hh"
 
 AASubtabSlots::AASubtabSlots(AAInterface *TheInterface)
   : TI(TheInterface)
@@ -16,16 +18,27 @@ void AASubtabSlots::HandleCheckButtons()
 {
   TGCheckButton *ActiveButton = (TGCheckButton *) gTQSender;
   int ActiveID = ActiveButton->WidgetId();
+
+  TI->SaveSettings();
   
   switch(ActiveID){
 
     // Enable the calibration widgets
   case SpectrumCalibration_CB_ID:
-
+    
     if(TI->SpectrumCalibration_CB->IsDown())
       TI->SetCalibrationWidgetState(true, kButtonUp);
     else
       TI->SetCalibrationWidgetState(false, kButtonDisabled);
+    
+    break;
+    
+  case DGTriggerCoincidenceEnable_CB_ID:
+    
+    if(TI->DGTriggerCoincidenceEnable_CB->IsDown())
+      TI->DGTriggerCoincidenceLevel_CBL->GetComboBox()->SetEnabled(true);
+    else
+      TI->DGTriggerCoincidenceLevel_CBL->GetComboBox()->SetEnabled(false);
 
     break;
   }
@@ -34,6 +47,8 @@ void AASubtabSlots::HandleCheckButtons()
 
 void AASubtabSlots::HandleComboBoxes(int ActivexID, int SelectedID)
 {
+  TI->SaveSettings();
+
   AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
 
   if(!TheVMEManager->GetVMEConnectionEstablished())
@@ -117,6 +132,8 @@ void AASubtabSlots::HandleNumberEntries()
   // Get the pointer and the widget ID for the active number entry
   TGNumberEntry *ActiveEntry = (TGNumberEntry *) gTQSender;
   int ActiveID = ActiveEntry->WidgetId();
+
+  TI->SaveSettings();
   
   AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
 
@@ -145,8 +162,12 @@ void AASubtabSlots::HandleTextButtons()
   TGTextButton *ActiveButton = (TGTextButton *) gTQSender;
   int ActiveID = ActiveButton->WidgetId();
 
-  AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
+  TI->SaveSettings();
 
+  AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
+  
+  AAAcquisitionManager *TheACQManager = AAAcquisitionManager::GetInstance();
+  
   switch(ActiveID){
 
     //////////////////
@@ -165,14 +186,14 @@ void AASubtabSlots::HandleTextButtons()
       ActiveButton->SetText("Waiting ...");
       
       // Get the start time (i.e. now)
-      TheVMEManager->SetAcquisitionTimeStart( time(NULL) );
+      TheACQManager->SetAcquisitionTimeStart(time(NULL));
 
       // Get the stop time (i.e. amount of time to run in seconds)
-      TheVMEManager->SetAcquisitionTimeStop( TI->AQTime_NEL->GetEntry()->GetNumber() );
-
+      TheACQManager->SetAcquisitionTimeStop(TI->AQTime_NEL->GetEntry()->GetNumber());
+      
       // Set the bool that will trigger the check of the timer against
       // the current time within the acquisition loop in RunDGScope()
-      TheVMEManager->SetAcquisitionTimerEnable(true);
+      TheACQManager->SetAcquisitionTimerEnable(true);
 
       // If the ROOT data file is open but the user has not enabled
       // data storage, assume that the user wants to acquire data for
@@ -184,11 +205,11 @@ void AASubtabSlots::HandleTextButtons()
     }
     break;
   }
-
+    
   case AQTimerAbort_TB_ID:{
-    if(TheVMEManager->GetDGAcquisitionEnable() and
-       TheVMEManager->GetAcquisitionTimerEnable())
-      {}//StopAcquisitionSafely();
+    if(TheACQManager->GetAcquisitionEnable() and
+       TheACQManager->GetAcquisitionTimerEnable())
+      TheACQManager->StopAcquisition();
     break;
   }
 
@@ -837,6 +858,8 @@ void AASubtabSlots::HandleRadioButtons()
 {
   TGRadioButton *ActiveButton = (TGRadioButton *) gTQSender;
   int ActiveID = ActiveButton->WidgetId();
+
+  TI->SaveSettings();
   
   switch(ActiveID){
     

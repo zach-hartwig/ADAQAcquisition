@@ -52,9 +52,9 @@ public:
 
   // Readout
   uint32_t EventsBeforeReadout;
-  bool EnableDataReduction;
+  bool DataReductionEnable;
   uint32_t DataReductionFactor;
-  bool EnableZeroSuppression;
+  bool ZeroSuppressionEnable;
 
   
   ////////////////////////////////////

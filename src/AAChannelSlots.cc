@@ -18,6 +18,8 @@ void AAChannelSlots::HandleNumberEntries()
   TGNumberEntry *ActiveEntry = (TGNumberEntry *) gTQSender;
   int ActiveID = ActiveEntry->WidgetId();
   
+  TI->SaveSettings();
+
   AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
 
   switch(ActiveID){
