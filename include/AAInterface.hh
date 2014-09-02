@@ -26,6 +26,7 @@ using namespace std;
 
 #include "AAVMEManager.hh"
 #include "AATypes.hh"
+#include "AASettings.hh"
 class AAChannelSlots;
 class AADisplaySlots;
 class AASubtabSlots;
@@ -94,6 +95,8 @@ private:
   const int NumVMEBoards;
 
   AAVMEManager *TheVMEManager;
+
+  AASettings *WidgetSettings;
 
 
   /////////////////////////////
@@ -196,7 +199,7 @@ private:
   TGTextEntry *DGScopeBufferStatus_TE;
   TGCheckButton *DGScopeUseDataReduction_CB;
   ADAQNumberEntryWithLabel *DGScopeDataReductionFactor_NEL;
-  ADAQComboBoxWithLabel *DGScopeZSMode_CBL;
+  TGCheckButton *DGScopeZSEnable_CB;
 
   ADAQComboBoxWithLabel *DGScopeTriggerType_CBL;
   ADAQComboBoxWithLabel *DGScopeTriggerEdge_CBL;

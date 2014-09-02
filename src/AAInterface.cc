@@ -59,10 +59,14 @@ AAInterface::AAInterface()
   SubtabSlots = new AASubtabSlots(this);
   TabSlots = new AATabSlots(this);
 
+  //
+  WidgetSettings = new AASettings;
+
   // Create a pointer to the singleton VME manager for ease-of-use
   TheVMEManager = AAVMEManager::GetInstance();
+  TheVMEManager->SetWidgetSettings(WidgetSettings);
 
-  
+
   /////////////////////////////
   // Initialize HV variables //
   /////////////////////////////
@@ -745,7 +749,7 @@ void AAInterface::FillAcquisitionFrame()
 				       new TGLayoutHints(kLHintsNormal));
     DGScopeVerticalPosition_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
     DGScopeVerticalPosition_NEL[ch]->GetEntry()->SetNumber(0);
-    DGScopeVerticalPosition_NEL[ch]->GetEntry()->Resize(65,20);
+    DGScopeVerticalPosition_NEL[ch]->GetEntry()->Resize(55,20);
 
     // ADAQ number entry to set channel's DAC offset 
     DGScopeChannelControl_GF->AddFrame(DGScopeDCOffset_NEL[ch] = new ADAQNumberEntryWithLabel(DGScopeChannelControl_GF, "DC offset (hex)", DGScopeChDCOffset_NEL_ID_Vec[ch]),
@@ -754,7 +758,7 @@ void AAInterface::FillAcquisitionFrame()
     DGScopeDCOffset_NEL[ch]->GetEntry()->SetNumLimits(TGNumberFormat::kNELLimitMinMax);
     DGScopeDCOffset_NEL[ch]->GetEntry()->SetLimitValues(0x0000,0xffff);
     DGScopeDCOffset_NEL[ch]->GetEntry()->SetNumber(0x8000);
-    DGScopeDCOffset_NEL[ch]->GetEntry()->Resize(65,20);
+    DGScopeDCOffset_NEL[ch]->GetEntry()->Resize(55,20);
 
     // ADAQ number entry to set channel's trigger threshold [ADC]
     DGScopeChannelControl_GF->AddFrame(DGScopeChTriggerThreshold_NEL[ch] = new ADAQNumberEntryWithLabel(DGScopeChannelControl_GF, "Trig. Threshold (ADC)", DGScopeChTriggerThreshold_NEL_ID_Vec[ch]),
@@ -762,7 +766,7 @@ void AAInterface::FillAcquisitionFrame()
     DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
     DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
     DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->SetNumber(2000);
-    DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->Resize(65,20);
+    DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->Resize(55,20);
     
     // ADAQ number entry to set minimum sample for baseline calculation [sample]
     DGScopeChannelControl_GF->AddFrame(DGScopeBaselineCalcMin_NEL[ch] = new ADAQNumberEntryWithLabel(DGScopeChannelControl_GF, "Baseline min. (sample)", DGScopeChBaselineCalcMin_NEL_ID_Vec[ch]),
@@ -771,27 +775,51 @@ void AAInterface::FillAcquisitionFrame()
     
     DGScopeBaselineCalcMin_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
     DGScopeBaselineCalcMin_NEL[ch]->GetEntry()->SetNumber(10);
-    DGScopeBaselineCalcMin_NEL[ch]->GetEntry()->Resize(65,20);
+    DGScopeBaselineCalcMin_NEL[ch]->GetEntry()->Resize(55,20);
 
     // ADAQ number entry to set maximum sample for baseline calculation [sample]
     DGScopeChannelControl_GF->AddFrame(DGScopeBaselineCalcMax_NEL[ch] = new ADAQNumberEntryWithLabel(DGScopeChannelControl_GF, "Baseline max. (sample)", DGScopeChBaselineCalcMax_NEL_ID_Vec[ch]),
 				       new TGLayoutHints(kLHintsNormal));
     DGScopeBaselineCalcMax_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
     DGScopeBaselineCalcMax_NEL[ch]->GetEntry()->SetNumber(45);
-    DGScopeBaselineCalcMax_NEL[ch]->GetEntry()->Resize(65,20);
+    DGScopeBaselineCalcMax_NEL[ch]->GetEntry()->Resize(55,20);
 
-    DGScopeChannelControl_GF->AddFrame(DGScopeZSThreshold_NEL[ch] = new ADAQNumberEntryWithLabel(DGScopeChannelControl_GF, "ZS threshold", -1),
+    DGScopeChannelControl_GF->AddFrame(DGScopeZSThreshold_NEL[ch] = new ADAQNumberEntryWithLabel(DGScopeChannelControl_GF, "ZS threshold (ADC)", -1),
 				       new TGLayoutHints(kLHintsNormal));
     DGScopeZSThreshold_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
     DGScopeZSThreshold_NEL[ch]->GetEntry()->SetNumber(0);
-    DGScopeZSThreshold_NEL[ch]->GetEntry()->Resize(65,20);
+    DGScopeZSThreshold_NEL[ch]->GetEntry()->Resize(55,20);
 
-    DGScopeChannelControl_GF->AddFrame(DGScopeZSSamples_NEL[ch] = new ADAQNumberEntryWithLabel(DGScopeChannelControl_GF, "ZS samples", -1),
-				       new TGLayoutHints(kLHintsNormal));
-    DGScopeZSSamples_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-    DGScopeZSSamples_NEL[ch]->GetEntry()->SetNumber(0);
-    DGScopeZSSamples_NEL[ch]->GetEntry()->Resize(65,20);
+
+    TGHorizontalFrame *ZS_HF0 = new TGHorizontalFrame(DGScopeChannelControl_GF);
+    DGScopeChannelControl_GF->AddFrame(ZS_HF0, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+
+    ZS_HF0->AddFrame(DGScopeZSForward_NEL[ch] = new ADAQNumberEntryWithLabel(ZS_HF0, "ZS Frwd", -1),
+		     new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+    DGScopeZSForward_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+    DGScopeZSForward_NEL[ch]->GetEntry()->SetNumber(0);
+    DGScopeZSForward_NEL[ch]->GetEntry()->Resize(55,20);
+
+    ZS_HF0->AddFrame(DGScopeZSBackward_NEL[ch] = new ADAQNumberEntryWithLabel(ZS_HF0, "ZS Back", -1),
+		     new TGLayoutHints(kLHintsNormal, 10,0,0,0));
+    DGScopeZSBackward_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+    DGScopeZSBackward_NEL[ch]->GetEntry()->SetNumber(0);
+    DGScopeZSBackward_NEL[ch]->GetEntry()->Resize(55,20);
+
+    TGHorizontalFrame *ZS_HF1 = new TGHorizontalFrame(DGScopeChannelControl_GF);
+    DGScopeChannelControl_GF->AddFrame(ZS_HF1, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+
+    ZS_HF1->AddFrame(new TGLabel(ZS_HF1, "ZS Logic"),
+		     new TGLayoutHints(kLHintsNormal, 60,0,5,0));
     
+    TGHButtonGroup *ZSLogicButtons_BG = new TGHButtonGroup(ZS_HF1,"");
+    ZSLogicButtons_BG->SetBorderDrawn(false);
+    ZS_HF1->AddFrame(ZSLogicButtons_BG, new TGLayoutHints(kLHintsNormal, -1,-15,-10,-10));
+
+    DGScopeZSPosLogic_RB[ch] = new TGRadioButton(ZSLogicButtons_BG, "+  ", -1);
+    DGScopeZSPosLogic_RB[ch]->SetState(kButtonDown);
+    
+    DGScopeZSNegLogic_RB[ch] = new TGRadioButton(ZSLogicButtons_BG, "-", -1);
   }
   
 
@@ -942,13 +970,34 @@ void AAInterface::FillAcquisitionFrame()
   
   TGGroupFrame *DGScopeTriggerControls_GF = new TGGroupFrame(DGScopeModeAndTrigger_VF, "Trigger Control", kVerticalFrame);
   DGScopeTriggerControls_GF->SetTitlePos(TGGroupFrame::kCenter);
-  DGScopeModeAndTrigger_VF->AddFrame(DGScopeTriggerControls_GF, new TGLayoutHints(kLHintsNormal,5,5,5,0));
+  DGScopeModeAndTrigger_VF->AddFrame(DGScopeTriggerControls_GF, new TGLayoutHints(kLHintsCenterX,5,5,0,0));
+
+
+  // ADAQ combo box to enable specification of trigger type
+  DGScopeTriggerControls_GF->AddFrame(DGScopeTriggerType_CBL = new ADAQComboBoxWithLabel(DGScopeTriggerControls_GF, "Type", DGScopeTriggerType_CBL_ID),
+				      new TGLayoutHints(kLHintsNormal,5,5,5,0));
+  DGScopeTriggerType_CBL->GetComboBox()->AddEntry("External (NIM)",0);
+  DGScopeTriggerType_CBL->GetComboBox()->AddEntry("External (TTL)",1);
+  DGScopeTriggerType_CBL->GetComboBox()->AddEntry("Automatic",2);
+  DGScopeTriggerType_CBL->GetComboBox()->AddEntry("Software",3);
+  DGScopeTriggerType_CBL->GetComboBox()->Select(2);
+  DGScopeTriggerType_CBL->GetComboBox()->Resize(110,20);
+  DGScopeTriggerType_CBL->GetComboBox()->ChangeOptions(DGScopeTriggerType_CBL->GetComboBox()->GetOptions() | kFixedSize);
+
+  // ADAQ combo box to enable specification of trigger type
+  DGScopeTriggerControls_GF->AddFrame(DGScopeTriggerEdge_CBL = new ADAQComboBoxWithLabel(DGScopeTriggerControls_GF, "Edge", DGScopeTriggerEdge_CBL_ID),
+				      new TGLayoutHints(kLHintsNormal,5,5,0,5));
+  DGScopeTriggerEdge_CBL->GetComboBox()->AddEntry("Rising",0);
+  DGScopeTriggerEdge_CBL->GetComboBox()->AddEntry("Falling",1);
+  DGScopeTriggerEdge_CBL->GetComboBox()->Select(0);
+  DGScopeTriggerEdge_CBL->GetComboBox()->Resize(110,20);
+  DGScopeTriggerEdge_CBL->GetComboBox()->ChangeOptions(DGScopeTriggerEdge_CBL->GetComboBox()->GetOptions() | kFixedSize);
   
   DGScopeTriggerControls_GF->AddFrame(DGScopeTriggerCoincidenceEnable_CB = new TGCheckButton(DGScopeTriggerControls_GF, "Coincidence triggering",DGScopeTriggerCoincidenceEnable_CB_ID),
-				      new TGLayoutHints(kLHintsNormal,5,5,5,0));
+				      new TGLayoutHints(kLHintsNormal,5,5,0,0));
   
-  DGScopeTriggerControls_GF->AddFrame(DGScopeTriggerCoincidenceLevel_CBL = new ADAQComboBoxWithLabel(DGScopeTriggerControls_GF, "Coincidence", -1),
-				      new TGLayoutHints(kLHintsNormal,5,5,0,5));
+  DGScopeTriggerControls_GF->AddFrame(DGScopeTriggerCoincidenceLevel_CBL = new ADAQComboBoxWithLabel(DGScopeTriggerControls_GF, "Level", -1),
+				      new TGLayoutHints(kLHintsNormal,5,5,0,0));
   DGScopeTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("2 channel",1);
   DGScopeTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("3 channel",2);
   DGScopeTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("4 channel",3);
@@ -958,16 +1007,6 @@ void AAInterface::FillAcquisitionFrame()
   DGScopeTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("8 channel",7);
   DGScopeTriggerCoincidenceLevel_CBL->GetComboBox()->Select(1);
 
-  // ADAQ combo box to enable specification of trigger type
-  DGScopeTriggerControls_GF->AddFrame(DGScopeTriggerType_CBL = new ADAQComboBoxWithLabel(DGScopeTriggerControls_GF, "Type", DGScopeTriggerType_CBL_ID),
-				      new TGLayoutHints(kLHintsNormal,5,5,5,5));
-  DGScopeTriggerType_CBL->GetComboBox()->AddEntry("External (NIM)",0);
-  DGScopeTriggerType_CBL->GetComboBox()->AddEntry("External (TTL)",1);
-  DGScopeTriggerType_CBL->GetComboBox()->AddEntry("Automatic",2);
-  DGScopeTriggerType_CBL->GetComboBox()->AddEntry("Software",3);
-  DGScopeTriggerType_CBL->GetComboBox()->Select(2);
-  DGScopeTriggerType_CBL->GetComboBox()->Resize(110,20);
-  DGScopeTriggerType_CBL->GetComboBox()->ChangeOptions(DGScopeTriggerType_CBL->GetComboBox()->GetOptions() | kFixedSize);
 
   
   ///////////////////////
@@ -992,7 +1031,7 @@ void AAInterface::FillAcquisitionFrame()
   DGScopePostTriggerSize_NEL->GetEntry()->SetLimitValues(0,100);
   DGScopePostTriggerSize_NEL->GetEntry()->SetNumber(50);
   
-  DGScopeAcquisitionControls_GF->AddFrame(DGScopeAcquisitionTime_NEL = new ADAQNumberEntryWithLabel(DGScopeAcquisitionControls_GF, "Acquisition time [s]", -1),
+  DGScopeAcquisitionControls_GF->AddFrame(DGScopeAcquisitionTime_NEL = new ADAQNumberEntryWithLabel(DGScopeAcquisitionControls_GF, "Acquisition time (s)", -1),
 					  new TGLayoutHints(kLHintsNormal,5,5,5,0));
   DGScopeAcquisitionTime_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
   DGScopeAcquisitionTime_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
@@ -1025,13 +1064,13 @@ void AAInterface::FillAcquisitionFrame()
   DGScopeReadoutControls_GF->SetTitlePos(TGGroupFrame::kCenter);
   DGScopeSettingsFrame->AddFrame(DGScopeReadoutControls_GF, new TGLayoutHints(kLHintsNormal, 5,5,5,5));
   
-  DGScopeReadoutControls_GF->AddFrame(DGScopeMaxEventsBeforeTransfer_NEL = new ADAQNumberEntryWithLabel(DGScopeReadoutControls_GF, "ME transfer events", -1),
+  DGScopeReadoutControls_GF->AddFrame(DGScopeMaxEventsBeforeTransfer_NEL = new ADAQNumberEntryWithLabel(DGScopeReadoutControls_GF, "Events before readout", -1),
 				      new TGLayoutHints(kLHintsNormal, 5,5,5,5));
   DGScopeMaxEventsBeforeTransfer_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
   DGScopeMaxEventsBeforeTransfer_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
   DGScopeMaxEventsBeforeTransfer_NEL->GetEntry()->SetNumber(5);
 
-  DGScopeReadoutControls_GF->AddFrame(DGScopeCheckBufferStatus_TB = new TGTextButton(DGScopeReadoutControls_GF, "Check V1720 Buffer", DGScopeCheckBufferStatus_TB_ID),
+  DGScopeReadoutControls_GF->AddFrame(DGScopeCheckBufferStatus_TB = new TGTextButton(DGScopeReadoutControls_GF, "Check FPGA Buffer", DGScopeCheckBufferStatus_TB_ID),
 				      new TGLayoutHints(kLHintsNormal, 5,5,5,0));
   DGScopeCheckBufferStatus_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
   DGScopeCheckBufferStatus_TB->Resize(150,30);
@@ -1044,7 +1083,7 @@ void AAInterface::FillAcquisitionFrame()
   DGScopeBufferStatus_TE->ChangeOptions(DGScopeBufferStatus_TE->GetOptions() | kFixedSize);
 
 
-  DGScopeReadoutControls_GF->AddFrame(DGScopeUseDataReduction_CB = new TGCheckButton(DGScopeReadoutControls_GF, "Use data reduction", -1),
+  DGScopeReadoutControls_GF->AddFrame(DGScopeUseDataReduction_CB = new TGCheckButton(DGScopeReadoutControls_GF, "Enable data reduction", -1),
 				      new TGLayoutHints(kLHintsNormal, 5,5,5,0));
 
   DGScopeReadoutControls_GF->AddFrame(DGScopeDataReductionFactor_NEL = new ADAQNumberEntryWithLabel(DGScopeReadoutControls_GF, "Data reduction factor", -1),
@@ -1053,13 +1092,8 @@ void AAInterface::FillAcquisitionFrame()
   DGScopeDataReductionFactor_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
   DGScopeDataReductionFactor_NEL->GetEntry()->SetNumber(1);
 
-  DGScopeReadoutControls_GF->AddFrame(DGScopeZSMode_CBL = new ADAQComboBoxWithLabel(DGScopeReadoutControls_GF, "ZS Mode", -1),
+  DGScopeReadoutControls_GF->AddFrame(DGScopeZSEnable_CB = new TGCheckButton(DGScopeReadoutControls_GF, "Enable zero-suppression", -1),
 				      new TGLayoutHints(kLHintsNormal, 5,5,0,5));
-  DGScopeZSMode_CBL->GetComboBox()->Resize(130,20);
-  DGScopeZSMode_CBL->GetComboBox()->AddEntry("Disabled", 0);
-  DGScopeZSMode_CBL->GetComboBox()->AddEntry("Z-length encoding", 2);
-  DGScopeZSMode_CBL->GetComboBox()->AddEntry("Z-suppression", 3);
-  DGScopeZSMode_CBL->GetComboBox()->Select(0);
   
 
 
@@ -1548,7 +1582,7 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
   DGScopeMaxEventsBeforeTransfer_NEL->GetEntry()->SetState(WidgetState);
   DGScopeDataReductionFactor_NEL->GetEntry()->SetState(WidgetState);
 
-  DGScopeZSMode_CBL->GetComboBox()->SetEnabled(WidgetState);
+  DGScopeZSEnable_CB->SetState(ButtonState);
 
   DGScopeSpectrumBinNumber_NEL->GetEntry()->SetState(WidgetState);
   DGScopeSpectrumMinBin_NEL->GetEntry()->SetState(WidgetState);
@@ -1587,37 +1621,73 @@ void AAInterface::SetCalibrationWidgetState(bool WidgetState, EButtonState Butto
 
 void AAInterface::SaveSettings()
 {
-  AASettings *DGSettings = new AASettings;
-  
+  // Acquisition channel 
   for(int ch=0; ch<NumDataChannels; ch++){
-    DGSettings->ChEnable[ch] = DGScopeChannelEnable_CB[ch]->IsDown();
-    DGSettings->ChPosPolarity[ch] = DGScopeChannelPosPolarity_RB[ch]->IsDown();
-    DGSettings->ChNegPolarity[ch] = DGScopeChannelNegPolarity_RB[ch]->IsDown();
-    DGSettings->ChVertPos[ch] = DGScopeVerticalPosition_NEL[ch]->GetEntry()->GetIntNumber();
-    DGSettings->ChDCOffset[ch] = DGScopeDCOffset_NEL[ch]->GetEntry()->GetHexNumber();
-    DGSettings->ChTriggerThreshold[ch] = DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->GetIntNumber();
-    DGSettings->ChBaselineCalcMin[ch] = DGScopeBaselineCalcMin_NEL[ch]->GetEntry()->GetIntNumber();
-    DGSettings->ChBaselineCalcMax[ch] = DGScopeBaselineCalcMax_NEL[ch]->GetEntry()->GetIntNumber();
-    DGSettings->ChZSThreshold[8] = DGScopeZSThreshold_NEL[ch]->GetEntry()->GetIntNumber();
-    DGSettings->ChZSForward[8] = DGScopeZSForward_NEL[ch]->GetEntry()->GetIntNumber();
-    DGSettings->ChZSBackward[8] = DGScopeZSBackward_NEL[ch]->GetEntry()->GetIntNumber();
-    DGSettings->ChZSPosLogic[8] = DGScopeZSPosLogic_RB[ch]->IsDown();
-    DGSettings->ChZSNegLogic[8] = DGScopeZSNegLogic_RB[ch]->IsDown();
+    WidgetSettings->ChEnable[ch] = DGScopeChannelEnable_CB[ch]->IsDown();
+    WidgetSettings->ChPosPolarity[ch] = DGScopeChannelPosPolarity_RB[ch]->IsDown();
+    WidgetSettings->ChNegPolarity[ch] = DGScopeChannelNegPolarity_RB[ch]->IsDown();
+    WidgetSettings->ChVertPos[ch] = DGScopeVerticalPosition_NEL[ch]->GetEntry()->GetIntNumber();
+    WidgetSettings->ChDCOffset[ch] = DGScopeDCOffset_NEL[ch]->GetEntry()->GetHexNumber();
+    WidgetSettings->ChTriggerThreshold[ch] = DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->GetIntNumber();
+    WidgetSettings->ChBaselineCalcMin[ch] = DGScopeBaselineCalcMin_NEL[ch]->GetEntry()->GetIntNumber();
+    WidgetSettings->ChBaselineCalcMax[ch] = DGScopeBaselineCalcMax_NEL[ch]->GetEntry()->GetIntNumber();
+    WidgetSettings->ChZSThreshold[8] = DGScopeZSThreshold_NEL[ch]->GetEntry()->GetIntNumber();
+    WidgetSettings->ChZSForward[8] = DGScopeZSForward_NEL[ch]->GetEntry()->GetIntNumber();
+    WidgetSettings->ChZSBackward[8] = DGScopeZSBackward_NEL[ch]->GetEntry()->GetIntNumber();
+    WidgetSettings->ChZSPosLogic[8] = DGScopeZSPosLogic_RB[ch]->IsDown();
+    WidgetSettings->ChZSNegLogic[8] = DGScopeZSNegLogic_RB[ch]->IsDown();
   }
+
+  /////////////////////////////
+  // Acquisition control subtab
+
+  // Scope display
+  WidgetSettings->WaveformMode = DGScopeWaveform_RB->IsDown();
+  WidgetSettings->SpectrumMode = DGScopeSpectrum_RB->IsDown();
+  WidgetSettings->HighRateMode = DGScopeHighRate_RB->IsDown();
+  WidgetSettings->UltraRateMode = DGScopeUltraRate_RB->IsDown();
+
+  // Trigger control settings
+  WidgetSettings->TriggerCoincidenceEnable = DGScopeTriggerCoincidenceEnable_CB->IsDown();
+  WidgetSettings->TriggerCoincidenceLevel = DGScopeTriggerCoincidenceLevel_CBL->GetComboBox()->GetSelected();
+  WidgetSettings->TriggerType = DGScopeTriggerType_CBL->GetComboBox()->GetSelected();
+  WidgetSettings->TriggerEdge = DGScopeTriggerEdge_CBL->GetComboBox()->GetSelected();
+
+  // Acquisition
+  WidgetSettings->RecordLength = DGScopeRecordLength_NEL->GetEntry()->GetIntNumber();
+  WidgetSettings->PostTrigger = DGScopePostTriggerSize_NEL->GetEntry()->GetIntNumber();
+  WidgetSettings->AcquisitionTime = DGScopeAcquisitionTime_NEL->GetEntry()->GetIntNumber();
+
+  // Readout
+  WidgetSettings->VMETransferEvents = DGScopeMaxEventsBeforeTransfer_NEL->GetEntry()->GetIntNumber();
+  WidgetSettings->EnableDataReduction = DGScopeUseDataReduction_CB->IsDown();
+  WidgetSettings->DataReductionFactor = DGScopeDataReductionFactor_NEL->GetEntry()->GetIntNumber();
+  WidgetSettings->EnableZeroSuppression = DGScopeZSEnable_CB->IsDown();
+
   
-  DGSettings->WaveformMode = DGScopeWaveform_RB->IsDown();
-  DGSettings->SpectrumMode = DGScopeSpectrum_RB->IsDown();
-  DGSettings->HighRateMode = DGScopeHighRate_RB->IsDown();
-  DGSettings->UltraRateMode = DGScopeUltraRate_RB->IsDown();
+  ///////////////////////////
+  // Spectrum creation subtab
 
-  DGSettings->TriggerCoincidenceEnable = DGScopeTriggerCoincidenceEnable_CB->IsDown();
-  DGSettings->TriggerCoincidenceLevel = DGScopeTriggerCoincidenceLevel_CBL->GetComboBox()->GetSelected();
-  DGSettings->TriggerType = DGScopeTriggerType_CBL->GetComboBox()->GetSelected();
-  DGSettings->TriggerEdge = DGScopeTriggerEdge_CBL->GetComboBox()->GetSelected();
+  WidgetSettings->SpectrumChannel = DGScopeSpectrumChannel_CBL->GetComboBox()->GetSelected();
+  WidgetSettings->SpectrumNumBins = DGScopeSpectrumBinNumber_NEL->GetEntry()->GetIntNumber();
+  WidgetSettings->SpectrumMinBin = DGScopeSpectrumMinBin_NEL->GetEntry()->GetIntNumber();
+  WidgetSettings->SpectrumMaxBin = DGScopeSpectrumMinBin_NEL->GetEntry()->GetIntNumber();
+
+  WidgetSettings->SpectrumPulseHeight = DGScopeSpectrumAnalysisHeight_RB->IsDown();
+  WidgetSettings->SpectrumPulseArea = DGScopeSpectrumAnalysisArea_RB->IsDown();
+  WidgetSettings->SpectrumLLD = DGScopeSpectrumAnalysisLLD_NEL->GetEntry()->GetIntNumber();
+  WidgetSettings->SpectrumULD = DGScopeSpectrumAnalysisULD_NEL->GetEntry()->GetIntNumber();
+  WidgetSettings->LDEnable = DGScopeSpectrumAnalysisLDTrigger_CB->IsDown();
+  WidgetSettings->LDChannel = DGScopeSpectrumAnalysisLDTriggerChannel_CBL->GetComboBox()->GetSelected();
+
+  WidgetSettings->SpectrumCalibrationEnable = DGScopeSpectrumCalibration_CB->IsDown();
+  WidgetSettings->SpectrumCalibrationUseSlider = DGScopeSpectrumUseCalibrationSlider_CB->IsDown();
 
   
+  //////////////////////////
+  // Graphic settings subtab
 
-
-
-
+  WidgetSettings->PlotXAxisInSamples = DGScopeDisplayWaveformXAxisSample_RB->IsDown();
+  WidgetSettings->PlotYAxisInADC = DGScopeDisplayWaveformYAxisADC_RB->IsDown();
+  WidgetSettings->PlotLegend = DGScopeDisplayDrawLegend_CB->IsDown();
 }

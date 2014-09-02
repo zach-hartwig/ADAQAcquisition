@@ -13,6 +13,8 @@ class ADAQBridge;
 class ADAQDigitizer;
 class ADAQHighVoltage;
 
+#include "AASettings.hh"
+
 class AAVMEManager : public TObject
 {
 public:
@@ -41,6 +43,8 @@ public:
 
   void SetAcquisitionTimeStart(double T) {AcquisitionTimeStart = T;}
   void SetAcquisitionTimeStop(double T) {AcquisitionTimeStop = T;}
+
+  void SetWidgetSettings(AASettings *WS) {WidgetSettings = WS;}
   
   
   // VME board enable booleans
@@ -88,6 +92,8 @@ private:
   //Objects for controlling timed acquisition periods
   bool AcquisitionTimerEnable;
   double AcquisitionTimeStart, AcquisitionTimeStop;
+
+  AASettings *WidgetSettings;
 
 
 

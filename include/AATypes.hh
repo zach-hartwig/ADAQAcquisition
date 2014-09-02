@@ -141,6 +141,7 @@ enum{
   DGScopeSave_TB_ID,
 
   DGScopeTriggerType_CBL_ID,
+  DGScopeTriggerEdge_CBL_ID,
 
   DGScopeRecordLength_NEL_ID,
   DGScopePostTriggerSize_NEL_ID,

@@ -47,13 +47,14 @@ public:
 
   // Acquisition
   uint32_t RecordLength;
-  uint32_t PostTriggerSize;
+  uint32_t PostTrigger;
   uint32_t AcquisitionTime;
 
   // Readout
-  uint32_t MaxEventsBeforeTransfer;
-  bool DataReductionEnable;
+  uint32_t VMETransferEvents;
+  bool EnableDataReduction;
   uint32_t DataReductionFactor;
+  bool EnableZeroSuppression;
 
   
   ////////////////////////////////////
@@ -72,7 +73,7 @@ public:
   uint32_t LDChannel;
 
   // Calibration
-  bool SpectrummCalibrationEnable;
+  bool SpectrumCalibrationEnable;
   bool SpectrumCalibrationUseSlider;
 
 
