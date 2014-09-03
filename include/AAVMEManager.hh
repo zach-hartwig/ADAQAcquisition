@@ -35,7 +35,7 @@ public:
   void SetVMEConnectionEstablished(bool CE) {VMEConnectionEstablished = CE;}
   bool GetVMEConnectionEstablished() {return VMEConnectionEstablished;}
 
-  void SetWidgetSettings(AASettings *WS) {WidgetSettings = WS;}
+  void SetSettingsPointer(AASettings *TS) {TheSettings = TS;}
   
   // VME board enable booleans
 
@@ -77,7 +77,7 @@ private:
   ADAQDigitizer *DGMgr;
   ADAQHighVoltage *HVMgr;
 
-  AASettings *WidgetSettings;
+  AASettings *TheSettings;
 
 
 

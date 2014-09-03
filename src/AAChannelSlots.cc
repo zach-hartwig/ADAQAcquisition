@@ -2,6 +2,7 @@
 
 #include "AAChannelSlots.hh"
 #include "AAInterface.hh"
+#include "AAVMEManager.hh"
 
 AAChannelSlots::AAChannelSlots(AAInterface *TheInterface)
   : TI(TheInterface)

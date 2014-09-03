@@ -40,8 +40,8 @@ void AAVMEManager::ProgramDigitizers()
 {
   DGMgr->Reset();
 
-  uint32_t DGNumChEnabled;
-  uint32_t DGChEnableMask;
+  uint32_t DGNumChEnabled = 0;
+  uint32_t DGChEnableMask = 0;
 
   ////////////////////////////
   // Channel-specific settings
@@ -49,20 +49,20 @@ void AAVMEManager::ProgramDigitizers()
   for(int ch=0; ch<DGMgr->GetNumChannels(); ch++){
     // Calculate the channel enable mask, where each hex digit
     // represents channel state as "0" == disabled, "1" == enabled
-    if(WidgetSettings->ChEnable[ch]){
+    if(TheSettings->ChEnable[ch]){
       uint32_t Ch = 0x00000001<<ch;
       DGChEnableMask |= Ch;
       DGNumChEnabled++;
     }
     
-    DGMgr->SetChannelDCOffset(ch, WidgetSettings->ChDCOffset[ch]);
-    DGMgr->SetChannelTriggerThreshold(ch, WidgetSettings->ChTriggerThreshold[ch]);
+    DGMgr->SetChannelDCOffset(ch, TheSettings->ChDCOffset[ch]);
+    DGMgr->SetChannelTriggerThreshold(ch, TheSettings->ChTriggerThreshold[ch]);
     
     DGMgr->SetZLEChannelSettings(ch,
-				 WidgetSettings->ChZSThreshold[ch],
-				 WidgetSettings->ChZSBackward[ch],
-				 WidgetSettings->ChZSForward[ch],
-				 WidgetSettings->ChZSPosLogic[ch]);
+				 TheSettings->ChZSThreshold[ch],
+				 TheSettings->ChZSBackward[ch],
+				 TheSettings->ChZSForward[ch],
+				 TheSettings->ChZSPosLogic[ch]);
   }
 
   DGMgr->SetChannelEnableMask(DGChEnableMask);
@@ -73,27 +73,31 @@ void AAVMEManager::ProgramDigitizers()
 
   // Trigger type
 
-  switch(WidgetSettings->TriggerType){
+  switch(TheSettings->TriggerType){
 
   case 0: // External (NIM logic)
     DGMgr->EnableExternalTrigger("NIM");
-    DGMgr->EnableAutoTrigger(DGChEnableMask);
+    DGMgr->DisableAutoTrigger(DGChEnableMask);
     DGMgr->DisableSWTrigger();
+    break;
 
   case 1: // External (TTL logic)
     DGMgr->EnableExternalTrigger("TTL");
-    DGMgr->EnableAutoTrigger(DGChEnableMask);
+    DGMgr->DisableAutoTrigger(DGChEnableMask);
     DGMgr->DisableSWTrigger();
+    break;
     
   case 2: // Automatic
     DGMgr->DisableExternalTrigger();
     DGMgr->EnableAutoTrigger(DGChEnableMask);
     DGMgr->DisableSWTrigger();
-
+    break;
+    
   case 3: // Software
     DGMgr->DisableExternalTrigger();
     DGMgr->DisableAutoTrigger(DGChEnableMask);
     DGMgr->EnableSWTrigger();
+    break;
 
   default:
     break;
@@ -102,7 +106,7 @@ void AAVMEManager::ProgramDigitizers()
   // Trigger edge (channel-specific but treated as group setting)
   
   for(int ch=0; ch<DGMgr->GetNumChannels(); ch++){
-    switch(WidgetSettings->TriggerEdge){
+    switch(TheSettings->TriggerEdge){
       
     case 0: // Rising edge
       DGMgr->SetTriggerEdge(ch, "Rising");
@@ -115,24 +119,26 @@ void AAVMEManager::ProgramDigitizers()
     }
   }
   
-  if(WidgetSettings->TriggerCoincidenceEnable and
-     WidgetSettings->TriggerCoincidenceLevel < DGNumChEnabled)
-    DGMgr->SetTriggerCoincidence(true, WidgetSettings->TriggerCoincidenceLevel);
+  if(TheSettings->TriggerCoincidenceEnable and
+     TheSettings->TriggerCoincidenceLevel < DGNumChEnabled)
+    DGMgr->SetTriggerCoincidence(true, TheSettings->TriggerCoincidenceLevel);
 
 
   ///////////////////////
   // Acquisition settings
 
-  DGMgr->SetRecordLength(WidgetSettings->RecordLength);
-  DGMgr->SetPostTriggerSize(WidgetSettings->PostTrigger);
+  DGMgr->SetRecordLength(TheSettings->RecordLength);
+  DGMgr->SetPostTriggerSize(TheSettings->PostTrigger);
 
 
   ///////////////////
   // Readout settings
 
-  DGMgr->SetMaxNumEventsBLT(WidgetSettings->EventsBeforeReadout);
+  DGMgr->SetMaxNumEventsBLT(TheSettings->EventsBeforeReadout);
 
-  if(WidgetSettings->ZeroSuppressionEnable)
+  cout << TheSettings->EventsBeforeReadout << endl;
+
+  if(TheSettings->ZeroSuppressionEnable)
     DGMgr->SetZSMode("ZLE");
   else
     DGMgr->SetZSMode("None");
@@ -1043,17 +1049,11 @@ void AAInterface::StopAcquisitionSafely()
   // Stop the V1720 from acquiring data first thing
   TheVMEManager->GetDGManager()->SWStopAcquisition();
   
-  // Update button color from green to red and update text to "Start"
-  DGScopeStartStop_TB->SetBackgroundColor(ColorManager->Number2Pixel(2));
-  DGScopeStartStop_TB->SetForegroundColor(ColorManager->Number2Pixel(1));
-  DGScopeStartStop_TB->SetText("Stopped");
+  
   
   // Set bool to disable the DGScope loop
   DGScopeEnable = false;
-  
-  // Set the appropriate state for the relevant widgets
-  SetDGWidgetState(false);
-  
+    
   // Determine if a ROOT file was open and receiving data when the
   // user clicked to stop acquiring data; if so, ensure that the
   // data is written and the ROOT file is properly closed before

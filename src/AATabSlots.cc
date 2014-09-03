@@ -14,6 +14,7 @@
 // ADAQAcquisition
 #include "AATabSlots.hh"
 #include "AAInterface.hh"
+#include "AAVMEManager.hh"
 
 
 AATabSlots::AATabSlots(AAInterface *TheInterface)

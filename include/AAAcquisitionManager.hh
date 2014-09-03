@@ -9,6 +9,8 @@
 
 #ifndef __CINT__
 #include <boost/cstdint.hpp>
+
+#include "ADAQDigitizer.hh"
 #endif
 
 #include <vector>
@@ -18,6 +20,8 @@ using namespace std;
 #include "ADAQRootClasses.hh"
 
 #include "AATypes.hh"
+#include "AAInterface.hh"
+#include "AASettings.hh"
 
 class AAAcquisitionManager : public TObject
 {
@@ -30,6 +34,11 @@ public:
   void StartAcquisition();
   void StopAcquisition();
 
+  void PreAcquisition();
+
+  void CreateWaveformTreeBranches();
+
+
   void SetAcquisitionEnable(bool ATE) {AcquisitionEnable = true;}
   bool GetAcquisitionEnable() {return AcquisitionEnable;}
   
@@ -38,6 +47,9 @@ public:
 
   void SetAcquisitionTimeStart(double T) {AcquisitionTimeStart = T;}
   void SetAcquisitionTimeStop(double T) {AcquisitionTimeStop = T;}
+  
+  void SetInterfacePointer(AAInterface *TI) {TheInterface = TI;}
+  void SetSettingsPointer(AASettings *TS) {TheSettings = TS;}
 
   ClassDef(AAAcquisitionManager, 0);
   
@@ -46,33 +58,56 @@ private:
 
   bool AcquisitionEnable;
 
-
   //Objects for controlling timed acquisition periods
   bool AcquisitionTimerEnable;
   double AcquisitionTimeStart, AcquisitionTimeStop;
+  time_t AcquisitionTimeNow, AcquisitionTimePrev;
 
+#ifndef __CINT__
+  // Variables for CAEN digitizer readout
+  char *EventPointer;
+  CAEN_DGTZ_EventInfo_t EventInfo;
+  CAEN_DGTZ_UINT16_EVENT_t *EventWaveform;
 
+  // Variables for PC buffer readout
+  char *Buffer;
+  uint32_t BufferSize, ReadSize, NumEvents;
+  vector<vector<uint16_t> > Waveforms;
+#endif
+  
+  vector<int> BaselineStart, BaselineStop, BaselineLength;
+  vector<double> BaselineValue;
 
+  vector<double> Polarity;
 
+  int LLD, ULD;
+  double SampleHeight, TriggerHeight;
+  double PulseHeight, PulseArea;
 
-  TGraph *Waveform_G[8];
-  TH1F *Spectrum_H[8];
+  vector<bool> CalibrationEnable;
+  vector<TGraph *> CalibrationCurves;
+  vector<ADAQChannelCalibrationData> CalibrationData;
+  
+  vector<TH1F *> Spectrum_H;
+
+  bool WriteWaveformToTree;
+  bool BranchWaveformTree;
+
 
   TFile *OutputDataFile;
   TTree *WaveformTree;
-  bool BranchWaveformTree;
+
   ADAQRootMeasParams *MeasParams;
   TObjString *MeasComment;
   bool ROOTFileOpen;
-
-  vector<bool> UseCalibrationManager;
-  vector<TGraph *> CalibrationManager;
-  vector<ADAQChannelCalibrationData> CalibrationData;
-
+  
   // Strings for file names, extensions
   string DataFileName, DataFileExtension;
   string SpectrumFileName, SpectrumFileExtension;
   string GraphicsFileName, GraphicsFileExtension;
+
+  AAInterface *TheInterface;
+  AASettings *TheSettings;
 
 
 };

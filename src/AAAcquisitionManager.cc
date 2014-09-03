@@ -1,6 +1,7 @@
 #include <TSystem.h>
 
 #include <iostream>
+#include <sstream>
 
 #include "AAAcquisitionManager.hh"
 #include "AAVMEManager.hh"
@@ -14,11 +15,37 @@ AAAcquisitionManager *AAAcquisitionManager::GetInstance()
 
 
 AAAcquisitionManager::AAAcquisitionManager()
-  : AcquisitionEnable(false)
+  : AcquisitionEnable(false),
+    AcquisitionTimeStart(0), AcquisitionTimeStop(0), 
+    AcquisitionTimeNow(0), AcquisitionTimePrev(0),
+    EventPointer(NULL), EventWaveform(NULL), Buffer(NULL),
+    BufferSize(0), ReadSize(0), NumEvents(0),
+    LLD(0), ULD(0), SampleHeight(0.), TriggerHeight(0.),
+    PulseHeight(0.), PulseArea(0.),
+    BranchWaveformTree(false),
+    WriteWaveformToTree(false)
 {
   if(TheAcquisitionManager)
     cout << "\nError! The AcquisitionManager was constructed twice!\n" << endl;
   TheAcquisitionManager = this;
+  
+  ADAQDigitizer *DGManager = AAVMEManager::GetInstance()->GetDGManager();
+  
+  int DGChannels = DGManager->GetNumChannels();
+  
+  for(int ch=0; ch<DGManager->GetNumChannels(); ch++){
+    BaselineStart.push_back(0);
+    BaselineStop.push_back(0);
+    BaselineLength.push_back(0);
+    BaselineValue.push_back(0);
+    
+    Polarity.push_back(0.);
+    
+    CalibrationEnable.push_back(false);
+    CalibrationCurves.push_back(new TGraph);
+    
+    Spectrum_H.push_back(new TH1F);
+  }
 }
 
 
@@ -26,63 +53,307 @@ AAAcquisitionManager::~AAAcquisitionManager()
 {;}
 
 
+void AAAcquisitionManager::PreAcquisition()
+{
+  ADAQDigitizer *DGManager = AAVMEManager::GetInstance()->GetDGManager();
+
+  int DGChannels = DGManager->GetNumChannels();
+
+  /////////////////////////////////////////////////
+  // Initialize general member data for acquisition
+
+  // Acquisition timer
+
+  AcquisitionTimeNow = 0;
+  AcquisitionTimePrev = 0;
+
+  // Baseline calculation
+  
+  for(int ch=0; ch<DGChannels; ch++){
+    BaselineStart[ch] = TheSettings->ChBaselineCalcMin[ch];
+    BaselineStop[ch] = TheSettings->ChBaselineCalcMax[ch];
+    BaselineLength[ch] = BaselineStop[ch] - BaselineStart[ch];
+    BaselineValue[ch] = 0.;
+    
+    if(TheSettings->ChPosPolarity[ch])
+      Polarity[ch] = 1.;
+    else
+      Polarity[ch] = -1.;
+  }
+  
+  // Waveform readout
+  
+  int WaveformLength = TheSettings->RecordLength;
+  if(TheSettings->DataReductionEnable)
+    WaveformLength /= TheSettings->DataReductionFactor;
+  
+  Waveforms.clear();
+  Waveforms.resize(DGChannels);
+  for(int ch=0; ch<DGChannels; ch++){
+    if(TheSettings->ChEnable[ch])
+      Waveforms[ch].resize(WaveformLength);
+    else
+      Waveforms[ch].resize(0);
+  }
+
+  // Calibration
+
+  // Pulse spectra creation
+  LLD = TheSettings->SpectrumLLD;
+  ULD = TheSettings->SpectrumULD;
+
+  for(int ch=0; ch<DGChannels; ch++){
+    stringstream SS;
+    SS << "Spectrum[Ch" << ch << "]";
+    string Name = SS.str();
+
+    if(Spectrum_H[ch]) delete Spectrum_H[ch];
+    
+    Spectrum_H[ch] = new TH1F(Name.c_str(), 
+			      Name.c_str(), 
+			      TheSettings->SpectrumNumBins,
+			      TheSettings->SpectrumMinBin,
+			      TheSettings->SpectrumMaxBin);
+  }
+  
+  // Initialize CAEN digitizer readout data for acquisition
+
+  EventPointer = NULL;
+  EventWaveform = NULL;
+  Buffer = NULL;
+  BufferSize = ReadSize = NumEvents = 0;
+  
+  AAVMEManager::GetInstance()->GetDGManager()->MallocReadoutBuffer(&Buffer, &BufferSize);
+}
+
+
 void AAAcquisitionManager::StartAcquisition()
 {
-  AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
+  ADAQDigitizer *DGManager = AAVMEManager::GetInstance()->GetDGManager();
+  
+  // Initialize all variables before acquisition begins
+  PreAcquisition();
+
+  DGManager->SWStartAcquisition();
 
   AcquisitionEnable = true;
 
-  time_t AcquisitionTimeNow = 0;
-  time_t AcquisitionTimePrev = 0;
-
   while(AcquisitionEnable){
     
+    // Handle acquisition actions in separate ROOT thread
     gSystem->ProcessEvents();
     
-    cout << "Acquiring data ..." << endl;
-    usleep(100000);
+    // Get the number of events stored in the FPGA buffer
+    DGManager->GetRegisterValue(0x812c, &NumEvents);
+    
+    // Prevent FPGA->PC readout unless the number events exceeds the
+    // number specified by the user explicity for readout (efficiency)
+    if(NumEvents < TheSettings->EventsBeforeReadout)
+      continue;
 
+    // Perform the FPGA buffer -> PC buffer data readout
+    DGManager->ReadData(Buffer, &ReadSize);    
+    
+    // For each event stored in the PC memory buffer...
+    for(uint32_t evt=0; evt<NumEvents; evt++){
 
-    if(AcquisitionTimerEnable){
-
-      // Calculate the elapsed time since timer started
-      AcquisitionTimePrev = AcquisitionTimeNow;
-      AcquisitionTimeNow = time(NULL) - AcquisitionTimeStart; // [seconds]
-      
-      // Update the ROOT widget only every second to notify the user
-      // of progress in the countdown. Note that the
-      // AcquisitionTime_* variables are integers. Therefore, this
-      // conditional will only be satisfied right when the second
-      // ticks over and "_Prev" time is different from"_Now" time
-      // for only a single pass of the while loop. This should
-      // maximize efficiency of the acquisition loop.
-      if(AcquisitionTimePrev != AcquisitionTimeNow){
-	int Countdown = AcquisitionTimeStop - AcquisitionTimeNow;
-
-	cout << Countdown << endl;
-
-	//DGScopeAcquisitionTimer_NEFL->GetEntry()->SetNumber(Countdown);
+      if(AcquisitionTimerEnable){
+	
+	// Calculate the elapsed time since the timer was started
+	AcquisitionTimePrev = AcquisitionTimeNow;
+	AcquisitionTimeNow = time(NULL) - AcquisitionTimeStart; // [seconds]
+	
+	// Update the AQTimer widget only every second
+	if(AcquisitionTimePrev != AcquisitionTimeNow){
+	  int TimeRemaining = AcquisitionTimeStop - AcquisitionTimeNow;
+	  TheInterface->UpdateAQTimer(TimeRemaining);
+	}
+	
+	// If the timer has reached zero, i.e. the acquisition loop has
+	// run for the duration specified, then turn the acquisition off
+	if(AcquisitionTimeNow >= AcquisitionTimeStop)
+	  StopAcquisition();
       }
       
-      // If the timer has reached zero, i.e. the acquisition loop has
-      // run for the duration specified then turn the acquisition off
-      if(AcquisitionTimeNow >= AcquisitionTimeStop)
-	StopAcquisition();
+      // Populate the EventInfo structure and assign address to the EventPointer
+      DGManager->GetEventInfo(Buffer, ReadSize, evt, &EventInfo, &EventPointer);
+      
+      //  Fill the EventWaveform structure with digitized signal voltages
+      DGManager->DecodeEvent(EventPointer, &EventWaveform);
+
+      // Prevent waveform analysis if there is nothing to analyze,
+      // i.e. seg-fault protection just in case!
+      if(EventWaveform == NULL)
+	continue;
+      
+      // Iterate over the digitizer channels that are enabled
+      for(int ch=0; ch<DGManager->GetNumChannels(); ch++){
+	
+	if(!TheSettings->ChEnable[ch])
+	  continue;
+
+	PulseHeight = PulseArea = 0.;
+	
+	for(int sample=0; sample<TheSettings->RecordLength; sample++){
+
+	  /////////////////////////
+	  // Data reduction readout
+
+	  if(TheSettings->DataReductionEnable){
+	    if(sample % TheSettings->DataReductionFactor == 0){
+	      int Index = sample / TheSettings->DataReductionFactor;
+	      Waveforms[ch][Index] = EventWaveform->DataChannel[ch][sample];
+	    }
+	  }
+
+
+	  ///////////////////
+	  // Standard readout
+
+	  else
+	    Waveforms[ch][sample] = EventWaveform->DataChannel[ch][sample];
+
+
+	  ///////////////////
+	  // Pulse processing
+
+	  if(!TheSettings->UltraRateMode){
+	  
+	    // Calculate the baseline by taking the average of all
+	    // samples that fall within the baseline calculation region
+	    if(sample > BaselineStart[ch] and sample <= BaselineStop[ch])
+	      BaselineValue[ch] += Waveforms[ch][sample] * 1.0 / BaselineLength[ch]; // [ADC]
+	    
+	    // Analyze the pulses to obtain pulse spectra
+	    else if(sample >= BaselineStop[ch]){
+	      
+	      // Calculate the waveform sample distance from the baseline
+	      SampleHeight = Polarity[ch] * (Waveforms[ch][sample] - BaselineValue[ch]);
+	      TriggerHeight = Polarity[ch] * (TheSettings->ChTriggerThreshold[ch] - BaselineValue[ch]);
+	      
+	      // Simple algorithm to determine maximum peak height in the pulse
+	      if(SampleHeight > PulseHeight)// and SampleHeight > TriggerHeight)
+		PulseHeight = SampleHeight;
+	      
+	      // Integrate the area under the pulse
+	      if(SampleHeight > TriggerHeight)
+		PulseArea += SampleHeight;
+	    }
+	  }
+	}
+
+	if(!TheSettings->UltraRateMode){
+	  
+	  if(CalibrationEnable[ch]){
+	    
+	    // Use the calibration curves (ROOT TGraph's) to convert
+	    // the pulse height/area from ADC to the user's energy
+	    // units using linear interpolation calibration points
+	    if(TheSettings->SpectrumPulseHeight)
+	      PulseHeight = CalibrationCurves[ch]->Eval(PulseHeight);
+	    else
+	      PulseArea = CalibrationCurves[ch]->Eval(PulseArea);
+	  }
+	  
+
+	  // Pulse height spectrum
+	  if(TheSettings->SpectrumPulseHeight){
+	    if(PulseHeight > LLD and PulseHeight < ULD){
+	      Spectrum_H[ch]->Fill(PulseHeight);
+	      
+	      if(TheSettings->LDEnable and ch == TheSettings->LDChannel)
+		WriteWaveformToTree = true;
+	    }
+	  }
+	  
+	  // Pulse area spectrum
+	  else{
+	    if(PulseArea > LLD and PulseArea < ULD){
+	      Spectrum_H[ch]->Fill(PulseArea);
+	      
+	      if(TheSettings->LDEnable and ch == TheSettings->LDChannel)
+		WriteWaveformToTree = true;
+	    }
+	  }
+	}
+	
+	if(BranchWaveformTree)
+	  CreateWaveformTreeBranches();
+	
+      }
+
+      if(WaveformTree and false){//TheSettings->DataStorageEnable){
+	
+	// If the user has specified that the LLD/ULD should be used
+	// as the "trigger" (for plotting the PAS/PHS and writing to a
+	// ROOT file) but the present waveform is NOT within the
+	// LLD/ULD window (indicated by the DiscrOKForOutput bool set
+	// above during analysis of the readout waveform then do NOT
+	// write the waveform to the ROOT TTree
+	if(TheSettings->LDEnable and !WriteWaveformToTree)
+	  continue;
+	
+	WaveformTree->Fill();
+	
+	// Reset the bool used to determine if the LLD/ULD window
+	// should be used as the "trigger" for writing waveforms
+	WriteWaveformToTree = false;
+      }
+
+
+
+
+
     }
+    // Free the PC memory allocated to the event
+    DGManager->FreeEvent(&EventWaveform);
   }
+
+  // Free the PC memory allocated to the readout buffer
+  DGManager->FreeReadoutBuffer(&Buffer);
 }
 
 
 void AAAcquisitionManager::StopAcquisition()
 {
+  AAVMEManager::GetInstance()->GetDGManager()->SWStopAcquisition();
+
   AcquisitionEnable = false;
 
-  if(AcquisitionTimerEnable)
+  if(AcquisitionTimerEnable){
     AcquisitionTimerEnable = false;
+    TheInterface->UpdateAfterAQTimerStopped(ROOTFileOpen);
+  }
 
   if(ROOTFileOpen){
   }
 }
+
+
+
+void AAAcquisitionManager::CreateWaveformTreeBranches()
+{
+  int DGChannels = AAVMEManager::GetInstance()->GetDGManager()->GetNumChannels();
+  
+  for(int ch=0; ch<DGChannels; ch++){
+    ostringstream SS;
+
+    // Create a channel-specific branch name...
+    SS << "VoltageInADC_Ch" << ch;
+    string BranchName = SS.str();
+    
+    // ...and use it to specify a channel-specific branch in
+    /// the waveform TTree The branch holds the address of the
+    // vector that contains the waveform as a function of
+    // record length and the RecordLength of each waveform
+    WaveformTree->Branch(BranchName.c_str(), &Waveforms[ch]);
+  }
+
+  // Set the boolean to false to prevent recreating branches during
+  // next iteration of the acquisition loop
+  BranchWaveformTree = false;
+}
+
   
 
 
@@ -109,81 +380,7 @@ void AAAcquisitionManager::StopAcquisition()
 */
 
 
-
-
-  
-
-  /*
-  /////////////////////////////////////////////////
-  // Initialize local and class member variables //
-  /////////////////////////////////////////////////
-
-  /////////////////////////////////////////
-  // Variables for V1720 digitizer settings
-
-  // Get the record length, ie, number of 4ns samples in acquisition window
-  uint32_t RecordLength = DGScopeRecordLength_NEL->GetEntry()->GetIntNumber();
-
-  // Get the data thinning factor 
-  bool UseDataReduction = DGScopeUseDataReduction_CB->IsDown();
-  uint32_t DataReductionFactor = DGScopeDataReductionFactor_NEL->GetEntry()->GetIntNumber();
-
-  if(RecordLength % DataReductionFactor != 0 && UseDataReduction){
-    cout << "\nError! (RecordLength % DataReductionFactor) MUST equal zero to avoid grevious errors!\n"
-	 <<   "       Adjust the data reduction factor and restart acquisition ...\n"
-	 << endl;
-
-    StopAcquisitionSafely();
-  }
-  
-  // Get the percentage of acquisition window that occurs after the trigger
-  uint32_t PostTriggerSize = DGScopePostTriggerSize_NEL->GetEntry()->GetIntNumber();
-
-  // Variables for graphing the digitized waveforms as time versus
-  // voltage. Units are determined by the user's selections when the
-  // arrays are filled inside the acquisition loop
-  double Time_graph[RecordLength], Voltage_graph[RecordLength]; 
-
-  // The following variables must be set / composed of values from
-  // all 8 digitzer channels. Declare them and then initialize.
-   
-  // Variables for channel trigger thresholds, calculation of the
-  // channel baselines
-  uint32_t ChannelTriggerThreshold[8]; // [ADC]
-  uint32_t BaselineCalcMin[8], BaselineCalcMax[8], BaselineCalcLength[8]; // [sample]
-  double BaselineCalcResult[8]; // [ADC]
-
-  // Variable to hold the channel enable mask, ie, sets which
-  // digitizer channels are actively taking data
-  uint32_t ChannelEnableMask = 0;
-
-  // Variable for total number of enabled digitizer channels
-  uint32_t NumDGChannelsEnabled = 0;
-
-  for(int ch=0; ch<NumDataChannels; ch++){
-
-    // Get each channel's trigger threshold]
-    ChannelTriggerThreshold[ch] = DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->GetIntNumber(); // [ADC]
-
-    // Get each channel's baseline calculation region (min, max, length)
-    BaselineCalcMin[ch] = DGScopeBaselineCalcMin_NEL[ch]->GetEntry()->GetIntNumber(); // [sample]
-    BaselineCalcMax[ch] = DGScopeBaselineCalcMax_NEL[ch]->GetEntry()->GetIntNumber(); // [sample]
-    BaselineCalcLength[ch] = BaselineCalcMax[ch]-BaselineCalcMin[ch]; // [sample]
-    BaselineCalcResult[ch] = 0; // [ADC] Result is calculated during acquisition
-
-    // Calculate the channel enable mask, which is a 32-bit integer
-    // describing which of the 8 digitizer channels are enabled. A
-    // 32-bit integer has 8 bytes or 8 "hex" digits; a hex digit set
-    // to "1" in the n-th position in the hex representation indicates
-    // that the n-th channel is enabled. For example, if the
-    // ChannelEnableMask is equal to 0x00110100 then channels 2, 4 and
-    // 5 are enabled for digitization
-    if(DGScopeChannelEnable_CB[ch]->IsDisabledAndSelected()){
-      uint32_t Ch = 0x00000001<<ch;
-      ChannelEnableMask |= Ch;
-      NumDGChannelsEnabled++;
-    }
-  }
+/*
 
   // Ensure that at least one channel is enabled in the channel
   // enabled bit mask; if not, alert the user and return without
@@ -203,18 +400,6 @@ void AAAcquisitionManager::StopAcquisition()
     LowestChannelMask <<= 1;
     LowestEnabledChannel++;
   }
-
-  // Get the desired triggering mode (external, automatic, or software)
-  int TriggerMode = DGScopeTriggerMode_CBL->GetComboBox()->GetSelected(); 
-   
-  // Get the trigger coincidence level (number of channels in coincidence - 1);
-  uint32_t TriggerCoincidenceLevel = DGScopeTriggerCoincidenceLevel_CBL->GetComboBox()->GetSelected();
-   
-  // Bit shift the coincidence level bits into position 24:26 of a
-  // 32-bit integer such that they may be added to the digitizer's
-  // TriggerSourceEnableMask with the "or" bit operator
-  uint32_t TriggerCoincidenceLevel_BitShifted = TriggerCoincidenceLevel << 24;
-   
 
   /////////////////////////////////////////////////
   // Variables for waveform/spectrum graph settings
@@ -249,14 +434,6 @@ void AAAcquisitionManager::StopAcquisition()
   if(PlotYAxisInADC)
     ConvertVoltageToGraphUnits = 1.;
    
-  // Get the signal polarity setting for each channel
-  double SignalPolarity[NumDataChannels];
-  for(int ch=0; ch<NumDataChannels; ch++){
-    if(DGScopeChannelPosPolarity_RB[ch]->IsDown())
-      SignalPolarity[ch] = 1.0;
-    else
-      SignalPolarity[ch] = -1.0;
-  }
    
   // The following variables are declared here but used/set within
   // the acquisition loop
@@ -268,49 +445,8 @@ void AAAcquisitionManager::StopAcquisition()
   double VertPosOffset, ChTrigThr;
   VertPosOffset = ChTrigThr = 0;
 
-  // Variables for baseline calculation. These variables are used
-  // within the acquisition loop.
-  double BaseCalcMin, BaseCalcMax, BaseCalcResult;
-  BaseCalcMin = BaseCalcMax = BaseCalcResult = 0;
-
-  // Variables for waveform sample height and channel trigger
-  // threshold hold height above the baseline
-  double SampleHeight = 0.;
-  double TriggerHeight = 0.;
-
-  // Variables contain the pulse height and integrated pulse area
-  // values. Units are in [ADC] until transformed by calibration
-  // factor into units of [keV]
-  double PulseHeight = 0.;
-  double PulseArea = 0.;
-   
   // The active channel to histogram
   uint32_t ChannelToHistogram = 0;
-
-  // Bools to determine whether the incoming waveforms are filted into
-  // a spectrum by pulse height (maximum value of voltage above the
-  // baseline during the entire record length) or by pulse area
-  // (integrated area between the baseline and the voltage trace)
-  bool AnalyzePulseHeight = DGScopeSpectrumAnalysisHeight_RB->IsDown();
-  bool AnalyzePulseArea = DGScopeSpectrumAnalysisArea_RB->IsDown();
-
-  // Lower/Upper threshold values for adding a pulse to the pulse
-  // spectrum histogram / output to ROOT TFile
-  int LowerLevelDiscr = DGScopeSpectrumAnalysisLLD_NEL->GetEntry()->GetIntNumber();
-  int UpperLevelDiscr = DGScopeSpectrumAnalysisULD_NEL->GetEntry()->GetIntNumber();
-  bool DiscrOKForOutput = false;
-   
-  // Iterate through all 8 digitizer channels
-  for(int ch=0; ch<NumDataChannels; ch++){
-     
-    // Initialize pulse spectrum histograms for each channel,
-    // deleting the previous ones if they exist to prevent memory
-    // leaks. Assign the correct graphical styles as necessary.
-    if(DGScopeSpectrum_H[ch]) delete DGScopeSpectrum_H[ch];
-    DGScopeSpectrum_H[ch] = new TH1F("","",bins,minBin,maxBin);
-    DGScopeSpectrum_H[ch]->SetLineWidth(2);
-    DGScopeSpectrum_H[ch]->SetLineColor(ch+1);
-  }
 
   // Set the style of the histogram statistics box
   gStyle->SetOptStat("ne");
@@ -321,178 +457,6 @@ void AAAcquisitionManager::StopAcquisition()
     Time_graph[sample] = sample * ConvertTimeToGraphUnits;
 
   // Assign values to use if built in debug mode (Not used)
-
-//  bool DebugModeEnabled = false;
-//  int DebugModeWaveformGenerationPause = 1000;
-//  if(BuildInDebugMode){
-//    DebugModeEnabled = DebugModeEnable_CB->IsDown();
-//    DebugModeWaveformGenerationPause = DebugModeWaveformGenerationPause_NEL->GetEntry()->GetIntNumber();
-//  }
-
-  // Assign the frequency (in number of histogram entries) with which
-  // the canvas will be updated
-  int SpectrumRefreshRate = DGScopeSpectrumRefreshRate_NEL->GetEntry()->GetIntNumber();
-
-  // Assign values to be used with the acquisition timer.
-  time_t AcquisitionTime_Now, AcquisitionTime_Prev;
-  AcquisitionTime_Now = AcquisitionTime_Prev = 0;
-
-
-  //////////////////////////////////////////////
-  // Prepare the ROOT output file and objects //
-  //////////////////////////////////////////////
-
-  // Define a vector of vectors that will hold the digitized waveforms
-  // in all channels (units of [ADC]). The outer vector (size 8)
-  // represents each digitizer channel; the inner vector (size
-  // RecordLength) represents the waveform. The start address of each
-  // outer vector will be used to create a unique branch in the
-  // waveform TTree object to store each of the 8 digitizer channels 
-  vector<vector<int> > Voltage;
-  vector<vector<int> > VoltageTmp;
-
-  uint32_t factor = RecordLength / DataReductionFactor;
-
-  // Resize the outer and inner vector to the appropriate, fixed size
-  Voltage.resize(NumDataChannels);
-  VoltageTmp.resize(NumDataChannels);
-  for(int ch=0; ch<NumDataChannels; ch++){
-    if(DGScopeChannelEnable_CB[ch]->IsDisabledAndSelected()){
-      Voltage[ch].resize(RecordLength);
-      VoltageTmp[ch].resize(factor);
-    }
-    else{
-      Voltage[ch].resize(0);
-      VoltageTmp[ch].resize(0);
-    }
-  }
-  
-
-  ///////////////////////////////////////////////////////
-  // Program V1720 digitizer with acquisition settings //
-  ///////////////////////////////////////////////////////
-
-  ///////////////////////////////////////////////
-  // Variables for digitizer readout
-
-  // CAEN_DGTZ type variables for readout of the digitized waveforms
-  // from the V1720 FPGA buffer onto the PC buffer
-  char *EventPointer = NULL;
-  CAEN_DGTZ_EventInfo_t EventInfo;
-  CAEN_DGTZ_UINT16_EVENT_t *EventWaveform = NULL;
-
-  uint32_t FPGAEventAddress = 0x812c;
-  uint32_t NumFPGAEvents = 0;
-
-  // Variables for PC buffer
-  char *Buffer = NULL;
-  uint32_t BufferSize;
-  uint32_t Size, NumEvents;
-
-  // Reset the digitizer to default state
-  DGManager->Reset();
-
-  // Set the trigger threshold, DC offsets, and ZS parameters
-  // individually for each of the 8 digitizer channels
-  for(int ch=0; ch<NumDataChannels; ch++){
-    DGManager->SetChannelTriggerThreshold(ch,ChannelTriggerThreshold[ch]);
-    DGManager->SetChannelDCOffset(ch, DGScopeDCOffset_NEL[ch]->GetEntry()->GetHexNumber());
-
-    int32_t Threshold = DGScopeZSThreshold_NEL[ch]->GetEntry()->GetIntNumber();
-    int32_t Samples = DGScopeZSSamples_NEL[ch]->GetEntry()->GetIntNumber();
-    DGManager->SetChannelZSParams(ch, 0, Threshold, Samples);
-  }
-
-  // Set the trigger mode
-  switch(TriggerMode){
-
-    // Mode: External trigger (NIM logic input signal)
-  case 0:{
-    DGManager->SetExtTriggerInputMode(CAEN_DGTZ_TRGMODE_ACQ_ONLY);
-    DGManager->SetChannelSelfTrigger(CAEN_DGTZ_TRGMODE_DISABLED, ChannelEnableMask);
-    DGManager->SetSWTriggerMode(CAEN_DGTZ_TRGMODE_DISABLED);
-
-    // Get the value of the front panel I/O control register
-    uint32_t FrontPanelIOControlRegister = 0x811C;
-    uint32_t FrontPanelIOControlValue = 0;
-    DGManager->GetRegisterValue(FrontPanelIOControlRegister, &FrontPanelIOControlValue);
-
-    // When Bit[0] of 0x811C == 0, NIM logic is used for input; so
-    // clear Bit[0] using bitwise ops
-    FrontPanelIOControlValue &= ~(1<<0);
-    DGManager->SetRegisterValue(FrontPanelIOControlRegister, FrontPanelIOControlValue);
-
-    break;
-  }
-
-    // Mode: External trigger (TTL logic input signal)
-  case 1:{
-    DGManager->SetExtTriggerInputMode(CAEN_DGTZ_TRGMODE_ACQ_ONLY);
-    DGManager->SetChannelSelfTrigger(CAEN_DGTZ_TRGMODE_DISABLED, ChannelEnableMask);
-    DGManager->SetSWTriggerMode(CAEN_DGTZ_TRGMODE_DISABLED);
-
-    // Get the value of the front panel I/O control register
-    uint32_t FrontPanelIOControlRegister = 0x811C;
-    uint32_t FrontPanelIOControlValue = 0;
-    DGManager->GetRegisterValue(FrontPanelIOControlRegister, &FrontPanelIOControlValue);
-
-    // When Bit[0] of 0x811C == 1, TTL logic is used for input; so set
-    // Bit[0] using bitwise ops
-    FrontPanelIOControlValue |= 1<<0;
-    DGManager->SetRegisterValue(FrontPanelIOControlRegister, FrontPanelIOControlValue);
-  }
-
-    // Mode: Automatic channel threshold triggering
-  case 2:
-    DGManager->SetExtTriggerInputMode(CAEN_DGTZ_TRGMODE_DISABLED);
-    DGManager->SetChannelSelfTrigger(CAEN_DGTZ_TRGMODE_ACQ_ONLY, ChannelEnableMask);
-    DGManager->SetSWTriggerMode(CAEN_DGTZ_TRGMODE_DISABLED);
-    break;
-
-    // Mode: Software trigger
-  case 3:
-    DGManager->SetExtTriggerInputMode(CAEN_DGTZ_TRGMODE_DISABLED);
-    DGManager->SetChannelSelfTrigger(CAEN_DGTZ_TRGMODE_DISABLED, ChannelEnableMask);
-    DGManager->SetSWTriggerMode(CAEN_DGTZ_TRGMODE_ACQ_ONLY);
-    break;
-  }
-
-  // Set the record length of the acquisition window
-  DGManager->SetRecordLength(RecordLength);
-
-  // Set the channel enable mask
-  DGManager->SetChannelEnableMask(ChannelEnableMask);
-
-  // Set the Zero-Supperssion mode
-  DGManager->SetZeroSuppressionMode(DGScopeZSMode_CBL->GetComboBox()->GetSelected());
-
-  // If the digitizer is to be operated in coincidence mode and "the
-  // conditions are right" as Oye says, set the trigger source mask by
-  // "or" bit operating  bits 24:26 of the preset trigger coincidence
-  // level variable into the digitizer's trigger source enable mask
-  if(TriggerCoincidenceLevel<NumDGChannelsEnabled 
-     and DGScopeTriggerCoincidenceEnable_CB->IsDisabledAndSelected()){
-    uint32_t TriggerSourceEnableMask = 0;
-    DGManager->GetRegisterValue(0x810C,&TriggerSourceEnableMask);
-    TriggerSourceEnableMask = TriggerSourceEnableMask | TriggerCoincidenceLevel_BitShifted;
-    DGManager->SetRegisterValue(0x810C,TriggerSourceEnableMask);
-  }
-
-  // Set the maximum number of events that will be accumulated before
-  // the V1720 FPGA buffer is dumped to PC memory
-  uint32_t MaxEvents = DGScopeMaxEventsBeforeTransfer_NEL->GetEntry()->GetIntNumber();
-  DGManager->SetMaxNumEventsBLT(MaxEvents);
-
-  // Allocate memory for the readout buffer
-  DGManager->MallocReadoutBuffer(&Buffer, &Size);
-
-  // Set the percentage of acquisition window that occurs after trigger
-  DGManager->SetPostTriggerSize(PostTriggerSize);
-
-  //timespec preA, postA;
-
-  // Set the V1720 to begin acquiring data
-  DGManager->SWStartAcquisition();
 
 
   ///////////////////////////////////////////////////
@@ -514,16 +478,6 @@ void AAAcquisitionManager::StopAcquisition()
   //              before being automatically readout into the PC buffer
   // Record Length == the length of the acquisition window in 4 ns units
   // Sample ==  a single value between 0 and 4095 of digitized voltage
-
-
-  // The acquisition and data plotting loop is run provided that the
-  // DGScopeEnable bool is true (see CyDAQRootGUI::HandleScopeTextButtons)
-
-  while(AcquisitionEnable){
-
-
-    /////////////////////////////////////////////
-    // Create separate ROOT thread for processing
 
 
     gSystem->ProcessEvents();
@@ -558,24 +512,6 @@ void AAAcquisitionManager::StopAcquisition()
       yMax *= DGManager->GetMaxBit()*ConvertVoltageToGraphUnits;
     }
     
-
-    /////////////////////
-    // Begin data readout
-
-    // Get number of events in FPGA buffer
-    DGManager->GetRegisterValue(FPGAEventAddress, &NumFPGAEvents);
-
-    // To reduce overhead, only readout the FPGA buffer when it has
-    // reached the user-set max events
-    if(NumFPGAEvents < MaxEvents)
-      continue;
-    
-    // Read data from the V1720 buffer into the PC buffer
-    DGManager->ReadData(Buffer, &BufferSize);    
-
-    // Determine the number of events in the buffer
-
-    DGManager->GetNumEvents(Buffer, BufferSize, &NumEvents);
 
     // For each event in the PC memory buffer...
     for(uint32_t evt=0; evt<NumEvents; evt++){
@@ -658,19 +594,6 @@ void AAAcquisitionManager::StopAcquisition()
 	    
 	    // Analyze the pulses to obtain pulse spectra
 	    else if(sample >= BaselineCalcMax[ch]){
-	      
-	      // Calculate the voltage ("height") of the sample above
-	      // the baseline, using the signal polarity to ensure SampleHeight>0
-	      SampleHeight = SignalPolarity[ch] * (Voltage[ch][sample] - BaselineCalcResult[ch]);
-	      TriggerHeight = SignalPolarity[ch] * (DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->GetIntNumber() - BaselineCalcResult[ch]);
-	      
-	      // Simple algorithm to determine maximum peak height in the pulse
-	      if(SampleHeight > PulseHeight and SampleHeight > TriggerHeight)
-		PulseHeight = SampleHeight;
-	      
-	      // Integrate the area under the pulse
-	      if(SampleHeight > TriggerHeight)
-		PulseArea += SampleHeight;
 	    }
 	  }
 	}
@@ -962,25 +885,9 @@ void AAAcquisitionManager::StopAcquisition()
       DGManager->FreeEvent(&EventWaveform);
     }
 
-
-    //    long elapsedA_sec = preA.tv_sec - postA.tv_sec;
-    //    long elapsedA_nsec = 0;
-    //    if(postA.tv_nsec > preA.tv_nsec)
-    //      elapsedA_nsec = postA.tv_nsec - preA.tv_nsec;
-    //    else
-    //      elapsedA_nsec = (1e9 + postA.tv_nsec) - preA.tv_nsec;
-    
-    //    cout << std::dec 
-    //	 << "Elapsed time: " << elapsedA_sec << "s \t " << elapsedA_nsec << "ns" 
-    //	 << endl;
 */
-  //  } // End DGScope acquisition 'while' loop
-  
-  // Once the acquisition session has concluded, free the memory that
-  // was allocated to the V1720 and PC event buffers
-  //DGManager->FreeReadoutBuffer(&Buffer);
 
-//}
+
 
 
 

@@ -24,13 +24,14 @@ using namespace std;
 
 #include "ADAQRootClasses.hh"
 
-#include "AAVMEManager.hh"
 #include "AATypes.hh"
 #include "AASettings.hh"
 class AAChannelSlots;
 class AADisplaySlots;
 class AASubtabSlots;
 class AATabSlots;
+class AAVMEManager;
+class AAAcquisitionManager;
 
 
 class AAInterface : public TGMainFrame
@@ -52,6 +53,9 @@ public:
   void FillPulserFrame();
   void FillVoltageFrame();
   void FillAcquisitionFrame();
+
+  void UpdateAQTimer(int);
+  void UpdateAfterAQTimerStopped(bool);
 
   void HandleDisconnectAndTerminate(bool = true);
 
@@ -95,8 +99,9 @@ private:
   const int NumVMEBoards;
 
   AAVMEManager *TheVMEManager;
+  AAAcquisitionManager *TheACQManager;
 
-  AASettings *WidgetSettings;
+  AASettings *TheSettings;
 
 
   /////////////////////////////

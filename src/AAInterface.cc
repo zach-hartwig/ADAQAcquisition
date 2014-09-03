@@ -40,7 +40,9 @@ using namespace boost::assign;
 #include "AASubtabSlots.hh"
 #include "AATabSlots.hh"
 #include "AASettings.hh"
+#include "AAVMEManager.hh"
 #include "AAAcquisitionManager.hh"
+
 
 AAInterface::AAInterface()
   : TGMainFrame(gClient->GetRoot()),
@@ -61,12 +63,17 @@ AAInterface::AAInterface()
   TabSlots = new AATabSlots(this);
 
   //
-  WidgetSettings = new AASettings;
+  TheSettings = new AASettings;
 
-  // Create a pointer to the singleton VME manager for ease-of-use
+  // Create a pointer to the singleton VME manager 
   TheVMEManager = AAVMEManager::GetInstance();
-  TheVMEManager->SetWidgetSettings(WidgetSettings);
+  TheVMEManager->SetSettingsPointer(TheSettings);
 
+  // Create a pointer to the single acquisition mananger
+  TheACQManager = AAAcquisitionManager::GetInstance();
+  TheACQManager->SetInterfacePointer(this);
+  TheACQManager->SetSettingsPointer(TheSettings);
+  
 
   /////////////////////////////
   // Initialize HV variables //
@@ -1573,7 +1580,7 @@ void AAInterface::SetVoltageWidgetState(bool WidgetState, EButtonState ButtonSta
 void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState ButtonState)
 {
   for(uint32_t ch=0; ch<8; ch++){
-    DGChEnable_CB[ch]->SetState(ButtonState,true);
+    DGChEnable_CB[ch]->SetState(ButtonState);
     DGChPosPolarity_RB[ch]->SetState(ButtonState);
     DGChNegPolarity_RB[ch]->SetState(ButtonState);
     DGChDCOffset_NEL[ch]->GetEntry()->SetState(WidgetState);
@@ -1590,10 +1597,10 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
   AQSpectrum_RB->SetEnabled(WidgetState);
   AQHighRate_RB->SetEnabled(WidgetState);
   AQUltraRate_RB->SetEnabled(WidgetState);
-
+  
   DGTriggerType_CBL->GetComboBox()->SetEnabled(WidgetState);
   DGTriggerEdge_CBL->GetComboBox()->SetEnabled(WidgetState);
-  DGTriggerCoincidenceEnable_CB->SetState(ButtonState,true);
+  DGTriggerCoincidenceEnable_CB->SetState(ButtonState);
 
   DGRecordLength_NEL->GetEntry()->SetState(WidgetState);
   DGPostTrigger_NEL->GetEntry()->SetState(WidgetState);
@@ -1642,71 +1649,104 @@ void AAInterface::SaveSettings()
 {
   // Acquisition channel 
   for(int ch=0; ch<NumDataChannels; ch++){
-    WidgetSettings->ChEnable[ch] = DGChEnable_CB[ch]->IsDown();
-    WidgetSettings->ChPosPolarity[ch] = DGChPosPolarity_RB[ch]->IsDown();
-    WidgetSettings->ChNegPolarity[ch] = DGChNegPolarity_RB[ch]->IsDown();
-    WidgetSettings->ChVertPos[ch] = DGChVerticalPosition_NEL[ch]->GetEntry()->GetIntNumber();
-    WidgetSettings->ChDCOffset[ch] = DGChDCOffset_NEL[ch]->GetEntry()->GetHexNumber();
-    WidgetSettings->ChTriggerThreshold[ch] = DGChTriggerThreshold_NEL[ch]->GetEntry()->GetIntNumber();
-    WidgetSettings->ChBaselineCalcMin[ch] = DGChBaselineCalcMin_NEL[ch]->GetEntry()->GetIntNumber();
-    WidgetSettings->ChBaselineCalcMax[ch] = DGChBaselineCalcMax_NEL[ch]->GetEntry()->GetIntNumber();
-    WidgetSettings->ChZSThreshold[8] = DGChZSThreshold_NEL[ch]->GetEntry()->GetIntNumber();
-    WidgetSettings->ChZSForward[8] = DGChZSForward_NEL[ch]->GetEntry()->GetIntNumber();
-    WidgetSettings->ChZSBackward[8] = DGChZSBackward_NEL[ch]->GetEntry()->GetIntNumber();
-    WidgetSettings->ChZSPosLogic[8] = DGChZSPosLogic_RB[ch]->IsDown();
-    WidgetSettings->ChZSNegLogic[8] = DGChZSNegLogic_RB[ch]->IsDown();
+    TheSettings->ChEnable[ch] = DGChEnable_CB[ch]->IsDown();
+    TheSettings->ChPosPolarity[ch] = DGChPosPolarity_RB[ch]->IsDown();
+    TheSettings->ChNegPolarity[ch] = DGChNegPolarity_RB[ch]->IsDown();
+    TheSettings->ChVertPos[ch] = DGChVerticalPosition_NEL[ch]->GetEntry()->GetIntNumber();
+    TheSettings->ChDCOffset[ch] = DGChDCOffset_NEL[ch]->GetEntry()->GetHexNumber();
+    TheSettings->ChTriggerThreshold[ch] = DGChTriggerThreshold_NEL[ch]->GetEntry()->GetIntNumber();
+    TheSettings->ChBaselineCalcMin[ch] = DGChBaselineCalcMin_NEL[ch]->GetEntry()->GetIntNumber();
+    TheSettings->ChBaselineCalcMax[ch] = DGChBaselineCalcMax_NEL[ch]->GetEntry()->GetIntNumber();
+    TheSettings->ChZSThreshold[8] = DGChZSThreshold_NEL[ch]->GetEntry()->GetIntNumber();
+    TheSettings->ChZSForward[8] = DGChZSForward_NEL[ch]->GetEntry()->GetIntNumber();
+    TheSettings->ChZSBackward[8] = DGChZSBackward_NEL[ch]->GetEntry()->GetIntNumber();
+    TheSettings->ChZSPosLogic[8] = DGChZSPosLogic_RB[ch]->IsDown();
+    TheSettings->ChZSNegLogic[8] = DGChZSNegLogic_RB[ch]->IsDown();
   }
 
   /////////////////////////////
   // Acquisition control subtab
 
   // Scope display
-  WidgetSettings->WaveformMode = AQWaveform_RB->IsDown();
-  WidgetSettings->SpectrumMode = AQSpectrum_RB->IsDown();
-  WidgetSettings->HighRateMode = AQHighRate_RB->IsDown();
-  WidgetSettings->UltraRateMode = AQUltraRate_RB->IsDown();
+  TheSettings->WaveformMode = AQWaveform_RB->IsDown();
+  TheSettings->SpectrumMode = AQSpectrum_RB->IsDown();
+  TheSettings->HighRateMode = AQHighRate_RB->IsDown();
+  TheSettings->UltraRateMode = AQUltraRate_RB->IsDown();
 
   // Trigger control settings
-  WidgetSettings->TriggerCoincidenceEnable = DGTriggerCoincidenceEnable_CB->IsDown();
-  WidgetSettings->TriggerCoincidenceLevel = DGTriggerCoincidenceLevel_CBL->GetComboBox()->GetSelected();
-  WidgetSettings->TriggerType = DGTriggerType_CBL->GetComboBox()->GetSelected();
-  WidgetSettings->TriggerEdge = DGTriggerEdge_CBL->GetComboBox()->GetSelected();
+  TheSettings->TriggerCoincidenceEnable = DGTriggerCoincidenceEnable_CB->IsDown();
+  TheSettings->TriggerCoincidenceLevel = DGTriggerCoincidenceLevel_CBL->GetComboBox()->GetSelected();
+  TheSettings->TriggerType = DGTriggerType_CBL->GetComboBox()->GetSelected();
+  TheSettings->TriggerEdge = DGTriggerEdge_CBL->GetComboBox()->GetSelected();
 
   // Acquisition
-  WidgetSettings->RecordLength = DGRecordLength_NEL->GetEntry()->GetIntNumber();
-  WidgetSettings->PostTrigger = DGPostTrigger_NEL->GetEntry()->GetIntNumber();
-  WidgetSettings->AcquisitionTime = AQTime_NEL->GetEntry()->GetIntNumber();
+  TheSettings->RecordLength = DGRecordLength_NEL->GetEntry()->GetIntNumber();
+  TheSettings->PostTrigger = DGPostTrigger_NEL->GetEntry()->GetIntNumber();
+  TheSettings->AcquisitionTime = AQTime_NEL->GetEntry()->GetIntNumber();
 
   // Readout
-  WidgetSettings->EventsBeforeReadout = DGEventsBeforeReadout_NEL->GetEntry()->GetIntNumber();
-  WidgetSettings->DataReductionEnable = AQDataReductionEnable_CB->IsDown();
-  WidgetSettings->DataReductionFactor = AQDataReductionFactor_NEL->GetEntry()->GetIntNumber();
-  WidgetSettings->ZeroSuppressionEnable = DGZSEnable_CB->IsDown();
+  TheSettings->EventsBeforeReadout = DGEventsBeforeReadout_NEL->GetEntry()->GetIntNumber();
+  TheSettings->DataReductionEnable = AQDataReductionEnable_CB->IsDown();
+  TheSettings->DataReductionFactor = AQDataReductionFactor_NEL->GetEntry()->GetIntNumber();
+  TheSettings->ZeroSuppressionEnable = DGZSEnable_CB->IsDown();
 
   
   ///////////////////////////
   // Spectrum creation subtab
 
-  WidgetSettings->SpectrumChannel = SpectrumChannel_CBL->GetComboBox()->GetSelected();
-  WidgetSettings->SpectrumNumBins = SpectrumNumBins_NEL->GetEntry()->GetIntNumber();
-  WidgetSettings->SpectrumMinBin = SpectrumMinBin_NEL->GetEntry()->GetIntNumber();
-  WidgetSettings->SpectrumMaxBin = SpectrumMinBin_NEL->GetEntry()->GetIntNumber();
+  TheSettings->SpectrumChannel = SpectrumChannel_CBL->GetComboBox()->GetSelected();
+  TheSettings->SpectrumNumBins = SpectrumNumBins_NEL->GetEntry()->GetIntNumber();
+  TheSettings->SpectrumMinBin = SpectrumMinBin_NEL->GetEntry()->GetIntNumber();
+  TheSettings->SpectrumMaxBin = SpectrumMinBin_NEL->GetEntry()->GetIntNumber();
 
-  WidgetSettings->SpectrumPulseHeight = SpectrumPulseHeight_RB->IsDown();
-  WidgetSettings->SpectrumPulseArea = SpectrumPulseArea_RB->IsDown();
-  WidgetSettings->SpectrumLLD = SpectrumLLD_NEL->GetEntry()->GetIntNumber();
-  WidgetSettings->SpectrumULD = SpectrumULD_NEL->GetEntry()->GetIntNumber();
-  WidgetSettings->LDEnable = SpectrumLDTrigger_CB->IsDown();
-  WidgetSettings->LDChannel = SpectrumLDTriggerChannel_CBL->GetComboBox()->GetSelected();
+  TheSettings->SpectrumPulseHeight = SpectrumPulseHeight_RB->IsDown();
+  TheSettings->SpectrumPulseArea = SpectrumPulseArea_RB->IsDown();
+  TheSettings->SpectrumLLD = SpectrumLLD_NEL->GetEntry()->GetIntNumber();
+  TheSettings->SpectrumULD = SpectrumULD_NEL->GetEntry()->GetIntNumber();
+  TheSettings->LDEnable = SpectrumLDTrigger_CB->IsDown();
+  TheSettings->LDChannel = SpectrumLDTriggerChannel_CBL->GetComboBox()->GetSelected();
 
-  WidgetSettings->SpectrumCalibrationEnable = SpectrumCalibration_CB->IsDown();
-  WidgetSettings->SpectrumCalibrationUseSlider = SpectrumUseCalibrationSlider_CB->IsDown();
+  TheSettings->SpectrumCalibrationEnable = SpectrumCalibration_CB->IsDown();
+  TheSettings->SpectrumCalibrationUseSlider = SpectrumUseCalibrationSlider_CB->IsDown();
 
   
   //////////////////////////
   // Graphic settings subtab
 
-  WidgetSettings->PlotXAxisInSamples = DisplayWaveformXAxisSample_RB->IsDown();
-  WidgetSettings->PlotYAxisInADC = DisplayWaveformYAxisADC_RB->IsDown();
-  WidgetSettings->PlotLegend = DisplayDrawLegend_CB->IsDown();
+  TheSettings->PlotXAxisInSamples = DisplayWaveformXAxisSample_RB->IsDown();
+  TheSettings->PlotYAxisInADC = DisplayWaveformYAxisADC_RB->IsDown();
+  TheSettings->PlotLegend = DisplayDrawLegend_CB->IsDown();
+}
+
+
+void AAInterface::UpdateAQTimer(int TimeRemaining)
+{ AQTimer_NEFL->GetEntry()->SetNumber(TimeRemaining); }
+
+
+void AAInterface::UpdateAfterAQTimerStopped(bool ROOTFileOpen)
+{
+  AQStartStop_TB->SetBackgroundColor(ColorManager->Number2Pixel(2));
+  AQStartStop_TB->SetForegroundColor(ColorManager->Number2Pixel(1));
+  AQStartStop_TB->SetText("Stopped");
+  
+  SetAcquisitionWidgetState(true, kButtonUp);
+  
+  if(ROOTFileOpen){
+    /*
+    if(DGScopeDataStorageEnable_CB->IsDown())
+      DGScopeDataStorageEnable_CB->Clicked();
+    
+    if(OutputDataFile->IsOpen())
+      DGScopeDataStorageCloseFile_TB->Clicked();
+    */
+  }
+
+  // Reset the attributes of the timer start text button
+  AQTimerStart_TB->SetBackgroundColor(ColorManager->Number2Pixel(18));
+  AQTimerStart_TB->SetText("Start timer");
+  
+  DGScopeDataStorageCreateFile_TB->SetState(kButtonDisabled);
+  DGScopeDataStorageCloseFile_TB->SetState(kButtonDisabled);
+  DGScopeDataStorageEnable_CB->SetState(kButtonUp);
+  DGScopeDataStorageEnable_CB->SetState(kButtonDisabled);
 }

@@ -128,7 +128,7 @@ enum{
   AQStartStop_TB_ID,
   AQTrigger_TB_ID,
   DisplayUpdate_TB_ID,
-
+  
 
   /////////////////////////////////////////////////////////////////////////////
   // Widget IDs for the acquisition subtabs (bottom-right of acquisition frame)
