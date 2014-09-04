@@ -268,28 +268,23 @@ private:
   TGRadioButton *DisplayWaveformYAxisMillivolts_RB;
 
 
-  // Persistent
+  // Persistent storage
 
-  TGTextButton *DGScopeSave_TB;
+  TGTextButton *WaveformFileName_TB;
+  ADAQTextEntryWithLabel *WaveformFileName_TEL;
+  TGTextButton *WaveformCreateFile_TB;
+  TGTextButton *WaveformCloseFile_TB;
+  TGCheckButton *WaveformEnable_CB;
 
-  ADAQTextEntryWithLabel *DGScopeDataComment_TEL;
-
-
-  TGTextButton *DGScopeDataFileName_TB;
-  ADAQTextEntryWithLabel *DGScopeDataFileName_TEL;
-  TGTextButton *DGScopeDataStorageCreateFile_TB;
-  TGTextButton *DGScopeDataStorageCloseFile_TB;
-  TGCheckButton *DGScopeDataStorageEnable_CB;
-
-  TGTextButton *DGScopeSpectrumFileName_TB;
-  ADAQTextEntryWithLabel *DGScopeSpectrumFileName_TEL;
-  TGCheckButton *DGScopeSaveSpectrumWithTimeExtension_CB;
-  TGTextButton *DGScopeSaveSpectrum_TB;
+  TGTextButton *SpectrumFileName_TB;
+  ADAQTextEntryWithLabel *SpectrumFileName_TEL;
+  TGCheckButton *SpectrumSaveWithTimeExtension_CB;
+  TGTextButton *SpectrumSave_TB;
   
-  TGTextButton *DGScopeCanvasFileName_TB;
-  ADAQTextEntryWithLabel *DGScopeCanvasFileName_TEL;
-  TGCheckButton *DGScopeSaveCanvasWithTimeExtension_CB;
-  TGTextButton *DGScopeSaveCanvas_TB;
+  TGTextButton *CanvasFileName_TB;
+  ADAQTextEntryWithLabel *CanvasFileName_TEL;
+  TGCheckButton *CanvasSaveWithTimeExtension_CB;
+  TGTextButton *CanvasSave_TB;
 
   ADAQTextEntryWithLabel *DGScopeDisplayOutputFileName_TEL;
   ADAQComboBoxWithLabel *DGScopeDisplayOutputFileType_CBL;

@@ -189,17 +189,20 @@ enum{
   DisplayXAxisLog_CB_ID,
   DisplayYAxisLog_CB_ID,
 
-  // Data storage subtab
+  // Persistent storage subtab
 
-  DataFileName_TB_ID,
-  DataStorageCreateFile_TB_ID,
-  DataStorageCloseFile_TB_ID,
+  WaveformFileName_TB_ID,
+  WaveformCreateFile_TB_ID,
+  WaveformCloseFile_TB_ID,
+  WaveformEnable_CB_ID,
 
   SpectrumFileName_TB_ID,
-  SaveSpectrum_TB_ID,
-
+  SpectrumSaveWithTimeExtension_CB_ID,
+  SpectrumSave_TB_ID,
+  
   CanvasFileName_TB_ID,
-  SaveCanvas_TB_ID
+  CanvasSaveWithTimeExtension_CB_ID,
+  CanvasSave_TB_ID
 };
 
 struct CalibrationDataStruct{

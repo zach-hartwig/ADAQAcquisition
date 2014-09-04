@@ -1407,58 +1407,45 @@ void AAInterface::FillAcquisitionFrame()
   // Data storage //
   //////////////////
 
-  TGGroupFrame *DGScopeDataStorage_GF = new TGGroupFrame(DataSubframe, "Waveform storage", kVerticalFrame);
-  DGScopeDataStorage_GF->SetTitlePos(TGGroupFrame::kCenter);
-  DataSubframe->AddFrame(DGScopeDataStorage_GF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
+  TGGroupFrame *WaveformStorage_GF = new TGGroupFrame(DataSubframe, "Waveform storage", kVerticalFrame);
+  WaveformStorage_GF->SetTitlePos(TGGroupFrame::kCenter);
+  DataSubframe->AddFrame(WaveformStorage_GF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
 
-  // ADAQ text entry for setting the ROOT file name
-  /*
-  DGScopeDataStorage_GF->AddFrame(DGScopeDataFileName_TEL = new ADAQTextEntryWithLabel(DGScopeDataStorage_GF, "Filename",-1),
-				  new TGLayoutHints(kLHintsNormal,5,5,5,5));
-  DGScopeDataFileName_TEL->GetEntry()->SetText("ADAQMeasurement");
-  DGScopeDataFileName_TEL->GetEntry()->SetState(false);
-
-  // ADAQ text entry that will add a comment on the saved data to the ROOT file, making it possible to
-  // record various parameters, settings, etc on the measurement for later retrieval
-  DGScopeDataStorage_GF->AddFrame(DGScopeDataComment_TEL = new ADAQTextEntryWithLabel(DGScopeDataStorage_GF, "Comment", -1),
-				  new TGLayoutHints(kLHintsNormal,5,5,5,5));
-  DGScopeDataComment_TEL->GetEntry()->SetState(false);
-  */
-  DGScopeDataStorage_GF->AddFrame(DGScopeDataFileName_TB = new TGTextButton(DGScopeDataStorage_GF, "Data file name", DataFileName_TB_ID),
+  WaveformStorage_GF->AddFrame(WaveformFileName_TB = new TGTextButton(WaveformStorage_GF, "Waveform data file name", WaveformFileName_TB_ID),
 				  new TGLayoutHints(kLHintsNormal,10,5,5,0));
-  DGScopeDataFileName_TB->Connect("Clicked()","AASubtabSlots", SubtabSlots, "HandleTextButtons()");
-  DGScopeDataFileName_TB->Resize(175, 30);
-  DGScopeDataFileName_TB->ChangeOptions(DGScopeDataFileName_TB->GetOptions() | kFixedSize);
+  WaveformFileName_TB->Connect("Clicked()","AASubtabSlots", SubtabSlots, "HandleTextButtons()");
+  WaveformFileName_TB->Resize(175, 30);
+  WaveformFileName_TB->ChangeOptions(WaveformFileName_TB->GetOptions() | kFixedSize);
 
-  DGScopeDataStorage_GF->AddFrame(DGScopeDataFileName_TEL = new ADAQTextEntryWithLabel(DGScopeDataStorage_GF, "", -1),
+  WaveformStorage_GF->AddFrame(WaveformFileName_TEL = new ADAQTextEntryWithLabel(WaveformStorage_GF, "", -1),
 				      new TGLayoutHints(kLHintsNormal,10,5,5,0));
-  DGScopeDataFileName_TEL->GetEntry()->Resize(175, 25);
-  DGScopeDataFileName_TEL->GetEntry()->ChangeOptions(DGScopeDataFileName_TEL->GetOptions() | kFixedSize | kSunkenFrame);
-  DGScopeDataFileName_TEL->GetEntry()->SetState(false);
-  DGScopeDataFileName_TEL->GetEntry()->SetText("DefaultData.adaq");
+  WaveformFileName_TEL->GetEntry()->Resize(175, 25);
+  WaveformFileName_TEL->GetEntry()->ChangeOptions(WaveformFileName_TEL->GetOptions() | kFixedSize | kSunkenFrame);
+  WaveformFileName_TEL->GetEntry()->SetState(false);
+  WaveformFileName_TEL->GetEntry()->SetText("DefaultData.adaq");
 
   // ROOT text button to create a root file using the name in the text entry field above
-  DGScopeDataStorage_GF->AddFrame(DGScopeDataStorageCreateFile_TB = new TGTextButton(DGScopeDataStorage_GF,"Create ADAQ file", DataStorageCreateFile_TB_ID),
+  WaveformStorage_GF->AddFrame(WaveformCreateFile_TB = new TGTextButton(WaveformStorage_GF,"Create ADAQ file", WaveformCreateFile_TB_ID),
 				  new TGLayoutHints(kLHintsNormal,10,5,8,5));
-  DGScopeDataStorageCreateFile_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
-  DGScopeDataStorageCreateFile_TB->Resize(175,30);
-  DGScopeDataStorageCreateFile_TB->ChangeOptions(DGScopeDataStorageCreateFile_TB->GetOptions() | kFixedSize);
-  DGScopeDataStorageCreateFile_TB->SetState(kButtonDisabled);
+  WaveformCreateFile_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
+  WaveformCreateFile_TB->Resize(175,30);
+  WaveformCreateFile_TB->ChangeOptions(WaveformCreateFile_TB->GetOptions() | kFixedSize);
+  WaveformCreateFile_TB->SetState(kButtonDisabled);
 
   // ROOT text button to write all data to the ROOT file and close it. This button MUST be clicked to 
   // successfully write&close the ROOT file otherwise the ROOT file will have errors.
-  DGScopeDataStorage_GF->AddFrame(DGScopeDataStorageCloseFile_TB = new TGTextButton(DGScopeDataStorage_GF,"Close ADAQ file", DataStorageCloseFile_TB_ID),
+  WaveformStorage_GF->AddFrame(WaveformCloseFile_TB = new TGTextButton(WaveformStorage_GF,"Close ADAQ file", WaveformCreateFile_TB_ID),
 				  new TGLayoutHints(kLHintsNormal,10,5,0,5));
-  DGScopeDataStorageCloseFile_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
-  DGScopeDataStorageCloseFile_TB->Resize(175,30);
-  DGScopeDataStorageCloseFile_TB->ChangeOptions(DGScopeDataStorageCloseFile_TB->GetOptions() | kFixedSize);
-  DGScopeDataStorageCloseFile_TB->SetState(kButtonDisabled);
+  WaveformCloseFile_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
+  WaveformCloseFile_TB->Resize(175,30);
+  WaveformCloseFile_TB->ChangeOptions(WaveformCloseFile_TB->GetOptions() | kFixedSize);
+  WaveformCloseFile_TB->SetState(kButtonDisabled);
   
   // ROOT check button to enable/disable saving data to ROOT file. Note that the data is saved to
   // the ROOT file only while the button is checked. The 
-  DGScopeDataStorage_GF->AddFrame(DGScopeDataStorageEnable_CB = new TGCheckButton(DGScopeDataStorage_GF,"Data stored while checked", -1),
+  WaveformStorage_GF->AddFrame(WaveformEnable_CB = new TGCheckButton(WaveformStorage_GF,"Data stored while checked", WaveformEnable_CB_ID),
 				  new TGLayoutHints(kLHintsNormal,10,5,5,5));
-  DGScopeDataStorageEnable_CB->SetState(kButtonDisabled);
+  WaveformEnable_CB->SetState(kButtonDisabled);
   
   DGDisplayAndControls_VF->AddFrame(DGScopeDisplay_GF, new TGLayoutHints(kLHintsCenterX,5,5,5,5));
   DGDisplayAndControls_VF->AddFrame(SubtabFrame, new TGLayoutHints(kLHintsCenterX,5,5,5,5));
@@ -1472,27 +1459,27 @@ void AAInterface::FillAcquisitionFrame()
   DGScopeSpectrumStorage_GF->SetTitlePos(TGGroupFrame::kCenter);
   DataSubframe->AddFrame(DGScopeSpectrumStorage_GF, new TGLayoutHints(kLHintsNormal,0,5,5,5));
 
-  DGScopeSpectrumStorage_GF->AddFrame(DGScopeSpectrumFileName_TB = new TGTextButton(DGScopeSpectrumStorage_GF, "Spectrum file name", SpectrumFileName_TB_ID),
+  DGScopeSpectrumStorage_GF->AddFrame(SpectrumFileName_TB = new TGTextButton(DGScopeSpectrumStorage_GF, "Spectrum file name", SpectrumFileName_TB_ID),
 				      new TGLayoutHints(kLHintsNormal, 5,5,5,0));
-  DGScopeSpectrumFileName_TB->Resize(175, 30);
-  DGScopeSpectrumFileName_TB->ChangeOptions(DGScopeSpectrumFileName_TB->GetOptions() | kFixedSize);
-  DGScopeSpectrumFileName_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
+  SpectrumFileName_TB->Resize(175, 30);
+  SpectrumFileName_TB->ChangeOptions(SpectrumFileName_TB->GetOptions() | kFixedSize);
+  SpectrumFileName_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
   
-  DGScopeSpectrumStorage_GF->AddFrame(DGScopeSpectrumFileName_TEL = new ADAQTextEntryWithLabel(DGScopeSpectrumStorage_GF, "", -1),
+  DGScopeSpectrumStorage_GF->AddFrame(SpectrumFileName_TEL = new ADAQTextEntryWithLabel(DGScopeSpectrumStorage_GF, "", -1),
 				      new TGLayoutHints(kLHintsNormal, 5,5,5,0));
-  DGScopeSpectrumFileName_TEL->GetEntry()->Resize(175, 25);
-  DGScopeSpectrumFileName_TEL->GetEntry()->ChangeOptions(DGScopeSpectrumFileName_TEL->GetOptions() | kFixedSize | kSunkenFrame);
-  DGScopeSpectrumFileName_TEL->GetEntry()->SetState(false);
-  DGScopeSpectrumFileName_TEL->GetEntry()->SetText("DefaultSpectrum.dat");
+  SpectrumFileName_TEL->GetEntry()->Resize(175, 25);
+  SpectrumFileName_TEL->GetEntry()->ChangeOptions(SpectrumFileName_TEL->GetOptions() | kFixedSize | kSunkenFrame);
+  SpectrumFileName_TEL->GetEntry()->SetState(false);
+  SpectrumFileName_TEL->GetEntry()->SetText("DefaultSpectrum.dat");
 
-  DGScopeSpectrumStorage_GF->AddFrame(DGScopeSaveSpectrumWithTimeExtension_CB = new TGCheckButton(DGScopeSpectrumStorage_GF, "Add time to file name", -1),
+  DGScopeSpectrumStorage_GF->AddFrame(SpectrumSaveWithTimeExtension_CB = new TGCheckButton(DGScopeSpectrumStorage_GF, "Add time to file name", SpectrumSaveWithTimeExtension_CB_ID),
 				      new TGLayoutHints(kLHintsNormal, 5,5,5,5));
   
-  DGScopeSpectrumStorage_GF->AddFrame(DGScopeSaveSpectrum_TB = new TGTextButton(DGScopeSpectrumStorage_GF, "Save spectrum data", SaveSpectrum_TB_ID),
+  DGScopeSpectrumStorage_GF->AddFrame(SpectrumSave_TB = new TGTextButton(DGScopeSpectrumStorage_GF, "Save spectrum data", SpectrumSave_TB_ID),
 				      new TGLayoutHints(kLHintsNormal, 5,5,0,5));
-  DGScopeSaveSpectrum_TB->Resize(175, 30);
-  DGScopeSaveSpectrum_TB->ChangeOptions(DGScopeSaveSpectrum_TB->GetOptions() | kFixedSize);
-  DGScopeSaveSpectrum_TB->Connect("Clicked()","AASubtabSlots", SubtabSlots, "HandleTextButtons()");
+  SpectrumSave_TB->Resize(175, 30);
+  SpectrumSave_TB->ChangeOptions(SpectrumSave_TB->GetOptions() | kFixedSize);
+  SpectrumSave_TB->Connect("Clicked()","AASubtabSlots", SubtabSlots, "HandleTextButtons()");
 
 
   // Widgets for saving the canvas graphics to file
@@ -1501,27 +1488,27 @@ void AAInterface::FillAcquisitionFrame()
   DGScopeCanvasStorage_GF->SetTitlePos(TGGroupFrame::kCenter);
   DataSubframe->AddFrame(DGScopeCanvasStorage_GF, new TGLayoutHints(kLHintsNormal,0,0,5,5));
 
-  DGScopeCanvasStorage_GF->AddFrame(DGScopeCanvasFileName_TB = new TGTextButton(DGScopeCanvasStorage_GF, "Canvas file name", CanvasFileName_TB_ID),
+  DGScopeCanvasStorage_GF->AddFrame(CanvasFileName_TB = new TGTextButton(DGScopeCanvasStorage_GF, "Canvas file name", CanvasFileName_TB_ID),
 				      new TGLayoutHints(kLHintsNormal, 5,5,5,0));
-  DGScopeCanvasFileName_TB->Resize(175, 30);
-  DGScopeCanvasFileName_TB->ChangeOptions(DGScopeCanvasFileName_TB->GetOptions() | kFixedSize);
-  DGScopeCanvasFileName_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
+  CanvasFileName_TB->Resize(175, 30);
+  CanvasFileName_TB->ChangeOptions(CanvasFileName_TB->GetOptions() | kFixedSize);
+  CanvasFileName_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
   
-  DGScopeCanvasStorage_GF->AddFrame(DGScopeCanvasFileName_TEL = new ADAQTextEntryWithLabel(DGScopeCanvasStorage_GF, "", -1),
+  DGScopeCanvasStorage_GF->AddFrame(CanvasFileName_TEL = new ADAQTextEntryWithLabel(DGScopeCanvasStorage_GF, "", -1),
 				    new TGLayoutHints(kLHintsNormal, 5,5,5,0));
-  DGScopeCanvasFileName_TEL->GetEntry()->Resize(175, 25);
-  DGScopeCanvasFileName_TEL->GetEntry()->ChangeOptions(DGScopeCanvasFileName_TEL->GetOptions() | kFixedSize | kSunkenFrame);
-  DGScopeCanvasFileName_TEL->GetEntry()->SetState(false);
-  DGScopeCanvasFileName_TEL->GetEntry()->SetText("DefaultGraphics.eps");
+  CanvasFileName_TEL->GetEntry()->Resize(175, 25);
+  CanvasFileName_TEL->GetEntry()->ChangeOptions(CanvasFileName_TEL->GetOptions() | kFixedSize | kSunkenFrame);
+  CanvasFileName_TEL->GetEntry()->SetState(false);
+  CanvasFileName_TEL->GetEntry()->SetText("DefaultGraphics.eps");
 
-  DGScopeCanvasStorage_GF->AddFrame(DGScopeSaveCanvasWithTimeExtension_CB = new TGCheckButton(DGScopeCanvasStorage_GF, "Add time to file name", -1),
+  DGScopeCanvasStorage_GF->AddFrame(CanvasSaveWithTimeExtension_CB = new TGCheckButton(DGScopeCanvasStorage_GF, "Add time to file name", CanvasSaveWithTimeExtension_CB_ID),
 				    new TGLayoutHints(kLHintsNormal, 5,5,5,5));
   
-  DGScopeCanvasStorage_GF->AddFrame(DGScopeSaveCanvas_TB = new TGTextButton(DGScopeCanvasStorage_GF, "Save canvas graphics", SaveCanvas_TB_ID),
+  DGScopeCanvasStorage_GF->AddFrame(CanvasSave_TB = new TGTextButton(DGScopeCanvasStorage_GF, "Save canvas graphics", CanvasSave_TB_ID),
 				    new TGLayoutHints(kLHintsNormal,5,5,0,5));
-  DGScopeSaveCanvas_TB->Resize(175, 30);
-  DGScopeSaveCanvas_TB->ChangeOptions(DGScopeSaveCanvas_TB->GetOptions() | kFixedSize);
-  DGScopeSaveCanvas_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
+  CanvasSave_TB->Resize(175, 30);
+  CanvasSave_TB->ChangeOptions(CanvasSave_TB->GetOptions() | kFixedSize);
+  CanvasSave_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
   
 
   ///////////////////
@@ -1622,9 +1609,9 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
   SpectrumLDTriggerChannel_CBL->GetComboBox()->SetEnabled(WidgetState);
 
   if(AAAcquisitionManager::GetInstance()->GetAcquisitionEnable())
-    DGScopeDataStorageCreateFile_TB->SetState(kButtonUp);
+    WaveformCreateFile_TB->SetState(kButtonUp);
   else
-    DGScopeDataStorageCreateFile_TB->SetState(kButtonDisabled);
+    WaveformCreateFile_TB->SetState(kButtonDisabled);
   
   SpectrumRefreshRate_NEL->GetEntry()->SetState(WidgetState);
 }
@@ -1733,11 +1720,11 @@ void AAInterface::UpdateAfterAQTimerStopped(bool ROOTFileOpen)
   
   if(ROOTFileOpen){
     /*
-    if(DGScopeDataStorageEnable_CB->IsDown())
-      DGScopeDataStorageEnable_CB->Clicked();
+    if(WaveformEnable_CB->IsDown())
+      WaveformEnable_CB->Clicked();
     
     if(OutputDataFile->IsOpen())
-      DGScopeDataStorageCloseFile_TB->Clicked();
+      WaveformCloseFile_TB->Clicked();
     */
   }
   
@@ -1745,10 +1732,10 @@ void AAInterface::UpdateAfterAQTimerStopped(bool ROOTFileOpen)
   AQTimerStart_TB->SetBackgroundColor(ColorManager->Number2Pixel(18));
   AQTimerStart_TB->SetText("Start timer");
   
-  DGScopeDataStorageCreateFile_TB->SetState(kButtonDisabled);
-  DGScopeDataStorageCloseFile_TB->SetState(kButtonDisabled);
-  DGScopeDataStorageEnable_CB->SetState(kButtonUp);
-  DGScopeDataStorageEnable_CB->SetState(kButtonDisabled);
+  WaveformCreateFile_TB->SetState(kButtonDisabled);
+  WaveformCloseFile_TB->SetState(kButtonDisabled);
+  WaveformEnable_CB->SetState(kButtonUp);
+  WaveformEnable_CB->SetState(kButtonDisabled);
 }
 
 

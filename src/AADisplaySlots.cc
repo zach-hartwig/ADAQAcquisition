@@ -66,10 +66,10 @@ void AADisplaySlots::HandleTextButtons()
 	TheACQManager->SetAcquisitionTimerEnable(false);
       }
 
-      TI->DGScopeDataStorageCreateFile_TB->SetState(kButtonDisabled);
-      TI->DGScopeDataStorageCloseFile_TB->SetState(kButtonDisabled);
-      TI->DGScopeDataStorageEnable_CB->SetState(kButtonUp);
-      TI->DGScopeDataStorageEnable_CB->SetState(kButtonDisabled);
+      TI->WaveformCreateFile_TB->SetState(kButtonDisabled);
+      TI->WaveformCloseFile_TB->SetState(kButtonDisabled);
+      TI->WaveformEnable_CB->SetState(kButtonUp);
+      TI->WaveformEnable_CB->SetState(kButtonDisabled);
       
     }
 

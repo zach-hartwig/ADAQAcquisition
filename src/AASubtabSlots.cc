@@ -370,9 +370,7 @@ void AASubtabSlots::HandleTextButtons()
 			       "All",                   "*.*",
 			       0,0};
 
-    EFileDialogMode DialogType = kFDSave;
-
-    string FileName = TI->CreateFileDialog(FileTypes, DialogType);
+    string FileName = TI->CreateFileDialog(FileTypes, kFDSave);
 
     if(FileName == "NULL"){
     }
@@ -384,103 +382,36 @@ void AASubtabSlots::HandleTextButtons()
     break;
   }
 
-    /*
-    //////////////////////////
-    // Save DGScope graphics
-  case DGScopeSave_TB_ID:{
-    
-    // Obtain the base name (no "." or file extension) from the ROOT text entry widget
-    string fBaseName = DGScopeDisplayOutputFileName_TEL->GetEntry()->GetText();
-
-    // Obtain the file type and extension from the ROOT combo box widget
-    string fExtension = "";
-    int PlotType = DGScopeDisplayOutputFileType_CBL->GetComboBox()->GetSelected();
-    switch(PlotType){
-    case 0:
-      fExtension.assign(".eps");
-      break;
-    case 1:
-      fExtension.assign(".ps");
-      break;
-    case 2:
-      fExtension.assign(".png");
-      break;
-    case 3:
-      fExtension.assign(".jpg");
-      break;
-    }
-
-    // Perform a check to ensure that the specified total file name
-    // does not exist to prevent overwriting important graphics; if
-    // the file does exist, increment an integer counter that is added
-    // onto the file num to create a new but recognizable file name
-    int num = 0;
-    stringstream ss;
-    string fNumber;
-    string fName;
-
-    bool fExists = true;
-    while(fExists){
-	  ss << num;
-	  fNumber.assign(ss.str());
-	  fName = fBaseName+fNumber+fExtension;
-	  ifstream fCheck(fName.c_str());
-	  fExists = (bool)fCheck;
-	  ss.str("");
-	  num++;
-    }
-
-    // Print the state of the DGScope embedded canvas to file
-    DGScope_EC->GetCanvas()->Print(fName.c_str(), fExtension.c_str());
-    break;
-  }
-
-
-
 
     //////////////////////////////
     // Set the ROOT data file name
 
-  case DGScopeDataFileName_TB_ID:{
+  case WaveformFileName_TB_ID:{
     
     const char *FileTypes[] = {"ADAQ ROOT file","*.adaq",
 			       "ADAQ ROOT file","*.root",
 			       0, 0};
-    
-    TGFileInfo FileInformation;
-    FileInformation.fFileTypes = FileTypes;
-    FileInformation.fOverwrite = false;
-    FileInformation.fIniDir = StrDup(getenv("PWD"));
-    new TGFileDialog(gClient->GetRoot(), this, kFDSave, &FileInformation);
-    
-    if(FileInformation.fFilename==NULL)
-      {}
+
+    string FileName = TI->CreateFileDialog(FileTypes, kFDOpen);
+
+    if(FileName == "NULL"){
+    }
     else{
-      DataFileName = FileInformation.fFilename;
+      string FileNameNoPath = FileName;
+
+      size_t Found = FileNameNoPath.find_last_of("/");
+      if(Found != string::npos)
+	FileNameNoPath = FileNameNoPath.substr(Found+1, FileNameNoPath.size());
       
-      size_t Found = DataFileName.find_last_of(".");
-      if(Found != string::npos)
-	DataFileName = DataFileName.substr(0, Found);
-
-      DataFileExtension = FileInformation.fFileTypes[FileInformation.fFileTypeIdx+1];
-
-      Found = DataFileExtension.find_last_of("*");
-      DataFileExtension = DataFileExtension.substr(Found+1, DataFileExtension.size());
-      string FileName_StripPath = DataFileName + DataFileExtension;
-
-      Found = FileName_StripPath.find_last_of("/");
-      if(Found != string::npos)
-	FileName_StripPath = FileName_StripPath.substr(Found+1, FileName_StripPath.size());
-
-      DGScopeDataFileName_TEL->GetEntry()->SetText(FileName_StripPath.c_str());
+      TI->WaveformFileName_TEL->GetEntry()->SetText(FileNameNoPath.c_str());
     }
     
     break;
   }
 
-    ///////////////////////////
-    // Create ROOT data file
-  case DGScopeDataStorageCreateFile_TB_ID:{
+  case WaveformCreateFile_TB_ID:{
+
+    /*
 
     ///////////////////////////////////////////////
     // Test to ensure data file is not already open
@@ -608,7 +539,7 @@ void AASubtabSlots::HandleTextButtons()
     DGScopeDataStorageEnable_CB->SetState(kButtonDisabled);
 
     ROOTFileOpen = false;
-
+    */
     break;
   }
 
@@ -618,123 +549,80 @@ void AASubtabSlots::HandleTextButtons()
     // determine the format of the data output to file
     const char *FileTypes[] = {"Space-separated format", ".dat",
 			       "Comma-separated format", ".csv",
+			       "ROOT File"             , ".root",
 			       0, 0};
-    
-    // Create a new window containing the file save dialog. Set the
-    // default directory to the user's present directory
-    TGFileInfo FileInformation;
-    FileInformation.fFileTypes = FileTypes;
-    FileInformation.fIniDir = StrDup(getenv("PWD"));
-    new TGFileDialog(gClient->GetRoot(), this, kFDSave, &FileInformation);
 
-    // If a file name was NOT successfully created ...
-    if(FileInformation.fFilename==NULL)
-      {}
-    
-    // If a file name was successfully created ...
+    string FileName = TI->CreateFileDialog(FileTypes, kFDOpen);
+
+    if(FileName == "NULL"){
+    }
     else{
-      // Get the file name from the text entry widget
-      SpectrumFileName = FileInformation.fFilename;
+      string FileNameNoPath = FileName;
       
-      // If the user entered the file name with a dot followed by a
-      // file extension, strip the them from the file name since the
-      // spectrum file type is assigned via the combo box selection
-      // from the file dialog. This ensures that regardless of the
-      // user's entry, the right format will prevail!
-      size_t Found = SpectrumFileName.find_last_of(".");
+      size_t Found = FileNameNoPath.find_last_of("/");
       if(Found != string::npos)
-	SpectrumFileName = SpectrumFileName.substr(0, Found);
+	FileNameNoPath = FileNameNoPath.substr(Found+1, FileNameNoPath.size());
       
-      // Get the file type enxtension from the combo box widget (note
-      // the "+1" required to get the index right)
-      SpectrumFileExtension = FileInformation.fFileTypes[FileInformation.fFileTypeIdx+1];
-      
-      // Get just the file name + file extension by stripping off the
-      // absolute path from the full file name
-
-      string FileName_StripPath = SpectrumFileName + SpectrumFileExtension;
-      
-      Found = FileName_StripPath.find_last_of("/");
-      if(Found != string::npos)
-	FileName_StripPath = FileName_StripPath.substr(Found+1, FileName_StripPath.size());
-      
-      SpectrumFileName_TEL->GetEntry()->SetText(FileName_StripPath.c_str());
+      TI->SpectrumFileName_TEL->GetEntry()->SetText(FileNameNoPath.c_str());
     }
     break;
   }
     
-  case DGScopeSaveSpectrum_TB_ID:{
-    SaveSpectrumData();
+  case SpectrumSave_TB_ID:{
+    // CALL AAACQUISITION TO OUTPUT THE SPECTRUM
     break;
   }
     
-  case DGScopeCanvasFileName_TB_ID:{
+  case CanvasFileName_TB_ID:{
     
-    // Set the allowable file type extensions. These will be used to
-    // determine the format of the data output to file
-    const char *FileTypes[] = {"EPS file", ".eps",
-			       "PS file", ".ps",
-			       "PDF file", ".pdf",
-			       "PNG file", ".png",
-			       "JPG file", ".jpeg",
+    const char *FileTypes[] = {"EPS file", "*.eps",
+			       "PS file",  "*.ps",
+			       "PDF file", "*.pdf",
+			       "PNG file", "*.png",
+			       "JPEG file", "*.jpeg",
 			       0, 0};
-    
-    // Create a new window containing the file save dialog. Set the
-    // default directory to the user's present directory
-    TGFileInfo FileInformation;
-    FileInformation.fFileTypes = FileTypes;
-    FileInformation.fIniDir = StrDup(getenv("PWD"));
-    new TGFileDialog(gClient->GetRoot(), this, kFDSave, &FileInformation);
 
-    // If a file name was NOT successfully created ...
-    if(FileInformation.fFilename==NULL)
-      {}//CreateMessageBox("No file name was selected! The canvas graphics will not be saved!","Stop");
-    
-    // If a file name was successfully created ...
-    else{
-      // Get the file name from the text entry widget
-      GraphicsFileName = FileInformation.fFilename;
-      
-      // Get the file type enxtension from the combo box widget (note
-      // the "+1" required to get the index right)
-      GraphicsFileExtension = FileInformation.fFileTypes[FileInformation.fFileTypeIdx+1];
+    string FileName = TI->CreateFileDialog(FileTypes, kFDOpen);
 
-      // If the user did not enter the file name with the extension,
-      // tack it on to the end
-      size_t Found = GraphicsFileName.find_last_of(".");
-      if(Found == string::npos)
-	GraphicsFileName = GraphicsFileName.substr(0,Found) + GraphicsFileExtension;
-
-      string FileName_StripPath = GraphicsFileName;
-      Found = FileName_StripPath.find_last_of("/");
-      if(Found != string::npos)
-	FileName_StripPath = FileName_StripPath.substr(Found+1, FileName_StripPath.size());
-      
-      DGScopeCanvasFileName_TEL->GetEntry()->SetText(FileName_StripPath.c_str());
+    if(FileName == "NULL"){
     }
+    else{
+      string FileNameNoPath = FileName;
+      
+      size_t Found = FileNameNoPath.find_last_of("/");
+      if(Found != string::npos)
+	FileNameNoPath = FileNameNoPath.substr(Found+1, FileNameNoPath.size());
+      
+      TI->CanvasFileName_TEL->GetEntry()->SetText(FileNameNoPath.c_str());
+
+      // NEED TO SET ABSOLUTE FILE NAME IN AAGRAPHICS
+    }
+
     break;
   }
+
     
-    
-  case DGScopeSaveCanvas_TB_ID:{
-    
-    string FileName;
-    
-    if(DGScopeSaveCanvasWithTimeExtension_CB->IsDown()){
+  case CanvasSave_TB_ID:{
+
+    // NEED TO GET ABSOLUTE FILE NAME FROM AAGRAPHICS
+    // NEED TO GET FILE EXTENSION TYPE / GRAPHICS TYPE
+
+    string FileName = "Hello.pdf";
+    string FileType = "pdf";
+          
+    if(TI->CanvasSaveWithTimeExtension_CB->IsDown()){
       time_t CurrentTime = time(NULL);
-      stringstream ss;
-      ss << "." << CurrentTime;
-      string CurrentTimeString = ss.str();
-      FileName = GraphicsFileName + CurrentTimeString;
+
+      stringstream SS;
+      SS << "." << CurrentTime;
+      string CurrentTimeString = SS.str();
+
+      FileName = FileName + CurrentTimeString;
     }
-    else
-      FileName = GraphicsFileName;
     
-    DGScope_EC->GetCanvas()->Print(FileName.c_str(), GraphicsFileExtension.c_str());
+    TI->DisplayCanvas_EC->GetCanvas()->Print(FileName.c_str(), FileType.c_str());
     break;
   }
-    
-  */
   }
 }
   
