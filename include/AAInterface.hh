@@ -16,6 +16,7 @@
 #include <TGDoubleSlider.h>
 #include <TGTripleSlider.h>
 #include <TGTextView.h>
+#include <TGFileDialog.h>
 
 #include <vector>
 #include <map>
@@ -53,9 +54,12 @@ public:
   void FillPulserFrame();
   void FillVoltageFrame();
   void FillAcquisitionFrame();
-
+  
   void UpdateAQTimer(int);
   void UpdateAfterAQTimerStopped(bool);
+  void UpdateAfterCalibrationPointAdded(int);
+
+  string CreateFileDialog(const char *[], EFileDialogMode);
 
   void HandleDisconnectAndTerminate(bool = true);
 

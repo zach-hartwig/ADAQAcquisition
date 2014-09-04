@@ -39,6 +39,15 @@ public:
   void CreateWaveformTreeBranches();
 
 
+  bool AddCalibrationPoint(int, int, double, double );
+  bool EnableCalibration(int);
+  bool ResetCalibration(int);
+  bool LoadCalibration(int, string, int &);
+  bool WriteCalibration(int, string);
+
+  bool GetCalibrationEnable(int C) {return CalibrationEnable[C];}
+  CalibrationDataStruct GetCalibrationDataStruct(int C) {return CalibrationData[C];}
+
   void SetAcquisitionEnable(bool ATE) {AcquisitionEnable = true;}
   bool GetAcquisitionEnable() {return AcquisitionEnable;}
   
@@ -86,13 +95,12 @@ private:
 
   vector<bool> CalibrationEnable;
   vector<TGraph *> CalibrationCurves;
-  vector<ADAQChannelCalibrationData> CalibrationData;
+  vector<CalibrationDataStruct> CalibrationData;
   
   vector<TH1F *> Spectrum_H;
 
   bool WriteWaveformToTree;
   bool BranchWaveformTree;
-
 
   TFile *OutputDataFile;
   TTree *WaveformTree;

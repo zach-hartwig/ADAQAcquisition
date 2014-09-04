@@ -202,7 +202,7 @@ enum{
   SaveCanvas_TB_ID
 };
 
-struct ADAQChannelCalibrationData{
+struct CalibrationDataStruct{
   vector<int> PointID;
   vector<double> Energy;
   vector<double> PulseUnit;

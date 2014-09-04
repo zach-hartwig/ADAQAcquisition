@@ -61,8 +61,8 @@ AAInterface::AAInterface()
   DisplaySlots = new AADisplaySlots(this);
   SubtabSlots = new AASubtabSlots(this);
   TabSlots = new AATabSlots(this);
-
-  //
+  
+  // A structure to important widget settings;
   TheSettings = new AASettings;
 
   // Create a pointer to the singleton VME manager 
@@ -1740,7 +1740,7 @@ void AAInterface::UpdateAfterAQTimerStopped(bool ROOTFileOpen)
       DGScopeDataStorageCloseFile_TB->Clicked();
     */
   }
-
+  
   // Reset the attributes of the timer start text button
   AQTimerStart_TB->SetBackgroundColor(ColorManager->Number2Pixel(18));
   AQTimerStart_TB->SetText("Start timer");
@@ -1749,4 +1749,74 @@ void AAInterface::UpdateAfterAQTimerStopped(bool ROOTFileOpen)
   DGScopeDataStorageCloseFile_TB->SetState(kButtonDisabled);
   DGScopeDataStorageEnable_CB->SetState(kButtonUp);
   DGScopeDataStorageEnable_CB->SetState(kButtonDisabled);
+}
+
+
+void AAInterface::UpdateAfterCalibrationPointAdded(int SetPoint)
+{
+  stringstream SS;
+  SS << (SetPoint+1);
+  string NewPointLabel = "Calibration point " + SS.str();
+  SpectrumCalibrationPoint_CBL->GetComboBox()->AddEntry(NewPointLabel.c_str(),SetPoint+1);
+  
+  // Set the combo box to display the new calibration point...
+  SpectrumCalibrationPoint_CBL->GetComboBox()->Select(SetPoint+1);
+  
+  // ...and set the calibration energy and pulse unit ROOT number
+  // entry widgets to their default "0.0" and "1.0" respectively,
+  SpectrumCalibrationEnergy_NEL->GetEntry()->SetNumber(0.0);
+  SpectrumCalibrationPulseUnit_NEL->GetEntry()->SetNumber(1.0);
+}
+
+
+string AAInterface::CreateFileDialog(const char *FileTypes[],
+				     EFileDialogMode DialogType)
+{
+  // Create a new window containing the file save dialog. Set the
+  // default directory to the user's present directory
+  TGFileInfo FileInformation;
+  FileInformation.fFileTypes = FileTypes;
+  FileInformation.fIniDir = StrDup(getenv("PWD"));
+  new TGFileDialog(gClient->GetRoot(), this, DialogType, &FileInformation);
+
+  string FileName, FileExt;
+
+  if(FileInformation.fFilename == NULL)
+    FileName = "NULL";
+  else{
+    
+    // If the user selects "All"/"*.*" option then any entered
+    // filename is acceptable (i.e. with/without file extensions, with
+    // custom file extension, etc)
+
+    if(FileInformation.fFileTypes[FileInformation.fFileTypeIdx] == "All"){
+      FileName = FileInformation.fFilename;
+    }
+
+    // Otherwise, the filename will always have the predetermined file
+    // extension that is selected in the file type selection list
+
+    else{
+      
+      // Get the file extension and strip off the leading "*" character
+      FileExt = FileInformation.fFileTypes[FileInformation.fFileTypeIdx+1];
+      FileExt = FileExt.erase(0,1);
+
+      // Get the file name
+      FileName = FileInformation.fFilename;
+
+      size_t Found = FileName.find_last_of(".");
+      
+      // If the user has entered a file extension, strip and replace it
+      if(Found != string::npos){
+	FileName = FileName.substr(0, Found) + FileExt;
+      }
+      
+      // If the user has not entered a file extension, add it
+      else{
+	FileName += FileExt;
+      }
+    }
+  }
+  return FileName;
 }

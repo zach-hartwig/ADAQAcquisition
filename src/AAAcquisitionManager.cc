@@ -2,6 +2,8 @@
 
 #include <iostream>
 #include <sstream>
+#include <fstream>
+#include <iomanip>
 
 #include "AAAcquisitionManager.hh"
 #include "AAVMEManager.hh"
@@ -41,6 +43,8 @@ AAAcquisitionManager::AAAcquisitionManager()
     
     Polarity.push_back(0.);
     
+    CalibrationDataStruct DataStruct;
+    CalibrationData.push_back(DataStruct);
     CalibrationEnable.push_back(false);
     CalibrationCurves.push_back(new TGraph);
     
@@ -707,145 +711,13 @@ void AAAcquisitionManager::CreateWaveformTreeBranches()
 	  // V1720 buffer dump.
 	  
 	  if(evt == 0){
-	    
-	    DGScope_EC->GetCanvas()->SetLogx(false);
-	    DGScope_EC->GetCanvas()->SetLogy(false);
-	    
-	    // Ensure to free previous memory allocated to the TGraphs
-	    // to prevent fairly massive memory leakage
-	    if(DGScopeWaveform_G[ch]) delete DGScopeWaveform_G[ch];
-	    DGScopeWaveform_G[ch] = new TGraph(RecordLength, Time_graph, Voltage_graph);
-	    
-	    // At minimum, a single channel's waveform is graphed. The
-	    // "lowest enabled channel", ie, the channel closest to 0
-	    // that is plotted, must set the graphical attributes of the
-	    // plot, including defining the X and Y axies; subsequent
-	    // channel waveform graphs will then be plotted on top.
-	    
-	    if(ch==LowestEnabledChannel){
-	      DGScopeWaveform_G[ch]->SetLineWidth(2);
-	      DGScopeWaveform_G[ch]->SetLineColor(ch+1);
-	      DGScopeWaveform_G[ch]->SetTitle(DGScopeDisplayTitle_TEL->GetEntry()->GetText());
-	      DGScopeWaveform_G[ch]->GetXaxis()->SetTitle(DGScopeDisplayXTitle_TEL->GetEntry()->GetText());
-	      DGScopeWaveform_G[ch]->GetXaxis()->SetTitleOffset(DGScopeDisplayXTitleOffset_NEL->GetEntry()->GetNumber());
-	      DGScopeWaveform_G[ch]->GetXaxis()->CenterTitle();
-	      DGScopeWaveform_G[ch]->GetXaxis()->SetRangeUser(xMin, xMax);
-	      DGScopeWaveform_G[ch]->GetYaxis()->SetTitle(DGScopeDisplayYTitle_TEL->GetEntry()->GetText());
-	      DGScopeWaveform_G[ch]->GetYaxis()->CenterTitle();
-	      DGScopeWaveform_G[ch]->GetYaxis()->SetTitleOffset(DGScopeDisplayYTitleOffset_NEL->GetEntry()->GetNumber());
-	      DGScopeWaveform_G[ch]->GetYaxis()->SetRangeUser(yMin,yMax);
-	      DGScopeWaveform_G[ch]->Draw("AL");
-	      
-	      if(DrawLegend)
-		DGScopeWaveform_Leg->Draw();
-	    }
-	    else{
-	      DGScopeWaveform_G[ch]->SetLineWidth(2);
-	      DGScopeWaveform_G[ch]->SetLineColor(ch+1);
-	      DGScopeWaveform_G[ch]->Draw("L");
-	    }
-	    
-	    // Draw a horizontal dotted line of the same color as the
-	    // channel waveform representing the channel trigger
-	    // threshold. Ensure accounting for channel vertical offset
-	    VertPosOffset = DGScopeVerticalPosition_NEL[ch]->GetEntry()->GetIntNumber();
-	    ChTrigThr = (DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->GetIntNumber() + VertPosOffset) * ConvertVoltageToGraphUnits;
-	    
-	    DGScopeChannelTrigger_L[ch]->DrawLine(xMin, ChTrigThr, xMax, ChTrigThr);
-	    
-	    // Draw a shaded box region to represent the area of the
-	    // waveform being used to calculate the current baseline for
-	    // each digitized waveform
-	    BaseCalcMin = BaselineCalcMin[ch]*ConvertTimeToGraphUnits;
-	    BaseCalcMax = BaselineCalcMax[ch]*ConvertTimeToGraphUnits;
-	    BaseCalcResult = (BaselineCalcResult[ch] + VertPosOffset) * ConvertVoltageToGraphUnits;
-
-	    DGScopeBaselineCalcRegion_B[ch]->DrawBox(BaseCalcMin, (BaseCalcResult-100), BaseCalcMax, (BaseCalcResult+100));
 	  }
+	    
 	}
 	
 	// Plot the integrated pulses in 'multichannel analyzer' mode
 	else if(PlotSpectrum){
 
-	  // Determine the channel desired for histogramming into a pulse height spectrum
-	  ChannelToHistogram = DGScopeSpectrumChannel_CBL->GetComboBox()->GetSelected();
-	  
-	  // Update the spectrum when specified by the user
-	  if(int(DGScopeSpectrum_H[ChannelToHistogram]->GetEntries())%SpectrumRefreshRate==0){
-	    
-	    // Need to get the raw positions of the sliders again at
-	    // present since variables are transformed automatically
-	    // for waveform plotting at top of acquisition loop
-	    DGScopeHorizontalScale_THS->GetPosition(&xMin, &xMax);
-	    DGScopeVerticalScale_DVS->GetPosition(&yMin, &yMax);
-	    
-	    xMin *= maxBin;
-	    xMax *= maxBin;
-
-	    yMin *= DGScopeSpectrum_H[ChannelToHistogram]->GetBinContent(DGScopeSpectrum_H[ChannelToHistogram]->GetMaximumBin());
-	    yMax *= DGScopeSpectrum_H[ChannelToHistogram]->GetBinContent(DGScopeSpectrum_H[ChannelToHistogram]->GetMaximumBin())*1.1;
-	    
-	    // Enable the X and Y axes to be plotted on a log. scale
-	    if(DGScopeSpectrumXAxisLog_CB->IsDown())
-	      DGScope_EC->GetCanvas()->SetLogx(true);
-	    else
-	      DGScope_EC->GetCanvas()->SetLogx(false);
-	    
-	    if(DGScopeSpectrumYAxisLog_CB->IsDown()){
-	      DGScope_EC->GetCanvas()->SetLogy();
-	      yMin += 1;
-	    }
-	    else
-	      DGScope_EC->GetCanvas()->SetLogy(false);
-
-	    DGScopeSpectrum_H[ChannelToHistogram]->GetXaxis()->SetTitle(DGScopeDisplayXTitle_TEL->GetEntry()->GetText());
-	    DGScopeSpectrum_H[ChannelToHistogram]->GetXaxis()->SetTitleOffset(DGScopeDisplayXTitleOffset_NEL->GetEntry()->GetNumber());
-	    DGScopeSpectrum_H[ChannelToHistogram]->GetXaxis()->CenterTitle();
-	    DGScopeSpectrum_H[ChannelToHistogram]->GetXaxis()->SetRangeUser(xMin,xMax);
-	    DGScopeSpectrum_H[ChannelToHistogram]->GetYaxis()->SetTitle(DGScopeDisplayYTitle_TEL->GetEntry()->GetText());
-	    DGScopeSpectrum_H[ChannelToHistogram]->GetYaxis()->SetTitleOffset(DGScopeDisplayYTitleOffset_NEL->GetEntry()->GetNumber());
-	    DGScopeSpectrum_H[ChannelToHistogram]->GetYaxis()->CenterTitle();
-	    DGScopeSpectrum_H[ChannelToHistogram]->GetYaxis()->SetRangeUser(yMin,yMax);
-	    DGScopeSpectrum_H[ChannelToHistogram]->SetTitle(DGScopeDisplayTitle_TEL->GetEntry()->GetText());
-	    DGScopeSpectrum_H[ChannelToHistogram]->Draw("L");
-	    
-	    // If the calibration mode is enabled, then draw the third
-	    // slider position from the horizontal triple slider and
-	    // use its position to calculate the correct calibration
-	    // factor. Update the calibration factor number entry
-	    // widget with the calculated value
-
-	    // If the user has enabled spectrum calibration mode ...
-	    if(DGScopeSpectrumCalibration_CB->IsDown()){
-	      
-	      double LinePosX;
-
-	      // If the user has enabled the use of the calibration
-	      // slider (the "pointer" on the horizontal triple slider
-	      // widget located underneath the canvas) ...
-	      if(DGScopeSpectrumUseCalibrationSlider_CB->IsDown()){
-		
-		// Get the pointer position
-		LinePosX = DGScopeHorizontalScale_THS->GetPointerPosition()*maxBin;
-		
-		// Set the pointer position (in correct units) to the
-		// ROOT GUI widget that displays the pulse unit
-		DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->SetNumber(DGScopeHorizontalScale_THS->GetPointerPosition() * maxBin);
-	      }
-	      
-	      // ... otherwise, allow the user to set the pulse unit manually
-	      else
-		LinePosX = DGScopeSpectrumCalibrationPulseUnit_NEL->GetEntry()->GetNumber();
-	      
-	      // Draw the vertical calibration line
-	      DGScopeSpectrumCalibration_L->DrawLine(LinePosX, yMin, LinePosX, yMax);
-	    }
-	    
-	    // Update the canvas
-	    DGScope_EC->GetCanvas()->Update();
-	  }
-	}
-	
 	// Do not plot anything. This mode is most useful to
 	// maximizing the data throughput rate.
 	else{
@@ -886,9 +758,6 @@ void AAAcquisitionManager::CreateWaveformTreeBranches()
     }
 
 */
-
-
-
 
 
 /*
@@ -998,3 +867,124 @@ void AAInterface::GenerateArtificialWaveform(int RecordLength, vector<int> &Volt
 }
 */
 
+
+bool AAAcquisitionManager::AddCalibrationPoint(int Channel, int SetPoint,
+					       double Energy, double PulseUnit)
+{
+  if(SetPoint == CalibrationData[Channel].PointID.size()){
+    CalibrationData[Channel].PointID.push_back(SetPoint);
+    CalibrationData[Channel].Energy.push_back(Energy);
+    CalibrationData[Channel].PulseUnit.push_back(PulseUnit);
+  }
+  else{
+    CalibrationData[Channel].Energy[SetPoint] = Energy;
+    CalibrationData[Channel].PulseUnit[SetPoint] = PulseUnit;
+  }
+  
+  return true;
+}
+
+
+bool AAAcquisitionManager::EnableCalibration(int Channel)
+{
+  // If there are 2 or more points in the current channel's
+  // calibration data set then create a new TGraph object. The
+  // TGraph object will have pulse units [ADC] on the X-axis and the
+  // corresponding energies [in whatever units the user has entered
+  // the energy] on the Y-axis. A TGraph is used because it provides
+  // very easy but extremely powerful methods for interpolation,
+  // which allows the pulse height/area to be converted in to energy
+  // efficiently in the acquisition loop.
+  
+  if(CalibrationData[Channel].PointID.size() >= 2){
+    
+    // Determine the total number of calibration points in the
+    // current channel's calibration data set
+    const int NumPoints = CalibrationData[Channel].PointID.size();
+    
+    // Create a new "CalibrationManager" TGraph object.
+    CalibrationCurves[Channel] = new TGraph(NumPoints,
+					    &CalibrationData[Channel].PulseUnit[0],
+					    &CalibrationData[Channel].Energy[0]);
+    
+    // Set the current channel's calibration boolean to true,
+    // indicating that the current channel will convert pulse units
+    // to energy within the acquisition loop before histogramming
+    // the result into the channel's spectrum
+    CalibrationEnable[Channel] = true;
+
+    return true;
+  }
+  else
+    return false;
+}
+
+
+bool AAAcquisitionManager::ResetCalibration(int Channel)
+{
+  // Clear the channel calibration vectors for the current channel
+  CalibrationData[Channel].PointID.clear();
+  CalibrationData[Channel].Energy.clear();
+  CalibrationData[Channel].PulseUnit.clear();
+  
+  // Delete the current channel's depracated calibration manager
+  // TGraph object to prevent memory leaks
+  if(CalibrationEnable[Channel])
+    delete CalibrationCurves[Channel];
+  
+  // Set the current channel's calibration boolean to false,
+  // indicating that the calibration manager will NOT be used within
+  // the acquisition loop
+  CalibrationEnable[Channel] = false;
+  
+  return true;
+}
+
+
+bool AAAcquisitionManager::LoadCalibration(int Channel, string FileName, int &NumPoints)
+{
+  size_t Found = FileName.find_last_of(".");
+  if(Found != string::npos){
+    
+    // Set the calibration file to an input stream
+    ifstream In(FileName.c_str());
+    
+    // An index to control the set point
+    int SetPoint = 0;
+    
+    // Iterate through each line in the file and use the values
+    // (column1 == energy, column2 == pulse unit) to set the
+    // CalibrationData objects for the current channel
+    while(In.good()){
+      double Energy, PulseUnit;
+      In >> Energy >> PulseUnit;
+      
+      if(In.eof()) break;
+      
+      AddCalibrationPoint(Channel, SetPoint, Energy, PulseUnit);
+      
+      SetPoint++;
+    }
+
+    NumPoints = SetPoint;
+
+    return true;
+  }
+  else
+    return false;
+}
+
+
+bool AAAcquisitionManager::WriteCalibration(int Channel, string FileName)
+{
+  // Set the calibration file to an input stream
+  ofstream Out(FileName.c_str());
+  
+  for(int i=0; i<CalibrationData[Channel].Energy.size(); i++)
+    Out << setw(10) << CalibrationData[Channel].Energy[i]
+	<< setw(10) << CalibrationData[Channel].PulseUnit[i]
+	<< endl;
+  Out.close();
+
+  return true;
+}
