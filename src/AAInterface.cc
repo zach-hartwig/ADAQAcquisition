@@ -42,6 +42,7 @@ using namespace boost::assign;
 #include "AASettings.hh"
 #include "AAVMEManager.hh"
 #include "AAAcquisitionManager.hh"
+#include "AAGraphics.hh"
 
 
 AAInterface::AAInterface()
@@ -61,20 +62,12 @@ AAInterface::AAInterface()
   DisplaySlots = new AADisplaySlots(this);
   SubtabSlots = new AASubtabSlots(this);
   TabSlots = new AATabSlots(this);
+
+  TheVMEManager = AAVMEManager::GetInstance();
   
   // A structure to important widget settings;
-  TheSettings = new AASettings;
-
-  // Create a pointer to the singleton VME manager 
-  TheVMEManager = AAVMEManager::GetInstance();
-  TheVMEManager->SetSettingsPointer(TheSettings);
-
-  // Create a pointer to the single acquisition mananger
-  TheACQManager = AAAcquisitionManager::GetInstance();
-  TheACQManager->SetInterfacePointer(this);
-  TheACQManager->SetSettingsPointer(TheSettings);
+  TheSettings = new AASettings(NumDataChannels);
   
-
   /////////////////////////////
   // Initialize HV variables //
   /////////////////////////////
@@ -149,6 +142,20 @@ AAInterface::AAInterface()
   FillPulserFrame();
   FillVoltageFrame();
   FillAcquisitionFrame();
+
+
+  ///////////////////////////////////////////
+  // Set manager pointers for later access //
+  ///////////////////////////////////////////
+
+
+  TheVMEManager->SetSettingsPointer(TheSettings);
+  
+  AAAcquisitionManager::GetInstance()->SetInterfacePointer(this);
+  AAAcquisitionManager::GetInstance()->SetSettingsPointer(TheSettings);
+  
+  AAGraphics::GetInstance()->SetCanvasPointer(DisplayCanvas_EC->GetCanvas());
+  AAGraphics::GetInstance()->SetSettingsPointer(TheSettings);
 
 
   ////////////////////////////////
@@ -786,7 +793,7 @@ void AAInterface::FillAcquisitionFrame()
 				       new TGLayoutHints(kLHintsNormal));
     DGChTriggerThreshold_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
     DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-    DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumber(2000);
+    DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumber(2500);
     DGChTriggerThreshold_NEL[ch]->GetEntry()->Resize(55,20);
     
     // ADAQ number entry to set minimum sample for baseline calculation [sample]
@@ -862,33 +869,37 @@ void AAInterface::FillAcquisitionFrame()
   DGScopeDisplay_GF->AddFrame(DGScopeDisplayAndSlider_HF, new TGLayoutHints(kLHintsNormal,0,0,5,0));
 
   // ROOT double slider for control of the min/max of vertical axis, ie, zoom
-  DGScopeDisplayAndSlider_HF->AddFrame(DisplayVerticalScale_DVS = new TGDoubleVSlider(DGScopeDisplayAndSlider_HF, 400, kDoubleScaleBoth, -1, kVerticalFrame, ColorManager->Number2Pixel(17),true,false),
+  DGScopeDisplayAndSlider_HF->AddFrame(DisplayVerticalScale_DVS = new TGDoubleVSlider(DGScopeDisplayAndSlider_HF, 400, kDoubleScaleBoth, DisplayVerticalScale_DVS_ID, kVerticalFrame, ColorManager->Number2Pixel(17),true,false),
 				       new TGLayoutHints(kLHintsNormal, 0, 0, 5, 0));
   DisplayVerticalScale_DVS->SetRange(0,1);
   DisplayVerticalScale_DVS->SetPosition(0,1);
+  DisplayVerticalScale_DVS->Connect("PositionChanged()", "AADisplaySlots", DisplaySlots, "HandleDoubleSliders()");
   
   // ROOT embdedded canvas for display of waveforms and spectra
   DGScopeDisplayAndSlider_HF->AddFrame(DisplayCanvas_EC = new TRootEmbeddedCanvas("DisplayCanvas_EC", DGScopeDisplayAndSlider_HF, 650, 400),
 				       new TGLayoutHints(kLHintsCenterX, 5,5,0,0));
   DisplayCanvas_EC->GetCanvas()->SetFillColor(0);
-  DisplayCanvas_EC->GetCanvas()->SetFrameFillColor(19);
-  DisplayCanvas_EC->GetCanvas()->SetGrid();
+  DisplayCanvas_EC->GetCanvas()->SetFrameFillColor(0);
+  DisplayCanvas_EC->GetCanvas()->SetGrid(true, true);
   DisplayCanvas_EC->GetCanvas()->SetBorderMode(0);
-  DisplayCanvas_EC->GetCanvas()->SetLeftMargin(0.12);
+  DisplayCanvas_EC->GetCanvas()->SetLeftMargin(0.13);
   DisplayCanvas_EC->GetCanvas()->SetBottomMargin(0.12);
   DisplayCanvas_EC->GetCanvas()->SetTopMargin(0.08);
-  DisplayCanvas_EC->GetCanvas()->SetRightMargin(0.1);
+  DisplayCanvas_EC->GetCanvas()->SetRightMargin(0.05);
 
   // ROOT triple slider. The "double" slider features are used to //
   // control the min/max of the horizontal axis, ie, zoom; The "third"
   // slider is used for graphical valibration of the pulse height
   // spectrum when DGScope is set to "calibration mode" while
   // acquiring data in "spectrum mode"
-  DGScopeDisplay_GF->AddFrame(DisplayHorizontalScale_THS = new TGTripleHSlider(DGScopeDisplay_GF, 650, kDoubleScaleBoth, -1, kVerticalFrame, ColorManager->Number2Pixel(17)),
+  DGScopeDisplay_GF->AddFrame(DisplayHorizontalScale_THS = new TGTripleHSlider(DGScopeDisplay_GF, 650, kDoubleScaleBoth, DisplayHorizontalScale_THS_ID, kVerticalFrame, ColorManager->Number2Pixel(17)),
 			      new TGLayoutHints(kLHintsRight, 5, 5, 5, 5));
   DisplayHorizontalScale_THS->SetRange(0,1);
   DisplayHorizontalScale_THS->SetPosition(0,1);
   DisplayHorizontalScale_THS->SetPointerPosition(0.5);
+  DisplayHorizontalScale_THS->Connect("PositionChanged()", "AADisplaySlots", DisplaySlots, "HandleDoubleSliders()");
+  DisplayHorizontalScale_THS->Connect("PointerPositionChanged()", "AADisplaySlots", DisplaySlots, "HandleSliderPointers()");
+  
 
   TGHorizontalFrame *DGScopeDisplayButtons_HF = new TGHorizontalFrame(DGScopeDisplay_GF);
   DGScopeDisplay_GF->AddFrame(DGScopeDisplayButtons_HF, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
@@ -1194,7 +1205,7 @@ void AAInterface::FillAcquisitionFrame()
 				new TGLayoutHints(kLHintsNormal,0,0,0,0));
   SpectrumULD_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
   SpectrumULD_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEANonNegative);
-  SpectrumULD_NEL->GetEntry()->SetNumber(100000);
+  SpectrumULD_NEL->GetEntry()->SetNumber(30000);
 
   SpectrumAnalysis_GF->AddFrame(SpectrumLDTrigger_CB = new TGCheckButton(SpectrumAnalysis_GF,"LD trigger to file", SpectrumLDTrigger_CB_ID),
 				new TGLayoutHints(kLHintsNormal,0,0,0,0));
@@ -1644,12 +1655,23 @@ void AAInterface::SaveSettings()
     TheSettings->ChTriggerThreshold[ch] = DGChTriggerThreshold_NEL[ch]->GetEntry()->GetIntNumber();
     TheSettings->ChBaselineCalcMin[ch] = DGChBaselineCalcMin_NEL[ch]->GetEntry()->GetIntNumber();
     TheSettings->ChBaselineCalcMax[ch] = DGChBaselineCalcMax_NEL[ch]->GetEntry()->GetIntNumber();
-    TheSettings->ChZSThreshold[8] = DGChZSThreshold_NEL[ch]->GetEntry()->GetIntNumber();
-    TheSettings->ChZSForward[8] = DGChZSForward_NEL[ch]->GetEntry()->GetIntNumber();
-    TheSettings->ChZSBackward[8] = DGChZSBackward_NEL[ch]->GetEntry()->GetIntNumber();
-    TheSettings->ChZSPosLogic[8] = DGChZSPosLogic_RB[ch]->IsDown();
-    TheSettings->ChZSNegLogic[8] = DGChZSNegLogic_RB[ch]->IsDown();
+    TheSettings->ChZSThreshold[ch] = DGChZSThreshold_NEL[ch]->GetEntry()->GetIntNumber();
+    TheSettings->ChZSForward[ch] = DGChZSForward_NEL[ch]->GetEntry()->GetIntNumber();
+    TheSettings->ChZSBackward[ch] = DGChZSBackward_NEL[ch]->GetEntry()->GetIntNumber();
+    TheSettings->ChZSPosLogic[ch] = DGChZSPosLogic_RB[ch]->IsDown();
+    TheSettings->ChZSNegLogic[ch] = DGChZSNegLogic_RB[ch]->IsDown();
   }
+
+  float Min, Max;
+  
+  DisplayHorizontalScale_THS->GetPosition(Min, Max);
+  TheSettings->HorizontalSliderMin = Min;
+  TheSettings->HorizontalSliderMax = Max;
+  
+  DisplayVerticalScale_DVS->GetPosition(Min, Max);
+  TheSettings->VerticalSliderMin = Min;
+  TheSettings->VerticalSliderMax = Max;
+
 
   /////////////////////////////
   // Acquisition control subtab
@@ -1659,9 +1681,10 @@ void AAInterface::SaveSettings()
   TheSettings->SpectrumMode = AQSpectrum_RB->IsDown();
   TheSettings->HighRateMode = AQHighRate_RB->IsDown();
   TheSettings->UltraRateMode = AQUltraRate_RB->IsDown();
-
+    
   // Trigger control settings
   TheSettings->TriggerCoincidenceEnable = DGTriggerCoincidenceEnable_CB->IsDown();
+    
   TheSettings->TriggerCoincidenceLevel = DGTriggerCoincidenceLevel_CBL->GetComboBox()->GetSelected();
   TheSettings->TriggerType = DGTriggerType_CBL->GetComboBox()->GetSelected();
   TheSettings->TriggerEdge = DGTriggerEdge_CBL->GetComboBox()->GetSelected();
@@ -1684,15 +1707,17 @@ void AAInterface::SaveSettings()
   TheSettings->SpectrumChannel = SpectrumChannel_CBL->GetComboBox()->GetSelected();
   TheSettings->SpectrumNumBins = SpectrumNumBins_NEL->GetEntry()->GetIntNumber();
   TheSettings->SpectrumMinBin = SpectrumMinBin_NEL->GetEntry()->GetIntNumber();
-  TheSettings->SpectrumMaxBin = SpectrumMinBin_NEL->GetEntry()->GetIntNumber();
+  TheSettings->SpectrumMaxBin = SpectrumMaxBin_NEL->GetEntry()->GetIntNumber();
 
   TheSettings->SpectrumPulseHeight = SpectrumPulseHeight_RB->IsDown();
   TheSettings->SpectrumPulseArea = SpectrumPulseArea_RB->IsDown();
+  
   TheSettings->SpectrumLLD = SpectrumLLD_NEL->GetEntry()->GetIntNumber();
   TheSettings->SpectrumULD = SpectrumULD_NEL->GetEntry()->GetIntNumber();
   TheSettings->LDEnable = SpectrumLDTrigger_CB->IsDown();
-  TheSettings->LDChannel = SpectrumLDTriggerChannel_CBL->GetComboBox()->GetSelected();
 
+  TheSettings->LDChannel = SpectrumLDTriggerChannel_CBL->GetComboBox()->GetSelected();
+  
   TheSettings->SpectrumCalibrationEnable = SpectrumCalibration_CB->IsDown();
   TheSettings->SpectrumCalibrationUseSlider = SpectrumUseCalibrationSlider_CB->IsDown();
 
@@ -1703,6 +1728,40 @@ void AAInterface::SaveSettings()
   TheSettings->PlotXAxisInSamples = DisplayWaveformXAxisSample_RB->IsDown();
   TheSettings->PlotYAxisInADC = DisplayWaveformYAxisADC_RB->IsDown();
   TheSettings->PlotLegend = DisplayDrawLegend_CB->IsDown();
+
+  bool AcquisitionOn = AAAcquisitionManager::GetInstance()->GetAcquisitionEnable();
+
+  if(AcquisitionOn){
+    for(int ch=0; ch<NumDataChannels; ch++){
+      TheSettings->ChEnable[ch] = DGChEnable_CB[ch]->IsDisabledAndSelected();
+      TheSettings->ChPosPolarity[ch] = DGChPosPolarity_RB[ch]->IsDisabledAndSelected();
+      TheSettings->ChNegPolarity[ch] = DGChNegPolarity_RB[ch]->IsDisabledAndSelected();
+      TheSettings->ChZSPosLogic[ch] = DGChZSPosLogic_RB[ch]->IsDisabledAndSelected();
+      TheSettings->ChZSNegLogic[ch] = DGChZSNegLogic_RB[ch]->IsDisabledAndSelected();
+    }
+
+    TheSettings->WaveformMode = AQWaveform_RB->IsDisabledAndSelected();
+    TheSettings->SpectrumMode = AQSpectrum_RB->IsDisabledAndSelected();
+    TheSettings->HighRateMode = AQHighRate_RB->IsDisabledAndSelected();
+    TheSettings->UltraRateMode = AQUltraRate_RB->IsDisabledAndSelected();
+
+    TheSettings->TriggerCoincidenceEnable = DGTriggerCoincidenceEnable_CB->IsDisabledAndSelected();
+
+    TheSettings->DataReductionEnable = AQDataReductionEnable_CB->IsDisabledAndSelected();
+    TheSettings->ZeroSuppressionEnable = DGZSEnable_CB->IsDisabledAndSelected();
+
+    TheSettings->SpectrumPulseHeight = SpectrumPulseHeight_RB->IsDisabledAndSelected();
+    TheSettings->SpectrumPulseArea = SpectrumPulseArea_RB->IsDisabledAndSelected();
+
+    TheSettings->LDEnable = SpectrumLDTrigger_CB->IsDisabledAndSelected();
+
+    TheSettings->SpectrumCalibrationEnable = SpectrumCalibration_CB->IsDisabledAndSelected();
+    TheSettings->SpectrumCalibrationUseSlider = SpectrumUseCalibrationSlider_CB->IsDisabledAndSelected();
+
+    TheSettings->PlotXAxisInSamples = DisplayWaveformXAxisSample_RB->IsDisabledAndSelected();
+    TheSettings->PlotYAxisInADC = DisplayWaveformYAxisADC_RB->IsDisabledAndSelected();
+    TheSettings->PlotLegend = DisplayDrawLegend_CB->IsDisabledAndSelected();
+  }
 }
 
 

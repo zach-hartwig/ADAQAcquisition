@@ -21,6 +21,7 @@ using namespace std;
 // ADAQ 
 #include "AAAcquisitionManager.hh"
 #include "AAVMEManager.hh"
+#include "AAGraphics.hh"
 #include "AAInterface.hh"
 
 
@@ -34,6 +35,9 @@ int main(int argc, char **argv)
   
   // Create the singleton acquisition manager
   AAAcquisitionManager *TheACQManager = new AAAcquisitionManager;
+  
+  // Create the singleton graphics manager
+  AAGraphics *TheGraphicsManager = new AAGraphics;
   
   // Create the graphical user interface
   AAInterface *TheInterface = new AAInterface;

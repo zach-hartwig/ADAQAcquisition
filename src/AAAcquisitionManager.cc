@@ -7,6 +7,7 @@
 
 #include "AAAcquisitionManager.hh"
 #include "AAVMEManager.hh"
+#include "AAGraphics.hh"
 
 
 AAAcquisitionManager *AAAcquisitionManager::TheAcquisitionManager = 0;
@@ -22,7 +23,7 @@ AAAcquisitionManager::AAAcquisitionManager()
     AcquisitionTimeNow(0), AcquisitionTimePrev(0),
     EventPointer(NULL), EventWaveform(NULL), Buffer(NULL),
     BufferSize(0), ReadSize(0), NumEvents(0),
-    LLD(0), ULD(0), SampleHeight(0.), TriggerHeight(0.),
+    WaveformLength(0), LLD(0), ULD(0), SampleHeight(0.), TriggerHeight(0.),
     PulseHeight(0.), PulseArea(0.),
     BranchWaveformTree(false),
     WriteWaveformToTree(false)
@@ -70,9 +71,8 @@ void AAAcquisitionManager::PreAcquisition()
 
   AcquisitionTimeNow = 0;
   AcquisitionTimePrev = 0;
-
-  // Baseline calculation
   
+  // Baseline calculation
   for(int ch=0; ch<DGChannels; ch++){
     BaselineStart[ch] = TheSettings->ChBaselineCalcMin[ch];
     BaselineStop[ch] = TheSettings->ChBaselineCalcMax[ch];
@@ -87,7 +87,7 @@ void AAAcquisitionManager::PreAcquisition()
   
   // Waveform readout
   
-  int WaveformLength = TheSettings->RecordLength;
+  WaveformLength = TheSettings->RecordLength;
   if(TheSettings->DataReductionEnable)
     WaveformLength /= TheSettings->DataReductionFactor;
   
@@ -119,6 +119,11 @@ void AAAcquisitionManager::PreAcquisition()
 			      TheSettings->SpectrumMinBin,
 			      TheSettings->SpectrumMaxBin);
   }
+
+  // GraphicsManager settings
+
+  AAGraphics::GetInstance()->CreateTimeVector(WaveformLength);
+
   
   // Initialize CAEN digitizer readout data for acquisition
 
@@ -134,7 +139,9 @@ void AAAcquisitionManager::PreAcquisition()
 void AAAcquisitionManager::StartAcquisition()
 {
   ADAQDigitizer *DGManager = AAVMEManager::GetInstance()->GetDGManager();
-  
+
+  AAGraphics *TheGraphicsManager = AAGraphics::GetInstance();
+
   // Initialize all variables before acquisition begins
   PreAcquisition();
 
@@ -196,13 +203,13 @@ void AAAcquisitionManager::StartAcquisition()
 	if(!TheSettings->ChEnable[ch])
 	  continue;
 
-	PulseHeight = PulseArea = 0.;
+	BaselineValue[ch] = PulseHeight = PulseArea = 0.;
 	
 	for(int sample=0; sample<TheSettings->RecordLength; sample++){
-
+	  
 	  /////////////////////////
 	  // Data reduction readout
-
+	  
 	  if(TheSettings->DataReductionEnable){
 	    if(sample % TheSettings->DataReductionFactor == 0){
 	      int Index = sample / TheSettings->DataReductionFactor;
@@ -216,7 +223,6 @@ void AAAcquisitionManager::StartAcquisition()
 
 	  else
 	    Waveforms[ch][sample] = EventWaveform->DataChannel[ch][sample];
-
 
 	  ///////////////////
 	  // Pulse processing
@@ -248,18 +254,18 @@ void AAAcquisitionManager::StartAcquisition()
 
 	if(!TheSettings->UltraRateMode){
 	  
+	  // Use the calibration curves (ROOT TGraph's) to convert
+	  // the pulse height/area from ADC to the user's energy
+	  // units using linear interpolation calibration points
 	  if(CalibrationEnable[ch]){
 	    
-	    // Use the calibration curves (ROOT TGraph's) to convert
-	    // the pulse height/area from ADC to the user's energy
-	    // units using linear interpolation calibration points
+
 	    if(TheSettings->SpectrumPulseHeight)
 	      PulseHeight = CalibrationCurves[ch]->Eval(PulseHeight);
 	    else
 	      PulseArea = CalibrationCurves[ch]->Eval(PulseArea);
 	  }
 	  
-
 	  // Pulse height spectrum
 	  if(TheSettings->SpectrumPulseHeight){
 	    if(PulseHeight > LLD and PulseHeight < ULD){
@@ -303,12 +309,16 @@ void AAAcquisitionManager::StartAcquisition()
 	// should be used as the "trigger" for writing waveforms
 	WriteWaveformToTree = false;
       }
-
-
-
-
-
     }
+
+    if(TheSettings->WaveformMode)
+      TheGraphicsManager->PlotWaveforms(Waveforms, 
+					WaveformLength, 
+					BaselineValue);
+    else if(TheSettings->SpectrumMode)
+      TheGraphicsManager->PlotSpectrum(Spectrum_H);
+
+    
     // Free the PC memory allocated to the event
     DGManager->FreeEvent(&EventWaveform);
   }

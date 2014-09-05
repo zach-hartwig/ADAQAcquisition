@@ -637,21 +637,10 @@ void AASubtabSlots::HandleRadioButtons()
   switch(ActiveID){
     
   case SpectrumPulseHeight_RB_ID:
-    
-    if(TI->SpectrumPulseHeight_RB->IsDown()){
-      TI->SpectrumLLD_NEL->GetEntry()->SetNumber(0);
-      TI->SpectrumULD_NEL->GetEntry()->SetNumber(4095);
-    }
-
-    break;
-
   case SpectrumPulseArea_RB_ID:
     
-    if(TI->SpectrumPulseArea_RB->IsDown()){
-      TI->SpectrumLLD_NEL->GetEntry()->SetNumber(4000);
-      TI->SpectrumULD_NEL->GetEntry()->SetNumber(100000);
-    }
-
+    TI->SpectrumLLD_NEL->GetEntry()->SetNumber(TI->TheSettings->SpectrumMinBin);
+    TI->SpectrumULD_NEL->GetEntry()->SetNumber(TI->TheSettings->SpectrumMaxBin);
     break;
   }
 }

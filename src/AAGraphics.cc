@@ -1,7 +1,16 @@
-#include <iostream>
+#include <TGraph.h>
+#include <TStyle.h>
+#include <TFrame.h>
 
+#include <boost/assign/std/vector.hpp>
+using namespace boost::assign;
+
+#include <iostream>
+#include <sstream>
 
 #include "AAGraphics.hh"
+#include "AAVMEManager.hh"
+#include "ADAQDigitizer.hh"
 
 
 AAGraphics *AAGraphics::TheGraphicsManager = 0;
@@ -12,10 +21,52 @@ AAGraphics *AAGraphics::GetInstance()
 
 
 AAGraphics::AAGraphics()
+  : WaveformWidth(2), SpectrumWidth(2)
 {
   if(TheGraphicsManager)
     cout << "\nError! The GraphicsManager was constructed twice!\n" << endl;
   TheGraphicsManager = this;
+
+  // Fill a vector with channel colors for plotting
+  
+  ChColor += kBlue, kRed, kGreen+1, kYellow-3,
+    kOrange+7, kAzure+7, kViolet-5, kMagenta;
+
+  // Initialize lines and boxes for plotting
+
+  for(int ch=0; ch<8; ch++){
+    Trigger_L.push_back(new TLine);
+    Trigger_L[ch]->SetLineColor(ChColor[ch]);
+    Trigger_L[ch]->SetLineStyle(7);
+    Trigger_L[ch]->SetLineWidth(2);
+    
+    Baseline_B.push_back(new TBox);
+    Baseline_B[ch]->SetFillColor(ChColor[ch]);
+    Baseline_B[ch]->SetFillStyle(3002);
+    Baseline_B[ch]->SetLineWidth(0);
+  }
+
+  SpectrumCalibration_L = new TLine;
+  SpectrumCalibration_L->SetLineColor(kRed);
+  SpectrumCalibration_L->SetLineStyle(7);
+  SpectrumCalibration_L->SetLineWidth(2);
+
+  // Create a legend for the waveforms
+
+  Waveform_LG = new TLegend(0.85, 0.5, 0.95, 0.92);
+  Waveform_LG->SetTextSize(0.05);
+
+  for(int ch=0; ch<8; ch++){
+    TLine *Line = new TLine;
+    Line->SetLineColor(ChColor[ch]);
+    Line->SetLineWidth(4);
+
+    stringstream SS;
+    SS << "Ch" << ch;
+    string LineName = SS.str();
+    
+    Waveform_LG->AddEntry(Line, LineName.c_str(), "L");
+  }
 }
 
 
@@ -23,76 +74,109 @@ AAGraphics::~AAGraphics()
 {;}
 
 
-void AAGraphics::PlotWaveform()
-{}
+void AAGraphics::CreateTimeVector(int WaveformLength)
+{
+  Time.clear();
+  for(int t=0; t<WaveformLength; t++)
+    Time.push_back(t);
+}
 
 
-void AAGraphics::PlotSpectrum()
-{}
+void AAGraphics::PlotWaveforms(vector<vector<uint16_t> > &Waveforms, 
+			       int WaveformLength,
+			       vector<double> &BaselineValue)
+{
+  vector<TGraph *> WaveformGraphs;
+  for(int ch=0; ch<TheSettings->ChEnable.size(); ch++){
+    
+    if(!TheSettings->ChEnable[ch])
+      continue;
+
+
+    vector<int> Voltage (Waveforms[ch].begin(), Waveforms[ch].end());
+
+    TGraph *Waveform_G = new TGraph(WaveformLength, &Time[0], &Voltage[0]);
+    WaveformGraphs.push_back(Waveform_G);
+
+    Waveform_G->Draw("AL");
+
+    // Set the horiz. and vert. min/max ranges of the waveform.  Note
+    // the max value is the max digitizer bit value in units of ADC
+
+    float XMin, XMax, YMin, YMax;
+
+    XMin = WaveformLength * TheSettings->HorizontalSliderMin;
+    XMax = WaveformLength * TheSettings->HorizontalSliderMax;
+    Waveform_G->GetXaxis()->SetRangeUser(XMin, XMax);
+    
+    int AbsoluteMax = AAVMEManager::GetInstance()->GetDGManager()->GetMaxBit();
+    YMin = AbsoluteMax * TheSettings->VerticalSliderMin;
+    YMax = AbsoluteMax * TheSettings->VerticalSliderMax;
+    Waveform_G->GetYaxis()->SetRangeUser(YMin, YMax);
+
+    // Set the waveform line properties
+
+    Waveform_G->SetLineColor(ChColor[ch]);
+    Waveform_G->SetLineWidth(WaveformWidth);
+    
+    // Draw additional graphical objects on top of the waveform
+    
+    Trigger_L[ch]->DrawLine(XMin,
+			    TheSettings->ChTriggerThreshold[ch],
+			    XMax,
+			    TheSettings->ChTriggerThreshold[ch]);
+
+    double BaselineWidth = (YMax-YMin)*0.03;
+    
+    Baseline_B[ch]->DrawBox(TheSettings->ChBaselineCalcMin[ch],
+			    BaselineValue[ch] - BaselineWidth,
+			    TheSettings->ChBaselineCalcMax[ch],
+			    BaselineValue[ch] + BaselineWidth);
+  }
+  
+  if(TheSettings->PlotLegend)
+    Waveform_LG->Draw();
+  
+  TheCanvas_C->Update();
+
+  vector<TGraph *>::iterator it = WaveformGraphs.begin();
+  for(; it!=WaveformGraphs.end(); it++)
+    delete (*it);
+}
+
+
+
+void AAGraphics::PlotSpectrum(vector<TH1F *> &Spectrum_H)
+{
+  int Channel = TheSettings->SpectrumChannel;
+
+  Spectrum_H[Channel]->Draw("C");
+
+  Spectrum_H[Channel]->SetLineColor(ChColor[Channel]);
+  Spectrum_H[Channel]->SetLineWidth(SpectrumWidth);
+
+
+  float XMin, XMax, YMin, YMax;
+
+  XMin = TheSettings->SpectrumMaxBin * TheSettings->HorizontalSliderMin;
+  XMax = TheSettings->SpectrumMaxBin * TheSettings->HorizontalSliderMax;
+  Spectrum_H[Channel]->GetXaxis()->SetRangeUser(XMin, XMax);
+  
+  int AbsoluteMax = Spectrum_H[Channel]->GetMaximum() * 1.05;
+
+  YMin = AbsoluteMax * TheSettings->VerticalSliderMin;
+  YMax = AbsoluteMax * TheSettings->VerticalSliderMax;
+  //  Spectrum_H[Channel]->SetMinimum(YMin);
+  //  Spectrum_H[Channel]->SetMaximum(YMax);
+
+  TheCanvas_C->Update();
+}
 
 
 void  AAGraphics::PlotCalibration()
 {}
 
 
-  /*
-  // Create string array used to assign labels for each channel in the
-  // DGScopeWaveform_Leg ROOT legend object
-  string DGScopeWaveformTitle[8] = {"Ch 0", "Ch 1", "Ch 2", "Ch 3", 
-				    "Ch 4", "Ch 5", "Ch 6", "Ch 7"};
-  
-  // Create a ROOT legend for the waveform graph
-  DGScopeWaveform_Leg = new TLegend(0.91, 0.5, 0.99, 0.95);
-  
-  // For each channel on the digitizer, create the appropriate label
-  // and symbol in the ROOT legend using a dummy TGraph object to set
-  // the line attributes. Also, initialize the TH1F objects
-  // representing the pulse heigh spectrum for each channel
-  for(int i=0; i<NumDataChannels; i++){
-    TGraph *Dummy_G = new TGraph();
-    Dummy_G->SetLineColor(i+1);
-    Dummy_G->SetLineWidth(4);
-
-    assert(i<9);
-
-    DGScopeWaveform_Leg->AddEntry(Dummy_G, DGScopeWaveformTitle[i].c_str(), "L");
-    DGScopeWaveform_Leg->SetFillColor(18);
-    DGScopeWaveform_Leg->SetTextSize(0.04);
-
-    DGScopeChannelTrigger_L[i] = new TLine;
-    DGScopeChannelTrigger_L[i]->SetLineColor(i+1);
-    DGScopeChannelTrigger_L[i]->SetLineWidth(2);
-    DGScopeChannelTrigger_L[i]->SetLineStyle(7);
-    
-    DGScopeBaselineCalcRegion_B[i] = new TBox;
-    DGScopeBaselineCalcRegion_B[i]->SetFillColor(i+1);
-    DGScopeBaselineCalcRegion_B[i]->SetFillStyle(3001);
-  }
-
-  DGScopeSpectrumCalibration_L = new TLine;
-  DGScopeSpectrumCalibration_L->SetLineColor(kRed);
-  DGScopeSpectrumCalibration_L->SetLineWidth(2);
-  DGScopeSpectrumCalibration_L->SetLineStyle(7);
-  
-
-  // Create a dummy TLine object to add a single entry to thewaveform
-  // graph legend representing the trigger lines
-  TLine *Dummy_Line = new TLine();
-  Dummy_Line->SetLineColor(4);
-  Dummy_Line->SetLineStyle(2);
-  Dummy_Line->SetLineWidth(4);
-  DGScopeWaveform_Leg->AddEntry(Dummy_Line, "Trig", "L");
-  
-  for(int ch=0; ch<NumDataChannels; ch++){
-    DGScopeWaveform_G[ch] = new TGraph;
-    DGScopeSpectrum_H[ch] = new TH1F;
-
-    UseCalibrationManager.push_back(false);
-    CalibrationManager.push_back(new TGraph);
-    ADAQChannelCalibrationData Init;
-    CalibrationData.push_back(Init);
-  }
-  */
 
 
 // Method that enables the user to force the drawing of the pulse

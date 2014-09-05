@@ -13,6 +13,8 @@ public:
   ~AADisplaySlots();
 
   void HandleTextButtons();
+  void HandleDoubleSliders();
+  void HandleSliderPointers();
 
   ClassDef(AADisplaySlots, 0);
   

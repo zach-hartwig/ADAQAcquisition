@@ -3,6 +3,10 @@
 
 #include <TObject.h>
 
+#include <vector>
+#include <iostream>
+using namespace std;
+
 #ifndef __CINT__
 #include <boost/cstdint.hpp>
 #endif
@@ -10,24 +14,48 @@
 class AASettings : public TObject
 {
 public:
+  
+  AASettings(int Channels){
+    ChEnable.resize(Channels);
+    ChPosPolarity.resize(Channels);
+    ChNegPolarity.resize(Channels);
+    ChVertPos.resize(Channels);
+    ChDCOffset.resize(Channels);
+    ChTriggerThreshold.resize(Channels);
+    ChBaselineCalcMin.resize(Channels);
+    ChBaselineCalcMax.resize(Channels);
+    ChZSThreshold.resize(Channels);
+    ChZSForward.resize(Channels);
+    ChZSBackward.resize(Channels);
+    ChZSPosLogic.resize(Channels);
+    ChZSNegLogic.resize(Channels);
+  }
+  
 #ifndef __CINT__
 
   //////////////////////////
   // Channel widget settings
   
-  bool     ChEnable[8];
-  bool     ChPosPolarity[8];
-  bool     ChNegPolarity[8];
-  uint32_t ChVertPos[8];
-  uint32_t ChDCOffset[8];
-  uint32_t ChTriggerThreshold[8];
-  uint32_t ChBaselineCalcMin[8];
-  uint32_t ChBaselineCalcMax[8];
-  uint32_t ChZSThreshold[8];
-  uint32_t ChZSForward[8];
-  uint32_t ChZSBackward[8];
-  bool     ChZSPosLogic[8];
-  bool     ChZSNegLogic[8];
+  vector<bool>     ChEnable;
+  vector<bool>     ChPosPolarity;
+  vector<bool>     ChNegPolarity;
+  vector<uint32_t> ChVertPos;
+  vector<uint32_t> ChDCOffset;
+  vector<uint32_t> ChTriggerThreshold;
+  vector<uint32_t> ChBaselineCalcMin;
+  vector<uint32_t> ChBaselineCalcMax;
+  vector<uint32_t> ChZSThreshold;
+  vector<uint32_t> ChZSForward;
+  vector<uint32_t> ChZSBackward;
+  vector<bool>     ChZSPosLogic;
+  vector<bool>     ChZSNegLogic;
+
+
+  //////////////////////////
+  // Display widget settings
+
+  double HorizontalSliderMin, HorizontalSliderMax;
+  double VerticalSliderMin, VerticalSliderMax;
 
 
   ///////////////////////////////////////
@@ -89,7 +117,7 @@ public:
   ////////////////////////////////
   // Miscellaneous widget settings
 
-  uint32_t SpectrumRefreshRate;
+ uint32_t SpectrumRefreshRate;
 
 #endif
 

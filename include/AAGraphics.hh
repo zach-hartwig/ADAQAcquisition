@@ -5,9 +5,17 @@
 #include <TLegend.h>
 #include <TLine.h>
 #include <TBox.h>
+#include <TCanvas.h>
+#include <TH1F.h>
 
 #include <vector>
 using namespace std;
+
+#ifndef __CINT__
+#include <boost/cstdint.hpp>
+#endif
+
+#include "AASettings.hh"
 
 class AAGraphics : public TObject
 {
@@ -18,8 +26,18 @@ public:
 
   static AAGraphics *GetInstance();
 
-  void PlotWaveform();
-  void PlotSpectrum();
+  void SetCanvasPointer(TCanvas *C) {TheCanvas_C = C;}
+  void SetSettingsPointer(AASettings *TS) {TheSettings = TS;}
+  
+  void CreateTimeVector(int);
+
+
+
+
+#ifndef __CINT__
+  void PlotWaveforms(vector<vector<uint16_t> > &, int, vector<double> &);
+#endif
+  void PlotSpectrum(vector<TH1F *> &);
   void PlotCalibration();
 
   ClassDef(AAGraphics, 0);
@@ -27,20 +45,23 @@ public:
 private:
   static AAGraphics *TheGraphicsManager;
 
-  vector<TLegend *> Waveform_LG;
-  vector<TLine *> ChTrigger_L;
-  vector<TBox *> ChBaselineCalc_B;
+  TLegend * Waveform_LG;
+  vector<TLine *> Trigger_L;
+  vector<TBox *> Baseline_B;
 
-  TLine *SpectrumCalibration_L;
+  TLine *Spectrum_L, *SpectrumCalibration_L;
 
+  TCanvas *TheCanvas_C;
+
+  vector<int> ChColor;
+
+  int WaveformWidth, SpectrumWidth;
+
+  AASettings *TheSettings;
+
+  vector<int> Time;
 };
 
-  /*
-  TLegend *DGScopeWaveform_Leg;
-  TLine *DGScopeChannelTrigger_L[8];
-  TBox *DGScopeBaselineCalcRegion_B[8];
-  TLine *DGScopeSpectrumCalibration_L;
-  */
 
 
 

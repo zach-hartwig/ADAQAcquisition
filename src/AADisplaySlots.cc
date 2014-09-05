@@ -39,7 +39,7 @@ void AADisplaySlots::HandleTextButtons()
 
       // Stop data acquisition 
       TheACQManager->StopAcquisition();
-
+      
       // Determine if a ROOT file was open and receiving data; if so,
       // ensure that the data is written and the ROOT file is closed
       /*
@@ -70,7 +70,6 @@ void AADisplaySlots::HandleTextButtons()
       TI->WaveformCloseFile_TB->SetState(kButtonDisabled);
       TI->WaveformEnable_CB->SetState(kButtonUp);
       TI->WaveformEnable_CB->SetState(kButtonDisabled);
-      
     }
 
     // If acquisition is not presently running then start it
@@ -112,3 +111,25 @@ void AADisplaySlots::HandleTextButtons()
   }
   }
 }
+
+
+void AADisplaySlots::HandleDoubleSliders()
+{
+  TI->SaveSettings();
+  
+  TGDoubleSlider *ActiveSlider = (TGDoubleSlider *) gTQSender;
+  int ActiveID = ActiveSlider->WidgetId();
+  
+  switch(ActiveID){
+
+  case DisplayHorizontalScale_THS_ID:
+    break;
+
+  case DisplayVerticalScale_DVS_ID:
+    break;
+  }
+}
+
+
+void AADisplaySlots::HandleSliderPointers()
+{}

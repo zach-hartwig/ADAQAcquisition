@@ -106,13 +106,16 @@ void AAVMEManager::ProgramDigitizers()
   // Trigger edge (channel-specific but treated as group setting)
   
   for(int ch=0; ch<DGMgr->GetNumChannels(); ch++){
+
     switch(TheSettings->TriggerEdge){
       
     case 0: // Rising edge
       DGMgr->SetTriggerEdge(ch, "Rising");
+      break;
       
     case 1: // Falling edge
       DGMgr->SetTriggerEdge(ch, "Falling");
+      break;
       
     default:
       break;
@@ -135,8 +138,6 @@ void AAVMEManager::ProgramDigitizers()
   // Readout settings
 
   DGMgr->SetMaxNumEventsBLT(TheSettings->EventsBeforeReadout);
-
-  cout << TheSettings->EventsBeforeReadout << endl;
 
   if(TheSettings->ZeroSuppressionEnable)
     DGMgr->SetZSMode("ZLE");

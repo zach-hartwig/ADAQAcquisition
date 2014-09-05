@@ -83,10 +83,10 @@ private:
   uint32_t BufferSize, ReadSize, NumEvents;
   vector<vector<uint16_t> > Waveforms;
 #endif
-  
+
+  int WaveformLength;
   vector<int> BaselineStart, BaselineStop, BaselineLength;
   vector<double> BaselineValue;
-
   vector<double> Polarity;
 
   int LLD, ULD;
