@@ -1,11 +1,38 @@
+#include <iostream>
+
+
 #include "AAGraphics.hh"
 
+
+AAGraphics *AAGraphics::TheGraphicsManager = 0;
+
+
+AAGraphics *AAGraphics::GetInstance()
+{ return TheGraphicsManager; }
+
+
 AAGraphics::AAGraphics()
-{;}
+{
+  if(TheGraphicsManager)
+    cout << "\nError! The GraphicsManager was constructed twice!\n" << endl;
+  TheGraphicsManager = this;
+}
 
 
 AAGraphics::~AAGraphics()
 {;}
+
+
+void AAGraphics::PlotWaveform()
+{}
+
+
+void AAGraphics::PlotSpectrum()
+{}
+
+
+void  AAGraphics::PlotCalibration()
+{}
 
 
   /*
