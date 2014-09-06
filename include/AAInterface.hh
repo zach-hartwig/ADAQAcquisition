@@ -70,6 +70,7 @@ public:
   void SetVoltageWidgetState(bool, EButtonState);
   void SetAcquisitionWidgetState(bool, EButtonState);
   void SetCalibrationWidgetState(bool, EButtonState);
+  void SetTitlesWidgetState(bool, EButtonState);
 
 private:
 
@@ -257,10 +258,11 @@ private:
   TGCheckButton *DisplayXAxisLog_CB;
   TGCheckButton *DisplayXaxisLog_CB;
 
-  ADAQTextEntryWithLabel *DisplayXTitle_TEL, *DisplayYTitle_TEL, *DisplayTitle_TEL;
+  TGCheckButton *DisplayTitlesEnable_CB;
+  ADAQTextEntryWithLabel *DisplayTitle_TEL, *DisplayXTitle_TEL, *DisplayYTitle_TEL;
   ADAQNumberEntryWithLabel *DisplayXTitleOffset_NEL, *DisplayXTitleSize_NEL;
   ADAQNumberEntryWithLabel *DisplayYTitleOffset_NEL, *DisplayYTitleSize_NEL;
-
+  
   TGCheckButton *DisplayDrawLegend_CB;
   TGRadioButton *DisplayWaveformXAxisSample_RB;
   TGRadioButton *DisplayWaveformXAxisNanoseconds_RB;

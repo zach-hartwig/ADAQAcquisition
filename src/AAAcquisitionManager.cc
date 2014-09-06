@@ -119,11 +119,10 @@ void AAAcquisitionManager::PreAcquisition()
 			      TheSettings->SpectrumMinBin,
 			      TheSettings->SpectrumMaxBin);
   }
-
+  
   // GraphicsManager settings
-
-  AAGraphics::GetInstance()->CreateTimeVector(WaveformLength);
-
+  if(TheSettings->WaveformMode)
+    AAGraphics::GetInstance()->SetupWaveformGraphics(WaveformLength);
   
   // Initialize CAEN digitizer readout data for acquisition
 

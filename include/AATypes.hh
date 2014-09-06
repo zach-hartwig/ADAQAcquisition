@@ -189,6 +189,18 @@ enum{
   DisplayXAxisLog_CB_ID,
   DisplayYAxisLog_CB_ID,
 
+  DisplayTitlesEnable_CB_ID,
+
+  DisplayTitle_TEL_ID,
+  
+  DisplayXTitle_TEL_ID,
+  DisplayXSize_NEL_ID,
+  DisplayXOffset_NEL_ID,
+
+  DisplayYTitle_TEL_ID,
+  DisplayYSize_NEL_ID,
+  DisplayYOffset_NEL_ID,
+
   // Persistent storage subtab
 
   WaveformFileName_TB_ID,

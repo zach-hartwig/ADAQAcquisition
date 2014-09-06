@@ -29,7 +29,7 @@ public:
   void SetCanvasPointer(TCanvas *C) {TheCanvas_C = C;}
   void SetSettingsPointer(AASettings *TS) {TheSettings = TS;}
   
-  void CreateTimeVector(int);
+  void SetupWaveformGraphics(int);
 
 
 
@@ -60,6 +60,9 @@ private:
   AASettings *TheSettings;
 
   vector<int> Time;
+
+  string Title, XTitle, YTitle;
+  double XSize, YSize, XOffset, YOffset;
 };
 
 

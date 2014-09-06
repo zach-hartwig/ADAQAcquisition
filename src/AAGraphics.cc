@@ -74,11 +74,32 @@ AAGraphics::~AAGraphics()
 {;}
 
 
-void AAGraphics::CreateTimeVector(int WaveformLength)
+void AAGraphics::SetupWaveformGraphics(int WaveformLength)
 {
   Time.clear();
   for(int t=0; t<WaveformLength; t++)
     Time.push_back(t);
+  
+  if(TheSettings->DisplayTitlesEnable){
+    Title = TheSettings->DisplayTitle;
+    XTitle = TheSettings->DisplayXTitle;
+    YTitle = TheSettings->DisplayYTitle;
+    
+    XSize = TheSettings->DisplayXTitleSize;
+    XOffset = TheSettings->DisplayXTitleOffset;
+
+    YSize = TheSettings->DisplayYTitleSize;
+    YOffset = TheSettings->DisplayYTitleOffset;
+  }
+  else{
+    Title = "Digitized waveform";
+    XTitle = "Time [sample]";
+    YTitle = "Voltage [ADC]";
+    
+    XSize = YSize = 0.05;
+    XOffset = 1.1;
+    YOffset = 1.2;
+  }
 }
 
 
@@ -91,7 +112,6 @@ void AAGraphics::PlotWaveforms(vector<vector<uint16_t> > &Waveforms,
     
     if(!TheSettings->ChEnable[ch])
       continue;
-
 
     vector<int> Voltage (Waveforms[ch].begin(), Waveforms[ch].end());
 
@@ -118,7 +138,20 @@ void AAGraphics::PlotWaveforms(vector<vector<uint16_t> > &Waveforms,
 
     Waveform_G->SetLineColor(ChColor[ch]);
     Waveform_G->SetLineWidth(WaveformWidth);
-    
+
+    // Set the waveform title and axes properties
+    Waveform_G->SetTitle(Title.c_str());
+
+    Waveform_G->GetXaxis()->SetTitle(XTitle.c_str());
+    Waveform_G->GetXaxis()->SetTitleSize(XSize);
+    Waveform_G->GetXaxis()->SetTitleOffset(XOffset);
+    Waveform_G->GetXaxis()->SetLabelSize(XSize);
+
+    Waveform_G->GetYaxis()->SetTitle(YTitle.c_str());
+    Waveform_G->GetYaxis()->SetTitleSize(YSize);
+    Waveform_G->GetYaxis()->SetTitleOffset(YOffset);
+    Waveform_G->GetYaxis()->SetLabelSize(YSize);
+
     // Draw additional graphical objects on top of the waveform
     
     Trigger_L[ch]->DrawLine(XMin,
@@ -134,7 +167,7 @@ void AAGraphics::PlotWaveforms(vector<vector<uint16_t> > &Waveforms,
 			    BaselineValue[ch] + BaselineWidth);
   }
   
-  if(TheSettings->PlotLegend)
+  if(TheSettings->DisplayLegend)
     Waveform_LG->Draw();
   
   TheCanvas_C->Update();

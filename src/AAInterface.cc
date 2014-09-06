@@ -1130,7 +1130,6 @@ void AAInterface::FillAcquisitionFrame()
 
   DGScopeReadoutControls_GF->AddFrame(DGZSEnable_CB = new TGCheckButton(DGScopeReadoutControls_GF, "Enable zero-suppression", DGZSEnable_CB_ID),
 				      new TGLayoutHints(kLHintsNormal, 5,5,0,5));
-  
 
 
   ///////////////////////
@@ -1355,28 +1354,55 @@ void AAInterface::FillAcquisitionFrame()
   DisplayTitle_GF->SetTitlePos(TGGroupFrame::kCenter);
   GraphicsSubframe->AddFrame(DisplayTitle_GF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
 
+  DisplayTitle_GF->AddFrame(DisplayTitlesEnable_CB = new TGCheckButton(DisplayTitle_GF, "Override defaults", DisplayTitlesEnable_CB_ID),
+			    new TGLayoutHints(kLHintsNormal, 5,5,5,5));
+  DisplayTitlesEnable_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
+  
+  DisplayTitle_GF->AddFrame(DisplayTitle_TEL = new ADAQTextEntryWithLabel(DisplayTitle_GF, "Plot", DisplayTitle_TEL_ID),
+			    new TGLayoutHints(kLHintsNormal,5,5,5,5));
+  
   // ADAQ text entries and number entries for specifying the DGScope title, axes title, and axes position
-
-  DisplayTitle_GF->AddFrame(DisplayXTitle_TEL = new ADAQTextEntryWithLabel(DisplayTitle_GF, "X-axis title", -1),
-				   new TGLayoutHints(kLHintsNormal,5,5,5,0));
+  
+  DisplayTitle_GF->AddFrame(DisplayXTitle_TEL = new ADAQTextEntryWithLabel(DisplayTitle_GF, "X-axis", DisplayXTitle_TEL_ID),
+			    new TGLayoutHints(kLHintsNormal,5,5,5,0));
   DisplayXTitle_TEL->GetEntry()->SetText("");
 
-  DisplayTitle_GF->AddFrame(DisplayXTitleOffset_NEL = new ADAQNumberEntryWithLabel(DisplayTitle_GF, "X-axis title offset", -1),
-				   new TGLayoutHints(kLHintsNormal,5,5,0,5));
+  TGHorizontalFrame *XSizeAndOffset_HF = new TGHorizontalFrame(DisplayTitle_GF);
+  DisplayTitle_GF->AddFrame(XSizeAndOffset_HF, new TGLayoutHints(kLHintsNormal, 0,0,2,0));
+
+  XSizeAndOffset_HF->AddFrame(DisplayXTitleSize_NEL = new ADAQNumberEntryWithLabel(XSizeAndOffset_HF, "Size", DisplayXSize_NEL_ID),
+			      new TGLayoutHints(kLHintsNormal,5,5,0,5));
+  DisplayXTitleSize_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
+  DisplayXTitleSize_NEL->GetEntry()->SetNumber(0.05);
+  DisplayXTitleSize_NEL->GetEntry()->Resize(52,20);
+  
+  XSizeAndOffset_HF->AddFrame(DisplayXTitleOffset_NEL = new ADAQNumberEntryWithLabel(XSizeAndOffset_HF, "Offset", DisplayXOffset_NEL_ID),
+			      new TGLayoutHints(kLHintsNormal,5,5,0,5));
   DisplayXTitleOffset_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
   DisplayXTitleOffset_NEL->GetEntry()->SetNumber(1.2);
+  DisplayXTitleOffset_NEL->GetEntry()->Resize(52,20);
 
-  DisplayTitle_GF->AddFrame(DisplayYTitle_TEL = new ADAQTextEntryWithLabel(DisplayTitle_GF, "Y-axis label", -1),
-				   new TGLayoutHints(kLHintsNormal,5,5,5,0));
+  DisplayTitle_GF->AddFrame(DisplayYTitle_TEL = new ADAQTextEntryWithLabel(DisplayTitle_GF, "Y-axis", DisplayYTitle_TEL_ID),
+			    new TGLayoutHints(kLHintsNormal,5,5,5,0));
   DisplayYTitle_TEL->GetEntry()->SetText("");
 
-  DisplayTitle_GF->AddFrame(DisplayYTitleOffset_NEL = new ADAQNumberEntryWithLabel(DisplayTitle_GF, "Y-axis offset", -1),
-				   new TGLayoutHints(kLHintsNormal,5,5,0,5));
+  TGHorizontalFrame *YSizeAndOffset_HF = new TGHorizontalFrame(DisplayTitle_GF);
+  DisplayTitle_GF->AddFrame(YSizeAndOffset_HF, new TGLayoutHints(kLHintsNormal, 0,0,2,0));
+  
+  YSizeAndOffset_HF->AddFrame(DisplayYTitleSize_NEL = new ADAQNumberEntryWithLabel(YSizeAndOffset_HF, "Size", DisplayYSize_NEL_ID),
+			    new TGLayoutHints(kLHintsNormal,5,5,0,5));
+  DisplayYTitleSize_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
+  DisplayYTitleSize_NEL->GetEntry()->SetNumber(1.5);
+  DisplayYTitleSize_NEL->GetEntry()->Resize(52,20);
+
+  YSizeAndOffset_HF->AddFrame(DisplayYTitleOffset_NEL = new ADAQNumberEntryWithLabel(YSizeAndOffset_HF, "Offset", DisplayYOffset_NEL_ID),
+			    new TGLayoutHints(kLHintsNormal,5,5,0,5));
   DisplayYTitleOffset_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
   DisplayYTitleOffset_NEL->GetEntry()->SetNumber(1.5);
-  
-  DisplayTitle_GF->AddFrame(DisplayTitle_TEL = new ADAQTextEntryWithLabel(DisplayTitle_GF, "Graph Title", -1),
-				   new TGLayoutHints(kLHintsNormal,5,5,5,5));
+  DisplayYTitleOffset_NEL->GetEntry()->Resize(52,20);
+
+  SetTitlesWidgetState(false, kButtonDisabled);
+    
 
   //////////////////////////
   // Graphical attributes //
@@ -1643,6 +1669,18 @@ void AAInterface::SetCalibrationWidgetState(bool WidgetState, EButtonState Butto
 }
 
 
+void AAInterface::SetTitlesWidgetState(bool WidgetState, EButtonState ButtonState)
+{
+  DisplayTitle_TEL->GetEntry()->SetState(WidgetState);
+  DisplayXTitle_TEL->GetEntry()->SetState(WidgetState);
+  DisplayXTitleSize_NEL->GetEntry()->SetState(WidgetState);
+  DisplayXTitleOffset_NEL->GetEntry()->SetState(WidgetState);
+  DisplayYTitle_TEL->GetEntry()->SetState(WidgetState);
+  DisplayYTitleSize_NEL->GetEntry()->SetState(WidgetState);
+  DisplayYTitleOffset_NEL->GetEntry()->SetState(WidgetState);
+}
+
+
 void AAInterface::SaveSettings()
 {
   // Acquisition channel 
@@ -1725,9 +1763,21 @@ void AAInterface::SaveSettings()
   //////////////////////////
   // Graphic settings subtab
 
-  TheSettings->PlotXAxisInSamples = DisplayWaveformXAxisSample_RB->IsDown();
-  TheSettings->PlotYAxisInADC = DisplayWaveformYAxisADC_RB->IsDown();
-  TheSettings->PlotLegend = DisplayDrawLegend_CB->IsDown();
+  TheSettings->DisplayTitlesEnable = DisplayTitlesEnable_CB->IsDown();
+
+  TheSettings->DisplayTitle = DisplayTitle_TEL->GetEntry()->GetText();
+
+  TheSettings->DisplayXTitle = DisplayXTitle_TEL->GetEntry()->GetText();
+  TheSettings->DisplayXTitleSize = DisplayXTitleSize_NEL->GetEntry()->GetNumber();
+  TheSettings->DisplayXTitleOffset = DisplayXTitleOffset_NEL->GetEntry()->GetNumber();
+
+  TheSettings->DisplayYTitle = DisplayYTitle_TEL->GetEntry()->GetText();
+  TheSettings->DisplayYTitleSize = DisplayYTitleSize_NEL->GetEntry()->GetNumber();
+  TheSettings->DisplayYTitleOffset = DisplayYTitleOffset_NEL->GetEntry()->GetNumber();
+	
+  TheSettings->DisplayXAxisInSamples = DisplayWaveformXAxisSample_RB->IsDown();
+  TheSettings->DisplayYAxisInADC = DisplayWaveformYAxisADC_RB->IsDown();
+  TheSettings->DisplayLegend = DisplayDrawLegend_CB->IsDown();
 
   bool AcquisitionOn = AAAcquisitionManager::GetInstance()->GetAcquisitionEnable();
 
@@ -1758,9 +1808,10 @@ void AAInterface::SaveSettings()
     TheSettings->SpectrumCalibrationEnable = SpectrumCalibration_CB->IsDisabledAndSelected();
     TheSettings->SpectrumCalibrationUseSlider = SpectrumUseCalibrationSlider_CB->IsDisabledAndSelected();
 
-    TheSettings->PlotXAxisInSamples = DisplayWaveformXAxisSample_RB->IsDisabledAndSelected();
-    TheSettings->PlotYAxisInADC = DisplayWaveformYAxisADC_RB->IsDisabledAndSelected();
-    TheSettings->PlotLegend = DisplayDrawLegend_CB->IsDisabledAndSelected();
+    TheSettings->DisplayTitlesEnable = DisplayTitlesEnable_CB->IsDisabledAndSelected();
+    TheSettings->DisplayXAxisInSamples = DisplayWaveformXAxisSample_RB->IsDisabledAndSelected();
+    TheSettings->DisplayYAxisInADC = DisplayWaveformYAxisADC_RB->IsDisabledAndSelected();
+    TheSettings->DisplayLegend = DisplayDrawLegend_CB->IsDisabledAndSelected();
   }
 }
 
@@ -1776,16 +1827,6 @@ void AAInterface::UpdateAfterAQTimerStopped(bool ROOTFileOpen)
   AQStartStop_TB->SetText("Stopped");
   
   SetAcquisitionWidgetState(true, kButtonUp);
-  
-  if(ROOTFileOpen){
-    /*
-    if(WaveformEnable_CB->IsDown())
-      WaveformEnable_CB->Clicked();
-    
-    if(OutputDataFile->IsOpen())
-      WaveformCloseFile_TB->Clicked();
-    */
-  }
   
   // Reset the attributes of the timer start text button
   AQTimerStart_TB->SetBackgroundColor(ColorManager->Number2Pixel(18));

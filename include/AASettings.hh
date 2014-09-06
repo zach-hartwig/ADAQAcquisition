@@ -108,10 +108,16 @@ public:
   ///////////////////////////
   // Graphics widget settings
 
-  bool PlotXAxisInSamples;
-  bool PlotYAxisInADC;
-  bool PlotLegend;
-  bool PlotXAxisInLog, PlotYAxisInLog;
+  bool DisplayTitlesEnable;
+  
+  string DisplayTitle, DisplayXTitle, DisplayYTitle;
+  double DisplayXTitleSize, DisplayXTitleOffset;
+  double DisplayYTitleSize, DisplayYTitleOffset;
+
+  bool DisplayXAxisInSamples;
+  bool DisplayYAxisInADC;
+  bool DisplayLegend;
+  bool DisplayXAxisInLog, DisplayYAxisInLog;
 
   
   ////////////////////////////////
