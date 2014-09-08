@@ -141,8 +141,22 @@ void AAAcquisitionManager::StartAcquisition()
 
   AAGraphics *TheGraphicsManager = AAGraphics::GetInstance();
 
+  // Check to ensure at least one channel is enabled
+
+  uint32_t ChannelEnableMask = 0;
+  DGManager->GetChannelEnableMask(&ChannelEnableMask);
+
+  if((0xff & ChannelEnableMask)==0){
+    cout << "\tError! At least one channel must be enabled! Stopping acquisition ...\n"
+	 << endl;
+    return;
+  }
+
   // Initialize all variables before acquisition begins
+
   PreAcquisition();
+
+  // Start the acquisition and enable the acquisition bool
 
   DGManager->SWStartAcquisition();
 
@@ -339,7 +353,13 @@ void AAAcquisitionManager::StopAcquisition()
   }
 
   if(ROOTFileOpen){
+    //if(TheInterface->WaveformEnable_CB->IsDown())
+    //      {}
+    //TheInterface->WaveformEnable_CB->Clicked();
+
+    //TheInterface->WaveformCloseFile_TB->Clicked();
   }
+
 }
 
 
@@ -368,108 +388,19 @@ void AAAcquisitionManager::CreateWaveformTreeBranches()
 }
 
   
-
-
-
-/*
-  // Stop the V1720 from acquiring data first thing
-  TheVMEManager->GetDGManager()->SWStopAcquisition();
-  
-  // Determine if a ROOT file was open and receiving data when the
-  // user clicked to stop acquiring data; if so, ensure that the
-  // data is written and the ROOT file is properly closed before
-  // resetting widget state to prevent seg faults and that ROOT
-  // file properly written.
-  if(ROOTFileOpen){
-    if(DGScopeDataStorageEnable_CB->IsDown())
-      DGScopeDataStorageEnable_CB->Clicked();
-    
-    if(OutputDataFile->IsOpen())
-      DGScopeDataStorageCloseFile_TB->Clicked();
-  }
-  
-  // Determine if the acquisition timer is active
-  }
-*/
-
-
-/*
-
-  // Ensure that at least one channel is enabled in the channel
-  // enabled bit mask; if not, alert the user and return without
-  // beginning acquisition since there ain't nothin' to acquire.
-  if((0xff & ChannelEnableMask)==0){
-    {}//CreateMessageBox("At least one V1720 digitizer channel must be enabled before acquisition will initiate!","Stop");
-    return;
-  }
    
   // Determine the lowest (ie, closest of 0) channel that is enabled
   // in the ChannelEnableMask. 'Fraid you'll have to figure out the
   // bitwise operations on your own if you don't know them...but take
   // it from me, this is a pretty pro'n'shit way to do it
+/*
   int LowestEnabledChannel = 0;
   uint32_t LowestChannelMask = 0x1;
   while(!(ChannelEnableMask & LowestChannelMask)){
     LowestChannelMask <<= 1;
     LowestEnabledChannel++;
   }
-
-  /////////////////////////////////////////////////
-  // Variables for waveform/spectrum graph settings
-   
-  // Get the number of, min, and max bins for the spectrum
-  int bins = DGScopeSpectrumBinNumber_NEL->GetEntry()->GetIntNumber();
-  double minBin = DGScopeSpectrumMinBin_NEL->GetEntry()->GetNumber();
-  double maxBin = DGScopeSpectrumMaxBin_NEL->GetEntry()->GetNumber();
-   
-  // Allocate variables for the X and Y minimum and maximum positions
-  // of the X and Y double sliders that control canvas plotting range
-  float xMin, xMax, yMin, yMax;
-   
-  // Get the bools to determine what (if anything) is plotted
-  bool PlotWaveform = DGScopeWaveform_RB->IsDown();
-  bool PlotSpectrum = DGScopeSpectrum_RB->IsDown();
-  //bool HighRate = DGScopeHighRate_RB->IsDown();
-  bool UltraHighRate = DGScopeUltraHighRate_RB->IsDown();
-   
-  // Get the bools to determine plotting options
-  bool DrawLegend = DGScopeDisplayDrawLegend_CB->IsDown();
-   
-  // Get the plotting units and set conversion units accordingly
-  bool PlotXAxisInSamples = DGScopeDisplayWaveformXAxisSample_RB->IsDown();
-  bool PlotYAxisInADC = DGScopeDisplayWaveformYAxisADC_RB->IsDown();
-
-  double ConvertTimeToGraphUnits = DGManager->GetNanosecondsPerSample(); 
-  if(PlotXAxisInSamples)
-    ConvertTimeToGraphUnits = 1.;
-   
-  double ConvertVoltageToGraphUnits = DGManager->GetMillivoltsPerBit();
-  if(PlotYAxisInADC)
-    ConvertVoltageToGraphUnits = 1.;
-   
-   
-  // The following variables are declared here but used/set within
-  // the acquisition loop
-
-  // Variables for plotted waveform vertical offset and plotted
-  // channel trigger threshold. Note that these variables are set
-  // dynamicallly within the acquisition loop to allow the user
-  // flexibility in setting these values
-  double VertPosOffset, ChTrigThr;
-  VertPosOffset = ChTrigThr = 0;
-
-  // The active channel to histogram
-  uint32_t ChannelToHistogram = 0;
-
-  // Set the style of the histogram statistics box
-  gStyle->SetOptStat("ne");
-   
-  // Convert the time to the user's desired units for graphing
- // the waveform [sample or ns]
-  for(uint32_t sample=0; sample<RecordLength; sample++)
-    Time_graph[sample] = sample * ConvertTimeToGraphUnits;
-
-  // Assign values to use if built in debug mode (Not used)
+*/
 
 
   ///////////////////////////////////////////////////
@@ -492,170 +423,6 @@ void AAAcquisitionManager::CreateWaveformTreeBranches()
   // Record Length == the length of the acquisition window in 4 ns units
   // Sample ==  a single value between 0 and 4095 of digitized voltage
 
-
-    gSystem->ProcessEvents();
-
-    ///////////////////////////
-    // Set graphical attributes
-
-    // Graphical attributes are set at the highest level of the loop
-    // to minimize the number of contributes since the graphical
-    // attributes apply to all events/all channels
-
-    // Get the horizontal and vertical positions of the double
-    // sliders that border the DGScope embedded canvas (the
-    // "zoom"). The slider end values are between 0 and 1;
-    // multiplying the slider values by the appropriate
-    // conversion factor results in correct X and Y axes
-    if(PlotWaveform or PlotSpectrum){
-      DGScopeHorizontalScale_THS->GetPosition(&xMin, &xMax);
-      DGScopeVerticalScale_DVS->GetPosition(&yMin, &yMax);
-      
-      // The value of ConvertTimeToGraphUnits is set before the
-      // acquisition loop begins: if plotting the X axis in samples,
-      // value == 1.; if plotting the X axis in nanoseconds value == 4
-      xMin *= (RecordLength * ConvertTimeToGraphUnits);
-      xMax *= (RecordLength * ConvertTimeToGraphUnits);
-      
-      // The value of ConvertVoltageToGraphUnits is set before the
-      // acquisition loop begins: if plotting the Y axis in ADC units,
-      // value == 1.; if plotting the Y axis in millivolts value ==
-      // (2000./4096)
-      yMin *= DGManager->GetMaxBit()*ConvertVoltageToGraphUnits;
-      yMax *= DGManager->GetMaxBit()*ConvertVoltageToGraphUnits;
-    }
-    
-
-    // For each event in the PC memory buffer...
-    for(uint32_t evt=0; evt<NumEvents; evt++){
-      
-      // Get the event information
-      DGManager->GetEventInfo(Buffer, BufferSize, evt, &EventInfo, &EventPointer);
-
-      // Decode the event and obtain the waveform (voltage as a function of time)
-      DGManager->DecodeEvent(EventPointer, &EventWaveform);
-
-      // If there is no waveform in the PC buffer, continue in the
-      // while loop to avoid segfaulting
-      if(EventWaveform==NULL)
-	continue;
-
-      // If the user has enabled the acquisition timer ...
-      if(AcquisitionTimerEnabled){
-
-	// Calculate the time that has elapsed since the start of
-	// acquisition loop
-	AcquisitionTime_Prev = AcquisitionTime_Now;
-	AcquisitionTime_Now = time(NULL) - AcquisitionTime_Start; // [seconds]
-	
-	// Update the ROOT widget only every second to notify the user
-	// of progress in the countdown. Note that the
-	// AcquisitionTime_* variables are integers. Therefore, this
-	// conditional will only be satisfied right when the second
-	// ticks over and "_Prev" time is different from"_Now" time
-	// for only a single pass of the while loop. This should
-	// maximize efficiency of the acquisition loop.
-	if(AcquisitionTime_Prev != AcquisitionTime_Now){
-	  int Countdown = AcquisitionTime_Stop - AcquisitionTime_Now;
-	  DGScopeAcquisitionTimer_NEFL->GetEntry()->SetNumber(Countdown);
-	}
-	
-	// If the timer has reached zero, i.e. the acquisition loop
-	// has been running for the during specified by the user then
-	// turn the acquisition off, which requires resetting a few
-	// variables and ROOT widgets
-	if(AcquisitionTime_Now >= AcquisitionTime_Stop)
-	  StopAcquisitionSafely();
-      }
-      
-      // For each channel...
-      for(int ch=0; ch<NumDataChannels; ch++){
-	
-	// Only proceed to waveform analysis if the channel is enabled
-	if(!DGScopeChannelEnable_CB[ch]->IsDisabledAndSelected())
-	  continue;
-	
-	// Initialize the pulse height and pulse area variables
-	PulseHeight = PulseArea = 0.; // [ADC]
-
-	// Reset all channel baseline before each event
-	BaselineCalcResult[ch] = 0.;
-
-	// For all of the samples in the acquisition window of length RecordLength...
-	for(uint32_t sample=0; sample<RecordLength; sample++){
-	  
-	  // Readout the pulse into the storage vector
-	  Voltage[ch][sample] = EventWaveform->DataChannel[ch][sample]; // [ADC]
-	  
-	  if(UseDataReduction && (sample % DataReductionFactor == 0)){
-	    const int Index = sample / DataReductionFactor;
-	    VoltageTmp[ch][Index] = EventWaveform->DataChannel[ch][sample]; // [ADC]
-	  }
-	  
-	  // Do not perform the following for ultrahigh rate readout
-	  if(!UltraHighRate){
-
-	    // Convert the voltage [ADC] into suitable form for graphing
-	    // (accounts for units of ADC/mV and vertical offset)
-	    if(PlotWaveform)
-	      Voltage_graph[sample] = (Voltage[ch][sample] + DGScopeVerticalPosition_NEL[ch]->GetEntry()->GetIntNumber()) * ConvertVoltageToGraphUnits;
-	    
-	    // Calculate the baseline by taking the average of all
-	    // samples that fall within the baseline calculation region
-	    if(sample > BaselineCalcMin[ch] and sample < BaselineCalcMax[ch])
-	      BaselineCalcResult[ch] += Voltage[ch][sample]*1.0/(BaselineCalcLength[ch]-1); // [ADC]
-	    
-	    // Analyze the pulses to obtain pulse spectra
-	    else if(sample >= BaselineCalcMax[ch]){
-	    }
-	  }
-	}
-	
-	if(!UltraHighRate){
-	
-	  // If a CalibrationManager (really, a ROOT TGraph) exists, ie,
-	  // has been successfully created and is valid for
-	  // interpolation then convert PulseHeight/Area
-	  if(UseCalibrationManager[ch]){
-	    // Use the ROOT TGraph CalibrationManager to convert the
-	    // pulse height/area from ADC to keV using LINEAR
-	    // interpolation on the pre-assigned calibration points
-	    if(AnalyzePulseHeight)
-	      PulseHeight = CalibrationManager[ch]->Eval(PulseHeight);
-	    else
-	      PulseArea = CalibrationManager[ch]->Eval(PulseArea);
-	    
-	    // Use the ROOT TGraph CalibrationManager to convert the
-	    // pulse height/area from ADC to keV using SPLINE
-	    // interpolation on the pre-assigned calibration
-	    // points. This settings is only useful if there are a large
-	    // number of points and even then, is probably not that
-	    // valuable. But it's here to show that more complicated
-	    // interpolation can easily be accomplished with ROOT's
-	    // PulseHeight =CalibrationManager->Eval(PulseHeight,0,"S"); 
-	    // PulseArea = CalibrationManager->Eval(PulseHeight,0,"S");
-	  }
-	  
-	  if(AnalyzePulseHeight){
-	    if(PulseHeight>LowerLevelDiscr and PulseHeight<UpperLevelDiscr)
-	      DGScopeSpectrum_H[ch]->Fill(PulseHeight);
-	    
-	    if(DGScopeSpectrumAnalysisLDTrigger_CB->IsDown() and
-	       ch == DGScopeSpectrumAnalysisLDTriggerChannel_CBL->GetComboBox()->GetSelected())
-	      DiscrOKForOutput = true;
-	  }
-	  
-	  else if(AnalyzePulseArea){
-	    if(PulseArea>LowerLevelDiscr and PulseArea<UpperLevelDiscr){
-	      DGScopeSpectrum_H[ch]->Fill(PulseArea);
-	      
-	      if(DGScopeSpectrumAnalysisLDTrigger_CB->IsDown() and 
-		 ch == DGScopeSpectrumAnalysisLDTriggerChannel_CBL->GetComboBox()->GetSelected())
-		DiscrOKForOutput = true;
-	    }
-	  }
-	}
-	
 	// The TTree that holds the waveforms must have a branch
 	// created for the waveforms; however, that branch holds the
 	// waveforms as arrays, which requires specifying (at branch
@@ -677,101 +444,11 @@ void AAAcquisitionManager::CreateWaveformTreeBranches()
 	// true such that the following commands within the "if"
 	// statement are called **only once per acquisition start** to
 	// create the TTree branch with the correct array properties.
-	if(BranchWaveformTree){
-	  ostringstream ss;
-
-	  // For each digitizer channel....
-	  for(Int_t channel=0; channel<NumDataChannels; channel++){
-	    
-	    // ...create a channel-specific name string...
-	    ss << "VoltageInADC_Ch" << channel;
-	    string WaveformTreeBranchName = ss.str();
-	    ss.str("");
-
-	    // ...and use it to specify a channel-specific branch in
-	    /// the waveform TTree The branch holds the address of the
-	    // vector that contains the waveform as a function of
-	    // record length and the RecordLength of each waveform
-	    
-	    if(UseDataReduction)
-	      WaveformTree->Branch(WaveformTreeBranchName.c_str(), 
-				   &VoltageTmp[channel]);
-	    else
-	      WaveformTree->Branch(WaveformTreeBranchName.c_str(), 
-				   &Voltage[channel]);
-	  }
-	  BranchWaveformTree = false;
-	}
-	
-	// Plot the digitized waveforms in 'oscilloscope' mode
-	if(PlotWaveform){
-	  
-	  // Waveform plotting requires small but non-significant
-	  // CPU/graphics processing. If the waveform acquisition
-	  // rate, especially with multiple channels enabled, is
-	  // extremely high, waveform plotting will lag behind event
-	  // readout rates, causing the V1720 buffer to overflow and
-	  // the ROOT GUI to become sluggish. Because the waveform
-	  // plotting mode is only to be used for detector inspection,
-	  // tuning acquisition settings, testing, and so on (rather
-	  // than high-rate data acquistion, it is not necessary to
-	  // plot every single readout event; therefore, I have
-	  // limited the plotting to only the first event in a given
-	  // V1720 buffer dump.
-	  
-	  if(evt == 0){
-	  }
-	    
-	}
-	
-	// Plot the integrated pulses in 'multichannel analyzer' mode
-	else if(PlotSpectrum){
-
-	// Do not plot anything. This mode is most useful to
-	// maximizing the data throughput rate.
-	else{
-	}
-      }
       
-      // After all the channels in the event have been iterated
-      // through to extract the waveforms, store the digitized
-      // waveforms for all channels in the ROOT TTree object provided:
-      // 0. the waveform tree has been created 
-      // 1. the user wants to dump the data to a ROOT file
-      if(WaveformTree and DGScopeDataStorageEnable_CB->IsDown()){
-	
-	// If the user has specified that the LLD/ULD should be used
-	// as the "trigger" (for plotting the PAS/PHS and writing to a
-	// ROOT file) but the present waveform is NOT within the
-	// LLD/ULD window (indicated by the DiscrOKForOutput bool set
-	// above during analysis of the readout waveform then do NOT
-	// write the waveform to the ROOT TTree
-	if(DGScopeSpectrumAnalysisLDTrigger_CB->IsDown() and !DiscrOKForOutput)
-	  continue;
-	
-	// Fill the TTree
-	//clock_gettime(CLOCK_REALTIME, &preA);
-	WaveformTree->Fill();
-	//clock_gettime(CLOCK_REALTIME, &postA);
-	
-	// Reset the bool used to determine if the LLD/ULD window
-	// should be used as the "trigger" for writing waveforms
-	DiscrOKForOutput = false;
-      }
-      
-      // Update the TGraph with the waveforms
-      if(PlotWaveform)
-	DGScope_EC->GetCanvas()->Update();
-      
-      DGManager->FreeEvent(&EventWaveform);
-    }
 
-*/
-
-
-/*
-void AAInterface::SaveSpectrumData()
+void AAAcquisitionManager::SaveSpectrumData()
 {
+  /*
   // Get the current channel
   int CurrentChannel = DGScopeSpectrumChannel_CBL->GetComboBox()->GetSelected();
 
@@ -828,8 +505,9 @@ void AAInterface::SaveSpectrumData()
       return;
     }
   }
+  */
 }
-*/
+
 
 
 // Method to generate a standard detector-esque artificial waveoforms
@@ -997,3 +675,135 @@ bool AAAcquisitionManager::WriteCalibration(int Channel, string FileName)
 
   return true;
 }
+
+
+
+
+void AAAcquisitionManager::CreateWaveformFile()
+{
+  /*
+  string FileName = DataFileName + DataFileExtension;
+
+  // TFile to create a ROOT binary file for output                                                                                                                                                                                                                           
+  OutputDataFile = new TFile(FileName.c_str(), "recreate");
+
+  // TTree to store the waveforms as arrays. The array indices are
+  // sample numbers and array values are the voltages
+  WaveformTree = new TTree("WaveformTree","Prototype tree to store all waveforms of an event");
+
+  // TObjString to hold a comment on the measurement data                                                                                                                                                                                                                    
+  MeasComment = new TObjString("Comments are not presently enabled! ZSH 14 Apr 14");
+
+  // ADAQ class to hold measurement paremeters                                                                                                                                                                                                                               
+  MeasParams = new ADAQRootMeasParams();
+
+  // Retrieve the present voltage and drawn current for each                                                                                                                                                                                                                 
+  // high voltage channel and store in the MeasParam object                                                                                                                                                                                                                  
+  uint16_t voltage = 0;
+  uint16_t current = 0;
+
+  for(int ch=0; ch<HVManager->GetNumChannels(); ch++){                                                                                                                                                                                                                       
+    if(V6534Enable){                                                                                                                                                                                                                                                         
+      MeasParams->DetectorVoltage.push_back( HVManager->GetVoltage(ch,&voltage) );                                                                                                                                                                                           
+      MeasParams->DetectorCurrent.push_back( HVManager->GetCurrent(ch,&current) );                                                                                                                                                                                           
+    }                                                                                                                                                                                                                                                                        
+    else{                                                                                                                                                                                                                                                                    
+      MeasParams->DetectorVoltage.push_back(0);                                                                                                                                                                                                                              
+      MeasParams->DetectorCurrent.push_back(0);                                                                                                                                                                                                                              
+    }
+  }
+
+  // Retrieve the present settings for each of the digitizer                                                                                                                                                                                                                 
+  // channels and store in the MeasParam object                                                                                                                                                                                                                              
+  for(int ch=0; ch<NumDataChannels; ch++){                                                                                                                                                                                                                                   
+    MeasParams->DCOffset.push_back( (int)DGScopeDCOffset_NEL[ch]->GetEntry()->GetHexNumber());                                                                                                                                                                               
+    MeasParams->TriggerThreshold.push_back( (int)DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->GetIntNumber() );                                                                                                                                                            
+    MeasParams->BaselineCalcMin.push_back( (int)DGScopeBaselineCalcMin_NEL[ch]->GetEntry()->GetIntNumber() );                                                                                                                                                                
+    MeasParams->BaselineCalcMax.push_back( (int)DGScopeBaselineCalcMax_NEL[ch]->GetEntry()->GetIntNumber() );                                                                                                                                                                
+  }
+
+  // Retrieve the record length for the acquisition window [samples].                                                                                                                                                                                                        
+  MeasParams->RecordLength = DGScopeRecordLength_NEL->GetEntry()->GetIntNumber();                                                                                                                                                                                            
+  
+  // If the user has selected to reduce the output data then modify                                                                                                                                                                                                          
+  // the record length accordingly. Note that this effectively                                                                                                                                                                                                               
+  // destroys any pulse timing information, but it presently done to                                                                                                                                                                                                         
+  // avoid modifying the structure of the ADAQ ROOT files. In the                                                                                                                                                                                                            
+  // future, this should be correctly implemented. ZSH 26 AUG 13                                                                                                                                                                                                             
+  if(DGScopeUseDataReduction_CB->IsDown())                                                                                                                                                                                                                                   
+    MeasParams->RecordLength /= DGScopeDataReductionFactor_NEL->GetEntry()->GetIntNumber();
+
+  // Set a bool indicating that the next digitized event will                                                                                                                                                                                                                
+  // trigger the creation of a TTree branch with the correctly sized                                                                                                                                                                                                         
+  // array. This action is performed once in                                                                                                                                                                                                                                 
+  // ADAQAcquisition::RunDGScope(). See that function for more comments                                                                                                                                                                                                      
+  BranchWaveformTree = true; 
+
+  ROOTFileOpen = true;
+  */
+}
+
+
+void AAAcquisitionManager::CloseWaveformFile()
+{
+  /*
+  if(!ROOTFileOpen)
+    return;
+  
+  if(WaveformTree)
+      WaveformTree->Write();
+  
+  // Write the ROOT objects to file
+  MeasParams->Write("MeasParams");
+  MeasComment->Write("MeasComment");
+  
+  // Close the ROOT TFile
+  OutputDataFile->Close();
+  
+  // Free the memory allocated to ROOT objects
+  delete MeasComment;
+  //EventTree->Delete(); // Causes crash for some reason
+  delete MeasParams;
+  delete OutputDataFile
+    
+  ROOTFileOpen = false;
+  */
+}
+
+
+
+    /*
+    uint16_t voltage = 0;
+    uint16_t current = 0;
+    
+    for(int ch=0; ch<HVManager->GetNumChannels(); ch++){
+      if(V6534Enable){
+	MeasParams->DetectorVoltage.push_back( HVManager->GetVoltage(ch,&voltage) );
+	MeasParams->DetectorCurrent.push_back( HVManager->GetCurrent(ch,&current) );
+      }
+      else{
+	MeasParams->DetectorVoltage.push_back(0);
+	MeasParams->DetectorCurrent.push_back(0);
+      }
+    }
+    */
+    
+    // Retrieve the present settings for each of the digitizer
+    // channels and store in the MeasParam object
+    //    for(int ch=0; ch<NumDataChannels; ch++){
+      //MeasParams->DCOffset.push_back( (int)DGScopeDCOffset_NEL[ch]->GetEntry()->GetHexNumber());
+      //      MeasParams->TriggerThreshold.push_back( (int)DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->GetIntNumber() );
+      //      MeasParams->BaselineCalcMin.push_back( (int)DGScopeBaselineCalcMin_NEL[ch]->GetEntry()->GetIntNumber() );
+      //      MeasParams->BaselineCalcMax.push_back( (int)DGScopeBaselineCalcMax_NEL[ch]->GetEntry()->GetIntNumber() );
+    //    }
+    
+    // Retrieve the record length for the acquisition window [samples].
+    //MeasParams->RecordLength = DGScopeRecordLength_NEL->GetEntry()->GetIntNumber();
+    
+    // If the user has selected to reduce the output data then modify
+    // the record length accordingly. Note that this effectively
+    // destroys any pulse timing information, but it presently done to
+    // avoid modifying the structure of the ADAQ ROOT files. In the
+    // future, this should be correctly implemented. ZSH 26 AUG 13
+    //    if(DGScopeUseDataReduction_CB->IsDown())
+    //      MeasParams->RecordLength /= DGScopeDataReductionFactor_NEL->GetEntry()->GetIntNumber();

@@ -36,6 +36,8 @@ public:
 
   void PreAcquisition();
 
+  void CreateWaveformFile();
+  void CloseWaveformFile();
   void CreateWaveformTreeBranches();
 
 
@@ -44,6 +46,8 @@ public:
   bool ResetCalibration(int);
   bool LoadCalibration(int, string, int &);
   bool WriteCalibration(int, string);
+
+  void SaveSpectrumData();
 
   bool GetCalibrationEnable(int C) {return CalibrationEnable[C];}
   CalibrationDataStruct GetCalibrationDataStruct(int C) {return CalibrationData[C];}

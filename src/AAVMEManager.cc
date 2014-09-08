@@ -67,6 +67,10 @@ void AAVMEManager::ProgramDigitizers()
 
   DGMgr->SetChannelEnableMask(DGChEnableMask);
 
+  // Ensure that at least one channel is enabled in the channel
+  // enabled bit mask; if not, alert the user and return without
+  // beginning acquisition since there ain't nothin' to acquire.
+
 
   ///////////////////
   // Trigger settings

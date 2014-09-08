@@ -418,139 +418,40 @@ void AASubtabSlots::HandleTextButtons()
     break;
   }
 
+
   case WaveformCreateFile_TB_ID:{
 
-    /*
-
-    ///////////////////////////////////////////////
-    // Test to ensure data file is not already open
-
-
-    /////////////////////////////////////////////
-    // Instantiate objects for persistent storage
-
-    string FileName = DataFileName + DataFileExtension;
-
-    // TFile to create a ROOT binary file for output
-    OutputDataFile = new TFile(FileName.c_str(), "recreate");
-    
-    // TTree to store the waveforms as arrays. The array indices are
-    // sample numbers and array values are the voltages
-    WaveformTree = new TTree("WaveformTree","Prototype tree to store all waveforms of an event");
-    
-    // TObjString to hold a comment on the measurement data
-    MeasComment = new TObjString("Comments are not presently enabled! ZSH 14 Apr 14");
-    
-    // ADAQ class to hold measurement paremeters
-    MeasParams = new ADAQRootMeasParams();
-    
-    
-    /////////////////////////////////////////////
-    // Retrieve all values (except the waveforms)
-    
-    // Retrieve the present voltage and drawn current for each
-    // high voltage channel and store in the MeasParam object
-    uint16_t voltage = 0;
-    uint16_t current = 0;
-    
-    for(int ch=0; ch<HVManager->GetNumChannels(); ch++){
-      if(V6534Enable){
-	MeasParams->DetectorVoltage.push_back( HVManager->GetVoltage(ch,&voltage) );
-	MeasParams->DetectorCurrent.push_back( HVManager->GetCurrent(ch,&current) );
-      }
-      else{
-	MeasParams->DetectorVoltage.push_back(0);
-	MeasParams->DetectorCurrent.push_back(0);
-      }
-    }
-    
-    // Retrieve the present settings for each of the digitizer
-    // channels and store in the MeasParam object
-    for(int ch=0; ch<NumDataChannels; ch++){
-      MeasParams->DCOffset.push_back( (int)DGScopeDCOffset_NEL[ch]->GetEntry()->GetHexNumber());
-      MeasParams->TriggerThreshold.push_back( (int)DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->GetIntNumber() );
-      MeasParams->BaselineCalcMin.push_back( (int)DGScopeBaselineCalcMin_NEL[ch]->GetEntry()->GetIntNumber() );
-      MeasParams->BaselineCalcMax.push_back( (int)DGScopeBaselineCalcMax_NEL[ch]->GetEntry()->GetIntNumber() );
-    }
-    
-    // Retrieve the record length for the acquisition window [samples].
-    MeasParams->RecordLength = DGScopeRecordLength_NEL->GetEntry()->GetIntNumber();
-    
-    // If the user has selected to reduce the output data then modify
-    // the record length accordingly. Note that this effectively
-    // destroys any pulse timing information, but it presently done to
-    // avoid modifying the structure of the ADAQ ROOT files. In the
-    // future, this should be correctly implemented. ZSH 26 AUG 13
-    if(DGScopeUseDataReduction_CB->IsDown())
-      MeasParams->RecordLength /= DGScopeDataReductionFactor_NEL->GetEntry()->GetIntNumber();
-    
-    ////////////////////////////
-    // Set the infamous booleans
-    
-    // Set a bool indicating that the next digitized event will
-    // trigger the creation of a TTree branch with the correctly sized
-    // array. This action is performed once in
-    // AAInterface::RunDGScope(). See that function for more comments
-    BranchWaveformTree = true;
-
-    ROOTFileOpen = true;
-    
+    AAAcquisitionManager::GetInstance()->CreateWaveformFile();
+   
     //////////////////////////////////
     // Set widget states appropriately
-    
-    // Disable the filename, comment, and create file button (since we
-    // don't want to create new ROOT files until the active is closed)
-    // and activate the close file and enable buttons (since these
-    // options are now available with an open ROOT file for data writing)
-    //DGScopeDataFileName_TEL->GetEntry()->SetState(false);
-    //DGScopeDataComment_TEL->GetEntry()->SetState(false);
-    DGScopeDataStorageCreateFile_TB->SetState(kButtonDisabled);
-    DGScopeDataStorageCreateFile_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(8));
-    DGScopeDataStorageCreateFile_TB->SetText("ADAQ file created");
-    DGScopeDataStorageCloseFile_TB->SetState(kButtonUp);
-    DGScopeDataStorageEnable_CB->SetState(kButtonUp);
+
+    TI->WaveformCreateFile_TB->SetState(kButtonDisabled);
+    TI->WaveformCreateFile_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(8));
+    TI->WaveformCreateFile_TB->SetText("ADAQ file created");
+    TI->WaveformCloseFile_TB->SetState(kButtonUp);
+    TI->WaveformEnable_CB->SetState(kButtonUp);
   
     break;
   }
 
-    ///////////////////////////////
-    // Write and close ROOT file
-  case DGScopeDataStorageCloseFile_TB_ID:{
-    
-    if(!ROOTFileOpen)
-      break;
-    
-    if(DGScopeDataStorageEnable_CB->IsDown())
-      DGScopeDataStorageEnable_CB->SetState(kButtonUp);
-    
-    if(WaveformTree)
-      WaveformTree->Write();
-    
-    // Write the ROOT objects to file
-    MeasParams->Write("MeasParams");
-    MeasComment->Write("MeasComment");
-        
-    // Close the ROOT TFile
-    OutputDataFile->Close();
-    
-    // Free the memory allocated to ROOT objects
-    delete MeasComment;
-    //EventTree->Delete(); // Causes crash for some reason
-    delete MeasParams;
-    delete OutputDataFile;
 
+  case WaveformCloseFile_TB_ID:{
+
+    AAAcquisitionManager::GetInstance()->CloseWaveformFile();
+    
     // Set widget states appropriately.
-    DGScopeDataStorageCreateFile_TB->SetState(kButtonUp);
-    DGScopeDataStorageCreateFile_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(18));
-    DGScopeDataStorageCreateFile_TB->SetText("Create ADAQ file");
-    DGScopeDataStorageCloseFile_TB->SetState(kButtonDisabled);
-    DGScopeDataStorageEnable_CB->SetState(kButtonUp);
-    DGScopeDataStorageEnable_CB->SetState(kButtonDisabled);
 
-    ROOTFileOpen = false;
-    */
+    TI->WaveformCreateFile_TB->SetState(kButtonUp);
+    TI->WaveformCreateFile_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(18));
+    TI->WaveformCreateFile_TB->SetText("Create ADAQ file");
+    TI->WaveformCloseFile_TB->SetState(kButtonDisabled);
+    TI->WaveformEnable_CB->SetState(kButtonUp);
+    TI->WaveformEnable_CB->SetState(kButtonDisabled);
+    
     break;
   }
+
 
   case SpectrumFileName_TB_ID:{
     

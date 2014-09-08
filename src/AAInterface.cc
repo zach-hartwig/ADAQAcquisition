@@ -1392,7 +1392,7 @@ void AAInterface::FillAcquisitionFrame()
   YSizeAndOffset_HF->AddFrame(DisplayYTitleSize_NEL = new ADAQNumberEntryWithLabel(YSizeAndOffset_HF, "Size", DisplayYSize_NEL_ID),
 			    new TGLayoutHints(kLHintsNormal,5,5,0,5));
   DisplayYTitleSize_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
-  DisplayYTitleSize_NEL->GetEntry()->SetNumber(1.5);
+  DisplayYTitleSize_NEL->GetEntry()->SetNumber(0.05);
   DisplayYTitleSize_NEL->GetEntry()->Resize(52,20);
 
   YSizeAndOffset_HF->AddFrame(DisplayYTitleOffset_NEL = new ADAQNumberEntryWithLabel(YSizeAndOffset_HF, "Offset", DisplayYOffset_NEL_ID),
@@ -1404,9 +1404,8 @@ void AAInterface::FillAcquisitionFrame()
   SetTitlesWidgetState(false, kButtonDisabled);
     
 
-  //////////////////////////
-  // Graphical attributes //
-  //////////////////////////
+  /////////////////////////////
+  // misc. graphical attributes 
   
   TGGroupFrame *DisplaySettings_GF = new TGGroupFrame(GraphicsSubframe, "Display", kVerticalFrame);
   DisplaySettings_GF->SetTitlePos(TGGroupFrame::kCenter);
