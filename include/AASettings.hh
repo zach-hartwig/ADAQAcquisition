@@ -117,10 +117,10 @@ public:
   double DisplayXTitleSize, DisplayXTitleOffset;
   double DisplayYTitleSize, DisplayYTitleOffset;
 
-  bool DisplayXAxisInSamples;
-  bool DisplayYAxisInADC;
-  bool DisplayLegend;
+  bool DisplayLegend, DisplayGrid;
   bool DisplayXAxisInLog, DisplayYAxisInLog;
+
+  int SpectrumRefreshRate;
 
   
   //////////////////////////////
@@ -129,12 +129,6 @@ public:
   bool WaveformStorageEnable;
   bool SpectrumSaveWithTimeExtension;
   bool CanvasSaveWithTimeExtension;
-
-  
-  ////////////////////////////////
-  // Miscellaneous widget settings
-
- uint32_t SpectrumRefreshRate;
 
 #endif
 

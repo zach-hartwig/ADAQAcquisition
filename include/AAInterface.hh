@@ -108,6 +108,10 @@ private:
 
   AASettings *TheSettings;
 
+  AAChannelSlots *ChannelSlots;
+  AADisplaySlots *DisplaySlots;
+  AASubtabSlots *SubtabSlots;
+  AATabSlots *TabSlots;
 
   /////////////////////////////
   // ROOT GUI widget objects //
@@ -255,21 +259,18 @@ private:
   TGTextButton *SpectrumCalibrationWrite_TB;
 
   // Graphics
-  
-  TGCheckButton *DisplayXAxisLog_CB;
-  TGCheckButton *DisplayXaxisLog_CB;
 
+  TGCheckButton *DisplayLegend_CB;
+  TGCheckButton *DisplayGrid_CB;
+  TGCheckButton *DisplayXAxisLog_CB;
+  TGCheckButton *DisplayYAxisLog_CB;
+  
   TGCheckButton *DisplayTitlesEnable_CB;
   ADAQTextEntryWithLabel *DisplayTitle_TEL, *DisplayXTitle_TEL, *DisplayYTitle_TEL;
   ADAQNumberEntryWithLabel *DisplayXTitleOffset_NEL, *DisplayXTitleSize_NEL;
   ADAQNumberEntryWithLabel *DisplayYTitleOffset_NEL, *DisplayYTitleSize_NEL;
-  
-  TGCheckButton *DisplayDrawLegend_CB;
-  TGRadioButton *DisplayWaveformXAxisSample_RB;
-  TGRadioButton *DisplayWaveformXAxisNanoseconds_RB;
-  TGRadioButton *DisplayWaveformYAxisADC_RB;
-  TGRadioButton *DisplayWaveformYAxisMillivolts_RB;
 
+  ADAQNumberEntryWithLabel *SpectrumRefreshRate_NEL;
 
   // Persistent storage
 
@@ -288,18 +289,6 @@ private:
   ADAQTextEntryWithLabel *CanvasFileName_TEL;
   TGCheckButton *CanvasSaveWithTimeExtension_CB;
   TGTextButton *CanvasSave_TB;
-
-  ADAQTextEntryWithLabel *DGScopeDisplayOutputFileName_TEL;
-  ADAQComboBoxWithLabel *DGScopeDisplayOutputFileType_CBL;
-
-  // Miscellaneous
-
-  ADAQNumberEntryWithLabel *SpectrumRefreshRate_NEL;
-
-  AAChannelSlots *ChannelSlots;
-  AADisplaySlots *DisplaySlots;
-  AASubtabSlots *SubtabSlots;
-  AATabSlots *TabSlots;
 
   // Define the AAInterface class to ROOT 
   ClassDef(AAInterface, 0);

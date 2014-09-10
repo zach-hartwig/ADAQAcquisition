@@ -36,7 +36,7 @@ public:
   void PlotWaveforms(vector<vector<Short_t> > &, int, vector<double> &);
 #endif
   void PlotSpectrum(vector<TH1F *> &);
-  void PlotCalibration();
+  void PlotCalibration(int);
 
   ClassDef(AAGraphics, 0);
   

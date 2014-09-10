@@ -9,6 +9,7 @@
 #include "AAInterface.hh"
 #include "AAVMEManager.hh"
 #include "AAAcquisitionManager.hh"
+#include "AAGraphics.hh"
 
 AASubtabSlots::AASubtabSlots(AAInterface *TheInterface)
   : TI(TheInterface)
@@ -160,6 +161,10 @@ void AASubtabSlots::HandleNumberEntries()
   switch(ActiveID){
     
   case SpectrumCalibrationEnergy_NEL_ID:
+    break;
+
+
+
   case SpectrumCalibrationPulseUnit_NEL_ID:{
     double Value = 0.;
     if(ActiveID == SpectrumCalibrationEnergy_NEL_ID)
@@ -309,9 +314,8 @@ void AASubtabSlots::HandleTextButtons()
     bool CalEnable = AAAcquisitionManager::GetInstance()->
       GetCalibrationEnable(Channel);
     
-    if(CalEnable){
-      //AAGraphicsManager::GetInstance()->PlotCalibration(Channel);
-    }
+    if(CalEnable)
+      AAGraphics::GetInstance()->PlotCalibration(Channel);
     else{
     }
 

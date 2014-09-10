@@ -953,10 +953,6 @@ void AAInterface::FillAcquisitionFrame()
   TGCompositeFrame *DataSubframe = new TGCompositeFrame(DataSubtab, 0, 0, kHorizontalFrame);
   DataSubtab->AddFrame(DataSubframe);
 
-  TGCompositeFrame *MiscSubtab = AQControlSubtabs->AddTab("Miscellaneous");
-  TGCompositeFrame *MiscSubframe = new TGCompositeFrame(MiscSubtab, 0, 0, kHorizontalFrame);
-  MiscSubtab->AddFrame(MiscSubframe);
-
   SubtabFrame->AddFrame(AQControlSubtabs, new TGLayoutHints(kLHintsTop, 0,0,0,0));
 
 
@@ -1404,31 +1400,29 @@ void AAInterface::FillAcquisitionFrame()
   GraphicsSubframe->AddFrame(DisplaySettings_GF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
 
   // ROOT check button to enable/disable plotting of the legend
-  DisplaySettings_GF->AddFrame(DisplayDrawLegend_CB = new TGCheckButton(DisplaySettings_GF, "Draw legend", -1),
-				      new TGLayoutHints(kLHintsNormal,0,0,5,0));
+  DisplaySettings_GF->AddFrame(DisplayLegend_CB = new TGCheckButton(DisplaySettings_GF, "Draw legend", -1),
+			       new TGLayoutHints(kLHintsNormal,0,0,5,0));
+  DisplayLegend_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
+  
+  DisplaySettings_GF->AddFrame(DisplayGrid_CB = new TGCheckButton(DisplaySettings_GF, "Draw grid", DisplayGrid_CB_ID),
+			       new TGLayoutHints(kLHintsNormal, 0,0,0,5));
+  DisplayGrid_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
+  DisplayGrid_CB->SetState(kButtonDown);
 
   // ROOT check buttons for specifying if X and Y axes on spectra should be logarithmic
-  DisplaySettings_GF->AddFrame(DisplayXAxisLog_CB = new TGCheckButton(DisplaySettings_GF, "Log. X-axis  ", DisplayXAxisLog_CB_ID),
+  DisplaySettings_GF->AddFrame(DisplayXAxisLog_CB = new TGCheckButton(DisplaySettings_GF, "Log X-axis  ", DisplayXAxisLog_CB_ID),
 			       new TGLayoutHints(kLHintsLeft,0,0,0,0));
+  DisplayXAxisLog_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
   
-  DisplaySettings_GF->AddFrame(DisplayXAxisLog_CB = new TGCheckButton(DisplaySettings_GF, "Log. Y-axis", DisplayYAxisLog_CB_ID),
+  DisplaySettings_GF->AddFrame(DisplayYAxisLog_CB = new TGCheckButton(DisplaySettings_GF, "Log Y-axis", DisplayYAxisLog_CB_ID),
 			       new TGLayoutHints(kLHintsLeft,0,0,0,0));
-  
-  TGButtonGroup *DisplayWaveformXAxis_BG = new TGButtonGroup(DisplaySettings_GF,"Waveform X axis",kHorizontalFrame);
-  DisplaySettings_GF->AddFrame(DisplayWaveformXAxis_BG, new TGLayoutHints(kLHintsNormal,5,0,5,0));
-  
-  DisplayWaveformXAxisSample_RB = new TGRadioButton(DisplayWaveformXAxis_BG, "Sample", -1);
-  DisplayWaveformXAxisSample_RB->SetState(kButtonDown);
-  
-  DisplayWaveformXAxisNanoseconds_RB = new TGRadioButton(DisplayWaveformXAxis_BG, "ns", -1);
+  DisplayYAxisLog_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
 
-  TGButtonGroup *DisplayWaveformYAxis_BG = new TGButtonGroup(DisplaySettings_GF,"Waveform Y axis",kHorizontalFrame);
-  DisplaySettings_GF->AddFrame(DisplayWaveformYAxis_BG, new TGLayoutHints(kLHintsNormal,5,0,5,0));
-  
-  DisplayWaveformYAxisADC_RB = new TGRadioButton(DisplayWaveformYAxis_BG, "ADC", -1);
-  DisplayWaveformYAxisADC_RB->SetState(kButtonDown);
-  
-  DisplayWaveformYAxisMillivolts_RB = new TGRadioButton(DisplayWaveformYAxis_BG, "mV", -1);
+  DisplaySettings_GF->AddFrame(SpectrumRefreshRate_NEL = new ADAQNumberEntryWithLabel(DisplaySettings_GF, "Spectrum refresh rate", -1),
+			       new TGLayoutHints(kLHintsNormal, 0,0,5,0));
+  SpectrumRefreshRate_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+  SpectrumRefreshRate_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+  SpectrumRefreshRate_NEL->GetEntry()->SetNumber(100);
 
 
   //////////////////
@@ -1539,21 +1533,6 @@ void AAInterface::FillAcquisitionFrame()
   CanvasSave_TB->Resize(175, 30);
   CanvasSave_TB->ChangeOptions(CanvasSave_TB->GetOptions() | kFixedSize);
   CanvasSave_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
-  
-
-  ///////////////////
-  // Miscellaneous //
-  ///////////////////
-
-  TGGroupFrame *DGScopeMisc_GF = new TGGroupFrame(MiscSubframe, "Extra options", kVerticalFrame);
-  DGScopeMisc_GF->SetTitlePos(TGGroupFrame::kCenter);
-  MiscSubframe->AddFrame(DGScopeMisc_GF, new TGLayoutHints(kLHintsNormal, 5,5,5,5));
-
-  DGScopeMisc_GF->AddFrame(SpectrumRefreshRate_NEL = new ADAQNumberEntryWithLabel(DGScopeMisc_GF, "Spectrum refresh rate", -1),
-			   new TGLayoutHints(kLHintsNormal, 5,5,5,5));
-  SpectrumRefreshRate_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-  SpectrumRefreshRate_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
-  SpectrumRefreshRate_NEL->GetEntry()->SetNumber(100);
 }
   
 
@@ -1802,13 +1781,16 @@ void AAInterface::SaveSettings()
   TheSettings->DisplayYTitleSize = DisplayYTitleSize_NEL->GetEntry()->GetNumber();
   TheSettings->DisplayYTitleOffset = DisplayYTitleOffset_NEL->GetEntry()->GetNumber();
 	
-  TheSettings->DisplayXAxisInSamples = DisplayWaveformXAxisSample_RB->IsDown();
-  TheSettings->DisplayYAxisInADC = DisplayWaveformYAxisADC_RB->IsDown();
-  TheSettings->DisplayLegend = DisplayDrawLegend_CB->IsDown();
+  TheSettings->DisplayLegend = DisplayLegend_CB->IsDown();
+  TheSettings->DisplayGrid = DisplayGrid_CB->IsDown();
+  TheSettings->DisplayXAxisInLog = DisplayXAxisLog_CB->IsDown();
+  TheSettings->DisplayYAxisInLog = DisplayYAxisLog_CB->IsDown();
   
   TheSettings->WaveformStorageEnable = WaveformStorageEnable_CB->IsDown();
   TheSettings->SpectrumSaveWithTimeExtension = SpectrumSaveWithTimeExtension_CB->IsDown();
   TheSettings->CanvasSaveWithTimeExtension = CanvasSaveWithTimeExtension_CB->IsDown();
+
+  TheSettings->SpectrumRefreshRate = SpectrumRefreshRate_NEL->GetEntry()->GetIntNumber();
   
 
   ////////////////////////////
@@ -1843,11 +1825,6 @@ void AAInterface::SaveSettings()
 
     TheSettings->SpectrumCalibrationEnable = SpectrumCalibration_CB->IsDisabledAndSelected();
     TheSettings->SpectrumCalibrationUseSlider = SpectrumUseCalibrationSlider_CB->IsDisabledAndSelected();
-
-    TheSettings->DisplayTitlesEnable = DisplayTitlesEnable_CB->IsDisabledAndSelected();
-    TheSettings->DisplayXAxisInSamples = DisplayWaveformXAxisSample_RB->IsDisabledAndSelected();
-    TheSettings->DisplayYAxisInADC = DisplayWaveformYAxisADC_RB->IsDisabledAndSelected();
-    TheSettings->DisplayLegend = DisplayDrawLegend_CB->IsDisabledAndSelected();
 
     TheSettings->WaveformStorageEnable = WaveformStorageEnable_CB->IsDisabledAndSelected();
     TheSettings->SpectrumSaveWithTimeExtension = SpectrumSaveWithTimeExtension_CB->IsDisabledAndSelected();
