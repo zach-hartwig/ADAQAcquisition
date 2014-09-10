@@ -35,7 +35,7 @@ public:
 #ifndef __CINT__
   void PlotWaveforms(vector<vector<Short_t> > &, int, vector<double> &);
 #endif
-  void PlotSpectrum(vector<TH1F *> &);
+  void PlotSpectrum(TH1F *);
   void PlotCalibration(int);
 
   ClassDef(AAGraphics, 0);

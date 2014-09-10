@@ -344,8 +344,8 @@ void AAAcquisitionManager::StartAcquisition()
 					WaveformLength, 
 					BaselineValue);
     else if(TheSettings->SpectrumMode)
-      TheGraphicsManager->PlotSpectrum(Spectrum_H);
-
+      TheGraphicsManager->PlotSpectrum(Spectrum_H[TheSettings->SpectrumChannel]);
+    
     
     // Free the PC memory allocated to the event
     DGManager->FreeEvent(&EventWaveform);

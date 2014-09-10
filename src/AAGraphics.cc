@@ -215,27 +215,27 @@ void AAGraphics::SetupSpectrumGraphics()
 }
 
 
-void AAGraphics::PlotSpectrum(vector<TH1F *> &Spectrum_H)
+void AAGraphics::PlotSpectrum(TH1F *Spectrum_H)
 {
   int Channel = TheSettings->SpectrumChannel;
-
-  Spectrum_H[Channel]->Draw("C");
+  
+  Spectrum_H->Draw("C");
 
   // Set spectrum graphical attributes
 
-  Spectrum_H[Channel]->SetLineColor(ChColor[Channel]);
-  Spectrum_H[Channel]->SetLineWidth(SpectrumWidth);
+  Spectrum_H->SetLineColor(ChColor[Channel]);
+  Spectrum_H->SetLineWidth(SpectrumWidth);
 
   // Set spectrum axes range and lin/log 
 
   double XMin = TheSettings->SpectrumMaxBin * TheSettings->HorizontalSliderMin;
   double XMax = TheSettings->SpectrumMaxBin * TheSettings->HorizontalSliderMax;
-  Spectrum_H[Channel]->GetXaxis()->SetRangeUser(XMin, XMax);
+  Spectrum_H->GetXaxis()->SetRangeUser(XMin, XMax);
   
   (TheSettings->DisplayXAxisInLog) ? 
     gPad->SetLogx(true) : gPad->SetLogx(false);
   
-  int AbsoluteMax = Spectrum_H[Channel]->GetBinContent(Spectrum_H[Channel]->GetMaximumBin());
+  int AbsoluteMax = Spectrum_H->GetBinContent(Spectrum_H->GetMaximumBin());
   double YMin = AbsoluteMax * TheSettings->VerticalSliderMin;
   double YMax = AbsoluteMax * TheSettings->VerticalSliderMax;
   
@@ -246,22 +246,22 @@ void AAGraphics::PlotSpectrum(vector<TH1F *> &Spectrum_H)
   else 
     gPad->SetLogy(false);
   
-  Spectrum_H[Channel]->SetMinimum(YMin);
-  Spectrum_H[Channel]->SetMaximum(YMax);
+  Spectrum_H->SetMinimum(YMin);
+  Spectrum_H->SetMaximum(YMax);
 
   // Set plot and axis title text properties
 
-  Spectrum_H[Channel]->SetTitle(Title.c_str());
+  Spectrum_H->SetTitle(Title.c_str());
   
-  Spectrum_H[Channel]->GetXaxis()->SetTitle(XTitle.c_str());
-  Spectrum_H[Channel]->GetXaxis()->SetTitleSize(XSize);
-  Spectrum_H[Channel]->GetXaxis()->SetTitleOffset(XOffset);
-  Spectrum_H[Channel]->GetXaxis()->SetLabelSize(XSize);
+  Spectrum_H->GetXaxis()->SetTitle(XTitle.c_str());
+  Spectrum_H->GetXaxis()->SetTitleSize(XSize);
+  Spectrum_H->GetXaxis()->SetTitleOffset(XOffset);
+  Spectrum_H->GetXaxis()->SetLabelSize(XSize);
 
-  Spectrum_H[Channel]->GetYaxis()->SetTitle(YTitle.c_str());
-  Spectrum_H[Channel]->GetYaxis()->SetTitleSize(YSize);
-  Spectrum_H[Channel]->GetYaxis()->SetTitleOffset(YOffset);
-  Spectrum_H[Channel]->GetYaxis()->SetLabelSize(YSize);
+  Spectrum_H->GetYaxis()->SetTitle(YTitle.c_str());
+  Spectrum_H->GetYaxis()->SetTitleSize(YSize);
+  Spectrum_H->GetYaxis()->SetTitleOffset(YOffset);
+  Spectrum_H->GetYaxis()->SetLabelSize(YSize);
 
 
   // If calibration is enabled the draw a vertical line corresponding

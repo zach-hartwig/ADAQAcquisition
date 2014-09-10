@@ -64,6 +64,7 @@ public:
   void SetInterfacePointer(AAInterface *TI) {TheInterface = TI;}
   void SetSettingsPointer(AASettings *TS) {TheSettings = TS;}
 
+  TH1F *GetSpectrum(int C) {return Spectrum_H[C];}
   TGraph *GetCalibrationCurve(int C) {return CalibrationCurves[C];}
 
   ClassDef(AAAcquisitionManager, 0);

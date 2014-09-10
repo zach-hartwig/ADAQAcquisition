@@ -4,6 +4,7 @@
 #include "AAInterface.hh"
 #include "AAVMEManager.hh"
 #include "AAAcquisitionManager.hh"
+#include "AAGraphics.hh"
 
 
 AADisplaySlots::AADisplaySlots(AAInterface *TheInterface)
@@ -72,13 +73,14 @@ void AADisplaySlots::HandleTextButtons()
 
   case DisplayUpdate_TB_ID:{
     
-    int CurrentChannel = TI->SpectrumChannel_CBL->GetComboBox()->GetSelected();
-    
-    if(TI->AQUltraRate_RB->IsDown())
+    if(TI->TheSettings->UltraRateMode)
       break;
     else{
-      //   if(TI->DGScopeSpectrum_H[CurrentChannel])
-      //	{}//ForceSpectrumDrawing();
+      if(TI->TheSettings->SpectrumMode or TI->TheSettings->HighRateMode){
+	int Channel = TI->TheSettings->SpectrumChannel;
+	TH1F *Spectrum_H = TheACQManager->GetSpectrum(Channel);
+	AAGraphics::GetInstance()->PlotSpectrum(Spectrum_H);
+      }
       break;
     }
   }
