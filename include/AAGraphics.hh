@@ -31,11 +31,8 @@ public:
   
   void SetupWaveformGraphics(int);
 
-
-
-
 #ifndef __CINT__
-  void PlotWaveforms(vector<vector<uint16_t> > &, int, vector<double> &);
+  void PlotWaveforms(vector<vector<Short_t> > &, int, vector<double> &);
 #endif
   void PlotSpectrum(vector<TH1F *> &);
   void PlotCalibration();

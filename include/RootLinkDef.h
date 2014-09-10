@@ -19,4 +19,6 @@
 
 #pragma link C++ class ADAQRootMeasParams+;
 
+#pragma link C++ class std::vector <Short_t>+;
+
 #endif

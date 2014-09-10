@@ -35,11 +35,11 @@ public:
   void StopAcquisition();
 
   void PreAcquisition();
+  
+  void CreateADAQFile(string);
+  void CloseADAQFile();
 
-  void CreateWaveformFile();
-  void CloseWaveformFile();
   void CreateWaveformTreeBranches();
-
 
   bool AddCalibrationPoint(int, int, double, double );
   bool EnableCalibration(int);
@@ -51,8 +51,8 @@ public:
 
   bool GetCalibrationEnable(int C) {return CalibrationEnable[C];}
   CalibrationDataStruct GetCalibrationDataStruct(int C) {return CalibrationData[C];}
-
-  void SetAcquisitionEnable(bool ATE) {AcquisitionEnable = true;}
+  
+  void SetAcquisitionEnable(bool ATE) {AcquisitionEnable = ATE;}
   bool GetAcquisitionEnable() {return AcquisitionEnable;}
   
   void SetAcquisitionTimerEnable(bool ATE) {AcquisitionTimerEnable = ATE;}
@@ -85,7 +85,7 @@ private:
   // Variables for PC buffer readout
   char *Buffer;
   uint32_t BufferSize, ReadSize, NumEvents;
-  vector<vector<uint16_t> > Waveforms;
+  vector<vector<Short_t> > Waveforms;
 #endif
 
   int WaveformLength;
@@ -103,15 +103,15 @@ private:
   
   vector<TH1F *> Spectrum_H;
 
-  bool WriteWaveformToTree;
-  bool BranchWaveformTree;
-
-  TFile *OutputDataFile;
   TTree *WaveformTree;
+  bool BranchWaveformTree;
+  bool FillWaveformTree;
 
-  ADAQRootMeasParams *MeasParams;
-  TObjString *MeasComment;
-  bool ROOTFileOpen;
+  bool ADAQFileIsOpen;
+  TFile *ADAQFile;
+  
+  ADAQRootMeasParams *Parameters;
+  TObjString *Comment;
   
   // Strings for file names, extensions
   string DataFileName, DataFileExtension;

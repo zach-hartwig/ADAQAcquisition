@@ -421,16 +421,19 @@ void AASubtabSlots::HandleTextButtons()
 
   case WaveformCreateFile_TB_ID:{
 
-    AAAcquisitionManager::GetInstance()->CreateWaveformFile();
+    string FileName = TI->WaveformFileName_TEL->GetEntry()->GetText();
+
+    cout << FileName << endl;
+
+    AAAcquisitionManager::GetInstance()->CreateADAQFile(FileName);
    
-    //////////////////////////////////
     // Set widget states appropriately
 
     TI->WaveformCreateFile_TB->SetState(kButtonDisabled);
     TI->WaveformCreateFile_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(8));
     TI->WaveformCreateFile_TB->SetText("ADAQ file created");
     TI->WaveformCloseFile_TB->SetState(kButtonUp);
-    TI->WaveformEnable_CB->SetState(kButtonUp);
+    TI->WaveformStorageEnable_CB->SetState(kButtonUp);
   
     break;
   }
@@ -438,7 +441,7 @@ void AASubtabSlots::HandleTextButtons()
 
   case WaveformCloseFile_TB_ID:{
 
-    AAAcquisitionManager::GetInstance()->CloseWaveformFile();
+    AAAcquisitionManager::GetInstance()->CloseADAQFile();
     
     // Set widget states appropriately.
 
@@ -446,8 +449,8 @@ void AASubtabSlots::HandleTextButtons()
     TI->WaveformCreateFile_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(18));
     TI->WaveformCreateFile_TB->SetText("Create ADAQ file");
     TI->WaveformCloseFile_TB->SetState(kButtonDisabled);
-    TI->WaveformEnable_CB->SetState(kButtonUp);
-    TI->WaveformEnable_CB->SetState(kButtonDisabled);
+    TI->WaveformStorageEnable_CB->SetState(kButtonUp);
+    TI->WaveformStorageEnable_CB->SetState(kButtonDisabled);
     
     break;
   }

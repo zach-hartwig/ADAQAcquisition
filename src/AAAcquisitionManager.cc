@@ -26,7 +26,7 @@ AAAcquisitionManager::AAAcquisitionManager()
     WaveformLength(0), LLD(0), ULD(0), SampleHeight(0.), TriggerHeight(0.),
     PulseHeight(0.), PulseArea(0.),
     BranchWaveformTree(false),
-    WriteWaveformToTree(false)
+    FillWaveformTree(false)
 {
   if(TheAcquisitionManager)
     cout << "\nError! The AcquisitionManager was constructed twice!\n" << endl;
@@ -285,7 +285,7 @@ void AAAcquisitionManager::StartAcquisition()
 	      Spectrum_H[ch]->Fill(PulseHeight);
 	      
 	      if(TheSettings->LDEnable and ch == TheSettings->LDChannel)
-		WriteWaveformToTree = true;
+		FillWaveformTree = true;
 	    }
 	  }
 	  
@@ -295,7 +295,7 @@ void AAAcquisitionManager::StartAcquisition()
 	      Spectrum_H[ch]->Fill(PulseArea);
 	      
 	      if(TheSettings->LDEnable and ch == TheSettings->LDChannel)
-		WriteWaveformToTree = true;
+		FillWaveformTree = true;
 	    }
 	  }
 	}
@@ -304,23 +304,24 @@ void AAAcquisitionManager::StartAcquisition()
 	  CreateWaveformTreeBranches();
 	
       }
+      
+      if(TheSettings->WaveformStorageEnable){
 
-      if(WaveformTree and false){//TheSettings->DataStorageEnable){
-	
 	// If the user has specified that the LLD/ULD should be used
 	// as the "trigger" (for plotting the PAS/PHS and writing to a
 	// ROOT file) but the present waveform is NOT within the
 	// LLD/ULD window (indicated by the DiscrOKForOutput bool set
 	// above during analysis of the readout waveform then do NOT
 	// write the waveform to the ROOT TTree
-	if(TheSettings->LDEnable and !WriteWaveformToTree)
+
+	if(TheSettings->LDEnable and !FillWaveformTree)
 	  continue;
 	
 	WaveformTree->Fill();
 	
 	// Reset the bool used to determine if the LLD/ULD window
 	// should be used as the "trigger" for writing waveforms
-	WriteWaveformToTree = false;
+	FillWaveformTree = false;
       }
     }
 
@@ -349,10 +350,10 @@ void AAAcquisitionManager::StopAcquisition()
 
   if(AcquisitionTimerEnable){
     AcquisitionTimerEnable = false;
-    TheInterface->UpdateAfterAQTimerStopped(ROOTFileOpen);
+    TheInterface->UpdateAfterAQTimerStopped(ADAQFileIsOpen);
   }
 
-  if(ROOTFileOpen){
+  if(ADAQFileIsOpen){
     //if(TheInterface->WaveformEnable_CB->IsDown())
     //      {}
     //TheInterface->WaveformEnable_CB->Clicked();
@@ -677,133 +678,80 @@ bool AAAcquisitionManager::WriteCalibration(int Channel, string FileName)
 }
 
 
-
-
-void AAAcquisitionManager::CreateWaveformFile()
+void AAAcquisitionManager::CreateADAQFile(string FileName)
 {
-  /*
-  string FileName = DataFileName + DataFileExtension;
-
-  // TFile to create a ROOT binary file for output                                                                                                                                                                                                                           
-  OutputDataFile = new TFile(FileName.c_str(), "recreate");
-
-  // TTree to store the waveforms as arrays. The array indices are
-  // sample numbers and array values are the voltages
+  if(ADAQFileIsOpen)
+    return;
+  
+  ADAQFile = new TFile(FileName.c_str(), "recreate");
+  
   WaveformTree = new TTree("WaveformTree","Prototype tree to store all waveforms of an event");
 
-  // TObjString to hold a comment on the measurement data                                                                                                                                                                                                                    
-  MeasComment = new TObjString("Comments are not presently enabled! ZSH 14 Apr 14");
+  Comment = new TObjString("Comments are not presently enabled! ZSH 14 Apr 14");
 
-  // ADAQ class to hold measurement paremeters                                                                                                                                                                                                                               
-  MeasParams = new ADAQRootMeasParams();
+  Parameters = new ADAQRootMeasParams();
 
-  // Retrieve the present voltage and drawn current for each                                                                                                                                                                                                                 
-  // high voltage channel and store in the MeasParam object                                                                                                                                                                                                                  
+  // Retrieve the present voltage and drawn current for each
+  // high voltage channel and store in the MeasParam object
   uint16_t voltage = 0;
   uint16_t current = 0;
 
-  for(int ch=0; ch<HVManager->GetNumChannels(); ch++){                                                                                                                                                                                                                       
-    if(V6534Enable){                                                                                                                                                                                                                                                         
-      MeasParams->DetectorVoltage.push_back( HVManager->GetVoltage(ch,&voltage) );                                                                                                                                                                                           
-      MeasParams->DetectorCurrent.push_back( HVManager->GetCurrent(ch,&current) );                                                                                                                                                                                           
-    }                                                                                                                                                                                                                                                                        
-    else{                                                                                                                                                                                                                                                                    
-      MeasParams->DetectorVoltage.push_back(0);                                                                                                                                                                                                                              
-      MeasParams->DetectorCurrent.push_back(0);                                                                                                                                                                                                                              
-    }
+  for(int ch=0; ch<6; ch++){
+    Parameters->DetectorVoltage.push_back(0);
+    Parameters->DetectorCurrent.push_back(0);
   }
 
-  // Retrieve the present settings for each of the digitizer                                                                                                                                                                                                                 
-  // channels and store in the MeasParam object                                                                                                                                                                                                                              
-  for(int ch=0; ch<NumDataChannels; ch++){                                                                                                                                                                                                                                   
-    MeasParams->DCOffset.push_back( (int)DGScopeDCOffset_NEL[ch]->GetEntry()->GetHexNumber());                                                                                                                                                                               
-    MeasParams->TriggerThreshold.push_back( (int)DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->GetIntNumber() );                                                                                                                                                            
-    MeasParams->BaselineCalcMin.push_back( (int)DGScopeBaselineCalcMin_NEL[ch]->GetEntry()->GetIntNumber() );                                                                                                                                                                
-    MeasParams->BaselineCalcMax.push_back( (int)DGScopeBaselineCalcMax_NEL[ch]->GetEntry()->GetIntNumber() );                                                                                                                                                                
-  }
 
-  // Retrieve the record length for the acquisition window [samples].                                                                                                                                                                                                        
-  MeasParams->RecordLength = DGScopeRecordLength_NEL->GetEntry()->GetIntNumber();                                                                                                                                                                                            
+  // Retrieve the present settings for each of the digitizer
+  // channels and store in the MeasParam object
+
+  for(int ch=0; ch<8; ch++){
+    Parameters->DCOffset.push_back(TheSettings->ChDCOffset[ch]);
+    Parameters->TriggerThreshold.push_back(TheSettings->ChTriggerThreshold[ch]);
+    Parameters->BaselineCalcMin.push_back(TheSettings->ChBaselineCalcMin[ch]);
+    Parameters->BaselineCalcMax.push_back(TheSettings->ChBaselineCalcMax[ch]);
+  }
+      
+
+  // Retrieve the record length for the acquisition window [samples].
+  Parameters->RecordLength = TheSettings->RecordLength;
+
+  // If the user has selected to reduce the output data then modify
+  // the record length accordingly. Note that this effectively
+  // destroys any pulse timing information, but it presently done to
+  // avoid modifying the structure of the ADAQ ROOT files. In the
+  // future, this should be correctly implemented. ZSH 26 AUG 13
+  if(TheSettings->DataReductionEnable)
+    Parameters->RecordLength /= TheSettings->DataReductionFactor;
   
-  // If the user has selected to reduce the output data then modify                                                                                                                                                                                                          
-  // the record length accordingly. Note that this effectively                                                                                                                                                                                                               
-  // destroys any pulse timing information, but it presently done to                                                                                                                                                                                                         
-  // avoid modifying the structure of the ADAQ ROOT files. In the                                                                                                                                                                                                            
-  // future, this should be correctly implemented. ZSH 26 AUG 13                                                                                                                                                                                                             
-  if(DGScopeUseDataReduction_CB->IsDown())                                                                                                                                                                                                                                   
-    MeasParams->RecordLength /= DGScopeDataReductionFactor_NEL->GetEntry()->GetIntNumber();
+  // Set a bool indicating that the next digitized event will
+  // trigger the creation of a TTree branch with the correctly sized
+  // array. This action is performed once in
+  // ADAQAcquisition::RunDGScope(). See that function for more comments
+  BranchWaveformTree = true;
 
-  // Set a bool indicating that the next digitized event will                                                                                                                                                                                                                
-  // trigger the creation of a TTree branch with the correctly sized                                                                                                                                                                                                         
-  // array. This action is performed once in                                                                                                                                                                                                                                 
-  // ADAQAcquisition::RunDGScope(). See that function for more comments                                                                                                                                                                                                      
-  BranchWaveformTree = true; 
-
-  ROOTFileOpen = true;
-  */
+  ADAQFileIsOpen = true;
 }
 
 
-void AAAcquisitionManager::CloseWaveformFile()
+void AAAcquisitionManager::CloseADAQFile()
 {
-  /*
-  if(!ROOTFileOpen)
+  if(!ADAQFileIsOpen)
     return;
   
   if(WaveformTree)
-      WaveformTree->Write();
+    WaveformTree->Write();
   
-  // Write the ROOT objects to file
-  MeasParams->Write("MeasParams");
-  MeasComment->Write("MeasComment");
+  Parameters->Write("MeasParams");
+  //Comment->Write("MeasComment");
   
-  // Close the ROOT TFile
-  OutputDataFile->Close();
+  ADAQFile->Close();
   
   // Free the memory allocated to ROOT objects
-  delete MeasComment;
-  //EventTree->Delete(); // Causes crash for some reason
-  delete MeasParams;
-  delete OutputDataFile
+  delete Parameters;
+  //delete WaveformTree;
+  delete Comment;
+  delete ADAQFile;
     
-  ROOTFileOpen = false;
-  */
+  ADAQFileIsOpen = false;
 }
-
-
-
-    /*
-    uint16_t voltage = 0;
-    uint16_t current = 0;
-    
-    for(int ch=0; ch<HVManager->GetNumChannels(); ch++){
-      if(V6534Enable){
-	MeasParams->DetectorVoltage.push_back( HVManager->GetVoltage(ch,&voltage) );
-	MeasParams->DetectorCurrent.push_back( HVManager->GetCurrent(ch,&current) );
-      }
-      else{
-	MeasParams->DetectorVoltage.push_back(0);
-	MeasParams->DetectorCurrent.push_back(0);
-      }
-    }
-    */
-    
-    // Retrieve the present settings for each of the digitizer
-    // channels and store in the MeasParam object
-    //    for(int ch=0; ch<NumDataChannels; ch++){
-      //MeasParams->DCOffset.push_back( (int)DGScopeDCOffset_NEL[ch]->GetEntry()->GetHexNumber());
-      //      MeasParams->TriggerThreshold.push_back( (int)DGScopeChTriggerThreshold_NEL[ch]->GetEntry()->GetIntNumber() );
-      //      MeasParams->BaselineCalcMin.push_back( (int)DGScopeBaselineCalcMin_NEL[ch]->GetEntry()->GetIntNumber() );
-      //      MeasParams->BaselineCalcMax.push_back( (int)DGScopeBaselineCalcMax_NEL[ch]->GetEntry()->GetIntNumber() );
-    //    }
-    
-    // Retrieve the record length for the acquisition window [samples].
-    //MeasParams->RecordLength = DGScopeRecordLength_NEL->GetEntry()->GetIntNumber();
-    
-    // If the user has selected to reduce the output data then modify
-    // the record length accordingly. Note that this effectively
-    // destroys any pulse timing information, but it presently done to
-    // avoid modifying the structure of the ADAQ ROOT files. In the
-    // future, this should be correctly implemented. ZSH 26 AUG 13
-    //    if(DGScopeUseDataReduction_CB->IsDown())
-    //      MeasParams->RecordLength /= DGScopeDataReductionFactor_NEL->GetEntry()->GetIntNumber();

@@ -1470,7 +1470,7 @@ void AAInterface::FillAcquisitionFrame()
 
   // ROOT text button to write all data to the ROOT file and close it. This button MUST be clicked to 
   // successfully write&close the ROOT file otherwise the ROOT file will have errors.
-  WaveformStorage_GF->AddFrame(WaveformCloseFile_TB = new TGTextButton(WaveformStorage_GF,"Close ADAQ file", WaveformCreateFile_TB_ID),
+  WaveformStorage_GF->AddFrame(WaveformCloseFile_TB = new TGTextButton(WaveformStorage_GF,"Close ADAQ file", WaveformCloseFile_TB_ID),
 				  new TGLayoutHints(kLHintsNormal,10,5,0,5));
   WaveformCloseFile_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
   WaveformCloseFile_TB->Resize(175,30);
@@ -1479,9 +1479,11 @@ void AAInterface::FillAcquisitionFrame()
   
   // ROOT check button to enable/disable saving data to ROOT file. Note that the data is saved to
   // the ROOT file only while the button is checked. The 
-  WaveformStorage_GF->AddFrame(WaveformEnable_CB = new TGCheckButton(WaveformStorage_GF,"Data stored while checked", WaveformEnable_CB_ID),
-				  new TGLayoutHints(kLHintsNormal,10,5,5,5));
-  WaveformEnable_CB->SetState(kButtonDisabled);
+  WaveformStorage_GF->AddFrame(WaveformStorageEnable_CB = new TGCheckButton(WaveformStorage_GF,"Data stored while checked", WaveformStorageEnable_CB_ID),
+			       new TGLayoutHints(kLHintsNormal,10,5,5,5));
+  WaveformStorageEnable_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
+  WaveformStorageEnable_CB->SetState(kButtonDisabled);
+  
   
   DGDisplayAndControls_VF->AddFrame(DGScopeDisplay_GF, new TGLayoutHints(kLHintsCenterX,5,5,5,5));
   DGDisplayAndControls_VF->AddFrame(SubtabFrame, new TGLayoutHints(kLHintsCenterX,5,5,5,5));
@@ -1602,6 +1604,9 @@ void AAInterface::SetVoltageWidgetState(bool WidgetState, EButtonState ButtonSta
 
 void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState ButtonState)
 {
+  // Widgets that have straightforward on/off behavoir depending on
+  // the acquisition state
+
   for(uint32_t ch=0; ch<8; ch++){
     DGChEnable_CB[ch]->SetState(ButtonState);
     DGChPosPolarity_RB[ch]->SetState(ButtonState);
@@ -1643,13 +1648,41 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
   SpectrumULD_NEL->GetEntry()->SetState(WidgetState);
   SpectrumLDTrigger_CB->SetState(ButtonState);
   SpectrumLDTriggerChannel_CBL->GetComboBox()->SetEnabled(WidgetState);
-
-  if(AAAcquisitionManager::GetInstance()->GetAcquisitionEnable())
-    WaveformCreateFile_TB->SetState(kButtonUp);
-  else
-    WaveformCreateFile_TB->SetState(kButtonDisabled);
   
   SpectrumRefreshRate_NEL->GetEntry()->SetState(WidgetState);
+
+  // The following widgets have special settings depending on
+  // the acquisition state
+
+  // Acquisition is turning ON
+  if(WidgetState == false){
+    AQStartStop_TB->SetBackgroundColor(ColorManager->Number2Pixel(8));
+    AQStartStop_TB->SetForegroundColor(ColorManager->Number2Pixel(1));
+    AQStartStop_TB->SetText("Acquiring");
+    
+    WaveformCreateFile_TB->SetState(kButtonUp);
+    WaveformCloseFile_TB->SetState(kButtonUp);
+    WaveformStorageEnable_CB->SetState(kButtonUp);
+  }
+
+  // Acquisition is turning OFF
+  else{
+    AQStartStop_TB->SetBackgroundColor(ColorManager->Number2Pixel(2));
+    AQStartStop_TB->SetForegroundColor(ColorManager->Number2Pixel(1));
+    AQStartStop_TB->SetText("Stopped");
+
+    WaveformCreateFile_TB->SetState(kButtonDisabled);
+    WaveformCloseFile_TB->SetState(kButtonDisabled);
+    WaveformStorageEnable_CB->SetState(kButtonUp);
+    WaveformStorageEnable_CB->SetState(kButtonDisabled);
+
+    bool AQTimerEnable = AAAcquisitionManager::GetInstance()->GetAcquisitionTimerEnable();
+    
+    if(AQTimerEnable){
+      AQTimerStart_TB->SetBackgroundColor(ColorManager->Number2Pixel(18));
+      AQTimerStart_TB->SetText("Start timer");
+    }      
+  }
 }
 
 
@@ -1777,6 +1810,12 @@ void AAInterface::SaveSettings()
   TheSettings->DisplayXAxisInSamples = DisplayWaveformXAxisSample_RB->IsDown();
   TheSettings->DisplayYAxisInADC = DisplayWaveformYAxisADC_RB->IsDown();
   TheSettings->DisplayLegend = DisplayDrawLegend_CB->IsDown();
+  
+  TheSettings->WaveformStorageEnable = WaveformStorageEnable_CB->IsDown();
+  
+
+  ////////////////////////////
+  // Persistent storage subtab
 
   bool AcquisitionOn = AAAcquisitionManager::GetInstance()->GetAcquisitionEnable();
 
@@ -1811,6 +1850,8 @@ void AAInterface::SaveSettings()
     TheSettings->DisplayXAxisInSamples = DisplayWaveformXAxisSample_RB->IsDisabledAndSelected();
     TheSettings->DisplayYAxisInADC = DisplayWaveformYAxisADC_RB->IsDisabledAndSelected();
     TheSettings->DisplayLegend = DisplayDrawLegend_CB->IsDisabledAndSelected();
+
+    TheSettings->WaveformStorageEnable = WaveformStorageEnable_CB->IsDisabledAndSelected();
   }
 }
 
@@ -1833,8 +1874,8 @@ void AAInterface::UpdateAfterAQTimerStopped(bool ROOTFileOpen)
   
   WaveformCreateFile_TB->SetState(kButtonDisabled);
   WaveformCloseFile_TB->SetState(kButtonDisabled);
-  WaveformEnable_CB->SetState(kButtonUp);
-  WaveformEnable_CB->SetState(kButtonDisabled);
+  WaveformStorageEnable_CB->SetState(kButtonUp);
+  WaveformStorageEnable_CB->SetState(kButtonDisabled);
 }
 
 

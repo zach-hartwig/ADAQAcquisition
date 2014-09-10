@@ -206,7 +206,7 @@ enum{
   WaveformFileName_TB_ID,
   WaveformCreateFile_TB_ID,
   WaveformCloseFile_TB_ID,
-  WaveformEnable_CB_ID,
+  WaveformStorageEnable_CB_ID,
 
   SpectrumFileName_TB_ID,
   SpectrumSaveWithTimeExtension_CB_ID,

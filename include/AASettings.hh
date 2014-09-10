@@ -120,6 +120,12 @@ public:
   bool DisplayXAxisInLog, DisplayYAxisInLog;
 
   
+  //////////////////////////////
+  // Persistent storage settings
+  
+  bool WaveformStorageEnable;
+
+  
   ////////////////////////////////
   // Miscellaneous widget settings
 

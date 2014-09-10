@@ -103,7 +103,7 @@ void AAGraphics::SetupWaveformGraphics(int WaveformLength)
 }
 
 
-void AAGraphics::PlotWaveforms(vector<vector<uint16_t> > &Waveforms, 
+void AAGraphics::PlotWaveforms(vector<vector<Short_t> > &Waveforms, 
 			       int WaveformLength,
 			       vector<double> &BaselineValue)
 {
