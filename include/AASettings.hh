@@ -124,6 +124,8 @@ public:
   // Persistent storage settings
   
   bool WaveformStorageEnable;
+  bool SpectrumSaveWithTimeExtension;
+  bool CanvasSaveWithTimeExtension;
 
   
   ////////////////////////////////

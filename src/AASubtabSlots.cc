@@ -28,7 +28,16 @@ void AASubtabSlots::HandleCheckButtons()
   
   switch(ActiveID){
 
-    // Enable the calibration widgets
+  case DGTriggerCoincidenceEnable_CB_ID:
+    
+    if(ActiveButton->IsDown())
+      TI->DGTriggerCoincidenceLevel_CBL->GetComboBox()->SetEnabled(true);
+    else
+      TI->DGTriggerCoincidenceLevel_CBL->GetComboBox()->SetEnabled(false);
+
+    break;
+
+
   case SpectrumCalibration_CB_ID:
     
     if(ActiveButton->IsDown())
@@ -38,14 +47,6 @@ void AASubtabSlots::HandleCheckButtons()
     
     break;
     
-  case DGTriggerCoincidenceEnable_CB_ID:
-    
-    if(ActiveButton->IsDown())
-      TI->DGTriggerCoincidenceLevel_CBL->GetComboBox()->SetEnabled(true);
-    else
-      TI->DGTriggerCoincidenceLevel_CBL->GetComboBox()->SetEnabled(false);
-
-    break;
 
   case DisplayTitlesEnable_CB_ID:
     
@@ -113,6 +114,7 @@ void AASubtabSlots::HandleComboBoxes(int ActiveID, int SelectedID)
     }
     break;
   }
+
 
   case SpectrumCalibrationPoint_CBL_ID:{
     
@@ -213,16 +215,14 @@ void AASubtabSlots::HandleTextButtons()
       // the current time within the acquisition loop in RunDGScope()
       TheACQManager->SetAcquisitionTimerEnable(true);
 
-      // If the ROOT data file is open but the user has not enabled
-      // data storage, assume that the user wants to acquire data for
-      // the specific amount of time dictated by the acquisition timer
-      //if(ROOTFileOpen){
-      //	if(OutputDataFile->IsOpen() and !DGScopeDataStorageEnable_CB->IsDown())
-      //	  DGScopeDataStorageEnable_CB->SetState(kButtonDown);
-      //      }
+      // Configure such that when an ADAQ file has been opened and the
+      // AQ timer is running waveform data is being stored
+      if(TheACQManager->GetADAQFileIsOpen())
+	TI->WaveformStorageEnable_CB->SetState(kButtonDown);
     }
     break;
   }
+
     
   case AQTimerAbort_TB_ID:{
     if(TheACQManager->GetAcquisitionEnable() and
@@ -230,6 +230,7 @@ void AASubtabSlots::HandleTextButtons()
       TheACQManager->StopAcquisition();
     break;
   }
+    
 
   case CheckBufferStatus_TB_ID:{
 
@@ -281,6 +282,7 @@ void AASubtabSlots::HandleTextButtons()
     
     break;
   }
+
     
   case SpectrumCalibrationCalibrate_TB_ID:{
     
@@ -298,6 +300,7 @@ void AASubtabSlots::HandleTextButtons()
     
     break;
   }
+
     
   case SpectrumCalibrationPlot_TB_ID:{
 
@@ -314,6 +317,7 @@ void AASubtabSlots::HandleTextButtons()
 
     break;
   }
+
 
   case SpectrumCalibrationReset_TB_ID:{
 
@@ -338,6 +342,7 @@ void AASubtabSlots::HandleTextButtons()
     
     break;
   }
+
     
   case SpectrumCalibrationLoad_TB_ID:{
 
@@ -372,6 +377,7 @@ void AASubtabSlots::HandleTextButtons()
     }
     break;
   }
+
     
   case SpectrumCalibrationWrite_TB_ID:{
 
@@ -391,9 +397,6 @@ void AASubtabSlots::HandleTextButtons()
     break;
   }
 
-
-    //////////////////////////////
-    // Set the ROOT data file name
 
   case WaveformFileName_TB_ID:{
     
@@ -480,11 +483,17 @@ void AASubtabSlots::HandleTextButtons()
     }
     break;
   }
+
     
   case SpectrumSave_TB_ID:{
-    // CALL AAACQUISITION TO OUTPUT THE SPECTRUM
+
+    string FileName = TI->SpectrumFileName_TEL->GetEntry()->GetText();
+    
+    AAAcquisitionManager::GetInstance()->SaveSpectrum(FileName);
+    
     break;
   }
+
     
   case CanvasFileName_TB_ID:{
     

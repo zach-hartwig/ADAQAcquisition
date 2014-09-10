@@ -286,8 +286,6 @@ void AAInterface::FillConnectionFrame()
     BoardAddress_HF->AddFrame(new TGLabel(BoardAddress_HF,"0x"), 
 			      new TGLayoutHints(kLHintsExpandY, 5,0,0,5));
 
-
-
     // The V1718 USB-VME board differs from the others in that, as the
     // VME controller, it does not an explictly settable VME
     // address. Its VME address is set automatically when a link is
@@ -1812,6 +1810,8 @@ void AAInterface::SaveSettings()
   TheSettings->DisplayLegend = DisplayDrawLegend_CB->IsDown();
   
   TheSettings->WaveformStorageEnable = WaveformStorageEnable_CB->IsDown();
+  TheSettings->SpectrumSaveWithTimeExtension = SpectrumSaveWithTimeExtension_CB->IsDown();
+  TheSettings->CanvasSaveWithTimeExtension = CanvasSaveWithTimeExtension_CB->IsDown();
   
 
   ////////////////////////////
@@ -1852,6 +1852,8 @@ void AAInterface::SaveSettings()
     TheSettings->DisplayLegend = DisplayDrawLegend_CB->IsDisabledAndSelected();
 
     TheSettings->WaveformStorageEnable = WaveformStorageEnable_CB->IsDisabledAndSelected();
+    TheSettings->SpectrumSaveWithTimeExtension = SpectrumSaveWithTimeExtension_CB->IsDisabledAndSelected();
+    TheSettings->CanvasSaveWithTimeExtension = CanvasSaveWithTimeExtension_CB->IsDisabledAndSelected();
   }
 }
 

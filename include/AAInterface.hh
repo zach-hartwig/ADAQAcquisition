@@ -295,7 +295,6 @@ private:
 
   ADAQNumberEntryWithLabel *SpectrumRefreshRate_NEL;
 
-
   AAChannelSlots *ChannelSlots;
   AADisplaySlots *DisplaySlots;
   AASubtabSlots *SubtabSlots;

@@ -31,15 +31,12 @@ public:
 
   static AAAcquisitionManager *GetInstance();
 
+  void PreAcquisition();
   void StartAcquisition();
   void StopAcquisition();
-
-  void PreAcquisition();
   
   void CreateADAQFile(string);
   void CloseADAQFile();
-
-  void CreateWaveformTreeBranches();
 
   bool AddCalibrationPoint(int, int, double, double );
   bool EnableCalibration(int);
@@ -47,7 +44,7 @@ public:
   bool LoadCalibration(int, string, int &);
   bool WriteCalibration(int, string);
 
-  void SaveSpectrumData();
+  void SaveSpectrum(string);
 
   bool GetCalibrationEnable(int C) {return CalibrationEnable[C];}
   CalibrationDataStruct GetCalibrationDataStruct(int C) {return CalibrationData[C];}
@@ -57,6 +54,9 @@ public:
   
   void SetAcquisitionTimerEnable(bool ATE) {AcquisitionTimerEnable = ATE;}
   bool GetAcquisitionTimerEnable() {return AcquisitionTimerEnable;}
+
+  void SetADAQFileIsOpen(bool AFIO) {ADAQFileIsOpen = AFIO;}
+  bool GetADAQFileIsOpen() {return ADAQFileIsOpen;}
 
   void SetAcquisitionTimeStart(double T) {AcquisitionTimeStart = T;}
   void SetAcquisitionTimeStop(double T) {AcquisitionTimeStop = T;}
@@ -102,9 +102,9 @@ private:
   vector<CalibrationDataStruct> CalibrationData;
   
   vector<TH1F *> Spectrum_H;
+  vector<bool> SpectrumExists;
 
   TTree *WaveformTree;
-  bool BranchWaveformTree;
   bool FillWaveformTree;
 
   bool ADAQFileIsOpen;

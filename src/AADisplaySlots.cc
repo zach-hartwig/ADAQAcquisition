@@ -43,7 +43,7 @@ void AADisplaySlots::HandleTextButtons()
       // Update widgets for acquisition-off settings
       TI->SetAcquisitionWidgetState(true, kButtonUp);
 
-      // Special handling for acquistion timer 
+      // Special handling for acquisition timer 
       if(TheACQManager->GetAcquisitionTimerEnable())
 	TheACQManager->SetAcquisitionTimerEnable(false);
     }

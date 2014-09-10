@@ -25,7 +25,6 @@ AAAcquisitionManager::AAAcquisitionManager()
     BufferSize(0), ReadSize(0), NumEvents(0),
     WaveformLength(0), LLD(0), ULD(0), SampleHeight(0.), TriggerHeight(0.),
     PulseHeight(0.), PulseArea(0.),
-    BranchWaveformTree(false),
     FillWaveformTree(false)
 {
   if(TheAcquisitionManager)
@@ -50,6 +49,7 @@ AAAcquisitionManager::AAAcquisitionManager()
     CalibrationCurves.push_back(new TGraph);
     
     Spectrum_H.push_back(new TH1F);
+    SpectrumExists.push_back(false);
   }
 }
 
@@ -107,17 +107,23 @@ void AAAcquisitionManager::PreAcquisition()
   ULD = TheSettings->SpectrumULD;
 
   for(int ch=0; ch<DGChannels; ch++){
+    
+    if(SpectrumExists[ch]) 
+      delete Spectrum_H[ch];
+    else 
+      continue;
+    
     stringstream SS;
     SS << "Spectrum[Ch" << ch << "]";
     string Name = SS.str();
-
-    if(Spectrum_H[ch]) delete Spectrum_H[ch];
     
     Spectrum_H[ch] = new TH1F(Name.c_str(), 
 			      Name.c_str(), 
 			      TheSettings->SpectrumNumBins,
 			      TheSettings->SpectrumMinBin,
 			      TheSettings->SpectrumMaxBin);
+    
+    SpectrumExists[ch] = true;
   }
   
   // GraphicsManager settings
@@ -299,10 +305,6 @@ void AAAcquisitionManager::StartAcquisition()
 	    }
 	  }
 	}
-	
-	if(BranchWaveformTree)
-	  CreateWaveformTreeBranches();
-	
       }
       
       if(TheSettings->WaveformStorageEnable){
@@ -347,59 +349,22 @@ void AAAcquisitionManager::StopAcquisition()
   AAVMEManager::GetInstance()->GetDGManager()->SWStopAcquisition();
 
   AcquisitionEnable = false;
-
+  
   if(AcquisitionTimerEnable){
     AcquisitionTimerEnable = false;
     TheInterface->UpdateAfterAQTimerStopped(ADAQFileIsOpen);
   }
-
-  if(ADAQFileIsOpen){
-    //if(TheInterface->WaveformEnable_CB->IsDown())
-    //      {}
-    //TheInterface->WaveformEnable_CB->Clicked();
-
-    //TheInterface->WaveformCloseFile_TB->Clicked();
-  }
-
+  
+  if(ADAQFileIsOpen)
+    CloseADAQFile();
 }
 
-
-
-void AAAcquisitionManager::CreateWaveformTreeBranches()
-{
-  int DGChannels = AAVMEManager::GetInstance()->GetDGManager()->GetNumChannels();
-  
-  for(int ch=0; ch<DGChannels; ch++){
-    ostringstream SS;
-
-    // Create a channel-specific branch name...
-    SS << "VoltageInADC_Ch" << ch;
-    string BranchName = SS.str();
-    
-    // ...and use it to specify a channel-specific branch in
-    /// the waveform TTree The branch holds the address of the
-    // vector that contains the waveform as a function of
-    // record length and the RecordLength of each waveform
-    WaveformTree->Branch(BranchName.c_str(), &Waveforms[ch]);
-  }
-
-  // Set the boolean to false to prevent recreating branches during
-  // next iteration of the acquisition loop
-  BranchWaveformTree = false;
-}
-
-  
-   
-  // Determine the lowest (ie, closest of 0) channel that is enabled
-  // in the ChannelEnableMask. 'Fraid you'll have to figure out the
-  // bitwise operations on your own if you don't know them...but take
-  // it from me, this is a pretty pro'n'shit way to do it
 /*
   int LowestEnabledChannel = 0;
   uint32_t LowestChannelMask = 0x1;
   while(!(ChannelEnableMask & LowestChannelMask)){
-    LowestChannelMask <<= 1;
-    LowestEnabledChannel++;
+  LowestChannelMask <<= 1;
+  LowestEnabledChannel++;
   }
 */
 
@@ -424,77 +389,50 @@ void AAAcquisitionManager::CreateWaveformTreeBranches()
   // Record Length == the length of the acquisition window in 4 ns units
   // Sample ==  a single value between 0 and 4095 of digitized voltage
 
-	// The TTree that holds the waveforms must have a branch
-	// created for the waveforms; however, that branch holds the
-	// waveforms as arrays, which requires specifying (at branch
-	// creation time) the array length (I hate arrays). The array
-	// length of "VoltageInADC" is set when the acquisition
-	// begins, but I want the ability to be able to create/close
-	// multiple ROOT files during the acquisition (provided by
-	// TGTextButtons) as well as only dump data to those files
-	// when desired (provided by TGCheckButton). The ROOT "slots"
-	// for these three buttons are implemented in
-	// CyDAQRootGUI::HandleScopeButtons, which precludes creating
-	// the branch there since the fixed-length array variable
-	// "Voltage" must be set in this member function at the
-	// beginning of each acquisition to allow different
-	// acquisition windows (length of that array). 
-	//
-	// Therefore, the solution is for the acquisition start
-	// TGTextButton to trigger the "BranchWaveformtree" boolean to
-	// true such that the following commands within the "if"
-	// statement are called **only once per acquisition start** to
-	// create the TTree branch with the correct array properties.
-      
-
-void AAAcquisitionManager::SaveSpectrumData()
+void AAAcquisitionManager::SaveSpectrum(string FileName)
 {
-  /*
-  // Get the current channel
-  int CurrentChannel = DGScopeSpectrumChannel_CBL->GetComboBox()->GetSelected();
+  int Channel = TheSettings->SpectrumChannel;
 
-  //Ensure that the spectrum histogram object exists
-  if(!DGScopeSpectrum_H[CurrentChannel]){
-    //    CreateMessageBox("The Spectrum_H object does not yet exist so there is nothing to save to file!","Stop");
+  if(!SpectrumExists[Channel])
     return;
-  }
-  else{
-    if(SpectrumFileExtension == ".dat" or SpectrumFileExtension == ".csv"){
+
+  size_t Found = FileName.find_last_of(".");
+  if(Found != string::npos){
+
+    string FileExtension = FileName.substr(Found, string::npos);
+    
+    if(FileExtension == ".dat" or FileExtension == ".csv"){
       
-      // Create the full file name (name + extension)
-      string FName;
-      
-      if(DGScopeSaveSpectrumWithTimeExtension_CB->IsDown()){
-	time_t CurrentTime = time(NULL);
-	stringstream ss;
-	ss << "." << CurrentTime;
-	string CurrentTimeString = ss.str();
-	FName = SpectrumFileName + SpectrumFileExtension + CurrentTimeString;
+      if(TheSettings->SpectrumSaveWithTimeExtension){
+	time_t Time = time(NULL);
+	stringstream SS;
+	SS << "." << Time;
+	string TimeString = SS.str();
+	
+	FileName.insert(Found, TimeString);
       }
-      else
-	FName = SpectrumFileName + SpectrumFileExtension;
       
       // Create an ofstream object to write the data to a file
-      ofstream SpectrumOutput(FName.c_str(), ofstream::trunc);
+      ofstream SpectrumOutput(FileName.c_str(), ofstream::trunc);
       
       // Assign the data separator based on file extension
-      string separator;
-      if(SpectrumFileExtension == ".dat")
-	separator = "\t";
-      else if(SpectrumFileExtension == ".csv")
-	separator = ",";
+      string Separator;
+      if(FileExtension == ".dat")
+	Separator = "\t";
+      else if(FileExtension == ".csv")
+	Separator = ",";
       
       // Get the number of bins in the spectrum histogram
-      int Bins = DGScopeSpectrum_H[CurrentChannel]->GetNbinsX();
+      int NumBins = Spectrum_H[Channel]->GetNbinsX();
       
       // Iterate over all the bins in spectrum histogram and output
       // the bin center (value on the X axis of the histogram) and the
       // bin content (value on the Y axis of the histogram)
-      for(int i=1; i<=Bins; i++){
-	double BinCenter = DGScopeSpectrum_H[CurrentChannel]->GetBinCenter(i);
-	double BinContent = DGScopeSpectrum_H[CurrentChannel]->GetBinContent(i);
+      for(int bin=1; bin<=NumBins; bin++){
+	double BinCenter = Spectrum_H[Channel]->GetBinCenter(bin);
+	double BinContent = Spectrum_H[Channel]->GetBinContent(bin);
 	
-	SpectrumOutput << BinCenter << separator << BinContent
+	SpectrumOutput << BinCenter << Separator << BinContent
 		       << endl;
       }
       
@@ -506,7 +444,6 @@ void AAAcquisitionManager::SaveSpectrumData()
       return;
     }
   }
-  */
 }
 
 
@@ -685,11 +622,26 @@ void AAAcquisitionManager::CreateADAQFile(string FileName)
   
   ADAQFile = new TFile(FileName.c_str(), "recreate");
   
-  WaveformTree = new TTree("WaveformTree","Prototype tree to store all waveforms of an event");
-
   Comment = new TObjString("Comments are not presently enabled! ZSH 14 Apr 14");
 
   Parameters = new ADAQRootMeasParams();
+
+  WaveformTree = new TTree("WaveformTree","Prototype tree to store all waveforms of an event");
+
+  int DGChannels = AAVMEManager::GetInstance()->GetDGManager()->GetNumChannels();
+  for(int ch=0; ch<DGChannels; ch++){
+    ostringstream SS;
+
+    // Create a channel-specific branch name...
+    SS << "VoltageInADC_Ch" << ch;
+    string BranchName = SS.str();
+    
+    // ...and use it to specify a channel-specific branch in
+    /// the waveform TTree. The branch holds the address of the
+    // vector that contains the digitized waveform
+    WaveformTree->Branch(BranchName.c_str(), &Waveforms[ch]);
+  }
+
 
   // Retrieve the present voltage and drawn current for each
   // high voltage channel and store in the MeasParam object
@@ -712,7 +664,6 @@ void AAAcquisitionManager::CreateADAQFile(string FileName)
     Parameters->BaselineCalcMax.push_back(TheSettings->ChBaselineCalcMax[ch]);
   }
       
-
   // Retrieve the record length for the acquisition window [samples].
   Parameters->RecordLength = TheSettings->RecordLength;
 
@@ -724,12 +675,6 @@ void AAAcquisitionManager::CreateADAQFile(string FileName)
   if(TheSettings->DataReductionEnable)
     Parameters->RecordLength /= TheSettings->DataReductionFactor;
   
-  // Set a bool indicating that the next digitized event will
-  // trigger the creation of a TTree branch with the correctly sized
-  // array. This action is performed once in
-  // ADAQAcquisition::RunDGScope(). See that function for more comments
-  BranchWaveformTree = true;
-
   ADAQFileIsOpen = true;
 }
 

@@ -30,13 +30,10 @@ int main(int argc, char **argv)
   // Run ROOT in standalone mode
   TApplication *TheApplication = new TApplication("ADAQAcquisition", &argc, argv);
 
-  // Create the singleton VME manager
+  // Create the various singleton manager classes. 
+
   AAVMEManager *TheVMEManager = new AAVMEManager;
-  
-  // Create the singleton acquisition manager
   AAAcquisitionManager *TheACQManager = new AAAcquisitionManager;
-  
-  // Create the singleton graphics manager
   AAGraphics *TheGraphicsManager = new AAGraphics;
   
   // Create the graphical user interface
@@ -47,8 +44,10 @@ int main(int argc, char **argv)
     
   // Garbage collection ..
   delete TheInterface;
+  delete TheGraphicsManager;
   delete TheACQManager;
   delete TheVMEManager;
-  
-  return 0;
+  delete TheApplication;
+
+  return 42;
 }
