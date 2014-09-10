@@ -30,6 +30,7 @@ public:
   void SetSettingsPointer(AASettings *TS) {TheSettings = TS;}
   
   void SetupWaveformGraphics(int);
+  void SetupSpectrumGraphics();
 
 #ifndef __CINT__
   void PlotWaveforms(vector<vector<Short_t> > &, int, vector<double> &);

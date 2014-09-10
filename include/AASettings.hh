@@ -54,8 +54,10 @@ public:
   //////////////////////////
   // Display widget settings
 
+  double HorizontalSliderPtr;
   double HorizontalSliderMin, HorizontalSliderMax;
   double VerticalSliderMin, VerticalSliderMax;
+
 
 
   ///////////////////////////////////////
@@ -98,6 +100,7 @@ public:
   bool SpectrumPulseHeight, SpectrumPulseArea;
   uint32_t SpectrumLLD, SpectrumULD;
   bool LDEnable;
+  bool LDTrigger;
   uint32_t LDChannel;
 
   // Calibration

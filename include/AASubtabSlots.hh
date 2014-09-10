@@ -22,6 +22,10 @@ public:
   
 private:
   AAInterface *TI;
+
+  string WaveformFileName;
+  string SpectrumFileName;
+  string CanvasFileName;
 };
 
 #endif

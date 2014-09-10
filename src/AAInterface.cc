@@ -183,6 +183,7 @@ AAInterface::AAInterface()
 
 AAInterface::~AAInterface()
 {
+  delete TheSettings;
   delete TabSlots;
   delete SubtabSlots;
   delete DisplaySlots;
@@ -632,16 +633,6 @@ void AAInterface::FillVoltageFrame()
 {
   TGVerticalFrame *HVChannelControls_VF = new TGVerticalFrame(VoltageFrame);
   
-  // The widgets and layout for each channel are identical although
-  // the underlying functionality must provide for setting the
-  // appropriate V6534 registers for each unique channel. Thus,
-  // building and laying out the HV widgets is handled in a "for"
-  // loop, with previously initialized std::vectors and std::maps used
-  // to retrieve unique values for each channel where necessary. Note:
-  // widget IDs are set to "-1" when the widget ID is not explicity
-  // needed in the code.
-
-
   const int HVChannels = TheVMEManager->GetHVManager()->GetNumChannels();
   
   for(int ch=0; ch<HVChannels; ch++){
@@ -1191,6 +1182,9 @@ void AAInterface::FillAcquisitionFrame()
   SpectrumPulseArea_RB = new TGRadioButton(SpectrumAnalysis_BG, "PAS", SpectrumPulseArea_RB_ID);
   SpectrumPulseArea_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
   SpectrumPulseArea_RB->SetState(kButtonDown);
+
+  SpectrumAnalysis_GF->AddFrame(SpectrumLDEnable_CB = new TGCheckButton(SpectrumAnalysis_GF, "LD Enable", SpectrumLDEnable_CB_ID),
+				new TGLayoutHints(kLHintsNormal, 0,0,0,5));
   
   SpectrumAnalysis_GF->AddFrame(SpectrumLLD_NEL = new ADAQNumberEntryWithLabel(SpectrumAnalysis_GF, "LLD (ADC/energy)", SpectrumLLD_NEL_ID),
 				new TGLayoutHints(kLHintsNormal,0,0,-2,0));
@@ -1729,7 +1723,9 @@ void AAInterface::SaveSettings()
     TheSettings->ChZSPosLogic[ch] = DGChZSPosLogic_RB[ch]->IsDown();
     TheSettings->ChZSNegLogic[ch] = DGChZSNegLogic_RB[ch]->IsDown();
   }
-
+  
+  TheSettings->HorizontalSliderPtr = DisplayHorizontalScale_THS->GetPointerPosition();
+  
   float Min, Max;
   
   DisplayHorizontalScale_THS->GetPosition(Min, Max);
@@ -1779,10 +1775,11 @@ void AAInterface::SaveSettings()
 
   TheSettings->SpectrumPulseHeight = SpectrumPulseHeight_RB->IsDown();
   TheSettings->SpectrumPulseArea = SpectrumPulseArea_RB->IsDown();
-  
+
+  TheSettings->LDEnable = SpectrumLDEnable_CB->IsDown();
   TheSettings->SpectrumLLD = SpectrumLLD_NEL->GetEntry()->GetIntNumber();
   TheSettings->SpectrumULD = SpectrumULD_NEL->GetEntry()->GetIntNumber();
-  TheSettings->LDEnable = SpectrumLDTrigger_CB->IsDown();
+  TheSettings->LDTrigger = SpectrumLDTrigger_CB->IsDown();
 
   TheSettings->LDChannel = SpectrumLDTriggerChannel_CBL->GetComboBox()->GetSelected();
   
@@ -1841,7 +1838,8 @@ void AAInterface::SaveSettings()
     TheSettings->SpectrumPulseHeight = SpectrumPulseHeight_RB->IsDisabledAndSelected();
     TheSettings->SpectrumPulseArea = SpectrumPulseArea_RB->IsDisabledAndSelected();
 
-    TheSettings->LDEnable = SpectrumLDTrigger_CB->IsDisabledAndSelected();
+    TheSettings->LDEnable = SpectrumLDEnable_CB->IsDown();
+    TheSettings->LDTrigger = SpectrumLDTrigger_CB->IsDisabledAndSelected();
 
     TheSettings->SpectrumCalibrationEnable = SpectrumCalibration_CB->IsDisabledAndSelected();
     TheSettings->SpectrumCalibrationUseSlider = SpectrumUseCalibrationSlider_CB->IsDisabledAndSelected();

@@ -167,6 +167,7 @@ enum{
 
   SpectrumPulseHeight_RB_ID,
   SpectrumPulseArea_RB_ID,
+  SpectrumLDEnable_CB_ID,
   SpectrumLLD_NEL_ID,
   SpectrumULD_NEL_ID,
   SpectrumLDTrigger_CB_ID,

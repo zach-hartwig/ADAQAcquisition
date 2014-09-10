@@ -404,13 +404,13 @@ void AASubtabSlots::HandleTextButtons()
 			       "ADAQ ROOT file","*.root",
 			       0, 0};
 
-    string FileName = TI->CreateFileDialog(FileTypes, kFDOpen);
-
-    if(FileName == "NULL"){
+    WaveformFileName = TI->CreateFileDialog(FileTypes, kFDOpen);
+    
+    if(WaveformFileName == "NULL"){
     }
     else{
-      string FileNameNoPath = FileName;
-
+      string FileNameNoPath = WaveformFileName;
+      
       size_t Found = FileNameNoPath.find_last_of("/");
       if(Found != string::npos)
 	FileNameNoPath = FileNameNoPath.substr(Found+1, FileNameNoPath.size());
@@ -424,11 +424,7 @@ void AASubtabSlots::HandleTextButtons()
 
   case WaveformCreateFile_TB_ID:{
 
-    string FileName = TI->WaveformFileName_TEL->GetEntry()->GetText();
-
-    cout << FileName << endl;
-
-    AAAcquisitionManager::GetInstance()->CreateADAQFile(FileName);
+    AAAcquisitionManager::GetInstance()->CreateADAQFile(WaveformFileName);
    
     // Set widget states appropriately
 
@@ -463,17 +459,17 @@ void AASubtabSlots::HandleTextButtons()
     
     // Set the allowable file type extensions. These will be used to
     // determine the format of the data output to file
-    const char *FileTypes[] = {"Space-separated format", ".dat",
-			       "Comma-separated format", ".csv",
-			       "ROOT File"             , ".root",
+    const char *FileTypes[] = {"Space-separated format", "*.dat",
+			       "Comma-separated format", "*.csv",
+			       "ROOT File"             , "*.root",
 			       0, 0};
-
-    string FileName = TI->CreateFileDialog(FileTypes, kFDOpen);
-
-    if(FileName == "NULL"){
+    
+    SpectrumFileName = TI->CreateFileDialog(FileTypes, kFDOpen);
+    
+    if(SpectrumFileName == "NULL"){
     }
     else{
-      string FileNameNoPath = FileName;
+      string FileNameNoPath = SpectrumFileName;
       
       size_t Found = FileNameNoPath.find_last_of("/");
       if(Found != string::npos)
@@ -486,14 +482,12 @@ void AASubtabSlots::HandleTextButtons()
 
     
   case SpectrumSave_TB_ID:{
+    
+    AAAcquisitionManager::GetInstance()->SaveSpectrum(SpectrumFileName);
 
-    string FileName = TI->SpectrumFileName_TEL->GetEntry()->GetText();
-    
-    AAAcquisitionManager::GetInstance()->SaveSpectrum(FileName);
-    
     break;
   }
-
+    
     
   case CanvasFileName_TB_ID:{
     
@@ -504,20 +498,18 @@ void AASubtabSlots::HandleTextButtons()
 			       "JPEG file", "*.jpeg",
 			       0, 0};
 
-    string FileName = TI->CreateFileDialog(FileTypes, kFDOpen);
-
-    if(FileName == "NULL"){
+    CanvasFileName = TI->CreateFileDialog(FileTypes, kFDOpen);
+    
+    if(CanvasFileName == "NULL"){
     }
     else{
-      string FileNameNoPath = FileName;
+      string FileNameNoPath = CanvasFileName;
       
       size_t Found = FileNameNoPath.find_last_of("/");
       if(Found != string::npos)
 	FileNameNoPath = FileNameNoPath.substr(Found+1, FileNameNoPath.size());
       
       TI->CanvasFileName_TEL->GetEntry()->SetText(FileNameNoPath.c_str());
-
-      // NEED TO SET ABSOLUTE FILE NAME IN AAGRAPHICS
     }
 
     break;
@@ -526,27 +518,30 @@ void AASubtabSlots::HandleTextButtons()
     
   case CanvasSave_TB_ID:{
 
-    // NEED TO GET ABSOLUTE FILE NAME FROM AAGRAPHICS
-    // NEED TO GET FILE EXTENSION TYPE / GRAPHICS TYPE
+    size_t Found = CanvasFileName.find_last_of(".");
 
-    string FileName = "Hello.pdf";
-    string FileType = "pdf";
-          
-    if(TI->CanvasSaveWithTimeExtension_CB->IsDown()){
-      time_t CurrentTime = time(NULL);
+    if(Found != string::npos){
 
-      stringstream SS;
-      SS << "." << CurrentTime;
-      string CurrentTimeString = SS.str();
-
-      FileName = FileName + CurrentTimeString;
+      string FileExtension = CanvasFileName.substr(Found, string::npos);
+      
+      if(TI->CanvasSaveWithTimeExtension_CB->IsDown()){
+	time_t Time = time(NULL);
+	
+	stringstream SS;
+	SS << "." << Time;
+	string TimeString = SS.str();
+	
+	CanvasFileName.insert(Found, TimeString);
+      }
+      
+      TI->DisplayCanvas_EC->GetCanvas()->Print(CanvasFileName.c_str(),
+					       FileExtension.substr(1).c_str());
     }
-    
-    TI->DisplayCanvas_EC->GetCanvas()->Print(FileName.c_str(), FileType.c_str());
     break;
   }
   }
 }
+
   
 
 void AASubtabSlots::HandleRadioButtons()

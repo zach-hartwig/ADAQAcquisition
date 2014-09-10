@@ -105,4 +105,15 @@ void AADisplaySlots::HandleDoubleSliders()
 
 
 void AADisplaySlots::HandleSliderPointers()
-{}
+{
+  TI->SaveSettings();
+  
+  if(TI->TheSettings->SpectrumMode and 
+     TI->TheSettings->SpectrumCalibrationEnable){
+    
+    double Max = TI->TheSettings->SpectrumMaxBin;
+    double Pos = TI->DisplayHorizontalScale_THS->GetPointerPosition();
+    
+    TI->SpectrumCalibrationPulseUnit_NEL->GetEntry()->SetNumber(Max*Pos);
+  }
+}

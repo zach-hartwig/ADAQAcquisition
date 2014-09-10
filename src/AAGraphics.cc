@@ -178,6 +178,30 @@ void AAGraphics::PlotWaveforms(vector<vector<Short_t> > &Waveforms,
 }
 
 
+void AAGraphics::SetupSpectrumGraphics()
+{
+  if(TheSettings->DisplayTitlesEnable){
+    Title = TheSettings->DisplayTitle;
+    XTitle = TheSettings->DisplayXTitle;
+    YTitle = TheSettings->DisplayYTitle;
+    
+    XSize = TheSettings->DisplayXTitleSize;
+    XOffset = TheSettings->DisplayXTitleOffset;
+
+    YSize = TheSettings->DisplayYTitleSize;
+    YOffset = TheSettings->DisplayYTitleOffset;
+  }
+  else{
+    Title = "Pulse spectrum";
+    XTitle = "Pulse value [ADC]";
+    YTitle = "Counts";
+    
+    XSize = YSize = 0.05;
+    XOffset = 1.1;
+    YOffset = 1.2;
+  }
+}
+
 
 void AAGraphics::PlotSpectrum(vector<TH1F *> &Spectrum_H)
 {
@@ -201,6 +225,17 @@ void AAGraphics::PlotSpectrum(vector<TH1F *> &Spectrum_H)
   YMax = AbsoluteMax * TheSettings->VerticalSliderMax;
   //  Spectrum_H[Channel]->SetMinimum(YMin);
   //  Spectrum_H[Channel]->SetMaximum(YMax);
+
+  if(TheSettings->SpectrumCalibrationEnable){
+    
+    double PulseValue = TheSettings->SpectrumMaxBin *
+      TheSettings->HorizontalSliderPtr;
+    
+    SpectrumCalibration_L->DrawLine(PulseValue,
+				    YMin,
+				    PulseValue,
+				    YMax);
+  }
 
   TheCanvas_C->Update();
 }

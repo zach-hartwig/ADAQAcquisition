@@ -236,6 +236,7 @@ private:
 
   TGRadioButton *SpectrumPulseHeight_RB;
   TGRadioButton *SpectrumPulseArea_RB;
+  TGCheckButton *SpectrumLDEnable_CB;
   ADAQNumberEntryWithLabel *SpectrumLLD_NEL;
   ADAQNumberEntryWithLabel *SpectrumULD_NEL;
   TGCheckButton *SpectrumLDTrigger_CB;

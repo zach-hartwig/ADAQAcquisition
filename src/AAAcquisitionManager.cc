@@ -49,7 +49,7 @@ AAAcquisitionManager::AAAcquisitionManager()
     CalibrationCurves.push_back(new TGraph);
     
     Spectrum_H.push_back(new TH1F);
-    SpectrumExists.push_back(false);
+    SpectrumExists.push_back(true);
   }
 }
 
@@ -108,8 +108,10 @@ void AAAcquisitionManager::PreAcquisition()
 
   for(int ch=0; ch<DGChannels; ch++){
     
-    if(SpectrumExists[ch]) 
+    if(SpectrumExists[ch]) {
       delete Spectrum_H[ch];
+      SpectrumExists[ch] = false;
+    }
     else 
       continue;
     
@@ -122,14 +124,17 @@ void AAAcquisitionManager::PreAcquisition()
 			      TheSettings->SpectrumNumBins,
 			      TheSettings->SpectrumMinBin,
 			      TheSettings->SpectrumMaxBin);
-    
+
     SpectrumExists[ch] = true;
   }
   
   // GraphicsManager settings
+
   if(TheSettings->WaveformMode)
     AAGraphics::GetInstance()->SetupWaveformGraphics(WaveformLength);
-  
+  else if(TheSettings->SpectrumMode)
+    AAGraphics::GetInstance()->SetupSpectrumGraphics();
+	
   // Initialize CAEN digitizer readout data for acquisition
 
   EventPointer = NULL;
@@ -287,28 +292,35 @@ void AAAcquisitionManager::StartAcquisition()
 	  
 	  // Pulse height spectrum
 	  if(TheSettings->SpectrumPulseHeight){
-	    if(PulseHeight > LLD and PulseHeight < ULD){
-	      Spectrum_H[ch]->Fill(PulseHeight);
-	      
-	      if(TheSettings->LDEnable and ch == TheSettings->LDChannel)
-		FillWaveformTree = true;
+
+	    if(TheSettings->LDEnable){
+	      if(PulseHeight > LLD and PulseHeight < ULD)
+		Spectrum_H[ch]->Fill(PulseHeight);
 	    }
+	    else
+	      Spectrum_H[ch]->Fill(PulseHeight);
+	    
+	    if(TheSettings->LDTrigger and ch == TheSettings->LDChannel)
+	      FillWaveformTree = true;
 	  }
 	  
 	  // Pulse area spectrum
 	  else{
-	    if(PulseArea > LLD and PulseArea < ULD){
-	      Spectrum_H[ch]->Fill(PulseArea);
-	      
-	      if(TheSettings->LDEnable and ch == TheSettings->LDChannel)
-		FillWaveformTree = true;
+	    if(TheSettings->LDEnable){
+	      if(PulseArea > LLD and PulseArea < ULD)
+		Spectrum_H[ch]->Fill(PulseArea);
 	    }
+	    else
+	      Spectrum_H[ch]->Fill(PulseArea);
+	      	      
+	    if(TheSettings->LDTrigger and ch == TheSettings->LDChannel)
+	      FillWaveformTree = true;
 	  }
 	}
       }
       
       if(TheSettings->WaveformStorageEnable){
-
+	
 	// If the user has specified that the LLD/ULD should be used
 	// as the "trigger" (for plotting the PAS/PHS and writing to a
 	// ROOT file) but the present waveform is NOT within the
@@ -359,35 +371,6 @@ void AAAcquisitionManager::StopAcquisition()
     CloseADAQFile();
 }
 
-/*
-  int LowestEnabledChannel = 0;
-  uint32_t LowestChannelMask = 0x1;
-  while(!(ChannelEnableMask & LowestChannelMask)){
-  LowestChannelMask <<= 1;
-  LowestEnabledChannel++;
-  }
-*/
-
-
-  ///////////////////////////////////////////////////
-  // V1720 digitizer acquisition and data plotting //
-  ///////////////////////////////////////////////////
-  // The following loops reads digitized data from the digitizers into
-  // local PC memory, principally as arrays of voltage versus time (or
-  // sample). To maximize data throughput, the following loop should
-  // be be as efficient as possible. The highest data throughput rate
-  // will be achieved when neither the waveform or spectrum is plotted
-  // (ie, DGScope is in "blank" mode), but an effort is made to
-  // streamline the loop as much as possible
-
-  // The following terminology is important:
-  // V1720 buffer == the memory buffer onboard the FPGA of the V1720 board
-  // PC buffer == the memory buffer allocated locally on the PC
-  // Event == an acquisition window caused by a channel trigger threshold being exceeded
-  // NumEvents == the number of events that is allowed to accumulate on the V1720 buffer
-  //              before being automatically readout into the PC buffer
-  // Record Length == the length of the acquisition window in 4 ns units
-  // Sample ==  a single value between 0 and 4095 of digitized voltage
 
 void AAAcquisitionManager::SaveSpectrum(string FileName)
 {
@@ -439,58 +422,15 @@ void AAAcquisitionManager::SaveSpectrum(string FileName)
       // Close the ofstream object
       SpectrumOutput.close();
     }
+    else if(FileExtension == ".root"){
+      TFile *SpectrumOutput = new TFile(FileName.c_str(), "recreate");
+      Spectrum_H[Channel]->Write("Spectrum");
+      SpectrumOutput->Close();
+    }
     else{
-      //CreateMessageBox("Unacceptable file extension for the spectrum data file! Valid extensions are '.dat' and '.csv'!","Stop");
-      return;
     }
   }
 }
-
-
-
-// Method to generate a standard detector-esque artificial waveoforms
-// to be used in debugging mode when waveforms from the DAQ are not
-// available. Method receives the record length of the acquisition
-// window and a reference to the being-processed data channel in order
-// to fill the channel data with the artificial waveform data. The
-// artificial waveform has a quick rise time and longer decay tail,
-// which are randomly varied to mimick data acquisition.
-/*
-void AAInterface::GenerateArtificialWaveform(int RecordLength, vector<int> &Voltage, 
-						 double *Voltage_graph, double VerticalPosition)
-{
-  // Exponential time constants with small random variations
-  const double t1 = 20. - (RNG->Rndm()*10);
-  const double t2 = 80. - (RNG->Rndm()*40);;
-  
-  // The waveform amplitude with small random variations
-  const double a = RNG->Rndm() * 30;
-  
-  // Set an artificial baseline for the pulse
-  const double b = 3200;
-  
-  // Set an artifical polarity for the pulse
-  const double p = -1.0;
-  
-  // Set the number of leading zeros before the waveform begins with
-  // small random variations
-  const int NumLeadingSamples = 100;
-  
-  // Fill the Voltage vector with the artificial waveform
-  for(int sample=0; sample<RecordLength; sample++){
-    
-    if(sample < NumLeadingSamples){
-      Voltage[sample] = b + VerticalPosition;
-      Voltage_graph[sample] = b + VerticalPosition;
-    }
-    else{
-      double t = (sample - NumLeadingSamples)*1.0;
-      Voltage[sample] = (p * (a * (t1-t2) * (exp(-t/t1)-exp(-t/t2)))) + b + VerticalPosition;
-      Voltage_graph[sample] = Voltage[sample];
-    }
-  }
-}
-*/
 
 
 bool AAAcquisitionManager::AddCalibrationPoint(int Channel, int SetPoint,
@@ -700,3 +640,52 @@ void AAAcquisitionManager::CloseADAQFile()
     
   ADAQFileIsOpen = false;
 }
+
+
+/*
+void AAInterface::GenerateArtificialWaveform(int RecordLength, vector<int> &Voltage, 
+						 double *Voltage_graph, double VerticalPosition)
+{
+  // Exponential time constants with small random variations
+  const double t1 = 20. - (RNG->Rndm()*10);
+  const double t2 = 80. - (RNG->Rndm()*40);;
+  
+  // The waveform amplitude with small random variations
+  const double a = RNG->Rndm() * 30;
+  
+  // Set an artificial baseline for the pulse
+  const double b = 3200;
+  
+  // Set an artifical polarity for the pulse
+  const double p = -1.0;
+  
+  // Set the number of leading zeros before the waveform begins with
+  // small random variations
+  const int NumLeadingSamples = 100;
+  
+  // Fill the Voltage vector with the artificial waveform
+  for(int sample=0; sample<RecordLength; sample++){
+    
+    if(sample < NumLeadingSamples){
+      Voltage[sample] = b + VerticalPosition;
+      Voltage_graph[sample] = b + VerticalPosition;
+    }
+    else{
+      double t = (sample - NumLeadingSamples)*1.0;
+      Voltage[sample] = (p * (a * (t1-t2) * (exp(-t/t1)-exp(-t/t2)))) + b + VerticalPosition;
+      Voltage_graph[sample] = Voltage[sample];
+    }
+  }
+}
+*/
+
+
+
+/*
+  int LowestEnabledChannel = 0;
+  uint32_t LowestChannelMask = 0x1;
+  while(!(ChannelEnableMask & LowestChannelMask)){
+  LowestChannelMask <<= 1;
+  LowestEnabledChannel++;
+  }
+*/
