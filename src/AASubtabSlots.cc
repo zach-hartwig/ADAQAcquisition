@@ -206,20 +206,20 @@ void AASubtabSlots::HandleTextButtons()
     if(ActiveButton->GetString() == "Start timer"){
       
       // Set the graphical attributes of the text button
-      ActiveButton->SetBackgroundColor(TI->ColorManager->Number2Pixel(8));
-      ActiveButton->SetForegroundColor(TI->ColorManager->Number2Pixel(1));
+      ActiveButton->SetBackgroundColor(TI->ColorManager->Number2Pixel(kGreen+2));
+      ActiveButton->SetForegroundColor(TI->ColorManager->Number2Pixel(kWhite));
       ActiveButton->SetText("Waiting ...");
       
       // Get the start time (i.e. now)
       TheACQManager->SetAcquisitionTimeStart(time(NULL));
-
+      
       // Get the stop time (i.e. amount of time to run in seconds)
       TheACQManager->SetAcquisitionTimeStop(TI->AQTime_NEL->GetEntry()->GetNumber());
       
       // Set the bool that will trigger the check of the timer against
       // the current time within the acquisition loop in RunDGScope()
       TheACQManager->SetAcquisitionTimerEnable(true);
-
+      
       // Configure such that when an ADAQ file has been opened and the
       // AQ timer is running waveform data is being stored
       if(TheACQManager->GetADAQFileIsOpen())
@@ -227,7 +227,7 @@ void AASubtabSlots::HandleTextButtons()
     }
     break;
   }
-
+    
     
   case AQTimerAbort_TB_ID:{
     if(TheACQManager->GetAcquisitionEnable() and
@@ -297,8 +297,7 @@ void AASubtabSlots::HandleTextButtons()
     
     if(CalibrationEnable){
       TI->SpectrumCalibrationCalibrate_TB->SetText("Calibrated");
-      TI->SpectrumCalibrationCalibrate_TB->SetForegroundColor(TI->ColorManager->Number2Pixel(1));
-      TI->SpectrumCalibrationCalibrate_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(8));
+      TI->SpectrumCalibrationCalibrate_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(kGreen+2));
     }
     else
       {}
@@ -338,7 +337,6 @@ void AASubtabSlots::HandleTextButtons()
       TI->SpectrumCalibrationPulseUnit_NEL->GetEntry()->SetNumber(1.0);
 
       TI->SpectrumCalibrationCalibrate_TB->SetText("Calibrate");
-      TI->SpectrumCalibrationCalibrate_TB->SetForegroundColor(TI->ColorManager->Number2Pixel(1));
       TI->SpectrumCalibrationCalibrate_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(18));
     }
     else
@@ -433,7 +431,7 @@ void AASubtabSlots::HandleTextButtons()
     // Set widget states appropriately
 
     TI->WaveformCreateFile_TB->SetState(kButtonDisabled);
-    TI->WaveformCreateFile_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(8));
+    TI->WaveformCreateFile_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(kGreen+2));
     TI->WaveformCreateFile_TB->SetText("ADAQ file created");
     TI->WaveformCloseFile_TB->SetState(kButtonUp);
     TI->WaveformStorageEnable_CB->SetState(kButtonUp);

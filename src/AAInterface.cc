@@ -47,7 +47,7 @@ using namespace boost::assign;
 
 AAInterface::AAInterface()
   : TGMainFrame(gClient->GetRoot()),
-    DisplayWidth(1100), DisplayHeight(840), 
+    DisplayWidth(1124), DisplayHeight(833), 
     NumDataChannels(8), ColorManager(new TColor), NumVMEBoards(3)
 {
   // Allow environmental variable to control small version of GUI
@@ -131,12 +131,14 @@ AAInterface::AAInterface()
   ////////////////////////////////////////
   // Create each of the top-level frame //
   ////////////////////////////////////////
+
   CreateTopLevelFrames();
 
   
   ///////////////////////////////////////
   // Fill each of the top-level frames //
   ///////////////////////////////////////
+
   FillConnectionFrame();
   FillRegisterFrame();
   FillPulserFrame();
@@ -147,7 +149,6 @@ AAInterface::AAInterface()
   ///////////////////////////////////////////
   // Set manager pointers for later access //
   ///////////////////////////////////////////
-
 
   TheVMEManager->SetSettingsPointer(TheSettings);
   
@@ -193,10 +194,11 @@ AAInterface::~AAInterface()
 
 void AAInterface::CreateTopLevelFrames()
 {
-  TGCanvas *TopFrame_C = new TGCanvas(this, DisplayWidth, DisplayHeight);
-  AddFrame(TopFrame_C, new TGLayoutHints(kLHintsCenterX));
+  TGCanvas *TopFrame_C = new TGCanvas(this, DisplayWidth, DisplayHeight, kRaisedFrame);
+  AddFrame(TopFrame_C, new TGLayoutHints(kLHintsCenterX, 40,0,0,0));
 
   TopFrame = new TGVerticalFrame(TopFrame_C->GetViewPort(), DisplayWidth, DisplayHeight);
+  TopFrame->SetBackgroundColor(ColorManager->Number2Pixel(22));
   TopFrame_C->SetContainer(TopFrame);
 
 
@@ -205,9 +207,9 @@ void AAInterface::CreateTopLevelFrames()
   ///////////////
   
   TGHorizontalFrame *TabFrame = new TGHorizontalFrame(TopFrame);
-  TabFrame->SetBackgroundColor(ColorManager->Number2Pixel(15));
+  TabFrame->SetBackgroundColor(ColorManager->Number2Pixel(22));
   
-  TopLevelTabs = new TGTab(TabFrame, 800, 700);
+  TopLevelTabs = new TGTab(TabFrame);
   
   ConnectionTab = TopLevelTabs->AddTab(" VME Connection ");
   ConnectionFrame = new TGCompositeFrame(ConnectionTab, 60, 20, kVerticalFrame);
@@ -226,7 +228,9 @@ void AAInterface::CreateTopLevelFrames()
   VoltageTab->AddFrame(VoltageFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 5,5,5,5));
 
   AcquisitionTab = TopLevelTabs->AddTab(" Acquisition ");
+  AcquisitionTab->SetBackgroundColor(ColorManager->Number2Pixel(22));
   AcquisitionFrame = new TGCompositeFrame(AcquisitionTab, 60, 20, kHorizontalFrame);
+  AcquisitionFrame->SetBackgroundColor(ColorManager->Number2Pixel(22));
   AcquisitionTab->AddFrame(AcquisitionFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 5,5,5,5));
 
   TabFrame->AddFrame(TopLevelTabs, new TGLayoutHints(kLHintsTop, 5,5,5,5));
@@ -236,8 +240,10 @@ void AAInterface::CreateTopLevelFrames()
   // Add top level frames to the main frame //
   ////////////////////////////////////////////
   
-  TopFrame->AddFrame(TabFrame, new TGLayoutHints(kLHintsTop, 5,5,5,5));
-  AddFrame(TopFrame, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+  TopFrame->AddFrame(TabFrame, new TGLayoutHints(kLHintsCenterX, 35,5,5,5));
+
+  AddFrame(TopFrame, new TGLayoutHints(kLHintsCenterX, 0,0,0,0));
+  SetBackgroundColor(ColorManager->Number2Pixel(22));
 }
 
 
@@ -253,7 +259,8 @@ void AAInterface::FillConnectionFrame()
 			    new TGLayoutHints(kLHintsExpandX, 5,5,25,5));
   VMEConnect_TB->Connect("Clicked()", "AATabSlots", TabSlots, "HandleConnectionTextButtons()");
   VMEConnect_TB->Resize(500,40);
-  VMEConnect_TB->SetBackgroundColor(ColorManager->Number2Pixel(2));
+  VMEConnect_TB->SetBackgroundColor(ColorManager->Number2Pixel(kRed+1));
+  VMEConnect_TB->SetForegroundColor(ColorManager->Number2Pixel(kWhite));
   VMEConnect_TB->ChangeOptions(VMEConnect_TB->GetOptions() | kFixedSize);
 
   // A text view window to capture/display std::cout information
@@ -317,7 +324,8 @@ void AAInterface::FillConnectionFrame()
     BoardEnable_TB.push_back(new TGTextButton(BoardAddress_VF, "Board enabled", BoardEnableID[board]));
     BoardEnable_TB[board]->Connect("Clicked()", "AATabSlots", TabSlots, "HandleConnectionTextButtons()");
     BoardEnable_TB[board]->Resize(110,25);
-    BoardEnable_TB[board]->SetBackgroundColor(ColorManager->Number2Pixel(8));
+    BoardEnable_TB[board]->SetBackgroundColor(ColorManager->Number2Pixel(kGreen+2));
+    BoardEnable_TB[board]->SetForegroundColor(ColorManager->Number2Pixel(kWhite));
     BoardEnable_TB[board]->ChangeOptions(BoardEnable_TB[board]->GetOptions() | kFixedSize);
     BoardAddress_VF->AddFrame(BoardEnable_TB[board], new TGLayoutHints(kLHintsCenterX));
 
@@ -333,17 +341,17 @@ void AAInterface::FillConnectionFrame()
 
   if(!TheVMEManager->GetBREnable()){
     BoardEnable_TB[V1718]->SetText("Board disabled");
-    BoardEnable_TB[V1718]->SetBackgroundColor(ColorManager->Number2Pixel(2));
+    BoardEnable_TB[V1718]->SetBackgroundColor(ColorManager->Number2Pixel(kRed+1));
   }
 
   if(!TheVMEManager->GetDGEnable()){
     BoardEnable_TB[V1720]->SetText("Board disabled");
-    BoardEnable_TB[V1720]->SetBackgroundColor(ColorManager->Number2Pixel(2));
+    BoardEnable_TB[V1720]->SetBackgroundColor(ColorManager->Number2Pixel(kRed+1));
   }
 
   if(!TheVMEManager->GetHVEnable()){
     BoardEnable_TB[V6534]->SetText("Board disabled");
-    BoardEnable_TB[V6534]->SetBackgroundColor(ColorManager->Number2Pixel(2));
+    BoardEnable_TB[V6534]->SetBackgroundColor(ColorManager->Number2Pixel(kRed+1));
   }
 }
 
@@ -682,7 +690,7 @@ void AAInterface::FillVoltageFrame()
     HVChPower_TB[ch]->SetToolTipText("Engage high voltage!");
     HVChPower_TB[ch]->Resize(110,50);
     HVChPower_TB[ch]->ChangeOptions(HVChPower_TB[ch]->GetOptions() | kFixedSize);
-    HVChPower_TB[ch]->SetBackgroundColor(ColorManager->Number2Pixel(2));
+    HVChPower_TB[ch]->SetBackgroundColor(ColorManager->Number2Pixel(kRed+1));
     HVChPower_TB[ch]->SetForegroundColor(ColorManager->Number2Pixel(1));
     
     // Modify the widget background to distinguish the negative voltage 
@@ -716,7 +724,7 @@ void AAInterface::FillAcquisitionFrame()
   // be used to view all channel widgets in a smalle frame. Pro'n'shit
   // if I do say so myself. And I do.
 
-  TGCanvas *DGChannelControls_C = new TGCanvas(AcquisitionFrame,300,100,kSunkenFrame);
+  TGCanvas *DGChannelControls_C = new TGCanvas(AcquisitionFrame,300,100,kRaisedFrame);
   AcquisitionFrame->AddFrame(DGChannelControls_C, new TGLayoutHints(kLHintsExpandX | kLHintsExpandY));
   
   TGVerticalFrame *DGChannelControls_VF = new TGVerticalFrame(DGChannelControls_C->GetViewPort(),10,10);
@@ -851,22 +859,24 @@ void AAInterface::FillAcquisitionFrame()
 
   TGVerticalFrame *DGDisplayAndControls_VF = new TGVerticalFrame(AcquisitionFrame);
   
-  TGGroupFrame *DGScopeDisplay_GF = new TGGroupFrame(DGDisplayAndControls_VF, "Multipurpose Display", kVerticalFrame);
-  DGScopeDisplay_GF->SetTitlePos(TGGroupFrame::kCenter);
+  TGVerticalFrame *Display_VF = new TGVerticalFrame(DGDisplayAndControls_VF);
+  Display_VF->SetBackgroundColor(ColorManager->Number2Pixel(22));
   
-  TGHorizontalFrame *DGScopeDisplayAndSlider_HF = new TGHorizontalFrame(DGScopeDisplay_GF);
-  DGScopeDisplay_GF->AddFrame(DGScopeDisplayAndSlider_HF, new TGLayoutHints(kLHintsNormal,0,0,5,0));
+  TGHorizontalFrame *DGScopeDisplayAndSlider_HF = new TGHorizontalFrame(Display_VF);
+  DGScopeDisplayAndSlider_HF->SetBackgroundColor(ColorManager->Number2Pixel(22));
+  Display_VF->AddFrame(DGScopeDisplayAndSlider_HF, new TGLayoutHints(kLHintsNormal,0,0,5,0));
 
   // ROOT double slider for control of the min/max of vertical axis, ie, zoom
-  DGScopeDisplayAndSlider_HF->AddFrame(DisplayVerticalScale_DVS = new TGDoubleVSlider(DGScopeDisplayAndSlider_HF, 400, kDoubleScaleBoth, DisplayVerticalScale_DVS_ID, kVerticalFrame, ColorManager->Number2Pixel(17),true,false),
-				       new TGLayoutHints(kLHintsNormal, 0, 0, 5, 0));
+  DGScopeDisplayAndSlider_HF->AddFrame(DisplayVerticalScale_DVS = new TGDoubleVSlider(DGScopeDisplayAndSlider_HF, 430, kDoubleScaleBoth, DisplayVerticalScale_DVS_ID, kVerticalFrame, ColorManager->Number2Pixel(17),true,false),
+				       new TGLayoutHints(kLHintsNormal, 0, 0, 0, 0));
   DisplayVerticalScale_DVS->SetRange(0,1);
   DisplayVerticalScale_DVS->SetPosition(0,1);
+  DisplayVerticalScale_DVS->SetBackgroundColor(ColorManager->Number2Pixel(18));
   DisplayVerticalScale_DVS->Connect("PositionChanged()", "AADisplaySlots", DisplaySlots, "HandleDoubleSliders()");
   
   // ROOT embdedded canvas for display of waveforms and spectra
-  DGScopeDisplayAndSlider_HF->AddFrame(DisplayCanvas_EC = new TRootEmbeddedCanvas("DisplayCanvas_EC", DGScopeDisplayAndSlider_HF, 650, 400),
-				       new TGLayoutHints(kLHintsCenterX, 5,5,0,0));
+  DGScopeDisplayAndSlider_HF->AddFrame(DisplayCanvas_EC = new TRootEmbeddedCanvas("DisplayCanvas_EC", DGScopeDisplayAndSlider_HF, 670, 430),
+				       new TGLayoutHints(kLHintsCenterX, 0,0,0,0));
   DisplayCanvas_EC->GetCanvas()->SetFillColor(0);
   DisplayCanvas_EC->GetCanvas()->SetFrameFillColor(0);
   DisplayCanvas_EC->GetCanvas()->SetGrid(true, true);
@@ -881,17 +891,19 @@ void AAInterface::FillAcquisitionFrame()
   // slider is used for graphical valibration of the pulse height
   // spectrum when DGScope is set to "calibration mode" while
   // acquiring data in "spectrum mode"
-  DGScopeDisplay_GF->AddFrame(DisplayHorizontalScale_THS = new TGTripleHSlider(DGScopeDisplay_GF, 650, kDoubleScaleBoth, DisplayHorizontalScale_THS_ID, kVerticalFrame, ColorManager->Number2Pixel(17)),
-			      new TGLayoutHints(kLHintsRight, 5, 5, 5, 5));
+  Display_VF->AddFrame(DisplayHorizontalScale_THS = new TGTripleHSlider(Display_VF, 670, kDoubleScaleBoth, DisplayHorizontalScale_THS_ID, kVerticalFrame, ColorManager->Number2Pixel(17)),
+		       new TGLayoutHints(kLHintsRight, 5, 0, 0, 5));
   DisplayHorizontalScale_THS->SetRange(0,1);
   DisplayHorizontalScale_THS->SetPosition(0,1);
   DisplayHorizontalScale_THS->SetPointerPosition(0.5);
+  DisplayHorizontalScale_THS->SetBackgroundColor(ColorManager->Number2Pixel(18));
   DisplayHorizontalScale_THS->Connect("PositionChanged()", "AADisplaySlots", DisplaySlots, "HandleDoubleSliders()");
   DisplayHorizontalScale_THS->Connect("PointerPositionChanged()", "AADisplaySlots", DisplaySlots, "HandleSliderPointers()");
   
 
-  TGHorizontalFrame *DGScopeDisplayButtons_HF = new TGHorizontalFrame(DGScopeDisplay_GF);
-  DGScopeDisplay_GF->AddFrame(DGScopeDisplayButtons_HF, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+  TGHorizontalFrame *DGScopeDisplayButtons_HF = new TGHorizontalFrame(Display_VF);
+  DGScopeDisplayButtons_HF->SetBackgroundColor(ColorManager->Number2Pixel(22));
+  Display_VF->AddFrame(DGScopeDisplayButtons_HF, new TGLayoutHints(kLHintsNormal, 0,0,5,0));
 
   // ROOT text button for starting/stopping data acquisition by the digitizer
   DGScopeDisplayButtons_HF->AddFrame(AQStartStop_TB = new TGTextButton(DGScopeDisplayButtons_HF, "Stopped", AQStartStop_TB_ID),
@@ -899,9 +911,9 @@ void AAInterface::FillAcquisitionFrame()
   AQStartStop_TB->Connect("Clicked()", "AADisplaySlots", DisplaySlots, "HandleTextButtons()");
   AQStartStop_TB->Resize(300,30);
   AQStartStop_TB->ChangeOptions(AQStartStop_TB->GetOptions() | kFixedSize);
-  AQStartStop_TB->SetBackgroundColor(ColorManager->Number2Pixel(2));
-  AQStartStop_TB->SetForegroundColor(ColorManager->Number2Pixel(1));
-
+  AQStartStop_TB->SetBackgroundColor(ColorManager->Number2Pixel(kRed+1));
+  AQStartStop_TB->SetForegroundColor(ColorManager->Number2Pixel(kWhite));
+  
 
   // ROOT text button for manually triggering of DGScope acquisition
   DGScopeDisplayButtons_HF->AddFrame(AQTrigger_TB = new TGTextButton(DGScopeDisplayButtons_HF, "Manual trigger", AQTrigger_TB_ID),
@@ -916,8 +928,8 @@ void AAInterface::FillAcquisitionFrame()
   DisplayUpdate_TB->ChangeOptions(DisplayUpdate_TB->GetOptions() | kFixedSize);
   DisplayUpdate_TB->Connect("Clicked()", "AADisplaySlots", DisplaySlots, "HandleTextButtons()");
 
-  TGHorizontalFrame *DGScopeDisplayControls_HF = new TGHorizontalFrame(DGScopeDisplay_GF);
-  DGScopeDisplay_GF->AddFrame(DGScopeDisplayControls_HF,
+  TGHorizontalFrame *DGScopeDisplayControls_HF = new TGHorizontalFrame(Display_VF);
+  Display_VF->AddFrame(DGScopeDisplayControls_HF,
 			      new TGLayoutHints(kLHintsCenterX,5,5,0,0));
 
   
@@ -1471,10 +1483,11 @@ void AAInterface::FillAcquisitionFrame()
   WaveformStorageEnable_CB->SetState(kButtonDisabled);
   
   
-  DGDisplayAndControls_VF->AddFrame(DGScopeDisplay_GF, new TGLayoutHints(kLHintsCenterX,5,5,5,5));
+  DGDisplayAndControls_VF->AddFrame(Display_VF, new TGLayoutHints(kLHintsCenterX,5,5,5,5));
   DGDisplayAndControls_VF->AddFrame(SubtabFrame, new TGLayoutHints(kLHintsCenterX,5,5,5,5));
 
-  AcquisitionFrame->AddFrame(DGDisplayAndControls_VF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
+  AcquisitionFrame->AddFrame(DGDisplayAndControls_VF, new TGLayoutHints(kLHintsNormal,5,5,0,10));
+  DGDisplayAndControls_VF->SetBackgroundColor(ColorManager->Number2Pixel(22));
 
 
   // Widgets for saving the spectrum data to file
@@ -1624,11 +1637,10 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
 
   // The following widgets have special settings depending on
   // the acquisition state
-
+  
   // Acquisition is turning ON
   if(WidgetState == false){
-    AQStartStop_TB->SetBackgroundColor(ColorManager->Number2Pixel(8));
-    AQStartStop_TB->SetForegroundColor(ColorManager->Number2Pixel(1));
+    AQStartStop_TB->SetBackgroundColor(ColorManager->Number2Pixel(kGreen+2));
     AQStartStop_TB->SetText("Acquiring");
     
     WaveformCreateFile_TB->SetState(kButtonUp);
@@ -1638,8 +1650,7 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
 
   // Acquisition is turning OFF
   else{
-    AQStartStop_TB->SetBackgroundColor(ColorManager->Number2Pixel(2));
-    AQStartStop_TB->SetForegroundColor(ColorManager->Number2Pixel(1));
+    AQStartStop_TB->SetBackgroundColor(ColorManager->Number2Pixel(kRed+1));
     AQStartStop_TB->SetText("Stopped");
 
     WaveformCreateFile_TB->SetState(kButtonDisabled);
@@ -1839,7 +1850,7 @@ void AAInterface::UpdateAQTimer(int TimeRemaining)
 
 void AAInterface::UpdateAfterAQTimerStopped(bool ROOTFileOpen)
 {
-  AQStartStop_TB->SetBackgroundColor(ColorManager->Number2Pixel(2));
+  AQStartStop_TB->SetBackgroundColor(ColorManager->Number2Pixel(kRed+1));
   AQStartStop_TB->SetForegroundColor(ColorManager->Number2Pixel(1));
   AQStartStop_TB->SetText("Stopped");
   
@@ -1847,6 +1858,7 @@ void AAInterface::UpdateAfterAQTimerStopped(bool ROOTFileOpen)
   
   // Reset the attributes of the timer start text button
   AQTimerStart_TB->SetBackgroundColor(ColorManager->Number2Pixel(18));
+  AQTimerStart_TB->SetForegroundColor(ColorManager->Number2Pixel(kBlack));
   AQTimerStart_TB->SetText("Start timer");
   
   WaveformCreateFile_TB->SetState(kButtonDisabled);
