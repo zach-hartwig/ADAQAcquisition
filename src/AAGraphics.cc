@@ -30,9 +30,9 @@ AAGraphics::AAGraphics()
 
   // Fill a vector with channel colors for plotting
   
-  ChColor += kBlue, kRed, kGreen+1, kYellow-3,
-    kOrange+7, kAzure+7, kViolet-5, kMagenta;
-
+  ChColor += kBlue, kViolet, kRed, kOrange, 
+    kYellow+1, kGreen+2, kCyan+2, kAzure+7;
+  
   // Initialize lines and boxes for plotting
 
   for(int ch=0; ch<8; ch++){
@@ -235,7 +235,7 @@ void AAGraphics::PlotSpectrum(TH1F *Spectrum_H)
   (TheSettings->DisplayXAxisInLog) ? 
     gPad->SetLogx(true) : gPad->SetLogx(false);
   
-  int AbsoluteMax = Spectrum_H->GetBinContent(Spectrum_H->GetMaximumBin());
+  int AbsoluteMax = Spectrum_H->GetBinContent(Spectrum_H->GetMaximumBin()) * 1.05;
   double YMin = AbsoluteMax * TheSettings->VerticalSliderMin;
   double YMax = AbsoluteMax * TheSettings->VerticalSliderMax;
   

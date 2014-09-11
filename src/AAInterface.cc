@@ -48,6 +48,7 @@ using namespace boost::assign;
 AAInterface::AAInterface()
   : TGMainFrame(gClient->GetRoot()),
     DisplayWidth(1124), DisplayHeight(833), 
+    ButtonForeColor(kWhite), ButtonBackColorOn(kGreen-5), ButtonBackColorOff(kRed-3),
     NumDataChannels(8), ColorManager(new TColor), NumVMEBoards(3)
 {
   // Allow environmental variable to control small version of GUI
@@ -199,6 +200,7 @@ void AAInterface::CreateTopLevelFrames()
 
   TopFrame = new TGVerticalFrame(TopFrame_C->GetViewPort(), DisplayWidth, DisplayHeight);
   TopFrame->SetBackgroundColor(ColorManager->Number2Pixel(22));
+
   TopFrame_C->SetContainer(TopFrame);
 
 
@@ -243,6 +245,7 @@ void AAInterface::CreateTopLevelFrames()
   TopFrame->AddFrame(TabFrame, new TGLayoutHints(kLHintsCenterX, 35,5,5,5));
 
   AddFrame(TopFrame, new TGLayoutHints(kLHintsCenterX, 0,0,0,0));
+
   SetBackgroundColor(ColorManager->Number2Pixel(22));
 }
 
@@ -259,7 +262,7 @@ void AAInterface::FillConnectionFrame()
 			    new TGLayoutHints(kLHintsExpandX, 5,5,25,5));
   VMEConnect_TB->Connect("Clicked()", "AATabSlots", TabSlots, "HandleConnectionTextButtons()");
   VMEConnect_TB->Resize(500,40);
-  VMEConnect_TB->SetBackgroundColor(ColorManager->Number2Pixel(kRed+1));
+  VMEConnect_TB->SetBackgroundColor(ColorManager->Number2Pixel(ButtonBackColorOff));
   VMEConnect_TB->SetForegroundColor(ColorManager->Number2Pixel(kWhite));
   VMEConnect_TB->ChangeOptions(VMEConnect_TB->GetOptions() | kFixedSize);
 
@@ -324,7 +327,7 @@ void AAInterface::FillConnectionFrame()
     BoardEnable_TB.push_back(new TGTextButton(BoardAddress_VF, "Board enabled", BoardEnableID[board]));
     BoardEnable_TB[board]->Connect("Clicked()", "AATabSlots", TabSlots, "HandleConnectionTextButtons()");
     BoardEnable_TB[board]->Resize(110,25);
-    BoardEnable_TB[board]->SetBackgroundColor(ColorManager->Number2Pixel(kGreen+2));
+    BoardEnable_TB[board]->SetBackgroundColor(ColorManager->Number2Pixel(ButtonBackColorOn));
     BoardEnable_TB[board]->SetForegroundColor(ColorManager->Number2Pixel(kWhite));
     BoardEnable_TB[board]->ChangeOptions(BoardEnable_TB[board]->GetOptions() | kFixedSize);
     BoardAddress_VF->AddFrame(BoardEnable_TB[board], new TGLayoutHints(kLHintsCenterX));
@@ -341,17 +344,17 @@ void AAInterface::FillConnectionFrame()
 
   if(!TheVMEManager->GetBREnable()){
     BoardEnable_TB[V1718]->SetText("Board disabled");
-    BoardEnable_TB[V1718]->SetBackgroundColor(ColorManager->Number2Pixel(kRed+1));
+    BoardEnable_TB[V1718]->SetBackgroundColor(ColorManager->Number2Pixel(ButtonBackColorOff));
   }
 
   if(!TheVMEManager->GetDGEnable()){
     BoardEnable_TB[V1720]->SetText("Board disabled");
-    BoardEnable_TB[V1720]->SetBackgroundColor(ColorManager->Number2Pixel(kRed+1));
+    BoardEnable_TB[V1720]->SetBackgroundColor(ColorManager->Number2Pixel(ButtonBackColorOff));
   }
 
   if(!TheVMEManager->GetHVEnable()){
     BoardEnable_TB[V6534]->SetText("Board disabled");
-    BoardEnable_TB[V6534]->SetBackgroundColor(ColorManager->Number2Pixel(kRed+1));
+    BoardEnable_TB[V6534]->SetBackgroundColor(ColorManager->Number2Pixel(ButtonBackColorOff));
   }
 }
 
@@ -623,7 +626,7 @@ void AAInterface::FillPulserFrame()
 
     PulserOutput_VF->AddFrame(V1718PulserStartStop_TB[pulser] = new TGTextButton(PulserOutput_VF, "Stopped", V1718PulserID[pulser]),
 			      new TGLayoutHints(kLHintsNormal, 5,5,20,5));
-    V1718PulserStartStop_TB[pulser]->SetBackgroundColor(ColorManager->Number2Pixel(kRed));
+    V1718PulserStartStop_TB[pulser]->SetBackgroundColor(ColorManager->Number2Pixel(ButtonBackColorOff));
     V1718PulserStartStop_TB[pulser]->Resize(200,40);
     V1718PulserStartStop_TB[pulser]->ChangeOptions(V1718PulserStartStop_TB[pulser]->GetOptions() | kFixedSize);
     V1718PulserStartStop_TB[pulser]->Connect("Pressed()", "AATabSlots", TabSlots, "HandlePulserTextButtons()");
@@ -690,8 +693,8 @@ void AAInterface::FillVoltageFrame()
     HVChPower_TB[ch]->SetToolTipText("Engage high voltage!");
     HVChPower_TB[ch]->Resize(110,50);
     HVChPower_TB[ch]->ChangeOptions(HVChPower_TB[ch]->GetOptions() | kFixedSize);
-    HVChPower_TB[ch]->SetBackgroundColor(ColorManager->Number2Pixel(kRed+1));
-    HVChPower_TB[ch]->SetForegroundColor(ColorManager->Number2Pixel(1));
+    HVChPower_TB[ch]->SetBackgroundColor(ColorManager->Number2Pixel(ButtonBackColorOff));
+    HVChPower_TB[ch]->SetForegroundColor(ColorManager->Number2Pixel(ButtonForeColor));
     
     // Modify the widget background to distinguish the negative voltage 
     // (V6534 channels 0,1,2) from the positive voltage (V6534 channels 3,4,5)
@@ -911,7 +914,7 @@ void AAInterface::FillAcquisitionFrame()
   AQStartStop_TB->Connect("Clicked()", "AADisplaySlots", DisplaySlots, "HandleTextButtons()");
   AQStartStop_TB->Resize(300,30);
   AQStartStop_TB->ChangeOptions(AQStartStop_TB->GetOptions() | kFixedSize);
-  AQStartStop_TB->SetBackgroundColor(ColorManager->Number2Pixel(kRed+1));
+  AQStartStop_TB->SetBackgroundColor(ColorManager->Number2Pixel(ButtonBackColorOff));
   AQStartStop_TB->SetForegroundColor(ColorManager->Number2Pixel(kWhite));
   
 
@@ -1456,8 +1459,8 @@ void AAInterface::FillAcquisitionFrame()
   WaveformFileName_TEL->GetEntry()->Resize(175, 25);
   WaveformFileName_TEL->GetEntry()->ChangeOptions(WaveformFileName_TEL->GetOptions() | kFixedSize | kSunkenFrame);
   WaveformFileName_TEL->GetEntry()->SetState(false);
-  WaveformFileName_TEL->GetEntry()->SetText("DefaultData.adaq");
-
+  WaveformFileName_TEL->GetEntry()->SetText("DefaultWaveforms.adaq");
+  
   // ROOT text button to create a root file using the name in the text entry field above
   WaveformStorage_GF->AddFrame(WaveformCreateFile_TB = new TGTextButton(WaveformStorage_GF,"Create ADAQ file", WaveformCreateFile_TB_ID),
 				  new TGLayoutHints(kLHintsNormal,10,5,8,5));
@@ -1507,7 +1510,7 @@ void AAInterface::FillAcquisitionFrame()
   SpectrumFileName_TEL->GetEntry()->Resize(175, 25);
   SpectrumFileName_TEL->GetEntry()->ChangeOptions(SpectrumFileName_TEL->GetOptions() | kFixedSize | kSunkenFrame);
   SpectrumFileName_TEL->GetEntry()->SetState(false);
-  SpectrumFileName_TEL->GetEntry()->SetText("DefaultSpectrum.dat");
+  SpectrumFileName_TEL->GetEntry()->SetText("DefaultSpectrum.root");
 
   DGScopeSpectrumStorage_GF->AddFrame(SpectrumSaveWithTimeExtension_CB = new TGCheckButton(DGScopeSpectrumStorage_GF, "Add time to file name", SpectrumSaveWithTimeExtension_CB_ID),
 				      new TGLayoutHints(kLHintsNormal, 5,5,5,5));
@@ -1536,7 +1539,7 @@ void AAInterface::FillAcquisitionFrame()
   CanvasFileName_TEL->GetEntry()->Resize(175, 25);
   CanvasFileName_TEL->GetEntry()->ChangeOptions(CanvasFileName_TEL->GetOptions() | kFixedSize | kSunkenFrame);
   CanvasFileName_TEL->GetEntry()->SetState(false);
-  CanvasFileName_TEL->GetEntry()->SetText("DefaultGraphics.eps");
+  CanvasFileName_TEL->GetEntry()->SetText("DefaultCanvas.eps");
 
   DGScopeCanvasStorage_GF->AddFrame(CanvasSaveWithTimeExtension_CB = new TGCheckButton(DGScopeCanvasStorage_GF, "Add time to file name", CanvasSaveWithTimeExtension_CB_ID),
 				    new TGLayoutHints(kLHintsNormal, 5,5,5,5));
@@ -1640,7 +1643,7 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
   
   // Acquisition is turning ON
   if(WidgetState == false){
-    AQStartStop_TB->SetBackgroundColor(ColorManager->Number2Pixel(kGreen+2));
+    AQStartStop_TB->SetBackgroundColor(ColorManager->Number2Pixel(ButtonBackColorOn));
     AQStartStop_TB->SetText("Acquiring");
     
     WaveformCreateFile_TB->SetState(kButtonUp);
@@ -1650,7 +1653,7 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
 
   // Acquisition is turning OFF
   else{
-    AQStartStop_TB->SetBackgroundColor(ColorManager->Number2Pixel(kRed+1));
+    AQStartStop_TB->SetBackgroundColor(ColorManager->Number2Pixel(ButtonBackColorOff));
     AQStartStop_TB->SetText("Stopped");
 
     WaveformCreateFile_TB->SetState(kButtonDisabled);
@@ -1850,8 +1853,8 @@ void AAInterface::UpdateAQTimer(int TimeRemaining)
 
 void AAInterface::UpdateAfterAQTimerStopped(bool ROOTFileOpen)
 {
-  AQStartStop_TB->SetBackgroundColor(ColorManager->Number2Pixel(kRed+1));
-  AQStartStop_TB->SetForegroundColor(ColorManager->Number2Pixel(1));
+  AQStartStop_TB->SetBackgroundColor(ColorManager->Number2Pixel(ButtonBackColorOff));
+  AQStartStop_TB->SetForegroundColor(ColorManager->Number2Pixel(kWhite));
   AQStartStop_TB->SetText("Stopped");
   
   SetAcquisitionWidgetState(true, kButtonUp);
@@ -1936,3 +1939,5 @@ string AAInterface::CreateFileDialog(const char *FileTypes[],
   }
   return FileName;
 }
+
+

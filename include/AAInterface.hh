@@ -80,7 +80,8 @@ private:
 
   // Dimensions for interface window
   int DisplayWidth, DisplayHeight;
-
+  int ButtonForeColor, ButtonBackColorOn, ButtonBackColorOff;
+  
   // Variables for use with high voltage widgets
   vector<string> HVChLabels;
   vector<int> HVChPower_TB_ID_Vec;

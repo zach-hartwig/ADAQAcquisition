@@ -12,7 +12,10 @@
 #include "AAGraphics.hh"
 
 AASubtabSlots::AASubtabSlots(AAInterface *TheInterface)
-  : TI(TheInterface)
+  : TI(TheInterface),
+    WaveformFileName("DefaultWaveforms.adaq"),
+    SpectrumFileName("DefaultSpectrum.root"),
+    CanvasFileName("DefaultCanvas.eps")
 {;}
 
 
@@ -206,8 +209,8 @@ void AASubtabSlots::HandleTextButtons()
     if(ActiveButton->GetString() == "Start timer"){
       
       // Set the graphical attributes of the text button
-      ActiveButton->SetBackgroundColor(TI->ColorManager->Number2Pixel(kGreen+2));
-      ActiveButton->SetForegroundColor(TI->ColorManager->Number2Pixel(kWhite));
+      ActiveButton->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOn));
+      ActiveButton->SetForegroundColor(TI->ColorManager->Number2Pixel(TI->ButtonForeColor));
       ActiveButton->SetText("Waiting ...");
       
       // Get the start time (i.e. now)
@@ -297,7 +300,8 @@ void AASubtabSlots::HandleTextButtons()
     
     if(CalibrationEnable){
       TI->SpectrumCalibrationCalibrate_TB->SetText("Calibrated");
-      TI->SpectrumCalibrationCalibrate_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(kGreen+2));
+      TI->SpectrumCalibrationCalibrate_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOn));
+      TI->SpectrumCalibrationCalibrate_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonForeColor));
     }
     else
       {}
@@ -338,6 +342,7 @@ void AASubtabSlots::HandleTextButtons()
 
       TI->SpectrumCalibrationCalibrate_TB->SetText("Calibrate");
       TI->SpectrumCalibrationCalibrate_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(18));
+      TI->SpectrumCalibrationCalibrate_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(kBlack));
     }
     else
       {}
@@ -423,15 +428,16 @@ void AASubtabSlots::HandleTextButtons()
     break;
   }
 
-
+    
   case WaveformCreateFile_TB_ID:{
-
+    
     AAAcquisitionManager::GetInstance()->CreateADAQFile(WaveformFileName);
-   
+    
     // Set widget states appropriately
 
     TI->WaveformCreateFile_TB->SetState(kButtonDisabled);
-    TI->WaveformCreateFile_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(kGreen+2));
+    TI->WaveformCreateFile_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOn));
+    TI->WaveformCreateFile_TB->SetForegroundColor(TI->ColorManager->Number2Pixel(TI->ButtonForeColor));
     TI->WaveformCreateFile_TB->SetText("ADAQ file created");
     TI->WaveformCloseFile_TB->SetState(kButtonUp);
     TI->WaveformStorageEnable_CB->SetState(kButtonUp);
@@ -448,6 +454,7 @@ void AASubtabSlots::HandleTextButtons()
 
     TI->WaveformCreateFile_TB->SetState(kButtonUp);
     TI->WaveformCreateFile_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(18));
+    TI->WaveformCreateFile_TB->SetForegroundColor(TI->ColorManager->Number2Pixel(kBlack));
     TI->WaveformCreateFile_TB->SetText("Create ADAQ file");
     TI->WaveformCloseFile_TB->SetState(kButtonDisabled);
     TI->WaveformStorageEnable_CB->SetState(kButtonUp);

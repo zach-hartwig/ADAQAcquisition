@@ -86,7 +86,7 @@ void AATabSlots::HandleConnectionTextButtons()
       if(BRLinkOpen == 0 or DGLinkOpen == 0 or HVLinkOpen == 0){
 	TheVMEManager->SetVMEConnectionEstablished(true);
 
-	TI->VMEConnect_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(kGreen+2));
+	TI->VMEConnect_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOn));
 	TI->VMEConnect_TB->SetText("Connected: click to disconnect");
 	
 	// Convert the new "std::cout" buffer into a TGText
@@ -100,7 +100,7 @@ void AATabSlots::HandleConnectionTextButtons()
 	TI->ConnectionOutput_TV->Update();
       }
       else
-	TI->VMEConnect_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(kRed+1));
+	TI->VMEConnect_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOff));
     }
 
     // If a connection is already established then terminate the connection
@@ -113,7 +113,7 @@ void AATabSlots::HandleConnectionTextButtons()
       TI->HandleDisconnectAndTerminate(false);
       
       // Change the color and text of the button.
-      TI->VMEConnect_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(kRed+1));
+      TI->VMEConnect_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOff));
       TI->VMEConnect_TB->SetText("Disconnected: click to connect");
 
       // Convert the new "std::cout" buffer into a TGText
@@ -134,12 +134,12 @@ void AATabSlots::HandleConnectionTextButtons()
   case HVBoardEnable_TB_ID:
     if(TI->BoardEnable_TB[V6534]->GetString() == "Board enabled"){
       TI->BoardEnable_TB[V6534]->SetText("Board disabled");
-      TI->BoardEnable_TB[V6534]->SetBackgroundColor(TI->ColorManager->Number2Pixel(kRed+1));
+      TI->BoardEnable_TB[V6534]->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOff));
       TheVMEManager->SetHVEnable(false);
     }
     else if(TI->BoardEnable_TB[V6534]->GetString() == "Board disabled"){
       TI->BoardEnable_TB[V6534]->SetText("Board enabled");
-      TI->BoardEnable_TB[V6534]->SetBackgroundColor(TI->ColorManager->Number2Pixel(kRed+1));
+      TI->BoardEnable_TB[V6534]->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOff));
       TheVMEManager->SetHVEnable(true);
     }
     break;
@@ -149,12 +149,12 @@ void AATabSlots::HandleConnectionTextButtons()
   case DGBoardEnable_TB_ID:
     if(TI->BoardEnable_TB[V1720]->GetString() == "Board enabled"){
       TI->BoardEnable_TB[V1720]->SetText("Board disabled");
-      TI->BoardEnable_TB[V1720]->SetBackgroundColor(TI->ColorManager->Number2Pixel(kRed+1));
+      TI->BoardEnable_TB[V1720]->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOff));
       TheVMEManager->SetDGEnable(false);
     }
     else if(TI->BoardEnable_TB[V1720]->GetString() == "Board disabled"){
       TI->BoardEnable_TB[V1720]->SetText("Board enabled");
-      TI->BoardEnable_TB[V1720]->SetBackgroundColor(TI->ColorManager->Number2Pixel(kGreen+2));
+      TI->BoardEnable_TB[V1720]->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOn));
       TheVMEManager->SetDGEnable(true);
     }
     break;
@@ -162,12 +162,12 @@ void AATabSlots::HandleConnectionTextButtons()
   case V1718BoardEnable_TB_ID:
     if(TI->BoardEnable_TB[V1718]->GetString() == "Board enabled"){
       TI->BoardEnable_TB[V1718]->SetText("Board disabled");
-      TI->BoardEnable_TB[V1718]->SetBackgroundColor(TI->ColorManager->Number2Pixel(kRed+1));
+      TI->BoardEnable_TB[V1718]->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOff));
       TheVMEManager->SetBREnable(false);
     }
     else if(TI->BoardEnable_TB[V1718]->GetString() == "Board disabled"){
       TI->BoardEnable_TB[V1718]->SetText("Board enabled");
-      TI->BoardEnable_TB[V1718]->SetBackgroundColor(TI->ColorManager->Number2Pixel(kGreen+2));
+      TI->BoardEnable_TB[V1718]->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOn));
       TheVMEManager->SetBREnable(true);
     }
     break;
@@ -276,10 +276,10 @@ void AATabSlots::HandleRegisterTextButtons()
   else if(Action == WRITE){
     Addr32 = TI->WriteAddress_NEF[Board]->GetHexNumber();
     Data32 = TI->WriteValue_NEF[Board]->GetHexNumber();
-
-    if(Board == V1718)
+    
+    if(Board == V1718 and TheVMEManager->GetBREnable())
       TheVMEManager->GetBRManager()->SetRegisterValue(Addr32, Data32);
-
+    
     if(Board == V1720 and TheVMEManager->GetDGEnable())
       TheVMEManager->GetDGManager()->SetRegisterValue(Addr32, Data32);
     
@@ -295,12 +295,13 @@ void AATabSlots::HandlePulserTextButtons()
   int TextButtonID = TextButton->WidgetId();
 
   TI->SaveSettings();
-
+  
   AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
   
-  if(TheVMEManager->GetVMEConnectionEstablished())
+  if(!TheVMEManager->GetVMEConnectionEstablished() or
+     !TheVMEManager->GetBREnable())
     return;
-
+  
   enum {PulserA, PulserB};
   int Pulser = -1;
 
@@ -381,7 +382,7 @@ void AATabSlots::HandleVoltageTextButtons()
     // If the power is being turned from "OFF" to "ON"...
     if(TextButton->GetString()=="OFF"){
       // Update the button color from red to green and set text to "ON"
-      TextButton->SetBackgroundColor(TI->ColorManager->Number2Pixel(kGreen+2));
+      TextButton->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOn));
       TextButton->SetText("ON");
       
       // Get the voltage and maximum current settings from the ROOT
@@ -400,7 +401,7 @@ void AATabSlots::HandleVoltageTextButtons()
     // If the power is being turned from "ON" to "OFF"...
     else if(TextButton->GetString()=="ON"){
       // Update the button color from green to red and set text to "OFF"
-      TextButton->SetBackgroundColor(TI->ColorManager->Number2Pixel(kRed+1));
+      TextButton->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOff));
       TextButton->SetText("OFF");
 
       // Turn the HV channel off
