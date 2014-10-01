@@ -627,6 +627,7 @@ void AAInterface::FillPulserFrame()
     PulserOutput_VF->AddFrame(V1718PulserStartStop_TB[pulser] = new TGTextButton(PulserOutput_VF, "Stopped", V1718PulserID[pulser]),
 			      new TGLayoutHints(kLHintsNormal, 5,5,20,5));
     V1718PulserStartStop_TB[pulser]->SetBackgroundColor(ColorManager->Number2Pixel(ButtonBackColorOff));
+    V1718PulserStartStop_TB[pulser]->SetForegroundColor(ColorManager->Number2Pixel(ButtonForeColor));
     V1718PulserStartStop_TB[pulser]->Resize(200,40);
     V1718PulserStartStop_TB[pulser]->ChangeOptions(V1718PulserStartStop_TB[pulser]->GetOptions() | kFixedSize);
     V1718PulserStartStop_TB[pulser]->Connect("Pressed()", "AATabSlots", TabSlots, "HandlePulserTextButtons()");

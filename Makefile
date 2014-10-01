@@ -70,7 +70,7 @@ TARGET = $(BINDIR)/ADAQAcquisition
 # Rules to build the binary
 
 $(TARGET) : $(OBJS) 
-	@echo -e "\n---> Building $@ ..."
+	@echo -e "\nBuilding $@ ..."
 	$(CXX) -g -o $@ $^ $(LDFLAGS) $(ROOTGLIBS)
 	@echo -e "\n$@ build is complete!\n"
 
@@ -83,7 +83,7 @@ $(BUILDDIR)/%.o : $(SRCDIR)/%.cc $(INCLS)
 
 
 $(BUILDDIR)/ADAQAcquisitionDict.o : $(BUILDDIR)/ADAQAcquisitionDict.cc
-	@echo -e "\n---> Building '$@' ..."
+	@echo -e "\nBuilding '$@' ..."
 	$(CXX) -g $(CXXFLAGS) -c -o $@ $<
 
 # Generate the necessary ROOT dictionaries
@@ -94,7 +94,7 @@ $(BUILDDIR)/ADAQAcquisitionDict.cc : $(INCLS) $(INCLDIR)/RootLinkDef.h
 # Clean the directory of all build files and binaries
 .PHONY: 
 clean:
-	@echo -e "\n---> Cleaning up the build and binary ..."
+	@echo -e "\nCleaning up the build and binary ..."
 	rm -f $(BUILDDIR)/*.o *.d $(BUILDDIR)/*Dict.* $(TARGET)
 	@echo -e ""
 
