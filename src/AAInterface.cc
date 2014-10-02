@@ -794,7 +794,7 @@ void AAInterface::FillAcquisitionFrame()
 				       new TGLayoutHints(kLHintsNormal));
     DGChTriggerThreshold_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
     DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-    DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumber(2500);
+    DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumber(2100);
     DGChTriggerThreshold_NEL[ch]->GetEntry()->Resize(55,20);
     
     // ADAQ number entry to set minimum sample for baseline calculation [sample]
@@ -1804,7 +1804,7 @@ void AAInterface::SaveSettings()
   TheSettings->WaveformStorageEnable = WaveformStorageEnable_CB->IsDown();
   TheSettings->SpectrumSaveWithTimeExtension = SpectrumSaveWithTimeExtension_CB->IsDown();
   TheSettings->CanvasSaveWithTimeExtension = CanvasSaveWithTimeExtension_CB->IsDown();
-
+  
   TheSettings->SpectrumRefreshRate = SpectrumRefreshRate_NEL->GetEntry()->GetIntNumber();
   
 

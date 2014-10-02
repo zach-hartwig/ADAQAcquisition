@@ -13,7 +13,7 @@ AAVMEManager *AAVMEManager::GetInstance()
 
 
 AAVMEManager::AAVMEManager()
-  : BREnable(true), DGEnable(true), HVEnable(true),
+  : BREnable(true), DGEnable(true), HVEnable(false),
     DGAddress(0x00420000), HVAddress(0x42420000),
     VMEConnectionEstablished(false)
 {

@@ -4,6 +4,7 @@
 #include <sstream>
 #include <fstream>
 #include <iomanip>
+#include <bitset>
 
 #include "AAAcquisitionManager.hh"
 #include "AAVMEManager.hh"
@@ -22,7 +23,7 @@ AAAcquisitionManager::AAAcquisitionManager()
     AcquisitionTimeStart(0), AcquisitionTimeStop(0), 
     AcquisitionTimeNow(0), AcquisitionTimePrev(0),
     EventPointer(NULL), EventWaveform(NULL), Buffer(NULL),
-    BufferSize(0), ReadSize(0), NumEvents(0),
+    BufferSize(0), ReadSize(0), FPGAEvents(0), PCEvents(0),
     WaveformLength(0), LLD(0), ULD(0), SampleHeight(0.), TriggerHeight(0.),
     PulseHeight(0.), PulseArea(0.),
     FillWaveformTree(false)
@@ -36,6 +37,9 @@ AAAcquisitionManager::AAAcquisitionManager()
   int DGChannels = DGManager->GetNumChannels();
   
   for(int ch=0; ch<DGManager->GetNumChannels(); ch++){
+
+    BufferFull.push_back(true);
+    
     BaselineStart.push_back(0);
     BaselineStop.push_back(0);
     BaselineLength.push_back(0);
@@ -140,7 +144,7 @@ void AAAcquisitionManager::PreAcquisition()
   EventPointer = NULL;
   EventWaveform = NULL;
   Buffer = NULL;
-  BufferSize = ReadSize = NumEvents = 0;
+  BufferSize = ReadSize = FPGAEvents = PCEvents = 0;
   
   AAVMEManager::GetInstance()->GetDGManager()->MallocReadoutBuffer(&Buffer, &BufferSize);
 }
@@ -177,21 +181,24 @@ void AAAcquisitionManager::StartAcquisition()
     
     // Handle acquisition actions in separate ROOT thread
     gSystem->ProcessEvents();
-    
-    // Get the number of events stored in the FPGA buffer
-    DGManager->GetRegisterValue(0x812c, &NumEvents);
-    
-    // Prevent FPGA->PC readout unless the number events exceeds the
-    // number specified by the user explicity for readout (efficiency)
-    if(NumEvents < TheSettings->EventsBeforeReadout)
-      continue;
 
+    // Get the number of events stored in the FPGA buffer and maximize
+    // efficiency by entering the event readout loop only when the max
+    // number of readout events has been reached
+    
+    DGManager->GetNumFPGAEvents(&FPGAEvents);
+    if(FPGAEvents < TheSettings->EventsBeforeReadout)
+      continue;
+    
     // Perform the FPGA buffer -> PC buffer data readout
     DGManager->ReadData(Buffer, &ReadSize);    
     
+    // Get the number of events in the PC buffer
+    DGManager->GetNumEvents(Buffer, ReadSize, &PCEvents);
+    
     // For each event stored in the PC memory buffer...
-    for(uint32_t evt=0; evt<NumEvents; evt++){
-
+    for(uint32_t evt=0; evt<PCEvents; evt++){
+      
       if(AcquisitionTimerEnable){
 	
 	// Calculate the elapsed time since the timer was started
@@ -209,7 +216,7 @@ void AAAcquisitionManager::StartAcquisition()
 	if(AcquisitionTimeNow >= AcquisitionTimeStop)
 	  StopAcquisition();
       }
-      
+
       // Populate the EventInfo structure and assign address to the EventPointer
       DGManager->GetEventInfo(Buffer, ReadSize, evt, &EventInfo, &EventPointer);
       
@@ -240,7 +247,6 @@ void AAAcquisitionManager::StartAcquisition()
 	      Waveforms[ch][Index] = EventWaveform->DataChannel[ch][sample];
 	    }
 	  }
-
 
 	  ///////////////////
 	  // Standard readout
@@ -274,7 +280,7 @@ void AAAcquisitionManager::StartAcquisition()
 		PulseArea += SampleHeight;
 	    }
 	  }
-	}
+	} // End sample loop
 
 	if(!TheSettings->UltraRateMode){
 	  
@@ -282,7 +288,6 @@ void AAAcquisitionManager::StartAcquisition()
 	  // the pulse height/area from ADC to the user's energy
 	  // units using linear interpolation calibration points
 	  if(CalibrationEnable[ch]){
-	    
 
 	    if(TheSettings->SpectrumPulseHeight)
 	      PulseHeight = CalibrationCurves[ch]->Eval(PulseHeight);
@@ -312,12 +317,12 @@ void AAAcquisitionManager::StartAcquisition()
 	    }
 	    else
 	      Spectrum_H[ch]->Fill(PulseArea);
-	      	      
+	    
 	    if(TheSettings->LDTrigger and ch == TheSettings->LDChannel)
 	      FillWaveformTree = true;
 	  }
 	}
-      }
+      } // End digitizer channel loop
       
       if(TheSettings->WaveformStorageEnable){
 	
@@ -337,20 +342,32 @@ void AAAcquisitionManager::StartAcquisition()
 	// should be used as the "trigger" for writing waveforms
 	FillWaveformTree = false;
       }
-    }
+      
+      // Plot the waveform; only plot the first waveform event in the
+      // case of a multievent readout to maximize efficiency
 
-    if(TheSettings->WaveformMode)
-      TheGraphicsManager->PlotWaveforms(Waveforms, 
-					WaveformLength, 
-					BaselineValue);
-    else if(TheSettings->SpectrumMode)
-      TheGraphicsManager->PlotSpectrum(Spectrum_H[TheSettings->SpectrumChannel]);
+      if(TheSettings->WaveformMode and evt == 0)
+	TheGraphicsManager->PlotWaveforms(Waveforms, 
+					  WaveformLength, 
+					  BaselineValue);
+    } // End readout event loop
     
+    if(TheSettings->SpectrumMode){
+      
+      // Use user set value for spectrum refresh rate to determine
+      // when to update the spectrum histogram
+
+      int Entries = Spectrum_H[TheSettings->SpectrumChannel]->GetEntries();
+      int Rate = TheSettings->SpectrumRefreshRate;
+      if(Entries % Rate == 0)
+	TheGraphicsManager->PlotSpectrum(Spectrum_H[TheSettings->SpectrumChannel]);
+    }
     
     // Free the PC memory allocated to the event
     DGManager->FreeEvent(&EventWaveform);
-  }
 
+  } // End acquisition loop
+  
   // Free the PC memory allocated to the readout buffer
   DGManager->FreeReadoutBuffer(&Buffer);
 }

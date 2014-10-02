@@ -219,7 +219,9 @@ void AAGraphics::PlotSpectrum(TH1F *Spectrum_H)
 {
   int Channel = TheSettings->SpectrumChannel;
   
-  Spectrum_H->Draw("C");
+  Spectrum_H->Draw("B");
+
+  Spectrum_H->SetFillColor(kBlue);
 
   // Set spectrum graphical attributes
 
