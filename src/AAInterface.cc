@@ -961,13 +961,13 @@ void AAInterface::FillAcquisitionFrame()
   TGCompositeFrame *SpectrumSubframe = new TGCompositeFrame(SpectrumSubtab, 0, 0, kHorizontalFrame);
   SpectrumSubtab->AddFrame(SpectrumSubframe);
   
-  TGCompositeFrame *GraphicsSubtab = AQControlSubtabs->AddTab("Graphics settings");
-  TGCompositeFrame *GraphicsSubframe = new TGCompositeFrame(GraphicsSubtab, 0, 0, kHorizontalFrame);
-  GraphicsSubtab->AddFrame(GraphicsSubframe);
-  
   TGCompositeFrame *DataSubtab = AQControlSubtabs->AddTab("Peristent storage");
   TGCompositeFrame *DataSubframe = new TGCompositeFrame(DataSubtab, 0, 0, kHorizontalFrame);
   DataSubtab->AddFrame(DataSubframe);
+
+  TGCompositeFrame *GraphicsSubtab = AQControlSubtabs->AddTab("Graphics settings");
+  TGCompositeFrame *GraphicsSubframe = new TGCompositeFrame(GraphicsSubtab, 0, 0, kHorizontalFrame);
+  GraphicsSubtab->AddFrame(GraphicsSubframe);
 
   SubtabFrame->AddFrame(AQControlSubtabs, new TGLayoutHints(kLHintsTop, 0,0,0,0));
 
@@ -1346,101 +1346,6 @@ void AAInterface::FillAcquisitionFrame()
   SpectrumCalibrationWrite_TB->ChangeOptions(SpectrumCalibrationLoad_TB->GetOptions() | kFixedSize);
   SpectrumCalibrationWrite_TB->SetState(kButtonDisabled);
 
-
-  //////////////////////
-  // Display settings //
-  //////////////////////
-
-  ////////////////////////////
-  // Title names and positions 
-
-  TGGroupFrame *DisplayTitle_GF = new TGGroupFrame(GraphicsSubframe, "Titles", kVerticalFrame);
-  DisplayTitle_GF->SetTitlePos(TGGroupFrame::kCenter);
-  GraphicsSubframe->AddFrame(DisplayTitle_GF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
-
-  DisplayTitle_GF->AddFrame(DisplayTitlesEnable_CB = new TGCheckButton(DisplayTitle_GF, "Override defaults", DisplayTitlesEnable_CB_ID),
-			    new TGLayoutHints(kLHintsNormal, 5,5,5,5));
-  DisplayTitlesEnable_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
-  
-  DisplayTitle_GF->AddFrame(DisplayTitle_TEL = new ADAQTextEntryWithLabel(DisplayTitle_GF, "Plot", DisplayTitle_TEL_ID),
-			    new TGLayoutHints(kLHintsNormal,5,5,5,5));
-  
-  // ADAQ text entries and number entries for specifying the DGScope title, axes title, and axes position
-  
-  DisplayTitle_GF->AddFrame(DisplayXTitle_TEL = new ADAQTextEntryWithLabel(DisplayTitle_GF, "X-axis", DisplayXTitle_TEL_ID),
-			    new TGLayoutHints(kLHintsNormal,5,5,5,0));
-  DisplayXTitle_TEL->GetEntry()->SetText("");
-
-  TGHorizontalFrame *XSizeAndOffset_HF = new TGHorizontalFrame(DisplayTitle_GF);
-  DisplayTitle_GF->AddFrame(XSizeAndOffset_HF, new TGLayoutHints(kLHintsNormal, 0,0,2,0));
-
-  XSizeAndOffset_HF->AddFrame(DisplayXTitleSize_NEL = new ADAQNumberEntryWithLabel(XSizeAndOffset_HF, "Size", DisplayXSize_NEL_ID),
-			      new TGLayoutHints(kLHintsNormal,5,5,0,5));
-  DisplayXTitleSize_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
-  DisplayXTitleSize_NEL->GetEntry()->SetNumber(0.05);
-  DisplayXTitleSize_NEL->GetEntry()->Resize(52,20);
-  
-  XSizeAndOffset_HF->AddFrame(DisplayXTitleOffset_NEL = new ADAQNumberEntryWithLabel(XSizeAndOffset_HF, "Offset", DisplayXOffset_NEL_ID),
-			      new TGLayoutHints(kLHintsNormal,5,5,0,5));
-  DisplayXTitleOffset_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
-  DisplayXTitleOffset_NEL->GetEntry()->SetNumber(1.2);
-  DisplayXTitleOffset_NEL->GetEntry()->Resize(52,20);
-
-  DisplayTitle_GF->AddFrame(DisplayYTitle_TEL = new ADAQTextEntryWithLabel(DisplayTitle_GF, "Y-axis", DisplayYTitle_TEL_ID),
-			    new TGLayoutHints(kLHintsNormal,5,5,5,0));
-  DisplayYTitle_TEL->GetEntry()->SetText("");
-
-  TGHorizontalFrame *YSizeAndOffset_HF = new TGHorizontalFrame(DisplayTitle_GF);
-  DisplayTitle_GF->AddFrame(YSizeAndOffset_HF, new TGLayoutHints(kLHintsNormal, 0,0,2,0));
-  
-  YSizeAndOffset_HF->AddFrame(DisplayYTitleSize_NEL = new ADAQNumberEntryWithLabel(YSizeAndOffset_HF, "Size", DisplayYSize_NEL_ID),
-			    new TGLayoutHints(kLHintsNormal,5,5,0,5));
-  DisplayYTitleSize_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
-  DisplayYTitleSize_NEL->GetEntry()->SetNumber(0.05);
-  DisplayYTitleSize_NEL->GetEntry()->Resize(52,20);
-
-  YSizeAndOffset_HF->AddFrame(DisplayYTitleOffset_NEL = new ADAQNumberEntryWithLabel(YSizeAndOffset_HF, "Offset", DisplayYOffset_NEL_ID),
-			    new TGLayoutHints(kLHintsNormal,5,5,0,5));
-  DisplayYTitleOffset_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
-  DisplayYTitleOffset_NEL->GetEntry()->SetNumber(1.5);
-  DisplayYTitleOffset_NEL->GetEntry()->Resize(52,20);
-
-  SetTitlesWidgetState(false, kButtonDisabled);
-    
-
-  /////////////////////////////
-  // misc. graphical attributes 
-  
-  TGGroupFrame *DisplaySettings_GF = new TGGroupFrame(GraphicsSubframe, "Display", kVerticalFrame);
-  DisplaySettings_GF->SetTitlePos(TGGroupFrame::kCenter);
-  GraphicsSubframe->AddFrame(DisplaySettings_GF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
-
-  // ROOT check button to enable/disable plotting of the legend
-  DisplaySettings_GF->AddFrame(DisplayLegend_CB = new TGCheckButton(DisplaySettings_GF, "Draw legend", -1),
-			       new TGLayoutHints(kLHintsNormal,0,0,5,0));
-  DisplayLegend_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
-  
-  DisplaySettings_GF->AddFrame(DisplayGrid_CB = new TGCheckButton(DisplaySettings_GF, "Draw grid", DisplayGrid_CB_ID),
-			       new TGLayoutHints(kLHintsNormal, 0,0,0,5));
-  DisplayGrid_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
-  DisplayGrid_CB->SetState(kButtonDown);
-
-  // ROOT check buttons for specifying if X and Y axes on spectra should be logarithmic
-  DisplaySettings_GF->AddFrame(DisplayXAxisLog_CB = new TGCheckButton(DisplaySettings_GF, "Log X-axis  ", DisplayXAxisLog_CB_ID),
-			       new TGLayoutHints(kLHintsLeft,0,0,0,0));
-  DisplayXAxisLog_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
-  
-  DisplaySettings_GF->AddFrame(DisplayYAxisLog_CB = new TGCheckButton(DisplaySettings_GF, "Log Y-axis", DisplayYAxisLog_CB_ID),
-			       new TGLayoutHints(kLHintsLeft,0,0,0,0));
-  DisplayYAxisLog_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
-
-  DisplaySettings_GF->AddFrame(SpectrumRefreshRate_NEL = new ADAQNumberEntryWithLabel(DisplaySettings_GF, "Spectrum refresh rate", -1),
-			       new TGLayoutHints(kLHintsNormal, 0,0,5,0));
-  SpectrumRefreshRate_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-  SpectrumRefreshRate_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
-  SpectrumRefreshRate_NEL->GetEntry()->SetNumber(100);
-
-
   //////////////////
   // Data storage //
   //////////////////
@@ -1550,6 +1455,100 @@ void AAInterface::FillAcquisitionFrame()
   CanvasSave_TB->Resize(175, 30);
   CanvasSave_TB->ChangeOptions(CanvasSave_TB->GetOptions() | kFixedSize);
   CanvasSave_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
+
+
+  //////////////////////
+  // Display settings //
+  //////////////////////
+
+  ////////////////////////////
+  // Title names and positions 
+
+  TGGroupFrame *DisplayTitle_GF = new TGGroupFrame(GraphicsSubframe, "Titles", kVerticalFrame);
+  DisplayTitle_GF->SetTitlePos(TGGroupFrame::kCenter);
+  GraphicsSubframe->AddFrame(DisplayTitle_GF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
+
+  DisplayTitle_GF->AddFrame(DisplayTitlesEnable_CB = new TGCheckButton(DisplayTitle_GF, "Override defaults", DisplayTitlesEnable_CB_ID),
+			    new TGLayoutHints(kLHintsNormal, 5,5,5,5));
+  DisplayTitlesEnable_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
+  
+  DisplayTitle_GF->AddFrame(DisplayTitle_TEL = new ADAQTextEntryWithLabel(DisplayTitle_GF, "Plot", DisplayTitle_TEL_ID),
+			    new TGLayoutHints(kLHintsNormal,5,5,5,5));
+  
+  // ADAQ text entries and number entries for specifying the DGScope title, axes title, and axes position
+  
+  DisplayTitle_GF->AddFrame(DisplayXTitle_TEL = new ADAQTextEntryWithLabel(DisplayTitle_GF, "X-axis", DisplayXTitle_TEL_ID),
+			    new TGLayoutHints(kLHintsNormal,5,5,5,0));
+  DisplayXTitle_TEL->GetEntry()->SetText("");
+
+  TGHorizontalFrame *XSizeAndOffset_HF = new TGHorizontalFrame(DisplayTitle_GF);
+  DisplayTitle_GF->AddFrame(XSizeAndOffset_HF, new TGLayoutHints(kLHintsNormal, 0,0,2,0));
+
+  XSizeAndOffset_HF->AddFrame(DisplayXTitleSize_NEL = new ADAQNumberEntryWithLabel(XSizeAndOffset_HF, "Size", DisplayXSize_NEL_ID),
+			      new TGLayoutHints(kLHintsNormal,5,5,0,5));
+  DisplayXTitleSize_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
+  DisplayXTitleSize_NEL->GetEntry()->SetNumber(0.05);
+  DisplayXTitleSize_NEL->GetEntry()->Resize(52,20);
+  
+  XSizeAndOffset_HF->AddFrame(DisplayXTitleOffset_NEL = new ADAQNumberEntryWithLabel(XSizeAndOffset_HF, "Offset", DisplayXOffset_NEL_ID),
+			      new TGLayoutHints(kLHintsNormal,5,5,0,5));
+  DisplayXTitleOffset_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
+  DisplayXTitleOffset_NEL->GetEntry()->SetNumber(1.2);
+  DisplayXTitleOffset_NEL->GetEntry()->Resize(52,20);
+
+  DisplayTitle_GF->AddFrame(DisplayYTitle_TEL = new ADAQTextEntryWithLabel(DisplayTitle_GF, "Y-axis", DisplayYTitle_TEL_ID),
+			    new TGLayoutHints(kLHintsNormal,5,5,5,0));
+  DisplayYTitle_TEL->GetEntry()->SetText("");
+
+  TGHorizontalFrame *YSizeAndOffset_HF = new TGHorizontalFrame(DisplayTitle_GF);
+  DisplayTitle_GF->AddFrame(YSizeAndOffset_HF, new TGLayoutHints(kLHintsNormal, 0,0,2,0));
+  
+  YSizeAndOffset_HF->AddFrame(DisplayYTitleSize_NEL = new ADAQNumberEntryWithLabel(YSizeAndOffset_HF, "Size", DisplayYSize_NEL_ID),
+			    new TGLayoutHints(kLHintsNormal,5,5,0,5));
+  DisplayYTitleSize_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
+  DisplayYTitleSize_NEL->GetEntry()->SetNumber(0.05);
+  DisplayYTitleSize_NEL->GetEntry()->Resize(52,20);
+
+  YSizeAndOffset_HF->AddFrame(DisplayYTitleOffset_NEL = new ADAQNumberEntryWithLabel(YSizeAndOffset_HF, "Offset", DisplayYOffset_NEL_ID),
+			    new TGLayoutHints(kLHintsNormal,5,5,0,5));
+  DisplayYTitleOffset_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
+  DisplayYTitleOffset_NEL->GetEntry()->SetNumber(1.5);
+  DisplayYTitleOffset_NEL->GetEntry()->Resize(52,20);
+
+  SetTitlesWidgetState(false, kButtonDisabled);
+    
+
+  /////////////////////////////
+  // misc. graphical attributes 
+  
+  TGGroupFrame *DisplaySettings_GF = new TGGroupFrame(GraphicsSubframe, "Display", kVerticalFrame);
+  DisplaySettings_GF->SetTitlePos(TGGroupFrame::kCenter);
+  GraphicsSubframe->AddFrame(DisplaySettings_GF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
+
+  // ROOT check button to enable/disable plotting of the legend
+  DisplaySettings_GF->AddFrame(DisplayLegend_CB = new TGCheckButton(DisplaySettings_GF, "Draw legend", -1),
+			       new TGLayoutHints(kLHintsNormal,0,0,5,0));
+  DisplayLegend_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
+  
+  DisplaySettings_GF->AddFrame(DisplayGrid_CB = new TGCheckButton(DisplaySettings_GF, "Draw grid", DisplayGrid_CB_ID),
+			       new TGLayoutHints(kLHintsNormal, 0,0,0,5));
+  DisplayGrid_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
+  DisplayGrid_CB->SetState(kButtonDown);
+
+  // ROOT check buttons for specifying if X and Y axes on spectra should be logarithmic
+  DisplaySettings_GF->AddFrame(DisplayXAxisLog_CB = new TGCheckButton(DisplaySettings_GF, "Log X-axis  ", DisplayXAxisLog_CB_ID),
+			       new TGLayoutHints(kLHintsLeft,0,0,0,0));
+  DisplayXAxisLog_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
+  
+  DisplaySettings_GF->AddFrame(DisplayYAxisLog_CB = new TGCheckButton(DisplaySettings_GF, "Log Y-axis", DisplayYAxisLog_CB_ID),
+			       new TGLayoutHints(kLHintsLeft,0,0,0,0));
+  DisplayYAxisLog_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
+
+  DisplaySettings_GF->AddFrame(SpectrumRefreshRate_NEL = new ADAQNumberEntryWithLabel(DisplaySettings_GF, "Spectrum refresh rate", -1),
+			       new TGLayoutHints(kLHintsNormal, 0,0,5,0));
+  SpectrumRefreshRate_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+  SpectrumRefreshRate_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+  SpectrumRefreshRate_NEL->GetEntry()->SetNumber(100);
 }
   
 
@@ -1649,7 +1648,6 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
     
     WaveformCreateFile_TB->SetState(kButtonUp);
     WaveformCloseFile_TB->SetState(kButtonUp);
-    WaveformStorageEnable_CB->SetState(kButtonUp);
   }
 
   // Acquisition is turning OFF

@@ -50,15 +50,19 @@ void AASubtabSlots::HandleCheckButtons()
       TI->SetCalibrationWidgetState(false, kButtonDisabled);
     
     break;
-    
 
+
+  case WaveformStorageEnable_CB_ID:
+    break;
+    
+    
   case DisplayTitlesEnable_CB_ID:
     
     if(ActiveButton->IsDown())
       TI->SetTitlesWidgetState(true, kButtonUp);
     else
       TI->SetTitlesWidgetState(false, kButtonDisabled);
-	 
+    
     break;
   }
 }
@@ -314,8 +318,7 @@ void AASubtabSlots::HandleTextButtons()
 
     int Channel = TI->SpectrumChannel_CBL->GetComboBox()->GetSelected();
     
-    bool CalEnable = AAAcquisitionManager::GetInstance()->
-      GetCalibrationEnable(Channel);
+    bool CalEnable = TheACQManager->GetCalibrationEnable(Channel);
     
     if(CalEnable)
       AAGraphics::GetInstance()->PlotCalibration(Channel);
@@ -431,10 +434,11 @@ void AASubtabSlots::HandleTextButtons()
     
   case WaveformCreateFile_TB_ID:{
     
-    AAAcquisitionManager::GetInstance()->CreateADAQFile(WaveformFileName);
+    TheACQManager->CreateADAQFile(WaveformFileName);
     
     // Set widget states appropriately
 
+    TI->WaveformFileName_TB->SetState(kButtonDisabled);
     TI->WaveformCreateFile_TB->SetState(kButtonDisabled);
     TI->WaveformCreateFile_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOn));
     TI->WaveformCreateFile_TB->SetForegroundColor(TI->ColorManager->Number2Pixel(TI->ButtonForeColor));
@@ -447,18 +451,19 @@ void AASubtabSlots::HandleTextButtons()
 
 
   case WaveformCloseFile_TB_ID:{
-
-    AAAcquisitionManager::GetInstance()->CloseADAQFile();
     
-    // Set widget states appropriately.
+    TheACQManager->CloseADAQFile();
 
-    TI->WaveformCreateFile_TB->SetState(kButtonUp);
-    TI->WaveformCreateFile_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(18));
-    TI->WaveformCreateFile_TB->SetForegroundColor(TI->ColorManager->Number2Pixel(kBlack));
-    TI->WaveformCreateFile_TB->SetText("Create ADAQ file");
-    TI->WaveformCloseFile_TB->SetState(kButtonDisabled);
-    TI->WaveformStorageEnable_CB->SetState(kButtonUp);
-    TI->WaveformStorageEnable_CB->SetState(kButtonDisabled);
+    if(!TheACQManager->GetADAQFileIsOpen()){
+      TI->WaveformFileName_TB->SetState(kButtonUp);
+      TI->WaveformCreateFile_TB->SetState(kButtonUp);
+      TI->WaveformCreateFile_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(18));
+      TI->WaveformCreateFile_TB->SetForegroundColor(TI->ColorManager->Number2Pixel(kBlack));
+      TI->WaveformCreateFile_TB->SetText("Create ADAQ file");
+      TI->WaveformCloseFile_TB->SetState(kButtonDisabled);
+      TI->WaveformStorageEnable_CB->SetState(kButtonUp);
+      TI->WaveformStorageEnable_CB->SetState(kButtonDisabled);
+    }
     
     break;
   }
@@ -491,9 +496,7 @@ void AASubtabSlots::HandleTextButtons()
 
     
   case SpectrumSave_TB_ID:{
-    
     AAAcquisitionManager::GetInstance()->SaveSpectrum(SpectrumFileName);
-
     break;
   }
     
@@ -526,11 +529,11 @@ void AASubtabSlots::HandleTextButtons()
 
     
   case CanvasSave_TB_ID:{
-
+    
     size_t Found = CanvasFileName.find_last_of(".");
-
+    
     if(Found != string::npos){
-
+      
       string FileExtension = CanvasFileName.substr(Found, string::npos);
       
       if(TI->CanvasSaveWithTimeExtension_CB->IsDown()){
@@ -542,7 +545,7 @@ void AASubtabSlots::HandleTextButtons()
 	
 	CanvasFileName.insert(Found, TimeString);
       }
-      
+      TI->DisplayCanvas_EC->GetCanvas()->Update();
       TI->DisplayCanvas_EC->GetCanvas()->Print(CanvasFileName.c_str(),
 					       FileExtension.substr(1).c_str());
     }

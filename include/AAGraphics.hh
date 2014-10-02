@@ -7,6 +7,7 @@
 #include <TBox.h>
 #include <TCanvas.h>
 #include <TH1F.h>
+#include <TGraph.h>
 
 #include <vector>
 using namespace std;
@@ -61,6 +62,8 @@ private:
 
   string Title, XTitle, YTitle;
   double XSize, YSize, XOffset, YOffset;
+
+  vector<TGraph *> WaveformGraphs;
 };
 
 

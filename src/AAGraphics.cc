@@ -108,7 +108,14 @@ void AAGraphics::PlotWaveforms(vector<vector<Short_t> > &Waveforms,
 			       int WaveformLength,
 			       vector<double> &BaselineValue)
 {
-  vector<TGraph *> WaveformGraphs;
+  // Delete previous TGraphs to prevent bleeding memory
+  vector<TGraph *>::iterator it = WaveformGraphs.begin();
+  for(; it!=WaveformGraphs.end(); it++)
+    delete (*it);
+
+  // Clear out the vector to start with size 0
+  WaveformGraphs.clear();
+  
   for(int ch=0; ch<TheSettings->ChEnable.size(); ch++){
     
     if(!TheSettings->ChEnable[ch])
@@ -183,10 +190,6 @@ void AAGraphics::PlotWaveforms(vector<vector<Short_t> > &Waveforms,
   (TheSettings->DisplayGrid) ? gPad->SetGrid(true, true) : gPad->SetGrid(false, false);
   
   TheCanvas_C->Update();
-
-  vector<TGraph *>::iterator it = WaveformGraphs.begin();
-  for(; it!=WaveformGraphs.end(); it++)
-    delete (*it);
 }
 
 
