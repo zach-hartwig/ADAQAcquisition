@@ -126,7 +126,21 @@ void AAGraphics::PlotWaveforms(vector<vector<Short_t> > &Waveforms,
     TGraph *Waveform_G = new TGraph(WaveformLength, &Time[0], &Voltage[0]);
     WaveformGraphs.push_back(Waveform_G);
 
-    Waveform_G->Draw("AL");
+    // Set the waveform graphical options
+
+    Waveform_G->SetLineColor(ChColor[ch]);
+    Waveform_G->SetLineWidth(WaveformWidth);
+    Waveform_G->SetMarkerStyle(24);
+    Waveform_G->SetMarkerSize(0.75);
+    Waveform_G->SetMarkerColor(ChColor[ch]);
+    Waveform_G->SetFillColor(ChColor[ch]);
+    
+    if(TheSettings->WaveformWithCurve)
+      Waveform_G->Draw("AC");
+    else if(TheSettings->WaveformWithMarkers)
+      Waveform_G->Draw("AP");
+    else
+      Waveform_G->Draw("APC");
 
     // Set the horiz. and vert. min/max ranges of the waveform.  Note
     // the max value is the max digitizer bit value in units of ADC
@@ -150,11 +164,6 @@ void AAGraphics::PlotWaveforms(vector<vector<Short_t> > &Waveforms,
       gPad->SetLogy(false);
 
     Waveform_G->GetYaxis()->SetRangeUser(YMin, YMax);
-
-    // Set the waveform line properties
-
-    Waveform_G->SetLineColor(ChColor[ch]);
-    Waveform_G->SetLineWidth(WaveformWidth);
 
     // Set the waveform title and axes properties
     Waveform_G->SetTitle(Title.c_str());
@@ -221,15 +230,24 @@ void AAGraphics::SetupSpectrumGraphics()
 void AAGraphics::PlotSpectrum(TH1F *Spectrum_H)
 {
   int Channel = TheSettings->SpectrumChannel;
-  
-  Spectrum_H->Draw("B");
-
-  Spectrum_H->SetFillColor(kBlue);
-
-  // Set spectrum graphical attributes
 
   Spectrum_H->SetLineColor(ChColor[Channel]);
   Spectrum_H->SetLineWidth(SpectrumWidth);
+  Spectrum_H->SetMarkerStyle(24);
+  Spectrum_H->SetMarkerColor(ChColor[Channel]);
+  Spectrum_H->SetMarkerSize(0.75);
+  Spectrum_H->SetFillColor(ChColor[Channel]);
+
+  if(TheSettings->SpectrumWithCurve){
+    Spectrum_H->SetFillStyle(4100);
+    Spectrum_H->Draw("C");
+  }
+  else if(TheSettings->SpectrumWithMarkers)
+    Spectrum_H->Draw("E1");
+  else
+    Spectrum_H->Draw("B");
+
+
 
   // Set spectrum axes range and lin/log 
 

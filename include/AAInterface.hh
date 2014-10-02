@@ -260,11 +260,12 @@ private:
   TGTextButton *SpectrumCalibrationWrite_TB;
 
   // Graphics
-
-  TGCheckButton *DisplayLegend_CB;
-  TGCheckButton *DisplayGrid_CB;
-  TGCheckButton *DisplayXAxisLog_CB;
-  TGCheckButton *DisplayYAxisLog_CB;
+  
+  TGCheckButton *DisplayLegend_CB, *DisplayGrid_CB;
+  TGCheckButton *DisplayXAxisLog_CB, *DisplayYAxisLog_CB;
+  
+  TGRadioButton *DrawWaveformWithCurve_RB, *DrawWaveformWithMarkers_RB, *DrawWaveformWithBoth_RB;
+  TGRadioButton *DrawSpectrumWithCurve_RB, *DrawSpectrumWithMarkers_RB, *DrawSpectrumWithBars_RB;
   
   TGCheckButton *DisplayTitlesEnable_CB;
   ADAQTextEntryWithLabel *DisplayTitle_TEL, *DisplayXTitle_TEL, *DisplayYTitle_TEL;

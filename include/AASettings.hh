@@ -120,6 +120,9 @@ public:
   bool DisplayLegend, DisplayGrid;
   bool DisplayXAxisInLog, DisplayYAxisInLog;
 
+  bool WaveformWithCurve, WaveformWithMarkers, WaveformWithBoth;
+  bool SpectrumWithCurve, SpectrumWithMarkers, SpectrumWithBars;
+
   int SpectrumRefreshRate;
 
   

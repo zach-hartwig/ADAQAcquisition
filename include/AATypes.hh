@@ -192,6 +192,14 @@ enum{
   DisplayXAxisLog_CB_ID,
   DisplayYAxisLog_CB_ID,
 
+  DrawWaveformWithCurve_RB_ID,
+  DrawWaveformWithMarkers_RB_ID,
+  DrawWaveformWithBoth_RB_ID,
+
+  DrawSpectrumWithCurve_RB_ID,
+  DrawSpectrumWithMarkers_RB_ID,
+  DrawSpectrumWithBars_RB_ID,
+
   DisplayTitlesEnable_CB_ID,
   DisplayTitle_TEL_ID,
   DisplayXTitle_TEL_ID,

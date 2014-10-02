@@ -1525,27 +1525,84 @@ void AAInterface::FillAcquisitionFrame()
   DisplaySettings_GF->SetTitlePos(TGGroupFrame::kCenter);
   GraphicsSubframe->AddFrame(DisplaySettings_GF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
 
+
+  TGHorizontalFrame *Display_HF0 = new TGHorizontalFrame(DisplaySettings_GF);
+  DisplaySettings_GF->AddFrame(Display_HF0, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+  
   // ROOT check button to enable/disable plotting of the legend
-  DisplaySettings_GF->AddFrame(DisplayLegend_CB = new TGCheckButton(DisplaySettings_GF, "Draw legend", -1),
-			       new TGLayoutHints(kLHintsNormal,0,0,5,0));
+  Display_HF0->AddFrame(DisplayLegend_CB = new TGCheckButton(Display_HF0, "Draw legend ", -1),
+			new TGLayoutHints(kLHintsNormal,0,0,5,0));
   DisplayLegend_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
   
-  DisplaySettings_GF->AddFrame(DisplayGrid_CB = new TGCheckButton(DisplaySettings_GF, "Draw grid", DisplayGrid_CB_ID),
-			       new TGLayoutHints(kLHintsNormal, 0,0,0,5));
+  Display_HF0->AddFrame(DisplayGrid_CB = new TGCheckButton(Display_HF0, "Draw grid", DisplayGrid_CB_ID),
+			new TGLayoutHints(kLHintsNormal, 0,0,5,0));
   DisplayGrid_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
   DisplayGrid_CB->SetState(kButtonDown);
 
+
+  TGHorizontalFrame *Display_HF1 = new TGHorizontalFrame(DisplaySettings_GF);
+  DisplaySettings_GF->AddFrame(Display_HF1, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+
   // ROOT check buttons for specifying if X and Y axes on spectra should be logarithmic
-  DisplaySettings_GF->AddFrame(DisplayXAxisLog_CB = new TGCheckButton(DisplaySettings_GF, "Log X-axis  ", DisplayXAxisLog_CB_ID),
-			       new TGLayoutHints(kLHintsLeft,0,0,0,0));
+  Display_HF1->AddFrame(DisplayXAxisLog_CB = new TGCheckButton(Display_HF1, "Log X-axis  ", DisplayXAxisLog_CB_ID),
+			new TGLayoutHints(kLHintsLeft,0,0,5,0));
   DisplayXAxisLog_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
   
-  DisplaySettings_GF->AddFrame(DisplayYAxisLog_CB = new TGCheckButton(DisplaySettings_GF, "Log Y-axis", DisplayYAxisLog_CB_ID),
-			       new TGLayoutHints(kLHintsLeft,0,0,0,0));
+  Display_HF1->AddFrame(DisplayYAxisLog_CB = new TGCheckButton(Display_HF1, "Log Y-axis", DisplayYAxisLog_CB_ID),
+			new TGLayoutHints(kLHintsLeft,0,0,5,0));
   DisplayYAxisLog_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
 
-  DisplaySettings_GF->AddFrame(SpectrumRefreshRate_NEL = new ADAQNumberEntryWithLabel(DisplaySettings_GF, "Spectrum refresh rate", -1),
+  
+  TGGroupFrame *WaveformDrawOptions_GF = new TGGroupFrame(DisplaySettings_GF, "Waveform options", kHorizontalFrame);
+  DisplaySettings_GF->AddFrame(WaveformDrawOptions_GF,
+			       new TGLayoutHints(kLHintsTop, 0,0,5,0));
+
+  WaveformDrawOptions_GF->AddFrame(DrawWaveformWithCurve_RB = new TGRadioButton(WaveformDrawOptions_GF,
+										"Curve ",
+										DrawWaveformWithCurve_RB_ID),
+				   new TGLayoutHints(kLHintsNormal, 0,3,3,-2));
+  DrawWaveformWithCurve_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
+  DrawWaveformWithCurve_RB->SetState(kButtonDown);
+  
+  WaveformDrawOptions_GF->AddFrame(DrawWaveformWithMarkers_RB = new TGRadioButton(WaveformDrawOptions_GF,
+										  "Markers ",
+										  DrawWaveformWithMarkers_RB_ID),
+				   new TGLayoutHints(kLHintsNormal, 0,3,3,-2));
+  DrawWaveformWithMarkers_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
+
+  WaveformDrawOptions_GF->AddFrame(DrawWaveformWithBoth_RB = new TGRadioButton(WaveformDrawOptions_GF,
+									       "Both",
+									       DrawWaveformWithBoth_RB_ID),
+				   new TGLayoutHints(kLHintsNormal, 0,3,3,-2));
+  DrawWaveformWithBoth_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
+
+  
+  TGGroupFrame *SpectrumDrawOptions_GF = new TGGroupFrame(DisplaySettings_GF, "Spectrum options", kHorizontalFrame);
+  DisplaySettings_GF->AddFrame(SpectrumDrawOptions_GF,
 			       new TGLayoutHints(kLHintsNormal, 0,0,5,0));
+  
+  SpectrumDrawOptions_GF->AddFrame(DrawSpectrumWithCurve_RB = new TGRadioButton(SpectrumDrawOptions_GF,
+										"Curve ",
+										DrawSpectrumWithCurve_RB_ID),
+				   new TGLayoutHints(kLHintsNormal, 0,3,3,-2));
+  DrawSpectrumWithCurve_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
+  DrawSpectrumWithCurve_RB->SetState(kButtonDown);
+  
+  SpectrumDrawOptions_GF->AddFrame(DrawSpectrumWithMarkers_RB = new TGRadioButton(SpectrumDrawOptions_GF,
+										  "Markers ",
+										  DrawSpectrumWithMarkers_RB_ID),
+				   new TGLayoutHints(kLHintsNormal, 0,3,3,-2));
+  DrawSpectrumWithMarkers_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
+  
+  SpectrumDrawOptions_GF->AddFrame(DrawSpectrumWithBars_RB = new TGRadioButton(SpectrumDrawOptions_GF,
+									       "Bars",
+									       DrawSpectrumWithBars_RB_ID),
+				   new TGLayoutHints(kLHintsNormal, 0,3,3,-2));
+  DrawSpectrumWithBars_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
+
+
+  DisplaySettings_GF->AddFrame(SpectrumRefreshRate_NEL = new ADAQNumberEntryWithLabel(DisplaySettings_GF, "Spectrum refresh rate", -1),
+			       new TGLayoutHints(kLHintsNormal, 0,0,10,0));
   SpectrumRefreshRate_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
   SpectrumRefreshRate_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
   SpectrumRefreshRate_NEL->GetEntry()->SetNumber(100);
@@ -1799,9 +1856,13 @@ void AAInterface::SaveSettings()
   TheSettings->DisplayXAxisInLog = DisplayXAxisLog_CB->IsDown();
   TheSettings->DisplayYAxisInLog = DisplayYAxisLog_CB->IsDown();
   
-  TheSettings->WaveformStorageEnable = WaveformStorageEnable_CB->IsDown();
-  TheSettings->SpectrumSaveWithTimeExtension = SpectrumSaveWithTimeExtension_CB->IsDown();
-  TheSettings->CanvasSaveWithTimeExtension = CanvasSaveWithTimeExtension_CB->IsDown();
+  TheSettings->WaveformWithCurve = DrawWaveformWithCurve_RB->IsDown();
+  TheSettings->WaveformWithMarkers = DrawWaveformWithMarkers_RB->IsDown();
+  TheSettings->WaveformWithBoth = DrawWaveformWithBoth_RB->IsDown();
+  
+  TheSettings->SpectrumWithCurve = DrawSpectrumWithCurve_RB->IsDown();
+  TheSettings->SpectrumWithMarkers = DrawSpectrumWithMarkers_RB->IsDown();
+  TheSettings->SpectrumWithBars = DrawSpectrumWithBars_RB->IsDown();
   
   TheSettings->SpectrumRefreshRate = SpectrumRefreshRate_NEL->GetEntry()->GetIntNumber();
   
@@ -1809,6 +1870,16 @@ void AAInterface::SaveSettings()
   ////////////////////////////
   // Persistent storage subtab
 
+  TheSettings->WaveformStorageEnable = WaveformStorageEnable_CB->IsDown();
+  TheSettings->SpectrumSaveWithTimeExtension = SpectrumSaveWithTimeExtension_CB->IsDown();
+  TheSettings->CanvasSaveWithTimeExtension = CanvasSaveWithTimeExtension_CB->IsDown();
+
+
+  // Because of the (in my frank opinion) pain in the ass way that
+  // ROOT specifies button widget states, it is necessary to specially
+  // readout buttons that are disabled AND selected. Do this all in
+  // one place to minimize code overhead
+  
   bool AcquisitionOn = AAAcquisitionManager::GetInstance()->GetAcquisitionEnable();
 
   if(AcquisitionOn){
