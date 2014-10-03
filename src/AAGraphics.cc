@@ -247,8 +247,6 @@ void AAGraphics::PlotSpectrum(TH1F *Spectrum_H)
   else
     Spectrum_H->Draw("B");
 
-
-
   // Set spectrum axes range and lin/log 
 
   double XMin = TheSettings->SpectrumMaxBin * TheSettings->HorizontalSliderMin;
