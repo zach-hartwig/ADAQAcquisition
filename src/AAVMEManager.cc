@@ -20,14 +20,14 @@ AAVMEManager::AAVMEManager()
   if(TheVMEManager)
     cout << "\nError! The VMEManager was constructed twice!\n" << endl;
   TheVMEManager = this;
-
-  BRMgr = new ADAQBridge;
+  
+  BRMgr = new ADAQBridge(zV1718, 0, 0x00000000);
   BRMgr->SetVerbose(true);
-
-  DGMgr = new ADAQDigitizer;
+  
+  DGMgr = new ADAQDigitizer(zV1720, 42, DGAddress);
   DGMgr->SetVerbose(true);
-
-  HVMgr = new ADAQHighVoltage;
+  
+  HVMgr = new ADAQHighVoltage(zV6534M, 4242, HVAddress);
   HVMgr->SetVerbose(true);
 }
 

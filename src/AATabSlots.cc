@@ -15,6 +15,7 @@
 #include "AATabSlots.hh"
 #include "AAInterface.hh"
 #include "AAVMEManager.hh"
+#include "AAAcquisitionManager.hh"
 
 
 AATabSlots::AATabSlots(AAInterface *TheInterface)
@@ -55,7 +56,8 @@ void AATabSlots::HandleConnectionTextButtons()
       if(TheVMEManager->GetDGEnable()){
 	uint32_t Addr = TI->BoardAddress_NEF[V1720]->GetHexNumber();
 	TheVMEManager->SetDGAddress(Addr);
-	DGLinkOpen = TheVMEManager->GetDGManager()->OpenLink(Addr);
+	TheVMEManager->GetDGManager()->SetBoardAddress(Addr);
+	DGLinkOpen = TheVMEManager->GetDGManager()->OpenLink();
 	
 	if(DGLinkOpen == 0)
 	  TheVMEManager->GetDGManager()->Initialize();
@@ -77,7 +79,8 @@ void AATabSlots::HandleConnectionTextButtons()
       if(TheVMEManager->GetHVEnable()){
 	uint32_t Addr = TI->BoardAddress_NEF[V6534]->GetHexNumber();
 	TheVMEManager->SetHVAddress(Addr);
-	HVLinkOpen = TheVMEManager->GetHVManager()->OpenLink(Addr);
+	TheVMEManager->GetHVManager()->SetBoardAddress(Addr);
+	HVLinkOpen = TheVMEManager->GetHVManager()->OpenLink();
 	
 	if(HVLinkOpen == 0)
 	  TheVMEManager->GetHVManager()->SetToSafeState();
@@ -85,6 +88,8 @@ void AATabSlots::HandleConnectionTextButtons()
       
       if(BRLinkOpen == 0 or DGLinkOpen == 0 or HVLinkOpen == 0){
 	TheVMEManager->SetVMEConnectionEstablished(true);
+
+	AAAcquisitionManager::GetInstance()->Initialize();
 
 	TI->VMEConnect_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOn));
 	TI->VMEConnect_TB->SetText("Connected: click to disconnect");

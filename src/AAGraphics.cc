@@ -152,10 +152,10 @@ void AAGraphics::PlotWaveforms(vector<vector<Short_t> > &Waveforms,
     (TheSettings->DisplayXAxisInLog) ? 
       gPad->SetLogx(true) : gPad->SetLogx(false);
     
-    int AbsoluteMax = AAVMEManager::GetInstance()->GetDGManager()->GetMaxBit();
+    int AbsoluteMax = AAVMEManager::GetInstance()->GetDGManager()->GetMaxADCBit();
     double YMin = AbsoluteMax * TheSettings->VerticalSliderMin;
     double YMax = AbsoluteMax * TheSettings->VerticalSliderMax;
-
+    
     if(TheSettings->DisplayYAxisInLog){
       if(YMin == 0) YMin = 1;
       gPad->SetLogy(true);

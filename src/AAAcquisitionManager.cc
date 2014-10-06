@@ -31,13 +31,21 @@ AAAcquisitionManager::AAAcquisitionManager()
   if(TheAcquisitionManager)
     cout << "\nError! The AcquisitionManager was constructed twice!\n" << endl;
   TheAcquisitionManager = this;
-  
+}
+
+
+AAAcquisitionManager::~AAAcquisitionManager()
+{;}
+
+
+void AAAcquisitionManager::Initialize()
+{
   ADAQDigitizer *DGManager = AAVMEManager::GetInstance()->GetDGManager();
   
   int DGChannels = DGManager->GetNumChannels();
   
-  for(int ch=0; ch<DGManager->GetNumChannels(); ch++){
-
+  for(int ch=0; ch<DGChannels; ch++){
+    
     BufferFull.push_back(true);
     
     BaselineStart.push_back(0);
@@ -58,10 +66,6 @@ AAAcquisitionManager::AAAcquisitionManager()
 }
 
 
-AAAcquisitionManager::~AAAcquisitionManager()
-{;}
-
-
 void AAAcquisitionManager::PreAcquisition()
 {
   ADAQDigitizer *DGManager = AAVMEManager::GetInstance()->GetDGManager();
@@ -77,12 +81,13 @@ void AAAcquisitionManager::PreAcquisition()
   AcquisitionTimePrev = 0;
   
   // Baseline calculation
+
   for(int ch=0; ch<DGChannels; ch++){
     BaselineStart[ch] = TheSettings->ChBaselineCalcMin[ch];
     BaselineStop[ch] = TheSettings->ChBaselineCalcMax[ch];
     BaselineLength[ch] = BaselineStop[ch] - BaselineStart[ch];
     BaselineValue[ch] = 0.;
-    
+
     if(TheSettings->ChPosPolarity[ch])
       Polarity[ch] = 1.;
     else

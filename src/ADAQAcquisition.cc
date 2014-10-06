@@ -33,7 +33,9 @@ int main(int argc, char **argv)
   // Create the various singleton manager classes. 
 
   AAVMEManager *TheVMEManager = new AAVMEManager;
+
   AAAcquisitionManager *TheACQManager = new AAAcquisitionManager;
+
   AAGraphics *TheGraphicsManager = new AAGraphics;
   
   // Create the graphical user interface

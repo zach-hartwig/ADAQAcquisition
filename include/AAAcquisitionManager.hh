@@ -31,6 +31,8 @@ public:
 
   static AAAcquisitionManager *GetInstance();
 
+  void Initialize();
+
   void PreAcquisition();
   void StartAcquisition();
   void StopAcquisition();
