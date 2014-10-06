@@ -109,9 +109,8 @@ void AAAcquisitionManager::PreAcquisition()
       Waveforms[ch].resize(0);
   }
 
-  // Calibration
-
   // Pulse spectra creation
+
   LLD = TheSettings->SpectrumLLD;
   ULD = TheSettings->SpectrumULD;
 

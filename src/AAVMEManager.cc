@@ -57,12 +57,16 @@ void AAVMEManager::ProgramDigitizers()
     
     DGMgr->SetChannelDCOffset(ch, TheSettings->ChDCOffset[ch]);
     DGMgr->SetChannelTriggerThreshold(ch, TheSettings->ChTriggerThreshold[ch]);
+
+    if(TheSettings->ZeroSuppressionEnable){
+      DGMgr->SetZSMode("ZLE");
     
-    DGMgr->SetZLEChannelSettings(ch,
-				 TheSettings->ChZSThreshold[ch],
-				 TheSettings->ChZSBackward[ch],
-				 TheSettings->ChZSForward[ch],
-				 TheSettings->ChZSPosLogic[ch]);
+      DGMgr->SetZLEChannelSettings(ch,
+				   TheSettings->ChZSThreshold[ch],
+				   TheSettings->ChZSBackward[ch],
+				   TheSettings->ChZSForward[ch],
+				   TheSettings->ChZSPosLogic[ch]);
+    }
   }
 
   DGMgr->SetChannelEnableMask(DGChEnableMask);
