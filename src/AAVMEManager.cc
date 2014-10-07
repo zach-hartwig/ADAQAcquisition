@@ -24,10 +24,10 @@ AAVMEManager::AAVMEManager()
   BRMgr = new ADAQBridge(zV1718, 0, 0x00000000);
   BRMgr->SetVerbose(true);
   
-  DGMgr = new ADAQDigitizer(zV1720, 42, DGAddress);
+  DGMgr = new ADAQDigitizer(zV1720, 0, DGAddress);
   DGMgr->SetVerbose(true);
   
-  HVMgr = new ADAQHighVoltage(zV6534M, 4242, HVAddress);
+  HVMgr = new ADAQHighVoltage(zV6534M, 0, HVAddress);
   HVMgr->SetVerbose(true);
 }
 

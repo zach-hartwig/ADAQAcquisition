@@ -92,6 +92,13 @@ private:
   uint32_t BufferSize, ReadSize, FPGAEvents, PCEvents;
   vector<vector<Short_t> > Waveforms;
   vector<bool> BufferFull;
+
+  uint32_t ReadoutType, ReadoutTypeBit, ReadoutTypeMask;
+
+  uint32_t *ZLEDataWords;
+  uint32_t ZLEEventSizeMask, ZLEEventSize;
+  uint32_t ZLESampleAMask, ZLESampleBMask;
+  uint32_t ZLENumWordMask, ZLEControlMask;
 #endif
 
   int WaveformLength;

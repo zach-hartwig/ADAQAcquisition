@@ -24,6 +24,12 @@ AAAcquisitionManager::AAAcquisitionManager()
     AcquisitionTimeNow(0), AcquisitionTimePrev(0),
     EventPointer(NULL), EventWaveform(NULL), Buffer(NULL),
     BufferSize(0), ReadSize(0), FPGAEvents(0), PCEvents(0),
+
+    ReadoutType(0), ReadoutTypeBit(24), ReadoutTypeMask(0b1 << ReadoutTypeBit),
+    ZLEEventSizeMask(0x0fffffff), ZLEEventSize(0),
+    ZLESampleAMask(0x0000ffff), ZLESampleBMask(0xffff0000), 
+    ZLENumWordMask(0x000fffff), ZLEControlMask(0xc0000000),
+
     WaveformLength(0), LLD(0), ULD(0), SampleHeight(0.), TriggerHeight(0.),
     PulseHeight(0.), PulseArea(0.),
     FillWaveformTree(false)
@@ -221,11 +227,97 @@ void AAAcquisitionManager::StartAcquisition()
 	  StopAcquisition();
       }
 
-      // Populate the EventInfo structure and assign address to the EventPointer
-      DGManager->GetEventInfo(Buffer, ReadSize, evt, &EventInfo, &EventPointer);
+      ///////////////////////////////
+      // Standard waveform readout //
+      ///////////////////////////////
+
+      if(true){
+
+	// Populate the EventInfo structure and assign address to the EventPointer
+	DGManager->GetEventInfo(Buffer, ReadSize, evt, &EventInfo, &EventPointer);
+	
+	//  Fill the EventWaveform structure with digitized signal voltages
+	DGManager->DecodeEvent(EventPointer, &EventWaveform);
+      }
+
       
-      //  Fill the EventWaveform structure with digitized signal voltages
-      DGManager->DecodeEvent(EventPointer, &EventWaveform);
+      ///////////////////////////////////////////
+      // Zero length encoding waveform readout //
+      ///////////////////////////////////////////
+
+      else{
+
+	// Cast a pointer to the PC buffer containing waveform data
+	ZLEDataWords = (uint32_t *)Buffer;
+
+	for(int i=0; i<4; i++){
+	  bitset<32> BinaryOut(ZLEDataWords[i]);
+	  cout << "Header[" << i << "]\t" << BinaryOut << endl;
+	}
+	cout << endl;
+
+	// Obtain the ZLE event size
+	ZLEEventSize = ZLEDataWords[0] & ZLEEventSizeMask;
+	cout << "ZLE event size: " << ZLEEventSize << endl;
+	
+	enum{STD,ZLE};
+	
+	int Test = ZLEDataWords[1] & ReadoutTypeMask;
+	if(Test >> ReadoutTypeBit == 0){
+	  cout << "Readout type: Standard" << endl;
+	  ReadoutType = STD;
+	}
+	else if(Test >> ReadoutTypeBit == 1){
+	  cout << "Readout type: ZLE" << endl;
+	  ReadoutType = ZLE;
+	}
+	cout << endl;
+
+	ZLEEventSize = ZLEDataWords[4];
+	
+	uint32_t WordCounter = 0;
+	
+	for(int i=5; i<ZLEEventSize; i++){
+
+	  uint32_t ZLEControl = ZLEDataWords[i] & ZLEControlMask;
+	  ZLEControl = ZLEControl >> 30;
+
+	  if(ZLEControl == 0b11){
+	    uint32_t NumWords = ZLEDataWords[i] & ZLENumWordMask;
+
+	    bitset<32> TMP(NumWords);
+
+	    cout << i << "\t" << "GOOD!"  << "\t"
+		 << NumWords << " words to follow!"
+		 << endl;
+
+	    WordCounter = 1;
+	  }
+	  else if(ZLEControl == 0b01){
+	    uint32_t NumWords = ZLEDataWords[i] & ZLENumWordMask;
+
+	    cout << i << "\t" << "skip" << "\t"
+		 << NumWords << " words have been skipped!"
+		 << endl;
+	  }
+	  else{
+	    cout << i << "\t" << "data" << "\t" 
+		 << "Word number: " << WordCounter << "\t\t";
+
+	    uint32_t SampleN = ZLEDataWords[i] & ZLESampleAMask;
+
+	    uint32_t SampleN_plus_1 = ZLEDataWords[i] & ZLESampleBMask;
+	    SampleN_plus_1 = SampleN_plus_1 >> 16;
+	    
+	    cout << "Sample[" << (WordCounter*2)-1 << "] = " << SampleN << "\t"
+		 << "Sample[" << (WordCounter*2) << "] = " << SampleN_plus_1 << "\t"
+		 << endl;
+	    
+	    WordCounter++;
+	  }
+	}
+	continue;
+      }
 
       // Prevent waveform analysis if there is nothing to analyze,
       // i.e. seg-fault protection just in case!
