@@ -1,12 +1,22 @@
+/////////////////////////////////////////////////////////////////////////////////
+//
+// name: RootLinkDef.h
+// date: 07 Oct 14
+// auth: Zach Hartwig
+// mail: hartwig@psfc.mit.edu
+// desc: Mandatory header file for ROOT dictionary generation
+///////////////////////////////////////////////////////////////////////////////// 
+
 #ifdef __CINT__
 
 #include <vector>
+#include <stdint.h>
 
 #pragma link off all globals;
 #pragma link off all classes;
 #pragma link off all functions;
 
-// Create dictionaries for the ADAQ classes
+// ADAQAcquisition classes
 #pragma link C++ class AAAcquisitionManager+;
 #pragma link C++ class AAChannelSlots+;
 #pragma link C++ class AADisplaySlots+;
@@ -17,8 +27,13 @@
 #pragma link C++ class AATabSlots+;
 #pragma link C++ class AAVMEManager+;
 
-#pragma link C++ class ADAQRootMeasParams+;
+// Create a special vector of uint16_t's. This type is used for
+// storing digitized waveform information and is necessary to define
+// here to be compatible with the ROOT-agnostic ADAQ libraries
+// (otherwise, we could simply have used the ROOT vector<Short_t> type)
+#pragma link C++ class std::vector<uint16_t>+;
 
-// #pragma link C++ class std::vector <Short_t>+;
+// ADAQ classes
+#pragma link C++ class ADAQRootMeasParams+;
 
 #endif

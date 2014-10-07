@@ -51,7 +51,7 @@ OBJS += $(BUILDDIR)/ADAQAcquisitionDict.o
 
 # Define compiler and add flags
 CXX = clang++
-CXXFLAGS += -ferror-limit=5 -w -I$(INCLDIR) -I$(ADAQHOME)/include
+CXXFLAGS += -ferror-limit=5 -w -I$(INCLDIR) -I$(ADAQHOME)/include -std=c++0x
 
 # Add linker flags for ADAQ libraries
 LDFLAGS+=-L$(ADAQHOME)/lib/$(HOSTTYPE) -lADAQ 

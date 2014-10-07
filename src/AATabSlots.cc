@@ -341,16 +341,16 @@ void AATabSlots::HandlePulserTextButtons()
 
   if(TextButton->GetString()=="Stopped"){
     // Update button color from red to green andn update text
-    TextButton->SetBackgroundColor(TI->ColorManager->Number2Pixel(8));
-    TextButton->SetForegroundColor(TI->ColorManager->Number2Pixel(1));
+    TextButton->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOn));
+    TextButton->SetForegroundColor(TI->ColorManager->Number2Pixel(TI->ButtonForeColor));
     TextButton->SetText("Pulsing");
 
     TheVMEManager->GetBRManager()->StartPulser(Pulser);
   }
   else if(TextButton->GetString()=="Pulsing"){
     // Update button color from green to red and update text
-    TextButton->SetBackgroundColor(TI->ColorManager->Number2Pixel(2));
-    TextButton->SetForegroundColor(TI->ColorManager->Number2Pixel(1));
+    TextButton->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOff));
+    TextButton->SetForegroundColor(TI->ColorManager->Number2Pixel(TI->ButtonForeColor));
     TextButton->SetText("Stopped");
     
     TheVMEManager->GetBRManager()->StopPulser(Pulser);

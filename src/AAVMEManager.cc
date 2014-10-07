@@ -57,10 +57,15 @@ void AAVMEManager::ProgramDigitizers()
     
     DGMgr->SetChannelDCOffset(ch, TheSettings->ChDCOffset[ch]);
     DGMgr->SetChannelTriggerThreshold(ch, TheSettings->ChTriggerThreshold[ch]);
-
+    
+    if(TheSettings->ChPosPolarity[ch])
+      DGMgr->SetChannelPulsePolarity(ch, CAEN_DGTZ_PulsePolarityPositive);
+    else
+      DGMgr->SetChannelPulsePolarity(ch, CAEN_DGTZ_PulsePolarityNegative);
+    
     if(TheSettings->ZeroSuppressionEnable){
       DGMgr->SetZSMode("ZLE");
-    
+      
       DGMgr->SetZLEChannelSettings(ch,
 				   TheSettings->ChZSThreshold[ch],
 				   TheSettings->ChZSBackward[ch],
@@ -68,7 +73,7 @@ void AAVMEManager::ProgramDigitizers()
 				   TheSettings->ChZSPosLogic[ch]);
     }
   }
-
+  
   DGMgr->SetChannelEnableMask(DGChEnableMask);
 
   // Ensure that at least one channel is enabled in the channel

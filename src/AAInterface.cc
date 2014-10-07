@@ -548,14 +548,14 @@ void AAInterface::FillPulserFrame()
     V1718PulserPeriod_NEL[pulser]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
     V1718PulserPeriod_NEL[pulser]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
     V1718PulserPeriod_NEL[pulser]->GetEntry()->Resize(XSize,YSize);
-    V1718PulserPeriod_NEL[pulser]->GetEntry()->SetNumber(4);
+    V1718PulserPeriod_NEL[pulser]->GetEntry()->SetNumber(250);
   
     PulserSettings_VF->AddFrame(V1718PulserWidth_NEL[pulser] = new ADAQNumberEntryWithLabel(PulserSettings_VF, "Width (number of time units)", -1),
 				new TGLayoutHints(kLHintsNormal, 5,5,5,0));
     V1718PulserWidth_NEL[pulser]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
     V1718PulserWidth_NEL[pulser]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
     V1718PulserWidth_NEL[pulser]->GetEntry()->Resize(XSize,YSize);
-    V1718PulserWidth_NEL[pulser]->GetEntry()->SetNumber(1);
+    V1718PulserWidth_NEL[pulser]->GetEntry()->SetNumber(20);
 
     PulserSettings_VF->AddFrame(V1718PulserPulses_NEL[pulser] = new ADAQNumberEntryWithLabel(PulserSettings_VF, "Number pulses (0 = infinite)", -1),
 				new TGLayoutHints(kLHintsNormal, 5,5,5,0));
@@ -794,7 +794,7 @@ void AAInterface::FillAcquisitionFrame()
 				       new TGLayoutHints(kLHintsNormal));
     DGChTriggerThreshold_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
     DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-    DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumber(2100);
+    DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumber(2150);
     DGChTriggerThreshold_NEL[ch]->GetEntry()->Resize(55,20);
     
     // ADAQ number entry to set minimum sample for baseline calculation [sample]
@@ -816,7 +816,8 @@ void AAInterface::FillAcquisitionFrame()
     DGChannelControl_GF->AddFrame(DGChZSThreshold_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "ZS threshold (ADC)", -1),
 				       new TGLayoutHints(kLHintsNormal));
     DGChZSThreshold_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-    DGChZSThreshold_NEL[ch]->GetEntry()->SetNumber(0);
+    DGChZSThreshold_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEANonNegative);
+    DGChZSThreshold_NEL[ch]->GetEntry()->SetNumber(2000);
     DGChZSThreshold_NEL[ch]->GetEntry()->Resize(55,20);
 
 
@@ -826,13 +827,15 @@ void AAInterface::FillAcquisitionFrame()
     ZS_HF0->AddFrame(DGChZSForward_NEL[ch] = new ADAQNumberEntryWithLabel(ZS_HF0, "ZS Frwd", -1),
 		     new TGLayoutHints(kLHintsNormal, 0,0,0,0));
     DGChZSForward_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-    DGChZSForward_NEL[ch]->GetEntry()->SetNumber(0);
+    DGChZSForward_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+    DGChZSForward_NEL[ch]->GetEntry()->SetNumber(10);
     DGChZSForward_NEL[ch]->GetEntry()->Resize(55,20);
 
     ZS_HF0->AddFrame(DGChZSBackward_NEL[ch] = new ADAQNumberEntryWithLabel(ZS_HF0, "ZS Back", -1),
 		     new TGLayoutHints(kLHintsNormal, 10,0,0,0));
     DGChZSBackward_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-    DGChZSBackward_NEL[ch]->GetEntry()->SetNumber(0);
+    DGChZSBackward_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+    DGChZSBackward_NEL[ch]->GetEntry()->SetNumber(10);
     DGChZSBackward_NEL[ch]->GetEntry()->Resize(55,20);
 
     TGHorizontalFrame *ZS_HF1 = new TGHorizontalFrame(DGChannelControl_GF);
@@ -1131,6 +1134,7 @@ void AAInterface::FillAcquisitionFrame()
 
   DGScopeReadoutControls_GF->AddFrame(DGZSEnable_CB = new TGCheckButton(DGScopeReadoutControls_GF, "Enable zero-suppression", DGZSEnable_CB_ID),
 				      new TGLayoutHints(kLHintsNormal, 5,5,0,5));
+  DGZSEnable_CB->SetState(kButtonDown);
 
 
   ///////////////////////

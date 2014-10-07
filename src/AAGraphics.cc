@@ -1,13 +1,18 @@
+// ROOT
 #include <TGraph.h>
 #include <TStyle.h>
 #include <TFrame.h>
 
+// Boost
 #include <boost/assign/std/vector.hpp>
 using namespace boost::assign;
 
+// C++
 #include <iostream>
 #include <sstream>
+#include <numeric>
 
+// ADAQAcquisition
 #include "AAGraphics.hh"
 #include "AAVMEManager.hh"
 #include "AAAcquisitionManager.hh"
@@ -104,7 +109,7 @@ void AAGraphics::SetupWaveformGraphics(int WaveformLength)
 }
 
 
-void AAGraphics::PlotWaveforms(vector<vector<Short_t> > &Waveforms, 
+void AAGraphics::PlotWaveforms(vector<vector<uint16_t> > &Waveforms, 
 			       int WaveformLength,
 			       vector<double> &BaselineValue)
 {
@@ -112,10 +117,10 @@ void AAGraphics::PlotWaveforms(vector<vector<Short_t> > &Waveforms,
   vector<TGraph *>::iterator it = WaveformGraphs.begin();
   for(; it!=WaveformGraphs.end(); it++)
     delete (*it);
-
+  
   // Clear out the vector to start with size 0
   WaveformGraphs.clear();
-  
+
   for(int ch=0; ch<TheSettings->ChEnable.size(); ch++){
     
     if(!TheSettings->ChEnable[ch])
@@ -123,7 +128,20 @@ void AAGraphics::PlotWaveforms(vector<vector<Short_t> > &Waveforms,
 
     vector<int> Voltage (Waveforms[ch].begin(), Waveforms[ch].end());
 
+    // Zero length encoding waveforms
+
+    if(TheSettings->ZeroSuppressionEnable){
+      WaveformLength = Voltage.size();
+      Time.resize(WaveformLength);
+      iota(begin(Time), end(Time), 0);
+
+      //      for(int i=0; i<WaveformLength; i++)
+      //	cout << Time[i] << "\t" << Voltage[i] << endl;
+
+    }
+    
     TGraph *Waveform_G = new TGraph(WaveformLength, &Time[0], &Voltage[0]);
+
     WaveformGraphs.push_back(Waveform_G);
 
     // Set the waveform graphical options

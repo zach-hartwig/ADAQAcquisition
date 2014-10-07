@@ -78,14 +78,18 @@ void AAAcquisitionManager::PreAcquisition()
 
   int DGChannels = DGManager->GetNumChannels();
 
-  /////////////////////////////////////////////////
-  // Initialize general member data for acquisition
+  ////////////////////////////////////////////////////
+  // Initialize general member data for acquisition //
+  ////////////////////////////////////////////////////
 
+  ////////////////////
   // Acquisition timer
 
   AcquisitionTimeNow = 0;
   AcquisitionTimePrev = 0;
   
+
+  ///////////////////////
   // Baseline calculation
 
   for(int ch=0; ch<DGChannels; ch++){
@@ -100,21 +104,40 @@ void AAAcquisitionManager::PreAcquisition()
       Polarity[ch] = -1.;
   }
   
+  
+  ///////////////////
   // Waveform readout
-  
-  WaveformLength = TheSettings->RecordLength;
-  if(TheSettings->DataReductionEnable)
-    WaveformLength /= TheSettings->DataReductionFactor;
-  
-  Waveforms.clear();
-  Waveforms.resize(DGChannels);
-  for(int ch=0; ch<DGChannels; ch++){
-    if(TheSettings->ChEnable[ch])
-      Waveforms[ch].resize(WaveformLength);
-    else
-      Waveforms[ch].resize(0);
+
+  // Zero length encoding: All digitizer channels (outer vector) are
+  // preallocated; the waveform vector (inner vector) memory is _not_
+  // preallocated since length of the waveform is unknown due to
+  // operation of ZLE algorithm.
+  if(TheSettings->ZeroSuppressionEnable){
+    Waveforms.clear();
+    Waveforms.resize(DGChannels);
   }
 
+  // Standard: All digitizer channels (outer vector) are preallocated;
+  // the waveform vector (inner vector) memory _is_ preallocated to
+  // store the waveforms since the length (== RecordLength) is
+  // constant and known in advance of waveform readout
+  else{
+    WaveformLength = TheSettings->RecordLength;
+    if(TheSettings->DataReductionEnable)
+      WaveformLength /= TheSettings->DataReductionFactor;
+    
+    Waveforms.clear();
+    Waveforms.resize(DGChannels);
+    for(int ch=0; ch<DGChannels; ch++){
+      if(TheSettings->ChEnable[ch])
+	Waveforms[ch].resize(WaveformLength);
+      else
+	Waveforms[ch].resize(0);
+    }
+  }
+
+
+  /////////////////////////
   // Pulse spectra creation
 
   LLD = TheSettings->SpectrumLLD;
@@ -231,7 +254,10 @@ void AAAcquisitionManager::StartAcquisition()
       // Standard waveform readout //
       ///////////////////////////////
 
-      if(true){
+      // Standard waveforms are obtained by using the CAENDigitizer
+      // methods encapsulated by the ADAQ libraries
+
+      if(!TheSettings->ZeroSuppressionEnable){
 
 	// Populate the EventInfo structure and assign address to the EventPointer
 	DGManager->GetEventInfo(Buffer, ReadSize, evt, &EventInfo, &EventPointer);
@@ -245,114 +271,52 @@ void AAAcquisitionManager::StartAcquisition()
       // Zero length encoding waveform readout //
       ///////////////////////////////////////////
 
+      // ZLE waveforms are obtained using custom ADAQ methods to
+      // readout the PC buffer directly into the "Waveforms" data
+      // member.
+      
       else{
-
-	// Cast a pointer to the PC buffer containing waveform data
-	ZLEDataWords = (uint32_t *)Buffer;
-
-	for(int i=0; i<4; i++){
-	  bitset<32> BinaryOut(ZLEDataWords[i]);
-	  cout << "Header[" << i << "]\t" << BinaryOut << endl;
-	}
-	cout << endl;
-
-	// Obtain the ZLE event size
-	ZLEEventSize = ZLEDataWords[0] & ZLEEventSizeMask;
-	cout << "ZLE event size: " << ZLEEventSize << endl;
-	
-	enum{STD,ZLE};
-	
-	int Test = ZLEDataWords[1] & ReadoutTypeMask;
-	if(Test >> ReadoutTypeBit == 0){
-	  cout << "Readout type: Standard" << endl;
-	  ReadoutType = STD;
-	}
-	else if(Test >> ReadoutTypeBit == 1){
-	  cout << "Readout type: ZLE" << endl;
-	  ReadoutType = ZLE;
-	}
-	cout << endl;
-
-	ZLEEventSize = ZLEDataWords[4];
-	
-	uint32_t WordCounter = 0;
-	
-	for(int i=5; i<ZLEEventSize; i++){
-
-	  uint32_t ZLEControl = ZLEDataWords[i] & ZLEControlMask;
-	  ZLEControl = ZLEControl >> 30;
-
-	  if(ZLEControl == 0b11){
-	    uint32_t NumWords = ZLEDataWords[i] & ZLENumWordMask;
-
-	    bitset<32> TMP(NumWords);
-
-	    cout << i << "\t" << "GOOD!"  << "\t"
-		 << NumWords << " words to follow!"
-		 << endl;
-
-	    WordCounter = 1;
-	  }
-	  else if(ZLEControl == 0b01){
-	    uint32_t NumWords = ZLEDataWords[i] & ZLENumWordMask;
-
-	    cout << i << "\t" << "skip" << "\t"
-		 << NumWords << " words have been skipped!"
-		 << endl;
-	  }
-	  else{
-	    cout << i << "\t" << "data" << "\t" 
-		 << "Word number: " << WordCounter << "\t\t";
-
-	    uint32_t SampleN = ZLEDataWords[i] & ZLESampleAMask;
-
-	    uint32_t SampleN_plus_1 = ZLEDataWords[i] & ZLESampleBMask;
-	    SampleN_plus_1 = SampleN_plus_1 >> 16;
-	    
-	    cout << "Sample[" << (WordCounter*2)-1 << "] = " << SampleN << "\t"
-		 << "Sample[" << (WordCounter*2) << "] = " << SampleN_plus_1 << "\t"
-		 << endl;
-	    
-	    WordCounter++;
-	  }
-	}
-	continue;
+	DGManager->GetZLEWaveform(Buffer, evt, Waveforms);
+	DGManager->PrintZLEEventInfo(Buffer);
       }
-
+      
       // Prevent waveform analysis if there is nothing to analyze,
       // i.e. seg-fault protection just in case!
-      if(EventWaveform == NULL)
-	continue;
+      //      if(EventWaveform == NULL)
+      //      	continue;
       
       // Iterate over the digitizer channels that are enabled
       for(int ch=0; ch<DGManager->GetNumChannels(); ch++){
 	
 	if(!TheSettings->ChEnable[ch])
 	  continue;
-
+	
 	BaselineValue[ch] = PulseHeight = PulseArea = 0.;
 	
-	for(int sample=0; sample<TheSettings->RecordLength; sample++){
+	int NumSamples = Waveforms[ch].size();
+	for(int sample=0; sample<NumSamples; sample++){
+
+	  // For "standard" or "data reduction" readout, the Waveforms
+	  // vector-of-vectors must be filled from the CAEN EventWaveform
 	  
-	  /////////////////////////
-	  // Data reduction readout
-	  
-	  if(TheSettings->DataReductionEnable){
-	    if(sample % TheSettings->DataReductionFactor == 0){
-	      int Index = sample / TheSettings->DataReductionFactor;
-	      Waveforms[ch][Index] = EventWaveform->DataChannel[ch][sample];
+	  if(!TheSettings->ZeroSuppressionEnable){
+	    
+	    // Data reduction readout
+	    if(TheSettings->DataReductionEnable){
+	      if(sample % TheSettings->DataReductionFactor == 0){
+		int Index = sample / TheSettings->DataReductionFactor;
+		Waveforms[ch][Index] = EventWaveform->DataChannel[ch][sample];
+	      }
 	    }
+
+	    // Standard readout
+	    else
+	      Waveforms[ch][sample] = EventWaveform->DataChannel[ch][sample];
 	  }
-
-	  ///////////////////
-	  // Standard readout
-
-	  else
-	    Waveforms[ch][sample] = EventWaveform->DataChannel[ch][sample];
-
+	  
 	  ///////////////////
 	  // Pulse processing
-
+	  
 	  if(!TheSettings->UltraRateMode){
 	  
 	    // Calculate the baseline by taking the average of all
@@ -441,7 +405,7 @@ void AAAcquisitionManager::StartAcquisition()
       
       // Plot the waveform; only plot the first waveform event in the
       // case of a multievent readout to maximize efficiency
-
+      
       if(TheSettings->WaveformMode and evt == 0)
 	TheGraphicsManager->PlotWaveforms(Waveforms, 
 					  WaveformLength, 

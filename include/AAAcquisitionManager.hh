@@ -90,7 +90,7 @@ private:
   // Variables for PC buffer readout
   char *Buffer;
   uint32_t BufferSize, ReadSize, FPGAEvents, PCEvents;
-  vector<vector<Short_t> > Waveforms;
+  vector<vector<uint16_t> > Waveforms;
   vector<bool> BufferFull;
 
   uint32_t ReadoutType, ReadoutTypeBit, ReadoutTypeMask;
