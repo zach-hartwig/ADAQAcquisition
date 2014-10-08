@@ -204,10 +204,9 @@ void AAAcquisitionManager::StartAcquisition()
 
   PreAcquisition();
 
-  // Start the acquisition and enable the acquisition bool
-
-  DGManager->SWStartAcquisition();
-
+  if(TheSettings->AcquisitionControl == 0)
+    DGManager->SWStartAcquisition();
+  
   AcquisitionEnable = true;
 
   while(AcquisitionEnable){
@@ -222,13 +221,13 @@ void AAAcquisitionManager::StartAcquisition()
     DGManager->GetNumFPGAEvents(&FPGAEvents);
     if(FPGAEvents < TheSettings->EventsBeforeReadout)
       continue;
-    
+
     // Perform the FPGA buffer -> PC buffer data readout
     DGManager->ReadData(Buffer, &ReadSize);    
     
     // Get the number of events in the PC buffer
     DGManager->GetNumEvents(Buffer, ReadSize, &PCEvents);
-    
+
     // For each event stored in the PC memory buffer...
     for(uint32_t evt=0; evt<PCEvents; evt++){
       
@@ -262,10 +261,18 @@ void AAAcquisitionManager::StartAcquisition()
 	// Populate the EventInfo structure and assign address to the EventPointer
 	DGManager->GetEventInfo(Buffer, ReadSize, evt, &EventInfo, &EventPointer);
 	
+	// Seg. fault protection
+	if(EventPointer == NULL)
+	  continue;
+	
 	//  Fill the EventWaveform structure with digitized signal voltages
 	DGManager->DecodeEvent(EventPointer, &EventWaveform);
+	
+	// Seg. fault protection
+	if(EventWaveform == NULL)
+	  continue;
       }
-
+      
       
       ///////////////////////////////////////////
       // Zero length encoding waveform readout //
@@ -435,8 +442,9 @@ void AAAcquisitionManager::StartAcquisition()
 
 void AAAcquisitionManager::StopAcquisition()
 {
-  AAVMEManager::GetInstance()->GetDGManager()->SWStopAcquisition();
-
+  if(TheSettings->AcquisitionControl == 0)
+    AAVMEManager::GetInstance()->GetDGManager()->SWStopAcquisition();
+  
   AcquisitionEnable = false;
   
   if(AcquisitionTimerEnable){

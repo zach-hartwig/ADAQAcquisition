@@ -1687,6 +1687,7 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
   DGTriggerEdge_CBL->GetComboBox()->SetEnabled(WidgetState);
   DGTriggerCoincidenceEnable_CB->SetState(ButtonState);
 
+  DGAcquisitionControl_CBL->GetComboBox()->SetEnabled(WidgetState);
   DGRecordLength_NEL->GetEntry()->SetState(WidgetState);
   DGPostTrigger_NEL->GetEntry()->SetState(WidgetState);
 

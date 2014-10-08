@@ -144,23 +144,23 @@ void AAVMEManager::ProgramDigitizers()
   // Acquisition settings
 
   switch(TheSettings->AcquisitionControl){
-
+    
   case 0: // Standard (software controlled)
     DGMgr->SetAcquisitionControl("Software");
     break;
-
+    
   case 1: // Gated (NIM signal on S-IN Lemo 00 front panel)
     DGMgr->SetAcquisitionControl("Gated (NIM)");
     break;
-
+    
   case 2: // Gated (TTL signal on S-IN Lemo 00 front panel)
-    DGMgr->SetAcquisitionControl("Gated (TTL");
+    DGMgr->SetAcquisitionControl("Gated (TTL)");
     break;
-
+    
   default:
     break;
   }
-
+  
   DGMgr->SetRecordLength(TheSettings->RecordLength);
   DGMgr->SetPostTriggerSize(TheSettings->PostTrigger);
 
