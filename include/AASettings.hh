@@ -76,6 +76,7 @@ public:
   uint32_t TriggerEdge;
 
   // Acquisition
+  uint32_t AcquisitionControl;
   uint32_t RecordLength;
   uint32_t PostTrigger;
   uint32_t AcquisitionTime;

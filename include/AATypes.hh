@@ -145,6 +145,7 @@ enum{
   DGTriggerCoincidenceEnable_CB_ID,
   DGTriggerCoincidenceLevel_CBL_ID,
 
+  DGAcquisitionControl_CBL_ID,
   DGRecordLength_NEL_ID,
   DGPostTriggerSize_NEL_ID,
   AQTime_NEL_ID,

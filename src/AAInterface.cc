@@ -1048,43 +1048,52 @@ void AAInterface::FillAcquisitionFrame()
   DGTriggerCoincidenceLevel_CBL->GetComboBox()->SetEnabled(false);
   
 
-
   ///////////////////////
   // Acquisition controls
 
-  TGGroupFrame *DGScopeAcquisitionControls_GF = new TGGroupFrame(AcquisitionSubframe, "Acquisition", kVerticalFrame);
-  DGScopeAcquisitionControls_GF->SetTitlePos(TGGroupFrame::kCenter);
-  AcquisitionSubframe->AddFrame(DGScopeAcquisitionControls_GF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
+  TGGroupFrame *DGAcquisitionControl_GF = new TGGroupFrame(AcquisitionSubframe, "Acquisition", kVerticalFrame);
+  DGAcquisitionControl_GF->SetTitlePos(TGGroupFrame::kCenter);
+  AcquisitionSubframe->AddFrame(DGAcquisitionControl_GF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
+  
+  DGAcquisitionControl_GF->AddFrame(DGAcquisitionControl_CBL = new ADAQComboBoxWithLabel(DGAcquisitionControl_GF, 
+											 "Control style",
+											 DGAcquisitionControl_CBL_ID),
+				     new TGLayoutHints(kLHintsNormal,5,5,10,5));
+  DGAcquisitionControl_CBL->GetComboBox()->AddEntry("Standard",0);
+  DGAcquisitionControl_CBL->GetComboBox()->AddEntry("Gated (NIM)",1);
+  DGAcquisitionControl_CBL->GetComboBox()->AddEntry("Gated (TTL)",2);
+  DGAcquisitionControl_CBL->GetComboBox()->Select(0);
+  
 
   // ADAQ number entry specifying number of samples
-  DGScopeAcquisitionControls_GF->AddFrame(DGRecordLength_NEL = new ADAQNumberEntryWithLabel(DGScopeAcquisitionControls_GF, "Record length (#)", DGRecordLength_NEL_ID),
+  DGAcquisitionControl_GF->AddFrame(DGRecordLength_NEL = new ADAQNumberEntryWithLabel(DGAcquisitionControl_GF, "Record length (#)", DGRecordLength_NEL_ID),
 					  new TGLayoutHints(kLHintsNormal,5,5,5,0));
   DGRecordLength_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
   DGRecordLength_NEL->GetEntry()->SetNumber(2000);
 
   // ADAQ number entry specifying the percentage of the acquisition
   // window that is behind (or after) the triggern (all channels)
-  DGScopeAcquisitionControls_GF->AddFrame(DGPostTrigger_NEL = new ADAQNumberEntryWithLabel(DGScopeAcquisitionControls_GF, "Post trigger (%)", DGPostTriggerSize_NEL_ID),
+  DGAcquisitionControl_GF->AddFrame(DGPostTrigger_NEL = new ADAQNumberEntryWithLabel(DGAcquisitionControl_GF, "Post trigger (%)", DGPostTriggerSize_NEL_ID),
 					  new TGLayoutHints(kLHintsNormal,5,5,0,5));
   DGPostTrigger_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
   DGPostTrigger_NEL->GetEntry()->SetNumLimits(TGNumberFormat::kNELLimitMinMax);
   DGPostTrigger_NEL->GetEntry()->SetLimitValues(0,100);
   DGPostTrigger_NEL->GetEntry()->SetNumber(50);
   
-  DGScopeAcquisitionControls_GF->AddFrame(AQTime_NEL = new ADAQNumberEntryWithLabel(DGScopeAcquisitionControls_GF, "Acquisition time (s)", AQTime_NEL_ID),
+  DGAcquisitionControl_GF->AddFrame(AQTime_NEL = new ADAQNumberEntryWithLabel(DGAcquisitionControl_GF, "Acquisition time (s)", AQTime_NEL_ID),
 					  new TGLayoutHints(kLHintsNormal,5,5,5,0));
   AQTime_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
   AQTime_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
   AQTime_NEL->GetEntry()->SetNumber(10);
 
-  DGScopeAcquisitionControls_GF->AddFrame(AQTimer_NEFL = new ADAQNumberEntryFieldWithLabel(DGScopeAcquisitionControls_GF, "Countdown", AQTimer_NEFL_ID),
+  DGAcquisitionControl_GF->AddFrame(AQTimer_NEFL = new ADAQNumberEntryFieldWithLabel(DGAcquisitionControl_GF, "Countdown", AQTimer_NEFL_ID),
 					  new TGLayoutHints(kLHintsNormal,5,5,0,5));
   AQTimer_NEFL->GetEntry()->SetFormat(TGNumberFormat::kNESMinSec);
   AQTimer_NEFL->GetEntry()->SetNumber(10);
   AQTimer_NEFL->GetEntry()->SetState(false);
 
-  TGHorizontalFrame *DGScopeTimerButtons_HF = new TGHorizontalFrame(DGScopeAcquisitionControls_GF);
-  DGScopeAcquisitionControls_GF->AddFrame(DGScopeTimerButtons_HF);
+  TGHorizontalFrame *DGScopeTimerButtons_HF = new TGHorizontalFrame(DGAcquisitionControl_GF);
+  DGAcquisitionControl_GF->AddFrame(DGScopeTimerButtons_HF);
   
   DGScopeTimerButtons_HF->AddFrame(AQTimerStart_TB = new TGTextButton(DGScopeTimerButtons_HF, "Start timer", AQTimerStart_TB_ID),
 				   new TGLayoutHints(kLHintsNormal, 5,5,0,0));
@@ -1807,6 +1816,7 @@ void AAInterface::SaveSettings()
   TheSettings->TriggerEdge = DGTriggerEdge_CBL->GetComboBox()->GetSelected();
 
   // Acquisition
+  TheSettings->AcquisitionControl = DGAcquisitionControl_CBL->GetComboBox()->GetSelected();
   TheSettings->RecordLength = DGRecordLength_NEL->GetEntry()->GetIntNumber();
   TheSettings->PostTrigger = DGPostTrigger_NEL->GetEntry()->GetIntNumber();
   TheSettings->AcquisitionTime = AQTime_NEL->GetEntry()->GetIntNumber();
