@@ -1,0 +1,111 @@
+\chapter{Tutorial 2: Saving digitized waveforms to a \ROOT file}
+\label{chap:tutorial2}
+This chapter provides a detailed, step-by-step tutorial that covers
+using \ADAQ to store digitized detector waveforms into a \ROOT file.
+
+The user is expected to have covered Tutorial 1 before beginning this
+tutorial, as a number of important skills taught there are critical to
+this tutorial as well.
+
+\section{Assumptions}
+\label{sec:assumptions2}
+The assumptions for this tutorial are identical to those found in
+Tutorial 1. Please see Section~\ref{sec:assumptions1}.
+
+\section{Hardware setup}
+\label{sec:hardwaresetup2}
+The hardware setup for this tutorial is identical to that found in
+Tutorial 1. Please see Section~\ref{sec:hardwaresetup1}
+
+\section{Configure \ADAQ for acquisition}
+\label{sec:configure2}
+
+\section{Acquiring waveforms}
+\label{sec:acquiring2}
+Setting up waveform acquisition is identical to that found in Tutorial
+1. Please see Section~\ref{sec:acquiring1}.
+
+\section{Saving waveforms  into a \ROOT file}
+The section describes the steps to create a \ROOT file, store
+digitized waveforms in it, and successfully close the \ROOT file.
+At this point in the tutorial
+
+\begin{enumerate}
+  \item{Configure all waveform acquisition settings to their desired
+    value using the channel 0 specific settings found towards the
+    top-right of the Oscilloscope frame. When done adjusting channel
+    0's settings, stop the acquisition.}
+  \item{Click the ``Data Storage'' subtab toward the bottom right of
+    the Oscilloscope frame. Note that all the widgets on this
+    subframe are disabled.}
+  \item{Start the acquisition. Note that ``Filename'', ``Comment'',
+    and ``Create ROOT File'' widgets are enabled, indicating that
+    these widgets may only be used when acquisition is running.}
+  \item{Set the \ROOT filename. Note that the user is responsible to
+    providing an appropriate suffix, with ``.root'' being the
+    recommended value. When done, click the ``Create ROOT File''
+    button. This creates and initializes the \ROOT file on the hard
+    disk, as well as enables the ``Close ROOT file'' and ``Data stored
+    ...'' check box, since the \ROOT file is now open and can receive
+    data. Note that at this point no waveforms are being written to
+    the \ROOT file even though waveforms are being acquired by
+    \texttt{|CyDAQRootGUI}.}
+  \item{Click the ``Data stored ...'' check box at the bottom of the
+    subframe. The digitized waveforms on channel 0 that appear on the
+    DGScope canvas are now being written to the \ROOT file. The user
+    may continually view the size of the created \ROOT file to
+    convince him- or herself that the \ROOT file is receiving data and
+    growing in size.}
+  \item{Once it is determined that sufficient data has been acquired
+    (by viewing and being satisfied with a pulse spectrum or
+    completing a 5 minute data acquisition session, for example),
+    uncheck the ``Data stored ...'' check box. Waveforms have ceased
+    to be written to the \ROOT file; the \ROOT file is still open and
+    must be closed correctly to ensure the file is not corrupted.}
+  \item{Click the ``Close ROOT File'' button. This performs a number
+    of final, required operations on the \ROOT file and closes it.}
+\end{enumerate}
+
+At this point in the tutorial, a complete \ROOT file exists on the
+hard disk containing digitized waveforms and can be processed with
+offline data acquisition code. The user may now: create a new \ROOT
+file and repeat the above steps; cease acquisition, modify channel
+settings and repeat the above steps; or move on to a completely
+different task.
+
+\section{Offline analysis using the \ROOT file}
+The \ADAQ user is responsible for developing his or her own code that
+will be used offline to process the data contained in the \ROOT
+file. To guide the user in creating his or her own analysis code, a
+data analysis ``template'' has been created that explicitly shows the
+user how to:
+\begin{itemize}
+  \item{create a standalone, C++ and \ROOT based offline analysis code}
+  \item{open a \ADAQ \ROOT file and extract the V6534 and V1720 channel parameters}
+  \item{extract the digitized waveforms into C++ integer arrays for processing}
+\end{itemize}
+The template is configured to open a \ROOT file (the path to the file
+must be specified on the command line), print the V6534 and V1720
+channel parameters, and the cycle through all of the V1720 channel 0
+waveforms contained in the \ROOT file.
+
+The user should copy the template directory to a new directory, and
+use it as the basis for his or her own analysis code. All of the
+critical interactions with the \ROOT file that must be performed to
+extract all stored data are explicitly shown and heavily commented,
+providing the user with a good understanding of the steps as well as a
+solid foundation for his or her own analysis code. The template code
+may be found in the \texttt{\$CYDAQHOME/analysis/analysisTemplate/}
+directory.
+
+\section{Conclusion}
+Congratulations! If you have reached this point without throwing
+errors or cursing the author with reckless abondon, you have
+successfully used \ADAQ to acquire detector waveform data and store it
+in a \ROOT file for permament storage and offline data analysis. The
+interested user is recommended to repeat this tutorial but explore the
+numerous \texttt{CyDAQRootGUI} settings that were not used in this
+tutorial, especially acquiring data in coincidence and using the level
+discrimanator settings as the ``trigger'' for storing waveforms in the
+\ROOT file.
+

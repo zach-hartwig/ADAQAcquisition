@@ -1,0 +1,154 @@
+\chapter{Introduction to ADAQAcquisition}
+\label{chap:introdurction}
+
+\ADAQ stands for \textbf{AIMS} \textbf{D}ata
+\textbf{A}c\textbf{Q}uisition. In general, \ADAQ is a collection of
+software tools running under Linux\footnote{Porting of \ADAQ to
+  Windows/Mac platforms is not foreseen at this time} for digitizing
+and analyzing output waveforms from the particle detectors that will
+be used with Ionetix cyclotron experiments. \ADAQ has been explicitly
+developed for use with \CAEN data acquisition hardware and the \CAEN C
+libraries that are distributed in support of the various hardware
+modules. At present, support is provided for a single \CAEN V6534 high
+voltage VME board and a signle \CAEN V1720 digitizerVME board
+controlled via the \CAEN V1718 USB-VME board.
+
+\section{Overview of the \ADAQ software}
+\label{sec: overviewsoftware}
+The centerpiece of \ADAQ is the \texttt{ADAQAcquisitionRootGUI} program, which
+provides an extremely powerful graphical user interface (GUI) for full
+control of the V6534 and 1720 boards, as well greatly enhanced
+\textit{digital versions} of the oscilloscope (waveform analysis),
+multichannel analyzer (pulse spectra creation) and computer programs
+(graphical plotting, digitial data storage) found in most traditional
+analog DAQ setups.
+
+\texttt{ADAQAcquisitionRootGUI} is primarily bnuilt upon two families of C++
+classes. First, \texttt{ADAQAcquisitionRootGUI} integrates many classes from the
+\ROOT data analysis toolkit that not only provides the graphical
+interface libraries themselves but also a tremendously powerful set of
+data analysis tools, such as graphing, histogramming, curve fitting,
+peak finding algorithms and much, much more. Second,
+\texttt{ADAQAcquisitionRootGUI} uses two custom C++ classes (ADAQAcquisitionHigh voltage
+and ADAQAcquisitionDigitizer) that provide a simple but powerful way for the \ADAQ
+developer to control the V6534 and V1720 boards, obscuring the
+nitty-gritty of interacting with the boards via the CAEN libraries and
+exposing easy-to-understand and often significantly enhanced methods
+for controlling the boards.
+
+Another important component of \ADAQ are the offline waveform analysis
+tools, which again make full use of the \ROOT toolkit. At present, a
+skeleton template code is provided that will open a specified data
+file containing waveforms, read in all the relevant parameters from
+the data file, and then iterate through all the stored waveforms in
+the file. The user is expected to use this template to implement
+his/her own algorithsm for waveform analysis (counting, pulse spectra
+creation, pulse shape discrimination, etc).
+
+The purpose of this user's guide is to provide the user of \ADAQ with
+the information required to
+\begin{enumerate}
+  \item{Understand the general layout of the \ADAQ source code}
+  \item{Retrieve the \ADAQ source code from the \GIT\footnote{Subversion
+      code management system. Available at:
+      \purl{http://subversion.apache.org}} repository and build the
+    \texttt{ADAQAcquisitionRootGUI} executable from source.}
+  \item{use \texttt{ADAQAcquisitionRootGUI} to acquire and analyze output
+    detector waveforms}
+  \item{Begin developing customized offline analysis code to process
+    digital waveform data}
+\end{enumerate}
+
+To achieve these goals, the remainder of this chapter describes the
+external software dependencies required to build the \ADAQ source code
+and run its programs. Chapter~\ref{chap:svn} provides instructions on
+how to obtain the \ADAQ source from the \GIT repository and building
+\texttt{ADAQAcquisitionRootGUI} from source, including configuring the user's
+Linux environment and some notes on obtaining and building the
+external software dependencies. Chapter~\ref{chap:overview} provides a
+detailed guide to the \texttt{ADAQAcquisitionRootGUI} program, including full
+textual descriptions of each graphical widget available to the user as
+well as annotated graphics of various parts of the
+program. Chapters~\ref{chap:tutorial1} and \ref{chap:tutorial2}
+contain step-by-step tutorials that walk the user through some of the
+most important features of the \texttt{ADAQAcquisitionRootGUI} program. Finally,
+Chapter~\ref{chap:source} provides an overview of the
+\texttt{ADAQAcquisitionRootGUI} source code to enable the ambitious user to add
+his/her own improvements to the software.
+
+    
+\section{Software Dependencies}
+\label{sec: dep}
+This section briefly describes the external software dependencies
+required to build and execute the \ADAQ source code.
+
+\subsection{The CAEN libraries}
+\label{sec: caendep}
+CAEN distributes hardware drivers and C libraries in support of its
+data acquisition system hardware. The following is a complete list of
+the required CAEN libraries for \ADAQ. Note that the most up-to-date
+version of the CAEN libraries and driver that \textit{have been
+  successfully tested} with \ADAQ are listed in parenthesis next to the
+library name:
+\begin{enumerate}
+\item{\textbf{CAENVMELib} (\textit{CAENVMELib-2.30}): provides a set
+    of C functions that enable communication with the VME crate
+    backplane and attached VME modules with the CAEN ``bridge'' modules,
+    such as the VME-USB V1718 board.}
+\item{\textbf{CAENComm} (\textit{CAENComm-1.02}): provides a set of
+    relatively high-level C functions that mask the low-level details
+    of communication with VME hardware via VME protocol, such as
+    reading/writing registers and other common VME functionality.}
+\item{\textbf{CAENDigitizer} (\textit{CAENDigitizer-1.31}): provides a
+    set of relatively high-level C functions that mask the low-level
+    details of communication with the CAEN family of
+    digitizers. Explicitly meant for digitial data acquisition with
+    CAEN sampling ADC (analog-to-digital) modules such as the V1720
+    board.}
+\item{\textbf{V1718 Linux Driver} (\textit{Version 0.9}): provides
+  necessary Linux driver to interface with the VME-USB V1718
+  board. Must be built from source and installed before using
+  \texttt{ADAQAcquisitionRootGUI}.}
+\end{enumerate}
+The \CAEN dependencies listed above are provided as part of the \ADAQ
+source code distribution for convenience and to ensure explicit
+version of control of the various libraries.\\
+
+\noindent
+The \CAEN homepage: \purl{http://www.CAEN.com}\\
+
+\subsection{The \ROOT toolkit}
+\label{sec: rootdep}
+\ROOT\ is a free (as in no cost), open-source, C++ object-oriented
+data analysis toolkit that was originated at CERN but is now developed
+and maintained by a worldwide collaboration across many scientific
+fields, although it is primarily used in particle and nuclear physics.
+
+While it was developed explicitly for handling massive data sets, it
+is also incredibly useful for data analysis on a small scale,
+providing powerful histogramming, fitting, graphical output, and GUI
+generation. It also contains a diverse array of powerful data analysis
+tools that are available as class objects that can be applied to any
+data set of data regardless of size. \ROOT is also powerful because
+the user can fold his or her own C++ code with the \ROOT class objects
+to create highly dynamic and customized data analysis, using all of
+the power of C++: the standard libraries, the \BOOST libraries,
+etc. It is open-source, constantly improved and maintained, and there
+is a dynamic user community available online.\\
+
+\noindent
+The \ROOT homepage: \purl{http://root.cern.ch/drupal/}\\
+
+\noindent
+The \textsc{ROOTTalk} users forum: \purl{http://root.cern.ch/phpBB2/}\\
+
+\subsection{The \BOOST C++ libraries}
+\label{sec: boostdep}
+\BOOST is a set of free (as in no cost), open-source, peer-reviewed
+portable C++ libraries that are incredibly powerful and diverse.
+\BOOST can be thought of as a significant extension of the C++
+Standard Libraries and is often a testing ground for a majority of the
+code that eventually gets folded into C++ during technical reviews.\\
+
+\noindent
+The \BOOST homepage: \purl{http://www.boost.org}\\

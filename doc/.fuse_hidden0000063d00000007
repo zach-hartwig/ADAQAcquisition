@@ -1,0 +1,280 @@
+\chapter{Tutorial 1: Creating a calibrated energy spectrum}
+\label{chap:tutorial1}
+This chapter provides a detailed, step-by-step tutorial that covers
+using \adaq to create a calibrated energy spectrum and output the
+resulting spectrum to an encapsulated post script (EPS) file.
+Specifically, the user will learn how to establish a VME connection to
+the V6534 and V1720 boards, power a standard sodium-iodide detector
+with the V6534 board, and acquire digital detector waveforms to create
+an energy spectrum.
+
+\section{Assumptions}
+\label{sec:assumptions1}
+For this walkthrough, a number of \textit{a priori} assumptions have
+been made:
+\begin{itemize}
+  \item{The CAEN V1718 driver has been installed on system running
+    \texttt{CyDAQRootGUI}.}
+  \item{The user's environment is configured as described in
+    Section~\ref{sec:config}.}
+  \item{The CAEN V1718 board occupies slot 1 of the VME8100 crate; the
+    CAEN V6534 and V1720 VME boards have their VME address set to
+    0x42420000 and 0x00420000, respectively, using the physical
+    potentiometers on each board.}
+  \item{The system running \texttt{CyDAQRootGUI} is connected to the
+    V1718 board via the USB-2.0 cable.}
+  \item{The NaI-PMT detector requires 1750 volts of \textit{negative
+      bias} bias high voltage and less than 800 microamps of
+    current.}
+  \item{The NaI detector outputs negative pulses (i.e. pulses that
+    ``rise'' below the baseline in the range -1 to +1 volts. Typical
+    pulses are on the order of a few hundred millivolts to a
+    thousand millivolts.}
+  \item{The user has a $^{137}$Cs (E$_{\gamma}$ = 661.7 keV) and
+    $^{60}$Co (E$_{\gamma}$ = 1170 and 1330 keV) radioactive
+    source available.}
+\end{itemize}
+
+
+\section{Hardware setup}
+\label{sec:hardwaresetup1}
+This section describes the ordered steps for setting up the \adaq
+hardware in advance of running \texttt{CyDAQRootGUI}.
+
+\begin{enumerate}
+\item{Power on the VME8100 crate.}
+\item{Connect the V6534 high voltage channel 0 (SHV connector
+  required) to the high voltage input on the base of the NaI
+  detector.}
+\item{Connect the V1720 digitizer channel 0 (MCX jack required) to
+  the signal output on the base of the NaI detector.}
+\end{enumerate}
+
+\section{Configure \adaq for acquisition}
+\label{sec:configure1}
+This section describes starting the \texttt{CyDAQRootGUI} software,
+establishing a VME connection to the CAEN V6534 and V1720 boards, and
+powering the NaI detector using the V6534 high voltage board.
+
+\begin{enumerate}
+  \item{Open a terminal and launch the \adaq graphical interface by
+    typing ``CyDAQRootGUI'' at the command line. You should see the
+    graphical interface open to the ``VME Connection'' frame described
+    in Section~\ref{sec:vmeconnectionframe}.}
+  \item{Ensure that the V6534 and V1720 VME base addresses are
+    correctly set (0x4242000 for the V6534 high voltage board and
+    0x00420000 in this example).}
+  \item{Establish a VME connection to the V6534 and V1720 boards by
+    clicking the large, red connect button at the top of VME
+    connection frame. If the connection is successfully established,
+    the button will turn green and the button's text will indicate a
+    successful connection.}
+  \item{Use the tabs at the top-left of the GUI and navigate to the
+    ``High Voltage'' frame. Using the ``Set'' widgets for V6534
+    channel 0, assign a value of ``1750'' (volts) to the ``Set
+    Voltage'' number entry and a value 'f ``800'' (microamps) to the
+    ``Set Current'' number entry. Click the ``Enable monitoring''
+    check box at the bottom of the screen; all 6 channel's ``Active
+    Voltage'' and ``Active Current'' widgets will turn white, showing
+    they are enabled. Each widget's value should be 0 (or very close
+    to it) since none of the V6534 high voltage channels are on.}
+  \item{Click the large, red ``Power button'' at the rightmost side of
+    channel 0's group frame. The button will turn from red to green
+    and the text will change from ``OFF'' to ``ON'' to indicate that
+    V6534 channel 0 is now energized. You should now observe the
+    voltage and current on channel 0 slowly ramp up by obvserving the
+    ``Active Voltage'' and ``Active Current'' widgets for channel
+    0. Note that while the active voltage will rise to the set value
+    of 1750 volts, the active current will rise to whatever current is
+    drawn by the NaI detector's PMT and base electronics.}
+\end{enumerate}
+
+\section{Acquiring waveforms}
+\label{sec:acquiriing1}
+This section describes using \texttt{CyDAQRootGUI} to optimally
+acquire digital waveforms from the detector output pulsest At this
+point in the tutorial, the \adaq system hardware should be producing
+analog output NaI detector pulses which are being fed into the V1720
+digitizer channel 0.
+
+\begin{enumerate}
+  \item{Use the tabs at the top-left of the GUI and navigate to the
+    ``Oscilloscope'' frame. In the channel 0 group frame, ensure that
+    digitizer channel 0 is enabled. Use the rest of the channel 0
+    default settings.}
+  \item{Under the ``Scope Settings'' subframe in the ``Trigger'' group
+    frame, set the trigger type to ``Software''.}
+  \item{Click the wide, red button under the blank DGScope canvas. The
+    button will turn from red to green and the text will change from
+    ``Stopped'' to ``Acquiring'' to indicate that the V1720 board is
+    now running and waiting to acquire data.}
+  \item{Under the ``Trigger'' group frame, click the ``Manual
+    Trigger'' button to send a software trigger to the V1720
+    board. This will tell the V1720 board to convert any analog signal
+    on enabled channels (only 0 in this case) to a digital
+    waveform. You should see an oscilloscope-like plot appear on the
+    DGScope canvas. If the data acquisition gods are on your side, you
+    should see a horizontal solid black line and a horizontal dashed
+    black line appear somwhere in the middle of the plot. The solid
+    line is the baseline for channel 0; the dashed line is the trigger
+    threshold for channel 0. Note that the trigger threshold's y-value
+    on the plot corresponds to the trigger threshold number entry
+    setting in the channel 0 group frame.}
+  \item{Using the ``Trig. Threshold'' number entry in the channel 0
+    group frame, Set the trigger threshold to be 100-300 ADC units
+    below the channel 0 baseline (because the NaI detector is assumed
+    to have negative pulses polarity). Clicking the ``Manual Trigger''
+    button will update the position of the channel 0 trigger threshold
+    line on the DGScope canvas.}
+  \item{Click the wide, green acquisition button below the DGScope
+    canvas to cease data acquisition. Under the trigger groupframe,
+    change the trigger type to ``Automatic'' using the selection
+    box. This tells the V1720 board to trigger channel 0 each time it
+    senses a digitized value that exceeds the channel 0 trigger
+    threshold that was just set.}
+  \item{Click the wide, red button under the DGScope canvas to start
+    data acquisition. If, for some obscure reason, the data
+    acquisition gods continue to favor your mere mortal self, you
+    should now see frequent waveforms appearing on the DGScope. Note
+    that only waveforms whose height exceeds the trigger threshold
+    appear. You may adjust the trigger threshold in real time to see
+    changes. Note that high acquisition rates cause a lag between the
+    acquired pulse (relatively low CPU) and plotting the waveform
+    (relatively high CPU). A quick ``off/on'' cycle of acquisition
+    will usually help when wishing to view the effects of live-time
+    trigger changes.}
+  \item{Play around with the other settings under the channel 0 group
+    frame. Note that the min/max baseline settings result in a shaded
+    box drawn over the waveform baseline. This region is used to
+    calculate the channel baseline and must not overlap the pulse in
+    the acquisition window!}
+  \item{Play around with the vertical double and horizontal triple
+    sliders that are to the left and bottom, respectively, of the
+    DGScope. Using the vertical slider, zoom in on the channel
+    baseline to a scale of a few tens of ADC. Note the inevitable
+    presence of noise! Using the horizontal slider, magnify certain
+    regions of the pulse by changing the fraction of the total
+    acquisition window that is viewd in the DGScope canvas.}
+  \item{Stop the acquisition by clicking the wide, green button.}
+\end{enumerate}
+
+\section{Creating a calibrated  energy spectrum}
+This section describes creating adjusting the \texttt{CyDAQRootGUI}
+settings to successfully create pulse spectra (``uncalibrated'') and
+energy spectra (``calibrated'').
+
+\begin{enumerate}
+  \item{Start waveform acquisition again by clicking the wide, red
+    button. Using the widgets in the channel 0 group frame, ensure the
+    trigger threshold is near (but not too close) to the baseline, i.e
+    above all noise by at least 10 or 20 ADC. Ensure that no
+    saturation of waveforms occurs (except for maybe the occasional
+    large cosmic ray). Ensure that the waveform is comfortably within
+    the acquisition window (if not, change the number of samples in
+    the acquisition window using the ``Record Length'' number entry or
+    adjust the number of samples that occur after the trigger using
+    the ``Post trigger'' number entry in the acquisition group
+    frame). Ensure that the shaded baseline calculation region does
+    not overlap the pulses}
+  \item{Stop the acquisition.}
+  \item{Change DGScope to run in ``spectrum'' mode by clicking the
+    appropriate radio button in the ``DGScope Mode'' group frame.}
+  \item{Click the ``Spectrum Settings'' subtab to display the options
+    that effects the spectrum histogram. Leave the settings at their
+    default value. In this example we will create a ``pulse area
+    spectrum'', where the entire detector waveform above the baseline
+    in the triggered acquisition window is integrated and the
+    final value histogrammed.}
+    \item{Start the acquisition}
+    \item{After sufficient detector waveforms have been acquired,
+      integrated, and histogrammed, the DGScope canvas should begin to
+      display the histogrammed pulse area spectrum. By default, the
+      spectrum histogram painted in the DGScope canvas is updated
+      every 100 events.}
+    \item{By default, the spectrum histgram has 100 bins evenly
+      divided between 0 and 30000 pulse units. If the histogram is cut
+      off at higher energy, stop the acquisition, extend the histogram
+      range by increasing the ``Maximum bin'' value on in the
+      ``Spectrum Settings'' subframe to the desired level (possibly
+      increasing the number of bins as well), and restart the
+      acquisition. Repeat until the full expected range of the pulse
+      spectrum is within the bin limits of the spectrum histogram.}
+    \item{Expose the detector to the $^{137}$Cs source, and ensure
+      that the spectrum contains the expectd features for a NaI
+      detector: photoabsorption peak, Compton gap and edge, Compton
+      continuum, gamma backscatter peak, etc.}
+    \item{Click the ``Calibration Mode'' check box on the right side
+      of the ``Spectrum Settings'' subframe. A vertical dotted red
+      line should appear in the center of the spectrum in the DGScope
+      canvas. Grab the little slider on the horizontal triple slider
+      just below the DGScope canvas and drag it back and forth. Notice
+      how the vertical red line moves with the spectrum and the
+      ``Pulse Unit'' number entry updates according to the position of
+      the vertical red line in the spectrum.}
+    \item{Place the $^{137}$Cs source next to the NaI detector until
+      the photopeak corresponding to the 661.7 keV gamma appears in
+      the pulse area spectrum histogram in the DGScope canvas. Drag
+      the little slider to align the vertical red line with the center
+      of the photopeak. Enter ``661.7'' in the ``Calibration Energy''
+      number entry. Click the ``Set Point'' button when finished.}
+    \item{Remove the $^{137}$ Cs source and place the $^{60}$Co source
+      nera the NaI detector; wait for the photopeaks to appear in the
+      pulse area spectrum corresponding to the 1170 and 1330 keV
+      gammas. Align the red vertical line with the 1170 keV photopeak,
+      enter ``1170'' in the ``Calibration Energy'' number entry, and
+      click `the ``Set Point'' button. Repeat for the 1330 photopeak.}
+    \item{remove the $^{60}$Co source and click the ``Calibrate''
+      button and uncheck the ``Calibration Mode'' button.}
+    \item{At this point, the values of the histogram bins are in units
+      of keV and the histogram bin limits should be reset to reflect
+      the energy of the incident gammas. Stop the acquisition, change
+      the ``Maximum bin'' number entry to ``1600'', and restart the
+      acquisition. The histogram will now bin detector waveforms
+      between 0 and 1600 keV. Expose the NaI detector to the
+      $^{137}$Cs and $^{60}$Co source, verifying that the three gamma
+      photopeaks appear at the extected energy value in the spectrum
+      histogram (661.7, 1170, 1330 keV). Stop the acquisition.}
+\end{enumerate}
+
+\section{Creating an EPS file of the energy spectrum}
+This section describes outputting the contents of the DGScope canvas,
+which will contained a labelled gamma energy spectrum, to an EPS file.
+
+\begin{enumerate}
+  \item{Using the NaI detector and the $^{137}$Cs and $^{60}$Co
+    sources, set the desired spectrum limits and number of bins, begin
+    acquisition, and create an energy spectrum. Leave the acquisition
+    running.}
+  \item{Click the ``Graphical Options'' tab to move the the DGScope
+    graphical settings frame. Set the X-axis, Y-axis, and graph titles
+    using the appropriate text entries. Adjust the position of the
+    X-axis and Y-axis positions as needed.}
+  \item{Set the output image file name using the text entry at the
+    right of the ``Graphical Options'' subframe. Note that the file
+    suffix (.eps, .ps, etc) is automatically attached to the file
+    name. Use the selection box underneath to ensure that the ``.eps''
+    options is selected to ensure the output file is an encapsulated
+    poscript.}
+  \item{Click the ``Save plot'' button, which will create an EPS file
+    containing the current contents of the DGScope canvas. If the file
+    name ``EnergySpectrum'' was used, a file name
+    ``EnergySpectrum0.eps'' will be created in the directory from
+    whence \texttt{CyDAQRootGUI} was executed. Use your favorite
+    postscript viewer to inspect the contents of the file.}
+  \item{Click the ``Save plot'' button again, with the same file name
+    and file type. If the file name ``EnergySpectrum'' was used, a
+    file named ``EnergySpectrum1.eps'' will be created in the
+    directory from whence \texttt{CyDAQRootGUI} was started. The
+    incrementing integer ensures images with the same file name are
+    not overwritten!}
+\end{enumerate}
+
+\section{Conclusion}
+Congratulations! If you have reached this point without throwing
+errors or putting your first through the computer screen, you have
+successfully used \adaq to acquire detector waveform data, analyze it to
+create a calibrated energy spectrum, and saved it into a
+vector-graphics EPS file, laballed axis and all. The interested user
+is recommended to repeat this tutorial but explore the numerous
+\texttt{CyDAQRootGUI} settings that were not used in this tutorial.
+

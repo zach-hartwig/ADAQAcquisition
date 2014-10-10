@@ -1,0 +1,64 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% name: ADAQAcquisition_UsersGuide.tex
+% date: 10 Oct 14
+% auth: Zach Hartwig
+% mail: hartwig@psfc.mit.edu
+% desc: Main LaTeX file for the ADAQAcquisition User's Guide
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass{report}
+
+\usepackage[margin=1.5in]{geometry}
+\usepackage{calc}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{units}
+\usepackage{url}
+\usepackage{textcomp}
+\usepackage{listings}
+\usepackage{fix-cm}
+\usepackage{color}
+
+\special{
+  ! userdict begin /bop-hook{
+    stroke
+    gsave 220 170 translate
+    55 rotate /Times-Roman findfont 250 scalefont setfont
+    0 0 moveto 0.9 setgray (Draft) show grestore
+  }def end
+}
+
+\definecolor{grey}{rgb}{0.5, 0.5, 0.5}
+
+% Package to allow inclusion of C++ code
+\lstset{language=bash,basicstyle=\footnotesize}
+
+\newcommand{\ADAQ}{\textsc{ADAQAcquisition }}
+\newcommand{\ROOT}{\textsc{ROOT }}
+\newcommand{\CAEN}{\textsc{Caen }}
+\newcommand{\GIT}{\textsc{Git }}
+\newcommand{\BOOST}{\textsc{Boost }}
+
+\newcommand{\purl}{\protect\url}
+
+\title{\begin{center}\includegraphics[width=5in]{images/IonetixLogo}\end{center}
+  \vspace{1.5cm}
+  \fontsize{36}{36}\selectfont \textbf{ADAQAcquisition User's Guide} \\
+  \fontsize{20}{20}\selectfont AIMS Data AcQuisition System
+  \vspace{2cm}}
+\author{\fontsize{20}{20}\selectfont Zachary S. Hartwig}
+
+\begin{document}
+
+\maketitle  
+
+\include{introduction}
+\include{git}
+\include{overview}
+\include{tutorial1}
+\include{tutorial2}
+
+\end{document}

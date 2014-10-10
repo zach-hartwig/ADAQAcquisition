@@ -1,0 +1,237 @@
+\chapter{Building CyDAQ from the SVN Repository}
+\label{chap:svn}
+This chapter describes in detail the steps required to obtain the \ADAQ
+source code from its SVN repository home and then build the \ADAQ
+executables from source.
+
+\section{Prerequisites}
+\label{sec:prereqs}
+Before building the \ADAQ source code, a number of dependencies must be
+installed on the user's local system in order to ensure a successful
+build of the \ADAQ source code. While the specific details of building
+each of these dependencies is outside the scope of this manual, a few
+notes are provided below. It should be noted that all required
+software dependencies are already installed on the Ionetix server,
+greatly accelerating the process of building and the using the \ADAQ
+software.
+
+\subsection{\ROOT}
+If the user will be building \ADAQ on his/her local Linux machine, \ROOT
+may be downloaded from the following location:
+\purl{http://root.cern.ch/drupal/content/downloading-root}. The most
+recent version of \ROOT that has been successfully tested with the \ADAQ
+source code is version 5.32.01. While \ROOT binaries are available for
+direct installation, it is preferable to build \ROOT from source code
+to ensure perfect configuration to the user's local environment. The
+user is recommended to download the appropriate tarball and then
+follow the directions for installing \ROOT from source that can be
+found here:
+\purl{http://root.cern.ch/drupal/content/installing-root-source}
+
+If the user will be building \ADAQ on the Ionetix server, \ROOT version
+5.32.01 has already been installed in
+\texttt{/usr/local/root/root\_v5.32.01}. To use this version of \ROOT,
+the user needs to add the following lines to his/her \texttt{.bashrc}
+file:
+\begin{lstlisting}
+  export ROOTSYS=/usr/local/root/root_v5.32.01/root
+  export PATH=$ROOTSYS/bin:$PATH
+  export LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH
+\end{lstlisting}
+These environmental variables ensure that the user has full access to
+the \ROOT binaries and libraries required to build and run the \ADAQ
+source code.
+
+
+\subsection{\texttt{Boost}}
+If the user will be building \ADAQ on his/her local Linux machine, the
+\BOOST C++ libraries can either be installed via the operating systems
+package manager (\texttt{apt-get} on Ubuntu or \texttt{yum} on
+Fedora/RedHat) or downloaded from the \BOOST homepage at
+\purl{http://www.boost.org/}. The vast majority of \BOOST
+functionality is conventiently provided by header files and therefore
+does not require building from source; such is the case for the parts
+of \BOOST used by \ADAQ. The user can follow directions for installation
+of the most recent \BOOST release (1.49.0) on Linux machines here:
+\purl{http://www.boost.org/doc/libs/1_49_0/more/getting_started/unix-variants.html}
+
+if the user will be building \ADAQ on the Ionetix server, \texttt{Boost}
+is already installed at \texttt{/usr/include/boost}. No special action
+is required of the user; \texttt{Boost} is ready to be used.
+
+
+\section{Getting the \ADAQ source code}
+\label{sec:sourcecode}
+The \ADAQ source lives permanently in a Subversion code management
+repository on the Ionetic Linux server \footnote{For the uninitiated,
+  a good code management system is a highly scalable piece of software
+  that allows developers to efficiently, seamlessly, and confidently
+  work on a software project together with the full history of
+  everyone's changes to the project (as well as all of the original
+  files) fully documented and accessible at any time. They are
+  incredibly useful for a developers or even just a single developer,
+  if for nothing other than to document all changes and provide the
+  ability to go back to any version of any file at any time.}. While
+anyone with a user account on the Ionetix Linux server may check out a
+working copy of the code, only users who are in the ``CyDAQ'' group
+have permission to check in changes to the repository. To be added to
+the CyDAQ developers group, please contact the author at
+\texttt{hartwig@psfc.mit.edu}.
+
+Checking out a copy of the source code depends on the location from
+which you connecting to the SVN repository: a ``local'' connection
+refers to a user who is logged into and working on the Ionetix server;
+a ``remote'' connection refers to a user who is working on a remote
+computer with SSH capababilites that is running Subversion.\\
+
+\noindent
+To checkout a copy of the \ADAQ source code \textit{locally}, the user
+should open a terminal on the Ionetix server and type:
+\begin{lstlisting}
+  svn co file:///usr/local/svn_repos/__CYDAQ_REPO__ /path/to/checkout
+\end{lstlisting}
+where the user should replace \texttt{/path/to/checkout} with the
+directory
+he/she would like SVN to place the checked out \ADAQ source code.\\
+
+\noindent
+To checkout a copy of the \ADAQ source code \textit{remotely}, the user
+should open a terminal on his/her local machine and type:
+\begin{lstlisting}
+  svn co svn+ssh://username@ipaddress/usr/local/svn_repos/__CYDAQ_REPO__ /path/to/checkout
+\end{lstlisting}
+where the user should replace \texttt{username} with his/her username
+on the Ionetix server, \texttt{ipaddress} with the IP address of the
+Ionetix server, and /path/to/checkout with the directory on the
+user's local machine that he/she would like SVN to place the checked
+out \ADAQ source code.
+
+\section{Overview of \ADAQ directory structure}
+\label{sec:directorystructure}
+After checking out the \ADAQ source code from the SVN repository as
+described in Section~\ref{sec:sourcecode}, navigate to the top-level
+\ADAQ directory, which will be the path specified to SVN when the copy
+of the source code was checked our of the repository
+(/path/to/checkout in the directions above). This directory is known
+as the top-level directory. The directory and file structure below
+this directory is descibed below:
+
+\begin{itemize}
+  \item{\textbf{analysis/}: contains a ``template'' for offline data
+    analysis of digitized waveforms produced with
+    \texttt{CyDAQRootGUI}. Designed to show the user how to access
+    stored waveforms and provide a basis for his/her own analysis
+    code.}
+  \item{\textbf{manual/}: contains all of the files (\LaTeX files,
+    images files in the images/ subdirectory, and the GNUmakefile for
+    creating the beautiful manual you are now reading.}
+  \item{\textbf{source/}: contains the bulk of the \ADAQ source
+    code. The \textbf{versions/} subdirectory (empty as present) will
+    contain snapshots of the \ADAQ source. The snapshots will be
+    versioned and used when acquiring mission critical data, such that
+    the state of the \ADAQ source code can be linked to experimental
+    data sessions. The \textbf{trunk/} subdirectory contains the
+    \texttt{CyDAQRootGUI} source code in subdirectories and the GNU
+    makefile:
+    \begin{itemize}
+      \item{\textbf{bin/}: contains the \texttt{CyDAQRootGUI} binary
+        after building via the GNU makefile. Other useful binaries are
+        also in this directory.}
+      \item{\textbf{build/}: a dumping ground for transient files
+        created during the build process. The files are source code
+        object files and \ROOT dictionary files.}
+      \item{\textbf{include/}: C++ header files for
+        \texttt{CyDAQRootGUI}.}
+      \item{\textbf{lib/}: CAEN libraries required to build and run
+        \texttt{CyDAQRootGUI}. The purpose of including these
+        libraries here (rather than relying on installed CAEN
+        libraries in places like /usr/lib) is for portability and to
+        maintain explicit control over the versioning of CAEN
+        libraries. The CAEN libraries are evolving and only somewhat
+        decently documented, so it is important to ensure the correct
+        versions of the libraries are used. Subdirectories contain
+        libraries and soft links for both 32- and 64-bit architectures
+        in the \textbf{x86/} and \textbf{x86\_64/} subdirectories.}
+      \item{\textbf{src/}: C++ source code for \texttt{CyDAQRootGUI}.}
+    \end{itemize}
+  }
+  \item{\textbf{utilities/}: contains some useful Python scripts.}
+\end{itemize}
+
+With the \ADAQ source code checked out and a basic understanding of the
+source code structure, it's time to build the \texttt{CyDAQRootGUI}
+binary.
+
+    
+\section{Configuring your environment}
+\label{sec:config}
+The \ADAQ source requires several environmental variables to be defined
+in order to build and run correctly.
+\begin{itemize}
+\item{\textbf{CYDAQHOME}: Used by the \ADAQ GNU makefiles to determine
+    the full paths to a number of source files and libraries. The
+    value should be set as the full path to the top level of the \ADAQ
+    source code.}
+\item{\textbf{HOSTTYPE}: Used by the \ADAQ GNU makefiles to build the
+    \ADAQ software tools for the correct architecture. The value should
+    be set to ``x86'' for 32-bit architecture and ``x86\_64'' for
+    64-bit architectures.}
+\item{\textbf{PATH}: The Linux environmental variable that contains
+    directories that are searched to determine the location of
+    binaries. The bin directory for CyDAQRootGUI should be added to
+    the \texttt{PATH} variable.}
+\item{\textbf{LD\_LIBRARY\_PATH}: The Linux environmental variables that
+    contains directories that are searched for dynamically linked
+    libraries. The \ADAQ source code contains most of the required
+    libraries for both 32- and 64-bit architectures. The lib directory
+    for CyDAQRootGUI should be added to the \texttt{LD\_LIBRARY\_PATH}
+    variable.}
+\end{itemize}
+
+The easiest way to set these four variables is to add the required
+lines to the user's \texttt{.bashrc} file (which exists in his/her
+home directory). For example, consider that user \texttt{zaphod} has
+checked out a copy of the \ADAQ source code to the directory
+\texttt{/home/zaphod/CyDAQ\_CheckOut} of the Ionetix server, which runs
+a 64-bit operating system. He would need to add the following lines to
+the file \texttt{/home/zaphod/.bashrc}:
+\begin{lstlisting}
+  export CYDAQHOME = /home/zaphod/CyDAQ_CheckOut
+  export PATH = $CYDAQHOME/source/trunk/bin:$PATH
+  export HOSTTYPE = x86_64
+  export LD_LIBRARY_PATH = $CYDAQHOME/source/trunk/lib/$HOSTTYPE:$LD_LIBRARY_PATH
+  $
+\end{lstlisting}
+\noindent
+After these lines are added to the \texttt{.bashrc} file, the user
+will either need to source the file in the currently open terminal or
+simply close the terminal window and reopen a new one for the
+environmental variables to take effect.
+
+\section{Building the \texttt{CyDAQRootGUI} binary}
+After ensuring that the prequisites described in
+Section~\ref{sec:prereqs} have been successfully installed and
+that the user's environment is configured as described in
+Section~\ref{sec:config}, the user is ready to build the
+\texttt{CyDAQRootGUI} binary.
+\begin{itemize}
+\item{Navigate to the \texttt{CyDAQRootGUI} directory:
+    \begin{lstlisting}
+      cd CYDAQHOME/source/trunk
+    \end{lstlisting}
+  }
+\item{Build the binary from the source code using the provided GNU
+    makefile:
+    \begin{lstlisting}
+      make
+    \end{lstlisting}
+    The GNU makefill will show the compilation steps and update the
+    user on the progress of the build.
+  }
+\item{If successful, a new executable binary named
+    \texttt{CyDAQRootGUI} should exist in the
+    \texttt{\$CYDAQHOME/source/trunk/bin} directory
+  }
+\end{itemize}
+That's all it takes! The user is now ready to begin running the
+\texttt{CyDAQRootGUI} and should proceed to Chapter~\ref{chap:run}.

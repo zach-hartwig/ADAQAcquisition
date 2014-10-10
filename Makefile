@@ -17,7 +17,7 @@
 #  $ make 
 #
 #  To clean the bin/ and build/ directories
-#  # make clean
+#  $ make clean
 #
 #********************************************************************
 
