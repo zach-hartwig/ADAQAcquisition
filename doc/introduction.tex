@@ -1,63 +1,52 @@
 \chapter{Introduction to ADAQAcquisition}
 \label{chap:introdurction}
 
-\ADAQ stands for \textbf{AIMS} \textbf{D}ata
-\textbf{A}c\textbf{Q}uisition. In general, \ADAQ is a collection of
-software tools running under Linux\footnote{Porting of \ADAQ to
-  Windows/Mac platforms is not foreseen at this time} for digitizing
-and analyzing output waveforms from the particle detectors that will
-be used with Ionetix cyclotron experiments. \ADAQ has been explicitly
-developed for use with \CAEN data acquisition hardware and the \CAEN C
-libraries that are distributed in support of the various hardware
-modules. At present, support is provided for a single \CAEN V6534 high
-voltage VME board and a signle \CAEN V1720 digitizerVME board
-controlled via the \CAEN V1718 USB-VME board.
+\ADAQ is a program that provides a powerful graphical user interface
+(GUI) method for the interacting, programming, and acquiring digitized
+waveform data using CAEN high voltage and acquisition hardware. It
+provides the user with a full range of functionality, from high level
+methods for accomplishing complex tasks all the way to reading/writing
+individual registers on the hardware. In addition to a fully featured
+digital oscilloscope and multichannel analyzer, the program provides
+persistent storage of waveform data in compressed binary files for
+offline analysis with its sister program (\texttt{ADAQAnalysis}),
+publication ready graphical output of waveforms and spectra, and
+control over VME high voltage, VME-USB/OpticalLink bridge, and pulser
+boards.
 
-\section{Overview of the \ADAQ software}
+\ADAQ is built upon two main dependencies. The first is the
+\texttt{ADAQ} library. The \texttt{ADAQ} library is a custom library
+developed to provide standardized, straightforward, and enhanced
+control over CAEN hardware. The library is available as a C++ shared
+object library and Python module, encapsulating all of the standard
+CAEN libraries with wrappers and extending these libraries by adding
+new features. The second dependency is the \ROOT toolkit, which
+provides object-oriented framework for data analysis, persistent
+storage, and GUI construction.
+
+At present, \ADAQ is only supported and tested on Linux platforms,
+although in principle, building on Mac should be fairly straightfoward
+provided the user's environment is correctly configured.
+
+
+\section{Purpose of the \ADAQ User's Guide}
 \label{sec: overviewsoftware}
-The centerpiece of \ADAQ is the \texttt{ADAQAcquisitionRootGUI} program, which
-provides an extremely powerful graphical user interface (GUI) for full
-control of the V6534 and 1720 boards, as well greatly enhanced
-\textit{digital versions} of the oscilloscope (waveform analysis),
-multichannel analyzer (pulse spectra creation) and computer programs
-(graphical plotting, digitial data storage) found in most traditional
-analog DAQ setups.
-
-\texttt{ADAQAcquisitionRootGUI} is primarily bnuilt upon two families of C++
-classes. First, \texttt{ADAQAcquisitionRootGUI} integrates many classes from the
-\ROOT data analysis toolkit that not only provides the graphical
-interface libraries themselves but also a tremendously powerful set of
-data analysis tools, such as graphing, histogramming, curve fitting,
-peak finding algorithms and much, much more. Second,
-\texttt{ADAQAcquisitionRootGUI} uses two custom C++ classes (ADAQAcquisitionHigh voltage
-and ADAQAcquisitionDigitizer) that provide a simple but powerful way for the \ADAQ
-developer to control the V6534 and V1720 boards, obscuring the
-nitty-gritty of interacting with the boards via the CAEN libraries and
-exposing easy-to-understand and often significantly enhanced methods
-for controlling the boards.
-
-Another important component of \ADAQ are the offline waveform analysis
-tools, which again make full use of the \ROOT toolkit. At present, a
-skeleton template code is provided that will open a specified data
-file containing waveforms, read in all the relevant parameters from
-the data file, and then iterate through all the stored waveforms in
-the file. The user is expected to use this template to implement
-his/her own algorithsm for waveform analysis (counting, pulse spectra
-creation, pulse shape discrimination, etc).
 
 The purpose of this user's guide is to provide the user of \ADAQ with
-the information required to
+the information required to:
 \begin{enumerate}
-  \item{Understand the general layout of the \ADAQ source code}
-  \item{Retrieve the \ADAQ source code from the \GIT\footnote{Subversion
-      code management system. Available at:
-      \purl{http://subversion.apache.org}} repository and build the
-    \texttt{ADAQAcquisitionRootGUI} executable from source.}
-  \item{use \texttt{ADAQAcquisitionRootGUI} to acquire and analyze output
-    detector waveforms}
-  \item{Begin developing customized offline analysis code to process
-    digital waveform data}
+\item{Retrieve the \ADAQ source code from its public \GIT repository}
+\item{Understand the general layout and build system of the \ADAQ
+  source code}
+\item{Configure the user's environment and build the \ADAQ binary}
+\item{Educate the user in all the features of \ADAQ}
 \end{enumerate}
+
+Detailed documentation on the \CAEN libraries can be found here:\\
+\href{http://www.caen.it/csite/LibrarySearch.jsp}{http://www.caen.it/csite/LibrarySearch.jsp}\\
+
+Documentation on the \ROOT toolkit can be found here:\\
+\href{http://root.cern.ch/drupal/content/documentation}{http://root.cern.ch/drupal/content/documentation}\\
 
 To achieve these goals, the remainder of this chapter describes the
 external software dependencies required to build the \ADAQ source code
