@@ -284,13 +284,8 @@ void AAAcquisitionManager::StartAcquisition()
       
       else{
 	DGManager->GetZLEWaveform(Buffer, evt, Waveforms);
-	DGManager->PrintZLEEventInfo(Buffer);
+	//DGManager->PrintZLEEventInfo(Buffer, evt);
       }
-      
-      // Prevent waveform analysis if there is nothing to analyze,
-      // i.e. seg-fault protection just in case!
-      //      if(EventWaveform == NULL)
-      //      	continue;
       
       // Iterate over the digitizer channels that are enabled
       for(int ch=0; ch<DGManager->GetNumChannels(); ch++){
