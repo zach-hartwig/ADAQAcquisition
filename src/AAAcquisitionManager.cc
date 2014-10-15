@@ -203,9 +203,18 @@ void AAAcquisitionManager::StartAcquisition()
   // Initialize all variables before acquisition begins
 
   PreAcquisition();
+  
+  int AcqControl = TheSettings->AcquisitionControl;
 
-  if(TheSettings->AcquisitionControl == 0)
+  // If acquisition is 'standard' or 'manual' then send the software
+  // (SW) signal to begin data acquisition
+  if(AcqControl == 0)
     DGManager->SWStartAcquisition();
+  
+  // If acquisition is 'Gated (NIM/TTL)' then arm the digitizer for
+  // reception of S IN signal as data acquisition start/stop 
+  else if(AcqControl == 1 or AcqControl == 2)
+    DGManager->SInArmAcquisition();
   
   AcquisitionEnable = true;
 
@@ -437,8 +446,12 @@ void AAAcquisitionManager::StartAcquisition()
 
 void AAAcquisitionManager::StopAcquisition()
 {
-  if(TheSettings->AcquisitionControl == 0)
-    AAVMEManager::GetInstance()->GetDGManager()->SWStopAcquisition();
+  ADAQDigitizer *DGManager = AAVMEManager::GetInstance()->GetDGManager();
+  int AcqControl = TheSettings->AcquisitionControl;
+  if(AcqControl == 0)
+    DGManager->SWStopAcquisition();
+  else if(AcqControl == 1 or AcqControl == 2)
+    DGManager->SInDisarmAcquisition();
   
   AcquisitionEnable = false;
   
