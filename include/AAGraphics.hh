@@ -45,7 +45,7 @@ private:
   static AAGraphics *TheGraphicsManager;
 
   TLegend * Waveform_LG;
-  vector<TLine *> Trigger_L;
+  vector<TLine *> Trigger_L, ZLE_L;
   vector<TBox *> Baseline_B;
 
   TLine *Spectrum_L, *SpectrumCalibration_L;

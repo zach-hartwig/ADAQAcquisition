@@ -189,21 +189,10 @@ void AAAcquisitionManager::StartAcquisition()
 
   AAGraphics *TheGraphicsManager = AAGraphics::GetInstance();
 
-  // Check to ensure at least one channel is enabled
-
-  uint32_t ChannelEnableMask = 0;
-  DGManager->GetChannelEnableMask(&ChannelEnableMask);
-
-  if((0xff & ChannelEnableMask)==0){
-    cout << "\tError! At least one channel must be enabled! Stopping acquisition ...\n"
-	 << endl;
-    return;
-  }
-
   // Initialize all variables before acquisition begins
-
   PreAcquisition();
-  
+
+  // Get the acquisition control setting
   int AcqControl = TheSettings->AcquisitionControl;
 
   // If acquisition is 'standard' or 'manual' then send the software
@@ -236,7 +225,7 @@ void AAAcquisitionManager::StartAcquisition()
     
     // Get the number of events in the PC buffer
     DGManager->GetNumEvents(Buffer, ReadSize, &PCEvents);
-
+    
     // For each event stored in the PC memory buffer...
     for(uint32_t evt=0; evt<PCEvents; evt++){
       
@@ -281,7 +270,7 @@ void AAAcquisitionManager::StartAcquisition()
 	if(EventWaveform == NULL)
 	  continue;
       }
-      
+
       
       ///////////////////////////////////////////
       // Zero length encoding waveform readout //
@@ -292,7 +281,17 @@ void AAAcquisitionManager::StartAcquisition()
       // member.
       
       else{
-	DGManager->GetZLEWaveform(Buffer, evt, Waveforms);
+	if(DGManager->GetZLEWaveform(Buffer, evt, Waveforms) != 0){
+	  cout << "\nAAAcquisitionManager::StartAcquisition() : You've encountered a serious error!\n"
+	       <<   "  There was an error reading out Event[" << evt << "] when using ZLE mode!\n"
+	       <<   "  This issue is likely due to using a RecordLength > 4030. This setting causes\n"
+	       <<   "  -- CAEN_DGTZ_GetNumEvents() to incorrectly return a '1'\n"
+	       <<   "  -- The readout PC buffer is not correctly filled causing algorithm to segfault\n"
+	       <<   "  CAEN has been contacted regarding this bug. ZSH (16 Oct 14)\n"
+	       << endl;
+	  
+	  continue;
+	}
 	//DGManager->PrintZLEEventInfo(Buffer, evt);
       }
       
@@ -660,7 +659,7 @@ void AAAcquisitionManager::CreateADAQFile(string FileName)
   Parameters = new ADAQRootMeasParams();
 
   WaveformTree = new TTree("WaveformTree","Prototype tree to store all waveforms of an event");
-
+  
   int DGChannels = AAVMEManager::GetInstance()->GetDGManager()->GetNumChannels();
   for(int ch=0; ch<DGChannels; ch++){
     ostringstream SS;
@@ -770,15 +769,4 @@ void AAInterface::GenerateArtificialWaveform(int RecordLength, vector<int> &Volt
     }
   }
 }
-*/
-
-
-
-/*
-  int LowestEnabledChannel = 0;
-  uint32_t LowestChannelMask = 0x1;
-  while(!(ChannelEnableMask & LowestChannelMask)){
-  LowestChannelMask <<= 1;
-  LowestEnabledChannel++;
-  }
 */

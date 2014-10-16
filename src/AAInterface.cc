@@ -772,14 +772,6 @@ void AAInterface::FillAcquisitionFrame()
     DGChNegPolarity_RB[ch]->SetState(kButtonDown);
     DGChPolarity_BG->Show();
 
-
-    // ADAQ number entry to set channel's vertical position on graph [ADC]
-    DGChannelControl_GF->AddFrame(DGChVerticalPosition_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "Vert. Position (ADC)", -1),
-				  new TGLayoutHints(kLHintsNormal));
-    DGChVerticalPosition_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-    DGChVerticalPosition_NEL[ch]->GetEntry()->SetNumber(0);
-    DGChVerticalPosition_NEL[ch]->GetEntry()->Resize(55,20);
-
     // ADAQ number entry to set channel's DAC offset 
     DGChannelControl_GF->AddFrame(DGChDCOffset_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "DC offset (hex)", DGChDCOffset_NEL_ID_Vec[ch]),
 				  new TGLayoutHints(kLHintsNormal));
@@ -794,7 +786,7 @@ void AAInterface::FillAcquisitionFrame()
 				       new TGLayoutHints(kLHintsNormal));
     DGChTriggerThreshold_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
     DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-    DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumber(2150);
+    DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumber(2000);
     DGChTriggerThreshold_NEL[ch]->GetEntry()->Resize(55,20);
     
     // ADAQ number entry to set minimum sample for baseline calculation [sample]
@@ -817,7 +809,7 @@ void AAInterface::FillAcquisitionFrame()
 				       new TGLayoutHints(kLHintsNormal));
     DGChZSThreshold_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
     DGChZSThreshold_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEANonNegative);
-    DGChZSThreshold_NEL[ch]->GetEntry()->SetNumber(2000);
+    DGChZSThreshold_NEL[ch]->GetEntry()->SetNumber(2100);
     DGChZSThreshold_NEL[ch]->GetEntry()->Resize(55,20);
 
 
@@ -849,9 +841,9 @@ void AAInterface::FillAcquisitionFrame()
     ZS_HF1->AddFrame(ZSLogicButtons_BG, new TGLayoutHints(kLHintsNormal, -1,-15,-10,-10));
 
     DGChZSPosLogic_RB[ch] = new TGRadioButton(ZSLogicButtons_BG, "+  ", -1);
-    DGChZSPosLogic_RB[ch]->SetState(kButtonDown);
     
     DGChZSNegLogic_RB[ch] = new TGRadioButton(ZSLogicButtons_BG, "-", -1);
+    DGChZSNegLogic_RB[ch]->SetState(kButtonDown);
   }
   
 
@@ -1143,7 +1135,6 @@ void AAInterface::FillAcquisitionFrame()
 
   DGScopeReadoutControls_GF->AddFrame(DGZSEnable_CB = new TGCheckButton(DGScopeReadoutControls_GF, "Enable zero-suppression", DGZSEnable_CB_ID),
 				      new TGLayoutHints(kLHintsNormal, 5,5,0,5));
-  DGZSEnable_CB->SetState(kButtonDown);
 
 
   ///////////////////////
@@ -1669,6 +1660,7 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
     DGChPosPolarity_RB[ch]->SetState(ButtonState);
     DGChNegPolarity_RB[ch]->SetState(ButtonState);
     DGChDCOffset_NEL[ch]->GetEntry()->SetState(WidgetState);
+    DGChTriggerThreshold_NEL[ch]->GetEntry()->SetState(WidgetState);
     DGChBaselineCalcMin_NEL[ch]->GetEntry()->SetState(WidgetState);
     DGChBaselineCalcMax_NEL[ch]->GetEntry()->SetState(WidgetState);
     DGChZSThreshold_NEL[ch]->GetEntry()->SetState(WidgetState);
@@ -1775,7 +1767,6 @@ void AAInterface::SaveSettings()
     TheSettings->ChEnable[ch] = DGChEnable_CB[ch]->IsDown();
     TheSettings->ChPosPolarity[ch] = DGChPosPolarity_RB[ch]->IsDown();
     TheSettings->ChNegPolarity[ch] = DGChNegPolarity_RB[ch]->IsDown();
-    TheSettings->ChVertPos[ch] = DGChVerticalPosition_NEL[ch]->GetEntry()->GetIntNumber();
     TheSettings->ChDCOffset[ch] = DGChDCOffset_NEL[ch]->GetEntry()->GetHexNumber();
     TheSettings->ChTriggerThreshold[ch] = DGChTriggerThreshold_NEL[ch]->GetEntry()->GetIntNumber();
     TheSettings->ChBaselineCalcMin[ch] = DGChBaselineCalcMin_NEL[ch]->GetEntry()->GetIntNumber();
@@ -1905,7 +1896,7 @@ void AAInterface::SaveSettings()
       TheSettings->ChZSPosLogic[ch] = DGChZSPosLogic_RB[ch]->IsDisabledAndSelected();
       TheSettings->ChZSNegLogic[ch] = DGChZSNegLogic_RB[ch]->IsDisabledAndSelected();
     }
-
+    
     TheSettings->WaveformMode = AQWaveform_RB->IsDisabledAndSelected();
     TheSettings->SpectrumMode = AQSpectrum_RB->IsDisabledAndSelected();
     TheSettings->HighRateMode = AQHighRate_RB->IsDisabledAndSelected();

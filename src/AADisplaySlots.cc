@@ -43,7 +43,7 @@ void AADisplaySlots::HandleTextButtons()
       
       // Update widgets for acquisition-off settings
       TI->SetAcquisitionWidgetState(true, kButtonUp);
-
+      
       // Special handling for acquisition timer 
       if(TheACQManager->GetAcquisitionTimerEnable())
 	TheACQManager->SetAcquisitionTimerEnable(false);
@@ -51,17 +51,22 @@ void AADisplaySlots::HandleTextButtons()
     
     // If acquisition is not presently running then start it
     else{
-
+     
       // Update widget settings before turning acquisition on since
       // thread will remain in acquisition loop and not return immediately
-
+      
       TI->SetAcquisitionWidgetState(false, kButtonDisabled);
 
       // Program the digitizers with the current settings
-      TheVMEManager->ProgramDigitizers();
+      bool DGProgramSuccess = TheVMEManager->ProgramDigitizers();
 
-      // Start data acquisition
-      TheACQManager->StartAcquisition();
+      bool DGChannelEnableSuccess = TheVMEManager->GetDGManager()->CheckForEnabledChannel();
+
+      if(DGProgramSuccess and DGChannelEnableSuccess)
+	TheACQManager->StartAcquisition();
+      else
+	TI->SetAcquisitionWidgetState(true, kButtonUp);
+      break;
     }
     break;
   }

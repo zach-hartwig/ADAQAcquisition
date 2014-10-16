@@ -416,17 +416,16 @@ void AASubtabSlots::HandleTextButtons()
 
     WaveformFileName = TI->CreateFileDialog(FileTypes, kFDOpen);
     
-    if(WaveformFileName == "NULL"){
-    }
-    else{
-      string FileNameNoPath = WaveformFileName;
-      
-      size_t Found = FileNameNoPath.find_last_of("/");
-      if(Found != string::npos)
-	FileNameNoPath = FileNameNoPath.substr(Found+1, FileNameNoPath.size());
-      
-      TI->WaveformFileName_TEL->GetEntry()->SetText(FileNameNoPath.c_str());
-    }
+    if(WaveformFileName == "NULL")
+      WaveformFileName = "DefaultWaveforms.adaq";
+
+    string FileNameNoPath = WaveformFileName;
+    
+    size_t Found = FileNameNoPath.find_last_of("/");
+    if(Found != string::npos)
+      FileNameNoPath = FileNameNoPath.substr(Found+1, FileNameNoPath.size());
+    
+    TI->WaveformFileName_TEL->GetEntry()->SetText(FileNameNoPath.c_str());
     
     break;
   }

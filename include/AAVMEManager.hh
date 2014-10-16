@@ -23,7 +23,7 @@ public:
 
   static AAVMEManager *GetInstance();
 
-  void ProgramDigitizers();
+  bool ProgramDigitizers();
 
   void SafelyDisconnectVMEBoards();
 

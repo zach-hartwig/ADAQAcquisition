@@ -19,7 +19,6 @@ public:
     ChEnable.resize(Channels);
     ChPosPolarity.resize(Channels);
     ChNegPolarity.resize(Channels);
-    ChVertPos.resize(Channels);
     ChDCOffset.resize(Channels);
     ChTriggerThreshold.resize(Channels);
     ChBaselineCalcMin.resize(Channels);
@@ -39,7 +38,6 @@ public:
   vector<bool>     ChEnable;
   vector<bool>     ChPosPolarity;
   vector<bool>     ChNegPolarity;
-  vector<uint32_t> ChVertPos;
   vector<uint32_t> ChDCOffset;
   vector<uint32_t> ChTriggerThreshold;
   vector<uint32_t> ChBaselineCalcMin;
@@ -57,7 +55,6 @@ public:
   double HorizontalSliderPtr;
   double HorizontalSliderMin, HorizontalSliderMax;
   double VerticalSliderMin, VerticalSliderMax;
-
 
 
   ///////////////////////////////////////

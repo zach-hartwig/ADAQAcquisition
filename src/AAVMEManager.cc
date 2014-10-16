@@ -36,7 +36,7 @@ AAVMEManager::~AAVMEManager()
 {;}
 
 
-void AAVMEManager::ProgramDigitizers()
+bool AAVMEManager::ProgramDigitizers()
 {
   DGMgr->Reset();
 
@@ -54,6 +54,8 @@ void AAVMEManager::ProgramDigitizers()
       DGChEnableMask |= Ch;
       DGNumChEnabled++;
     }
+    else
+      continue;
     
     DGMgr->SetChannelDCOffset(ch, TheSettings->ChDCOffset[ch]);
     DGMgr->SetChannelTriggerThreshold(ch, TheSettings->ChTriggerThreshold[ch]);
@@ -71,11 +73,32 @@ void AAVMEManager::ProgramDigitizers()
 				   TheSettings->ChZSBackward[ch],
 				   TheSettings->ChZSForward[ch],
 				   TheSettings->ChZSPosLogic[ch]);
+
+      // Testing for positive ZLE logic
+      if(TheSettings->ChZSPosLogic[ch]){
+	if(TheSettings->ChZSThreshold[ch] > TheSettings->ChTriggerThreshold[ch]){
+	  
+	  cout << "Error! For ZS positive logic: ZS Threshold > Ch Trigger!\n"
+	       << endl;
+	  
+	  return false;
+	}
+      }
+      
+      // Testing for negative ZLE logic
+      else if(TheSettings->ChZSNegLogic[ch]){
+	if(TheSettings->ChZSThreshold[ch] < TheSettings->ChTriggerThreshold[ch]){
+	  
+	  cout << "Error! For ZS negative logic: ZS Threshold < Ch Trigger!\n"
+	       << endl;
+	  return false;
+	}
+      }
     }
   }
   
   DGMgr->SetChannelEnableMask(DGChEnableMask);
-
+  
   // Ensure that at least one channel is enabled in the channel
   // enabled bit mask; if not, alert the user and return without
   // beginning acquisition since there ain't nothin' to acquire.
@@ -174,6 +197,8 @@ void AAVMEManager::ProgramDigitizers()
     DGMgr->SetZSMode("ZLE");
   else
     DGMgr->SetZSMode("None");
+
+  return true;
 }
 
 

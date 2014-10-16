@@ -189,7 +189,6 @@ private:
   TGRadioButton *DGChPosPolarity_RB[8];
   TGRadioButton *DGChNegPolarity_RB[8];
   ADAQNumberEntryWithLabel *DGChDCOffset_NEL[8];
-  ADAQNumberEntryWithLabel *DGChVerticalPosition_NEL[8];
   ADAQNumberEntryWithLabel *DGChTriggerThreshold_NEL[8];
   ADAQNumberEntryWithLabel *DGChBaselineCalcMin_NEL[8];
   ADAQNumberEntryWithLabel *DGChBaselineCalcMax_NEL[8];

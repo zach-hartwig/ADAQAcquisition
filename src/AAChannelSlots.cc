@@ -46,6 +46,8 @@ void AAChannelSlots::HandleNumberEntries()
       
       // Set the channel trigger threshold 
       TheVMEManager->GetDGManager()->SetChannelTriggerThreshold(ch, thr);
+
+      cout << "HERE" << endl;
     }
     break;
   }

@@ -45,6 +45,11 @@ AAGraphics::AAGraphics()
     Trigger_L[ch]->SetLineColor(ChColor[ch]);
     Trigger_L[ch]->SetLineStyle(7);
     Trigger_L[ch]->SetLineWidth(2);
+
+    ZLE_L.push_back(new TLine);
+    ZLE_L[ch]->SetLineColor(ChColor[ch]);
+    ZLE_L[ch]->SetLineStyle(10);
+    ZLE_L[ch]->SetLineWidth(2);
     
     Baseline_B.push_back(new TBox);
     Baseline_B[ch]->SetFillColor(ChColor[ch]);
@@ -134,13 +139,12 @@ void AAGraphics::PlotWaveforms(vector<vector<uint16_t> > &Waveforms,
       WaveformLength = Voltage.size();
       Time.resize(WaveformLength);
       iota(begin(Time), end(Time), 0);
-
-      //      for(int i=0; i<WaveformLength; i++)
-      //	cout << Time[i] << "\t" << Voltage[i] << endl;
-
     }
     
     TGraph *Waveform_G = new TGraph(WaveformLength, &Time[0], &Voltage[0]);
+
+    if(Waveform_G->GetN() == 0)
+      return;
 
     WaveformGraphs.push_back(Waveform_G);
 
@@ -209,6 +213,13 @@ void AAGraphics::PlotWaveforms(vector<vector<uint16_t> > &Waveforms,
 			    BaselineValue[ch] - BaselineWidth,
 			    TheSettings->ChBaselineCalcMax[ch],
 			    BaselineValue[ch] + BaselineWidth);
+
+    if(TheSettings->ZeroSuppressionEnable)
+      ZLE_L[ch]->DrawLine(XMin,
+			  TheSettings->ChZSThreshold[ch],
+			  XMax,
+			  TheSettings->ChZSThreshold[ch]);
+
   }
   
   if(TheSettings->DisplayLegend)
@@ -255,9 +266,9 @@ void AAGraphics::PlotSpectrum(TH1F *Spectrum_H)
   Spectrum_H->SetMarkerColor(ChColor[Channel]);
   Spectrum_H->SetMarkerSize(0.75);
   Spectrum_H->SetFillColor(ChColor[Channel]);
-
+  
   if(TheSettings->SpectrumWithCurve){
-    Spectrum_H->SetFillStyle(4100);
+    Spectrum_H->SetFillStyle(0);
     Spectrum_H->Draw("C");
   }
   else if(TheSettings->SpectrumWithMarkers)
@@ -302,7 +313,10 @@ void AAGraphics::PlotSpectrum(TH1F *Spectrum_H)
   Spectrum_H->GetYaxis()->SetTitleOffset(YOffset);
   Spectrum_H->GetYaxis()->SetLabelSize(YSize);
 
+  (TheSettings->DisplayLegend) ? Spectrum_H->SetStats(true) : Spectrum_H->SetStats(false);
 
+  (TheSettings->DisplayGrid) ? gPad->SetGrid(true, true) : gPad->SetGrid(false, false);
+  
   // If calibration is enabled the draw a vertical line corresponding
   // to the current pulse value selected by the triple slider pointer
   if(TheSettings->SpectrumCalibrationEnable){
