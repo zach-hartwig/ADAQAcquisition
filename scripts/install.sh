@@ -50,9 +50,9 @@ git co $VERSION -b $VERSION >& /dev/null
 # Overwrite the include/AAVersion.hh header such that the correct
 # production version number is accessible to the binary build
 VERSION_ID=${VERSION/v/}
-cat > include/Version.hh << EOL
-#ifndef __Version_hh__
-#define __Version_hh__ 1
+cat > include/AAVersion.hh << EOL
+#ifndef __AAVersion_hh__
+#define __AAVersion_hh__ 1
 
 const string VersionString = "$VERSION_ID";
 
