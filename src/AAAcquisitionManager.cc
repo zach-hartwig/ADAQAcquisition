@@ -247,8 +247,10 @@ void AAAcquisitionManager::StartAcquisition()
 	
 	// If the timer has reached zero, i.e. the acquisition loop has
 	// run for the duration specified, then turn the acquisition off
-	if(AcquisitionTimeNow >= AcquisitionTimeStop)
+	if(AcquisitionTimeNow >= AcquisitionTimeStop){
 	  StopAcquisition();
+	  break;
+	}
       }
 
       ///////////////////////////////
@@ -436,10 +438,6 @@ void AAAcquisitionManager::StartAcquisition()
       if(Entries % Rate == 0)
 	TheGraphicsManager->PlotSpectrum(Spectrum_H[TheSettings->SpectrumChannel]);
     }
-    
-    // Free the PC memory allocated to the event
-    //    DGManager->FreeEvent(&EventWaveform);
-
   } // End acquisition loop
 
   // Free the memory preallocated for event readout
@@ -460,6 +458,9 @@ void AAAcquisitionManager::StopAcquisition()
     DGManager->SInDisarmAcquisition();
   
   AcquisitionEnable = false;
+  
+  DGManager->FreeEvent(&EventWaveform);
+  DGManager->FreeReadoutBuffer(&Buffer);
   
   if(AcquisitionTimerEnable){
     AcquisitionTimerEnable = false;
@@ -730,7 +731,7 @@ void AAAcquisitionManager::CloseADAQFile()
   //Comment->Write("MeasComment");
   
   ADAQFile->Close();
-  
+
   // Free the memory allocated to ROOT objects
   delete Parameters;
   //delete WaveformTree;

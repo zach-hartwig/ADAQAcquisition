@@ -229,12 +229,14 @@ void AASubtabSlots::HandleTextButtons()
       
       // Configure such that when an ADAQ file has been opened and the
       // AQ timer is running waveform data is being stored
-      if(TheACQManager->GetADAQFileIsOpen())
+      if(TheACQManager->GetADAQFileIsOpen() and
+	 !TI->WaveformStorageEnable_CB->IsDown()){
 	TI->WaveformStorageEnable_CB->SetState(kButtonDown);
+	TI->SaveSettings();
+      }
     }
     break;
   }
-    
     
   case AQTimerAbort_TB_ID:{
     if(TheACQManager->GetAcquisitionEnable() and
