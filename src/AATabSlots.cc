@@ -27,6 +27,41 @@ AATabSlots::~AATabSlots()
 {;}
 
 
+void AATabSlots::HandleCheckButtons()
+{
+  TGCheckButton *ActiveButton = (TGCheckButton *) gTQSender;
+  int ActiveID = ActiveButton->WidgetId();
+  
+  TI->SaveSettings();
+
+  AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
+  
+  switch(ActiveID){
+    
+  case HVEnableMonitoring_CB_ID:{
+    
+    int HVChannels = TheVMEManager->GetHVManager()->GetNumChannels();
+    
+    if(ActiveButton->IsDown()){
+      for(int ch=0; ch<HVChannels; ch++){
+	TI->HVChVoltageMonitor_NEFL[ch]->GetEntry()->SetState(true);
+	TI->HVChCurrentMonitor_NEFL[ch]->GetEntry()->SetState(true);
+      }
+      TheVMEManager->StartHVMonitoring(TI);
+    }
+    else{
+      for(int ch=0; ch<HVChannels; ch++){
+	TI->HVChVoltageMonitor_NEFL[ch]->GetEntry()->SetState(false);
+	TI->HVChCurrentMonitor_NEFL[ch]->GetEntry()->SetState(false);
+      }
+      TheVMEManager->StopHVMonitoring();
+      break;
+    }
+  }
+  }
+}
+
+
 void AATabSlots::HandleConnectionTextButtons()
 {
   TGTextButton *TextButton = (TGTextButton *) gTQSender;
@@ -140,26 +175,30 @@ void AATabSlots::HandleConnectionTextButtons()
     if(TI->BoardEnable_TB[V6534]->GetString() == "Board enabled"){
       TI->BoardEnable_TB[V6534]->SetText("Board disabled");
       TI->BoardEnable_TB[V6534]->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOff));
+      TI->VoltageTab->HideFrame(TI->VoltageFrame);
       TheVMEManager->SetHVEnable(false);
     }
     else if(TI->BoardEnable_TB[V6534]->GetString() == "Board disabled"){
       TI->BoardEnable_TB[V6534]->SetText("Board enabled");
-      TI->BoardEnable_TB[V6534]->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOff));
+      TI->BoardEnable_TB[V6534]->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOn));
+      TI->VoltageTab->ShowFrame(TI->VoltageFrame);
       TheVMEManager->SetHVEnable(true);
     }
     break;
-
+    
     // Set the V1720Enable boolean that controls whether or not the
     // V1720 high voltage board should be presently used
   case DGBoardEnable_TB_ID:
     if(TI->BoardEnable_TB[V1720]->GetString() == "Board enabled"){
       TI->BoardEnable_TB[V1720]->SetText("Board disabled");
       TI->BoardEnable_TB[V1720]->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOff));
+      TI->AcquisitionTab->HideFrame(TI->AcquisitionFrame);
       TheVMEManager->SetDGEnable(false);
     }
     else if(TI->BoardEnable_TB[V1720]->GetString() == "Board disabled"){
       TI->BoardEnable_TB[V1720]->SetText("Board enabled");
       TI->BoardEnable_TB[V1720]->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOn));
+      TI->AcquisitionTab->ShowFrame(TI->AcquisitionFrame);
       TheVMEManager->SetDGEnable(true);
     }
     break;
@@ -168,11 +207,13 @@ void AATabSlots::HandleConnectionTextButtons()
     if(TI->BoardEnable_TB[V1718]->GetString() == "Board enabled"){
       TI->BoardEnable_TB[V1718]->SetText("Board disabled");
       TI->BoardEnable_TB[V1718]->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOff));
+      TI->PulserTab->HideFrame(TI->PulserFrame);
       TheVMEManager->SetBREnable(false);
     }
     else if(TI->BoardEnable_TB[V1718]->GetString() == "Board disabled"){
       TI->BoardEnable_TB[V1718]->SetText("Board enabled");
       TI->BoardEnable_TB[V1718]->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOn));
+      TI->PulserTab->ShowFrame(TI->PulserFrame);
       TheVMEManager->SetBREnable(true);
     }
     break;
@@ -394,7 +435,7 @@ void AATabSlots::HandleVoltageTextButtons()
       // number entry widgets for the desired HV channel
       int HVVoltageValue = TI->HVChVoltage_NEL[HVChannel]->GetEntry()->GetIntNumber();
       int HVCurrentValue = TI->HVChCurrent_NEL[HVChannel]->GetEntry()->GetIntNumber();
-      
+
       // Set the voltage and maxmimum current drawn and turn the HV channel on
       TheVMEManager->GetHVManager()->SetVoltage(HVChannel, HVVoltageValue); 
       TheVMEManager->GetHVManager()->SetCurrent(HVChannel, HVCurrentValue);

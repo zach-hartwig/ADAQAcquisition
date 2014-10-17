@@ -58,6 +58,7 @@ public:
   void UpdateAQTimer(int);
   void UpdateAfterAQTimerStopped(bool);
   void UpdateAfterCalibrationPointAdded(int);
+  void UpdateHVMonitors(int, int, int);
 
   string CreateFileDialog(const char *[], EFileDialogMode);
 
@@ -192,11 +193,11 @@ private:
   ADAQNumberEntryWithLabel *DGChTriggerThreshold_NEL[8];
   ADAQNumberEntryWithLabel *DGChBaselineCalcMin_NEL[8];
   ADAQNumberEntryWithLabel *DGChBaselineCalcMax_NEL[8];
-  ADAQNumberEntryWithLabel *DGChZSThreshold_NEL[8];
-  ADAQNumberEntryWithLabel *DGChZSSamples_NEL[8];
-  ADAQNumberEntryWithLabel *DGChZSForward_NEL[8];
-  ADAQNumberEntryWithLabel *DGChZSBackward_NEL[8];
-  TGRadioButton *DGChZSPosLogic_RB[8], *DGChZSNegLogic_RB[8];
+  ADAQNumberEntryWithLabel *DGChZLEThreshold_NEL[8];
+  ADAQNumberEntryWithLabel *DGChZLESamples_NEL[8];
+  ADAQNumberEntryWithLabel *DGChZLEForward_NEL[8];
+  ADAQNumberEntryWithLabel *DGChZLEBackward_NEL[8];
+  TGRadioButton *DGChZLEPosLogic_RB[8], *DGChZLENegLogic_RB[8];
   
   // Display specific widgets (in the upper-right subframe)
 
@@ -230,7 +231,7 @@ private:
 
   TGCheckButton *AQDataReductionEnable_CB;
   ADAQNumberEntryWithLabel *AQDataReductionFactor_NEL;
-  TGCheckButton *DGZSEnable_CB;
+  TGCheckButton *DGZLEEnable_CB;
   
   // Spectrum
 

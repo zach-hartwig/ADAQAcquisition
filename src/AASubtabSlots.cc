@@ -305,14 +305,14 @@ void AASubtabSlots::HandleTextButtons()
     if(CalibrationEnable){
       TI->SpectrumCalibrationCalibrate_TB->SetText("Calibrated");
       TI->SpectrumCalibrationCalibrate_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOn));
-      TI->SpectrumCalibrationCalibrate_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonForeColor));
+      TI->SpectrumCalibrationCalibrate_TB->SetForegroundColor(TI->ColorManager->Number2Pixel(TI->ButtonForeColor));
     }
     else
       {}
     
     break;
   }
-
+    
     
   case SpectrumCalibrationPlot_TB_ID:{
 
@@ -345,7 +345,7 @@ void AASubtabSlots::HandleTextButtons()
 
       TI->SpectrumCalibrationCalibrate_TB->SetText("Calibrate");
       TI->SpectrumCalibrationCalibrate_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(18));
-      TI->SpectrumCalibrationCalibrate_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(kBlack));
+      TI->SpectrumCalibrationCalibrate_TB->SetForegroundColor(TI->ColorManager->Number2Pixel(kBlack));
     }
     else
       {}
@@ -365,16 +365,16 @@ void AASubtabSlots::HandleTextButtons()
     EFileDialogMode DialogType = kFDOpen;
     
     string FileName = TI->CreateFileDialog(FileTypes, DialogType);
-
+    
     if(FileName == "NULL"){
     }
     else{
       
-      int NumPoints = 0;
-      bool CalibrationLoaded = TheACQManager->LoadCalibration(Channel, FileName, NumPoints);
-      
       // Reset any preexisting calibrations
       TI->SpectrumCalibrationReset_TB->Clicked();
+
+      int NumPoints = 0;
+      bool CalibrationLoaded = TheACQManager->LoadCalibration(Channel, FileName, NumPoints);
       
       if(CalibrationLoaded){
 	for(int point=0; point<NumPoints; point++)
@@ -387,7 +387,7 @@ void AASubtabSlots::HandleTextButtons()
     }
     break;
   }
-
+    
     
   case SpectrumCalibrationWrite_TB_ID:{
 

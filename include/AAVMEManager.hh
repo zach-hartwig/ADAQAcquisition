@@ -13,6 +13,7 @@ class ADAQBridge;
 class ADAQDigitizer;
 class ADAQHighVoltage;
 
+#include "AAInterface.hh"
 #include "AASettings.hh"
 
 class AAVMEManager : public TObject
@@ -62,6 +63,12 @@ public:
   ADAQDigitizer *GetDGManager() {return DGMgr;}
   ADAQHighVoltage *GetHVManager() {return HVMgr;}
 
+  // General purpose VME functions
+
+  void StartHVMonitoring(AAInterface *);
+  void StopHVMonitoring();
+    
+
   ClassDef(AAVMEManager, 0);
   
 private:
@@ -72,41 +79,13 @@ private:
   long DGAddress, HVAddress;
   
   bool VMEConnectionEstablished;
+  bool HVMonitorEnable;
 
   ADAQBridge *BRMgr;
   ADAQDigitizer *DGMgr;
   ADAQHighVoltage *HVMgr;
 
   AASettings *TheSettings;
-
-
-
-
-  // DGScope objects
-  /*
-  TGraph *DGScopeWaveform_G[8];
-  TH1F *DGScopeSpectrum_H[8];
-
-  TFile *OutputDataFile;
-  TTree *WaveformTree;
-  bool BranchWaveformTree;
-  ADAQRootMeasParams *MeasParams;
-  TObjString *MeasComment;
-  bool ROOTFileOpen;
-
-  vector<bool> UseCalibrationManager;
-  vector<TGraph *> CalibrationManager;
-  vector<ADAQChannelCalibrationData> CalibrationData;
-  */
-
-  
-
-  // Strings for file names, extensions
-  // string DataFileName, DataFileExtension;
-  // string SpectrumFileName, SpectrumFileExtension;
-  // string GraphicsFileName, GraphicsFileExtension;
-
-
 };
 
 #endif

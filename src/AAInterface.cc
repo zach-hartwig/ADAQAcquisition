@@ -74,11 +74,15 @@ AAInterface::AAInterface()
   /////////////////////////////
   // Initialize C++ stdlib vectors and maps but using the
   // Boost::Assign functionality for its utility and concision
-
-  // std::vector for HV channel labels
-  HVChLabels += 
-    "Channel 0 (-)", "Channel 1 (-)", "Channel 2 (-)", 
-    "Channel 3 (+)", "Channel 4 (+)", "Channel 5 (+)";
+  
+  int NumHVChannels = TheVMEManager->GetHVManager()->GetNumChannels();
+  for(int ch=0; ch<NumHVChannels; ch++){
+    stringstream SS;
+    SS << "Channel " << ch << " (" << TheVMEManager->GetHVManager()->GetPolarityString(ch)
+       << ")";
+    
+    HVChLabels.push_back(SS.str());
+  }
   
   // std::vector to return the ROOT channel power widget ID from the HV channel number
   HVChPower_TB_ID_Vec += 
@@ -142,10 +146,16 @@ AAInterface::AAInterface()
 
   FillConnectionFrame();
   FillRegisterFrame();
-  FillPulserFrame();
-  FillVoltageFrame();
-  FillAcquisitionFrame();
 
+  if(TheVMEManager->GetBREnable())
+    FillPulserFrame();
+  
+  if(TheVMEManager->GetHVEnable())
+    FillVoltageFrame();
+  
+  if(TheVMEManager->GetBREnable())
+    FillAcquisitionFrame();
+  
 
   ///////////////////////////////////////////
   // Set manager pointers for later access //
@@ -227,7 +237,7 @@ void AAInterface::CreateTopLevelFrames()
 
   VoltageTab = TopLevelTabs->AddTab(" High Voltage ");
   VoltageFrame = new TGCompositeFrame(VoltageTab, 60, 20, kHorizontalFrame);
-  VoltageTab->AddFrame(VoltageFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 5,5,5,5));
+  VoltageTab->AddFrame(VoltageFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 5,5,40,5));
 
   AcquisitionTab = TopLevelTabs->AddTab(" Acquisition ");
   AcquisitionTab->SetBackgroundColor(ColorManager->Number2Pixel(22));
@@ -697,9 +707,12 @@ void AAInterface::FillVoltageFrame()
     HVChPower_TB[ch]->SetBackgroundColor(ColorManager->Number2Pixel(ButtonBackColorOff));
     HVChPower_TB[ch]->SetForegroundColor(ColorManager->Number2Pixel(ButtonForeColor));
     
-    // Modify the widget background to distinguish the negative voltage 
-    // (V6534 channels 0,1,2) from the positive voltage (V6534 channels 3,4,5)
-    (ch<3) ? (HVChannel_GF->SetBackgroundColor(ColorManager->Number2Pixel(22))) : (HVChannel_GF->SetBackgroundColor(ColorManager->Number2Pixel(16)));
+    // Modify the widget background to distinguish the negative and positive voltage 
+    string Polarity = TheVMEManager->GetHVManager()->GetPolarityString(ch);
+    if(Polarity == "+")
+      HVChannel_GF->SetBackgroundColor(ColorManager->Number2Pixel(22));
+    else if(Polarity == "-")
+      HVChannel_GF->SetBackgroundColor(ColorManager->Number2Pixel(16));
   }
 
   TGGroupFrame *HVAllChannel_GF = new TGGroupFrame(HVChannelControls_VF, "All Channels", kHorizontalFrame);
@@ -710,7 +723,7 @@ void AAInterface::FillVoltageFrame()
   // channel's set voltage and drawn current
   HVAllChannel_GF->AddFrame(HVMonitorEnable_CB = new TGCheckButton(HVAllChannel_GF, "Enable monitoring", HVEnableMonitoring_CB_ID),
 			    new TGLayoutHints(kLHintsNormal, 5,5,5,5));
-  HVMonitorEnable_CB->Connect("Clicked()", "AATabSlots", TabSlots, "HandleVoltageTextButtons()");
+  HVMonitorEnable_CB->Connect("Clicked()", "AATabSlots", TabSlots, "HandleCheckButtons()");
   HVMonitorEnable_CB->SetState(kButtonUp);
   
   VoltageFrame->AddFrame(HVChannelControls_VF, new TGLayoutHints(kLHintsTop | kLHintsCenterX, 5, 5, 5, 5));
@@ -805,45 +818,45 @@ void AAInterface::FillAcquisitionFrame()
     DGChBaselineCalcMax_NEL[ch]->GetEntry()->SetNumber(45);
     DGChBaselineCalcMax_NEL[ch]->GetEntry()->Resize(55,20);
 
-    DGChannelControl_GF->AddFrame(DGChZSThreshold_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "ZS threshold (ADC)", -1),
+    DGChannelControl_GF->AddFrame(DGChZLEThreshold_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "ZLE threshold (ADC)", -1),
 				       new TGLayoutHints(kLHintsNormal));
-    DGChZSThreshold_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-    DGChZSThreshold_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEANonNegative);
-    DGChZSThreshold_NEL[ch]->GetEntry()->SetNumber(2100);
-    DGChZSThreshold_NEL[ch]->GetEntry()->Resize(55,20);
+    DGChZLEThreshold_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+    DGChZLEThreshold_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEANonNegative);
+    DGChZLEThreshold_NEL[ch]->GetEntry()->SetNumber(2100);
+    DGChZLEThreshold_NEL[ch]->GetEntry()->Resize(55,20);
 
 
-    TGHorizontalFrame *ZS_HF0 = new TGHorizontalFrame(DGChannelControl_GF);
-    DGChannelControl_GF->AddFrame(ZS_HF0, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+    TGHorizontalFrame *ZLE_HF0 = new TGHorizontalFrame(DGChannelControl_GF);
+    DGChannelControl_GF->AddFrame(ZLE_HF0, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
 
-    ZS_HF0->AddFrame(DGChZSForward_NEL[ch] = new ADAQNumberEntryWithLabel(ZS_HF0, "ZS Frwd", -1),
+    ZLE_HF0->AddFrame(DGChZLEForward_NEL[ch] = new ADAQNumberEntryWithLabel(ZLE_HF0, "ZLE Frwd", -1),
 		     new TGLayoutHints(kLHintsNormal, 0,0,0,0));
-    DGChZSForward_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-    DGChZSForward_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
-    DGChZSForward_NEL[ch]->GetEntry()->SetNumber(10);
-    DGChZSForward_NEL[ch]->GetEntry()->Resize(55,20);
+    DGChZLEForward_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+    DGChZLEForward_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+    DGChZLEForward_NEL[ch]->GetEntry()->SetNumber(10);
+    DGChZLEForward_NEL[ch]->GetEntry()->Resize(55,20);
 
-    ZS_HF0->AddFrame(DGChZSBackward_NEL[ch] = new ADAQNumberEntryWithLabel(ZS_HF0, "ZS Back", -1),
+    ZLE_HF0->AddFrame(DGChZLEBackward_NEL[ch] = new ADAQNumberEntryWithLabel(ZLE_HF0, "ZLE Back", -1),
 		     new TGLayoutHints(kLHintsNormal, 10,0,0,0));
-    DGChZSBackward_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-    DGChZSBackward_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
-    DGChZSBackward_NEL[ch]->GetEntry()->SetNumber(10);
-    DGChZSBackward_NEL[ch]->GetEntry()->Resize(55,20);
+    DGChZLEBackward_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+    DGChZLEBackward_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+    DGChZLEBackward_NEL[ch]->GetEntry()->SetNumber(10);
+    DGChZLEBackward_NEL[ch]->GetEntry()->Resize(55,20);
 
-    TGHorizontalFrame *ZS_HF1 = new TGHorizontalFrame(DGChannelControl_GF);
-    DGChannelControl_GF->AddFrame(ZS_HF1, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+    TGHorizontalFrame *ZLE_HF1 = new TGHorizontalFrame(DGChannelControl_GF);
+    DGChannelControl_GF->AddFrame(ZLE_HF1, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
 
-    ZS_HF1->AddFrame(new TGLabel(ZS_HF1, "ZS Logic"),
+    ZLE_HF1->AddFrame(new TGLabel(ZLE_HF1, "ZLE Logic"),
 		     new TGLayoutHints(kLHintsNormal, 60,0,5,0));
     
-    TGHButtonGroup *ZSLogicButtons_BG = new TGHButtonGroup(ZS_HF1,"");
-    ZSLogicButtons_BG->SetBorderDrawn(false);
-    ZS_HF1->AddFrame(ZSLogicButtons_BG, new TGLayoutHints(kLHintsNormal, -1,-15,-10,-10));
+    TGHButtonGroup *ZLELogicButtons_BG = new TGHButtonGroup(ZLE_HF1,"");
+    ZLELogicButtons_BG->SetBorderDrawn(false);
+    ZLE_HF1->AddFrame(ZLELogicButtons_BG, new TGLayoutHints(kLHintsNormal, -1,-15,-10,-10));
 
-    DGChZSPosLogic_RB[ch] = new TGRadioButton(ZSLogicButtons_BG, "+  ", -1);
+    DGChZLEPosLogic_RB[ch] = new TGRadioButton(ZLELogicButtons_BG, "+  ", -1);
     
-    DGChZSNegLogic_RB[ch] = new TGRadioButton(ZSLogicButtons_BG, "-", -1);
-    DGChZSNegLogic_RB[ch]->SetState(kButtonDown);
+    DGChZLENegLogic_RB[ch] = new TGRadioButton(ZLELogicButtons_BG, "-", -1);
+    DGChZLENegLogic_RB[ch]->SetState(kButtonDown);
   }
   
 
@@ -1019,7 +1032,7 @@ void AAInterface::FillAcquisitionFrame()
 				 new TGLayoutHints(kLHintsNormal,5,5,0,5));
   DGTriggerEdge_CBL->GetComboBox()->AddEntry("Rising",0);
   DGTriggerEdge_CBL->GetComboBox()->AddEntry("Falling",1);
-  DGTriggerEdge_CBL->GetComboBox()->Select(0);
+  DGTriggerEdge_CBL->GetComboBox()->Select(1);
   DGTriggerEdge_CBL->GetComboBox()->Resize(110,20);
   DGTriggerEdge_CBL->GetComboBox()->ChangeOptions(DGTriggerEdge_CBL->GetComboBox()->GetOptions() | kFixedSize);
   
@@ -1133,7 +1146,7 @@ void AAInterface::FillAcquisitionFrame()
   AQDataReductionFactor_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
   AQDataReductionFactor_NEL->GetEntry()->SetNumber(1);
 
-  DGScopeReadoutControls_GF->AddFrame(DGZSEnable_CB = new TGCheckButton(DGScopeReadoutControls_GF, "Enable zero-suppression", DGZSEnable_CB_ID),
+  DGScopeReadoutControls_GF->AddFrame(DGZLEEnable_CB = new TGCheckButton(DGScopeReadoutControls_GF, "Enable ZLE zero-suppression", DGZLEEnable_CB_ID),
 				      new TGLayoutHints(kLHintsNormal, 5,5,0,5));
 
 
@@ -1663,11 +1676,11 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
     DGChTriggerThreshold_NEL[ch]->GetEntry()->SetState(WidgetState);
     DGChBaselineCalcMin_NEL[ch]->GetEntry()->SetState(WidgetState);
     DGChBaselineCalcMax_NEL[ch]->GetEntry()->SetState(WidgetState);
-    DGChZSThreshold_NEL[ch]->GetEntry()->SetState(WidgetState);
-    DGChZSBackward_NEL[ch]->GetEntry()->SetState(WidgetState);
-    DGChZSForward_NEL[ch]->GetEntry()->SetState(WidgetState);
-    DGChZSPosLogic_RB[ch]->SetState(ButtonState);
-    DGChZSNegLogic_RB[ch]->SetState(ButtonState);
+    DGChZLEThreshold_NEL[ch]->GetEntry()->SetState(WidgetState);
+    DGChZLEBackward_NEL[ch]->GetEntry()->SetState(WidgetState);
+    DGChZLEForward_NEL[ch]->GetEntry()->SetState(WidgetState);
+    DGChZLEPosLogic_RB[ch]->SetState(ButtonState);
+    DGChZLENegLogic_RB[ch]->SetState(ButtonState);
   }
 
   AQWaveform_RB->SetEnabled(WidgetState);
@@ -1686,7 +1699,7 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
   DGEventsBeforeReadout_NEL->GetEntry()->SetState(WidgetState);
   AQDataReductionEnable_CB->SetState(ButtonState);
   AQDataReductionFactor_NEL->GetEntry()->SetState(WidgetState);
-  DGZSEnable_CB->SetState(ButtonState);
+  DGZLEEnable_CB->SetState(ButtonState);
 
   SpectrumNumBins_NEL->GetEntry()->SetState(WidgetState);
   SpectrumMinBin_NEL->GetEntry()->SetState(WidgetState);
@@ -1771,11 +1784,11 @@ void AAInterface::SaveSettings()
     TheSettings->ChTriggerThreshold[ch] = DGChTriggerThreshold_NEL[ch]->GetEntry()->GetIntNumber();
     TheSettings->ChBaselineCalcMin[ch] = DGChBaselineCalcMin_NEL[ch]->GetEntry()->GetIntNumber();
     TheSettings->ChBaselineCalcMax[ch] = DGChBaselineCalcMax_NEL[ch]->GetEntry()->GetIntNumber();
-    TheSettings->ChZSThreshold[ch] = DGChZSThreshold_NEL[ch]->GetEntry()->GetIntNumber();
-    TheSettings->ChZSForward[ch] = DGChZSForward_NEL[ch]->GetEntry()->GetIntNumber();
-    TheSettings->ChZSBackward[ch] = DGChZSBackward_NEL[ch]->GetEntry()->GetIntNumber();
-    TheSettings->ChZSPosLogic[ch] = DGChZSPosLogic_RB[ch]->IsDown();
-    TheSettings->ChZSNegLogic[ch] = DGChZSNegLogic_RB[ch]->IsDown();
+    TheSettings->ChZLEThreshold[ch] = DGChZLEThreshold_NEL[ch]->GetEntry()->GetIntNumber();
+    TheSettings->ChZLEForward[ch] = DGChZLEForward_NEL[ch]->GetEntry()->GetIntNumber();
+    TheSettings->ChZLEBackward[ch] = DGChZLEBackward_NEL[ch]->GetEntry()->GetIntNumber();
+    TheSettings->ChZLEPosLogic[ch] = DGChZLEPosLogic_RB[ch]->IsDown();
+    TheSettings->ChZLENegLogic[ch] = DGChZLENegLogic_RB[ch]->IsDown();
   }
   
   TheSettings->HorizontalSliderPtr = DisplayHorizontalScale_THS->GetPointerPosition();
@@ -1817,7 +1830,7 @@ void AAInterface::SaveSettings()
   TheSettings->EventsBeforeReadout = DGEventsBeforeReadout_NEL->GetEntry()->GetIntNumber();
   TheSettings->DataReductionEnable = AQDataReductionEnable_CB->IsDown();
   TheSettings->DataReductionFactor = AQDataReductionFactor_NEL->GetEntry()->GetIntNumber();
-  TheSettings->ZeroSuppressionEnable = DGZSEnable_CB->IsDown();
+  TheSettings->ZeroSuppressionEnable = DGZLEEnable_CB->IsDown();
 
   
   ///////////////////////////
@@ -1893,8 +1906,8 @@ void AAInterface::SaveSettings()
       TheSettings->ChEnable[ch] = DGChEnable_CB[ch]->IsDisabledAndSelected();
       TheSettings->ChPosPolarity[ch] = DGChPosPolarity_RB[ch]->IsDisabledAndSelected();
       TheSettings->ChNegPolarity[ch] = DGChNegPolarity_RB[ch]->IsDisabledAndSelected();
-      TheSettings->ChZSPosLogic[ch] = DGChZSPosLogic_RB[ch]->IsDisabledAndSelected();
-      TheSettings->ChZSNegLogic[ch] = DGChZSNegLogic_RB[ch]->IsDisabledAndSelected();
+      TheSettings->ChZLEPosLogic[ch] = DGChZLEPosLogic_RB[ch]->IsDisabledAndSelected();
+      TheSettings->ChZLENegLogic[ch] = DGChZLENegLogic_RB[ch]->IsDisabledAndSelected();
     }
     
     TheSettings->WaveformMode = AQWaveform_RB->IsDisabledAndSelected();
@@ -1905,7 +1918,7 @@ void AAInterface::SaveSettings()
     TheSettings->TriggerCoincidenceEnable = DGTriggerCoincidenceEnable_CB->IsDisabledAndSelected();
 
     TheSettings->DataReductionEnable = AQDataReductionEnable_CB->IsDisabledAndSelected();
-    TheSettings->ZeroSuppressionEnable = DGZSEnable_CB->IsDisabledAndSelected();
+    TheSettings->ZeroSuppressionEnable = DGZLEEnable_CB->IsDisabledAndSelected();
 
     TheSettings->SpectrumPulseHeight = SpectrumPulseHeight_RB->IsDisabledAndSelected();
     TheSettings->SpectrumPulseArea = SpectrumPulseArea_RB->IsDisabledAndSelected();
@@ -1961,6 +1974,13 @@ void AAInterface::UpdateAfterCalibrationPointAdded(int SetPoint)
   // entry widgets to their default "0.0" and "1.0" respectively,
   SpectrumCalibrationEnergy_NEL->GetEntry()->SetNumber(0.0);
   SpectrumCalibrationPulseUnit_NEL->GetEntry()->SetNumber(1.0);
+}
+
+
+void AAInterface::UpdateHVMonitors(int Channel, int HV, int I)
+{
+  HVChVoltageMonitor_NEFL[Channel]->GetEntry()->SetNumber(HV);
+  HVChCurrentMonitor_NEFL[Channel]->GetEntry()->SetNumber(I);
 }
 
 

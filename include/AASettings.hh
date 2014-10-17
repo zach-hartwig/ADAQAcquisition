@@ -23,11 +23,11 @@ public:
     ChTriggerThreshold.resize(Channels);
     ChBaselineCalcMin.resize(Channels);
     ChBaselineCalcMax.resize(Channels);
-    ChZSThreshold.resize(Channels);
-    ChZSForward.resize(Channels);
-    ChZSBackward.resize(Channels);
-    ChZSPosLogic.resize(Channels);
-    ChZSNegLogic.resize(Channels);
+    ChZLEThreshold.resize(Channels);
+    ChZLEForward.resize(Channels);
+    ChZLEBackward.resize(Channels);
+    ChZLEPosLogic.resize(Channels);
+    ChZLENegLogic.resize(Channels);
   }
   
 #ifndef __CINT__
@@ -42,11 +42,11 @@ public:
   vector<uint32_t> ChTriggerThreshold;
   vector<uint32_t> ChBaselineCalcMin;
   vector<uint32_t> ChBaselineCalcMax;
-  vector<uint32_t> ChZSThreshold;
-  vector<uint32_t> ChZSForward;
-  vector<uint32_t> ChZSBackward;
-  vector<bool>     ChZSPosLogic;
-  vector<bool>     ChZSNegLogic;
+  vector<uint32_t> ChZLEThreshold;
+  vector<uint32_t> ChZLEForward;
+  vector<uint32_t> ChZLEBackward;
+  vector<bool>     ChZLEPosLogic;
+  vector<bool>     ChZLENegLogic;
 
 
   //////////////////////////

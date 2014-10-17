@@ -172,23 +172,27 @@ void AAAcquisitionManager::PreAcquisition()
   else if(TheSettings->SpectrumMode)
     AAGraphics::GetInstance()->SetupSpectrumGraphics();
 	
-  // Initialize CAEN digitizer readout data for acquisition
-
+  // Initialize pointers to the event and event waveform. Memory is
+  // preallocated for events here rather than at readout time
+  // resulting in slightly larger memory use but faster readout
   EventPointer = NULL;
   EventWaveform = NULL;
+  DGManager->AllocateEvent(&EventWaveform);
+  
+  // Initialize variables for the PC buffer and event readout. Memory
+  // is preallocated for the buffer to receive readout events.
   Buffer = NULL;
   BufferSize = ReadSize = FPGAEvents = PCEvents = 0;
-  
-  AAVMEManager::GetInstance()->GetDGManager()->MallocReadoutBuffer(&Buffer, &BufferSize);
+  DGManager->MallocReadoutBuffer(&Buffer, &BufferSize);
 }
 
 
 void AAAcquisitionManager::StartAcquisition()
 {
   ADAQDigitizer *DGManager = AAVMEManager::GetInstance()->GetDGManager();
-
+  
   AAGraphics *TheGraphicsManager = AAGraphics::GetInstance();
-
+  
   // Initialize all variables before acquisition begins
   PreAcquisition();
 
@@ -206,7 +210,7 @@ void AAAcquisitionManager::StartAcquisition()
     DGManager->SInArmAcquisition();
   
   AcquisitionEnable = true;
-
+  
   while(AcquisitionEnable){
     
     // Handle acquisition actions in separate ROOT thread
@@ -434,9 +438,12 @@ void AAAcquisitionManager::StartAcquisition()
     }
     
     // Free the PC memory allocated to the event
-    DGManager->FreeEvent(&EventWaveform);
+    //    DGManager->FreeEvent(&EventWaveform);
 
   } // End acquisition loop
+
+  // Free the memory preallocated for event readout
+  DGManager->FreeEvent(&EventWaveform);
   
   // Free the PC memory allocated to the readout buffer
   DGManager->FreeReadoutBuffer(&Buffer);

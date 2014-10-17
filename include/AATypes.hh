@@ -157,7 +157,7 @@ enum{
   CheckBufferStatus_TB_ID,
   AQDataReductionEnable_CB_ID,
   AQDataReductionFactor_NEL_ID,
-  DGZSEnable_CB_ID,
+  DGZLEEnable_CB_ID,
 
   // Spectrum subtab
 

@@ -216,9 +216,9 @@ void AAGraphics::PlotWaveforms(vector<vector<uint16_t> > &Waveforms,
 
     if(TheSettings->ZeroSuppressionEnable)
       ZLE_L[ch]->DrawLine(XMin,
-			  TheSettings->ChZSThreshold[ch],
+			  TheSettings->ChZLEThreshold[ch],
 			  XMax,
-			  TheSettings->ChZSThreshold[ch]);
+			  TheSettings->ChZLEThreshold[ch]);
 
   }
   

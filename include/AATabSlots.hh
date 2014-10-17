@@ -10,7 +10,8 @@ class AATabSlots : public TObject
 public:
   AATabSlots(AAInterface *);
   ~AATabSlots();
-  
+
+  void HandleCheckButtons();
   void HandleConnectionTextButtons();
   void HandleRegisterTextButtons();
   void HandlePulserTextButtons();

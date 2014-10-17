@@ -1,3 +1,5 @@
+#include <TSystem.h>
+
 #include "ADAQBridge.hh"
 #include "ADAQDigitizer.hh"
 #include "ADAQHighVoltage.hh"
@@ -13,7 +15,7 @@ AAVMEManager *AAVMEManager::GetInstance()
 
 
 AAVMEManager::AAVMEManager()
-  : BREnable(true), DGEnable(true), HVEnable(false),
+  : BREnable(true), DGEnable(true), HVEnable(true),
     DGAddress(0x00420000), HVAddress(0x42420000),
     VMEConnectionEstablished(false)
 {
@@ -69,16 +71,16 @@ bool AAVMEManager::ProgramDigitizers()
       DGMgr->SetZSMode("ZLE");
       
       DGMgr->SetZLEChannelSettings(ch,
-				   TheSettings->ChZSThreshold[ch],
-				   TheSettings->ChZSBackward[ch],
-				   TheSettings->ChZSForward[ch],
-				   TheSettings->ChZSPosLogic[ch]);
+				   TheSettings->ChZLEThreshold[ch],
+				   TheSettings->ChZLEBackward[ch],
+				   TheSettings->ChZLEForward[ch],
+				   TheSettings->ChZLEPosLogic[ch]);
 
       // Testing for positive ZLE logic
-      if(TheSettings->ChZSPosLogic[ch]){
-	if(TheSettings->ChZSThreshold[ch] > TheSettings->ChTriggerThreshold[ch]){
+      if(TheSettings->ChZLEPosLogic[ch]){
+	if(TheSettings->ChZLEThreshold[ch] > TheSettings->ChTriggerThreshold[ch]){
 	  
-	  cout << "Error! For ZS positive logic: ZS Threshold > Ch Trigger!\n"
+	  cout << "Error! For ZLE positive logic: ZLE Threshold < Ch Trigger!\n"
 	       << endl;
 	  
 	  return false;
@@ -86,10 +88,10 @@ bool AAVMEManager::ProgramDigitizers()
       }
       
       // Testing for negative ZLE logic
-      else if(TheSettings->ChZSNegLogic[ch]){
-	if(TheSettings->ChZSThreshold[ch] < TheSettings->ChTriggerThreshold[ch]){
+      else if(TheSettings->ChZLENegLogic[ch]){
+	if(TheSettings->ChZLEThreshold[ch] < TheSettings->ChTriggerThreshold[ch]){
 	  
-	  cout << "Error! For ZS negative logic: ZS Threshold < Ch Trigger!\n"
+	  cout << "Error! For ZLE negative logic: ZLE Threshold > Ch Trigger!\n"
 	       << endl;
 	  return false;
 	}
@@ -217,34 +219,37 @@ void AAVMEManager::SafelyDisconnectVMEBoards()
 }
 
 
+void AAVMEManager::StartHVMonitoring(AAInterface *TI)
+{
+  HVMonitorEnable = true;
 
-// Run the real-time updating of the ROOT number entry widgets that
-// display active voltage and drawn current from all channels
-//void AAInterface::RunHVMonitoring()
-//{
-  /*
+  //  vector<uint16_t> Voltage(HVMgr->GetNumChannels(), 0);
+  //  vector<uint16_t> Current(HVMgr->GetNumChannels(), 0);
+  
   // The high voltage and current will be displayed and updated in the
   // dedicated number entry fields when HVMonitorEnable is true
   while(HVMonitorEnable){
+
     // Perform action in a separate thread to enable use of other GUI
     // features while HV monitoring is taking place
     gSystem->ProcessEvents();
     
-    // Update the voltage and current displays every second
-    double delay = clock()+(1.0*CLOCKS_PER_SEC);
+    // Update the voltage and current displays every half-second
+    double delay = clock()+(0.5*CLOCKS_PER_SEC);
     while(clock()<delay){gSystem->ProcessEvents();}
-
+    
     uint16_t Voltage, Current;
     const int HVChannels = TheVMEManager->GetHVManager()->GetNumChannels();
     for(int ch=0; ch<HVChannels; ch++){
-      // Get the present active voltage and current values
-      TheVMEManager->GetHVManager()->GetVoltage(ch, &Voltage);
-      TheVMEManager->GetHVManager()->GetCurrent(ch, &Current);
       
-      // Update the appropriate number entry fields
-      HVChannelVMonitor_NEFL[ch]->GetEntry()->SetNumber(Voltage);
-      HVChannelIMonitor_NEFL[ch]->GetEntry()->SetNumber(Current);
+      HVMgr->GetVoltage(ch, &Voltage);
+      HVMgr->GetCurrent(ch, &Current);
+      
+      TI->UpdateHVMonitors(ch, Voltage, Current);
     }
   }
-  */
-//}
+}
+
+
+void AAVMEManager::StopHVMonitoring()
+{ HVMonitorEnable = false; }
