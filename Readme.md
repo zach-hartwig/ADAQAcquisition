@@ -1,3 +1,7 @@
+![AIMS Logo](doc/figures/AIMSLogo_BoldPastelColors.png "Accelerator-based In-situ Materials Surveillance")  
+**A**ccelerator-based **I**n-situ **M**aterials **S**urveillance
+
+
 ## ADAQAcquisition ##
 
 **ADAQAcquisition** is a program that provides a powerful graphical
@@ -47,6 +51,19 @@ dependencies. If the user desires installation in a system-wide
 location, a Bash script is provided to correctly handle this
 operation.
 
+
+The following lines should first be added to your .bashrc file to
+configure your environment correctly:
+
+```bash 
+    # ADAQAcquisition configuration
+    ADAQACQUISITION_HOME = /full/path/to/ADAQAcquisition
+    ADAQACQUISITION_USER = dev # Setting for local install (developer)
+    # ADAQACQUISITION_USER = usr # Setting for global install (user)
+    source $ADAQACQUISITION_HOME/scripts/setup.sh $ADAQACQUISITION_USER >& /dev/null
+```
+Don't forget to open a new terminal for the settings to take effect!
+
 On Linux or MacOS, clone into the repository and then use the provided
 GNU Makefile to build the **ADAQAcquisition** binary:
 
@@ -62,17 +79,6 @@ GNU Makefile to build the **ADAQAcquisition** binary:
 
   # To cleanup all build files and remove the binary:
   make clean  
-```
-
-The following lines should be added to your .bashrc file to configure
-your environment correctly:
-
-```bash 
-    # ADAQAcquisition configuration
-    ADAQACQUISITION_HOME = /full/path/to/ADAQAcquisition
-    ADAQACQUISITION_USER = dev # Setting for local install (developer)
-    # ADAQACQUISITION_USER = usr # Setting for global install (user)
-    source $ADAQACQUISITION_HOME/scripts/setup.sh $ADAQACQUISITION_USER >& /dev/null
 ```
 
 ### Code dependencies ###
