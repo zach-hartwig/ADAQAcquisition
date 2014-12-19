@@ -298,7 +298,7 @@ void AAInterface::FillConnectionFrame()
   // The VME addresses, address display, and enable/disable widgets
   
   vector<string> Title;
-  Title += "VME-USB Board", "VME/Desktop Digitizer", "VME/Desktop High Voltage";
+  Title += "VME-USB Bridge", "VME/Desktop Digitizer", "VME/Desktop High Voltage";
   
   vector<int> BoardEnableID, BoardAddressID, BoardLinkNumberID;
   BoardEnableID += (int)V1718BoardEnable_TB_ID, (int)DGBoardEnable_TB_ID, (int)HVBoardEnable_TB_ID;
@@ -326,12 +326,37 @@ void AAInterface::FillConnectionFrame()
 
     BoardOptions_VF->AddFrame(new TGLabel(BoardOptions_VF, Title[board].c_str()), 
 			      new TGLayoutHints(kLHintsCenterX, 5,5,5,0));
+
+    BoardType_CBL.push_back(new ADAQComboBoxWithLabel(BoardOptions_VF, "Type", -1));
+    BoardOptions_VF->AddFrame(BoardType_CBL[board], new TGLayoutHints(kLHintsCenterX, 0,0,10,5));
+    BoardType_CBL[board]->GetComboBox()->Resize(65,20);
+
+    if(board == 0){
+      BoardType_CBL[board]->GetComboBox()->AddEntry("V1718", zV1718);
+      BoardType_CBL[board]->GetComboBox()->Select(zV1718);
+    }
+    if(board == 1){
+      BoardType_CBL[board]->GetComboBox()->AddEntry("V1720", zV1720);
+      BoardType_CBL[board]->GetComboBox()->AddEntry("V1724", zV1724);
+      BoardType_CBL[board]->GetComboBox()->AddEntry("DT5720", zDT5720);
+      BoardType_CBL[board]->GetComboBox()->AddEntry("DT5730", zDT5730);
+      BoardType_CBL[board]->GetComboBox()->Select(zV1720);
+    }
+    else if(board == 2){
+      BoardType_CBL[board]->GetComboBox()->AddEntry("V6533M", zV6533M);
+      BoardType_CBL[board]->GetComboBox()->AddEntry("V6533N", zV6533N);
+      BoardType_CBL[board]->GetComboBox()->AddEntry("V6533P", zV6533P);
+      BoardType_CBL[board]->GetComboBox()->AddEntry("V6534M", zV6534M);
+      BoardType_CBL[board]->GetComboBox()->AddEntry("V6534N", zV6534N);
+      BoardType_CBL[board]->GetComboBox()->AddEntry("V6534P", zV6534P);
+      BoardType_CBL[board]->GetComboBox()->Select(zV6534M);
+    }
     
     TGHorizontalFrame *BoardAddress_HF = new TGHorizontalFrame(BoardOptions_VF);
     BoardOptions_VF->AddFrame(BoardAddress_HF, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
     
     BoardAddress_HF->AddFrame(new TGLabel(BoardAddress_HF,"0x"), 
-			      new TGLayoutHints(kLHintsCenterX, 5,0,10,5));
+			      new TGLayoutHints(kLHintsCenterX, 5,0,5,5));
     
     // The V1718 USB-VME board differs from the others in that, as the
     // VME controller, it does not an explictly settable VME
@@ -348,10 +373,10 @@ void AAInterface::FillConnectionFrame()
       TGTextEntry *V1718_TE = new TGTextEntry(BoardAddress_HF, "Auto-Set!", 0);
       V1718_TE->SetAlignment(kTextCenterX);
       V1718_TE->Resize(65,20);
-      BoardAddress_HF->AddFrame(V1718_TE, new TGLayoutHints(kLHintsExpandY, 5, 5, 5, 5));
-
+      BoardAddress_HF->AddFrame(V1718_TE, new TGLayoutHints(kLHintsCenterX, 5, 5, 0, 0));
+      
       BoardAddress_HF->AddFrame(new TGLabel(BoardAddress_HF,"Address"), 
-				new TGLayoutHints(kLHintsCenterX, 0,0,10,5));
+				new TGLayoutHints(kLHintsCenterX, 0,0,3,0));
       
     }
     else{
@@ -361,7 +386,10 @@ void AAInterface::FillConnectionFrame()
       BoardAddress_NEF[board]->GetEntry()->SetFormat(TGNumberFormat::kNESHex);
       BoardAddress_NEF[board]->GetEntry()->SetHexNumber(BoardAddress[board]);
       BoardAddress_NEF[board]->GetEntry()->Resize(65,20);
-      BoardAddress_HF->AddFrame(BoardAddress_NEF[board], new TGLayoutHints(kLHintsExpandY, 5, 5, 7, 0));
+
+      int Offset = 5;
+      if(board == 2) Offset = 9;
+      BoardAddress_HF->AddFrame(BoardAddress_NEF[board], new TGLayoutHints(kLHintsCenterX, Offset, 0, 0, 0));
     }
     
     BoardLinkNumber_NEL.push_back(new ADAQNumberEntryWithLabel(BoardOptions_VF, 
@@ -371,7 +399,7 @@ void AAInterface::FillConnectionFrame()
     BoardLinkNumber_NEL[board]->GetEntry()->SetHexNumber(BoardLinkNumber[board]);
     BoardLinkNumber_NEL[board]->GetEntry()->Resize(40,20);
     BoardLinkNumber_NEL[board]->GetEntry()->SetNumber(0);
-    BoardOptions_VF->AddFrame(BoardLinkNumber_NEL[board], new TGLayoutHints(kLHintsNormal, 47, 0, 0, 5));
+    BoardOptions_VF->AddFrame(BoardLinkNumber_NEL[board], new TGLayoutHints(kLHintsNormal, 47, 0, 2, 5));
     
     BoardEnable_TB.push_back(new TGTextButton(BoardOptions_VF, "Board enabled", BoardEnableID[board]));
     BoardOptions_VF->AddFrame(BoardEnable_TB[board], new TGLayoutHints(kLHintsCenterX));
