@@ -25,9 +25,11 @@ enum{
 
   HVBoardEnable_TB_ID,
   HVBoardAddress_ID,
+  HVBoardLinkNumber_ID,
 
   DGBoardEnable_TB_ID,
   DGBoardAddress_ID,
+  DGBoardLinkNumber_ID,
 
   
   ///////////////////
@@ -40,7 +42,6 @@ enum{
   V1718WriteAddress_ID,
   V1718WriteValue_ID,
   V1718Write_ID,
-    
 
   HVReadAddress_ID,
   HVReadValue_ID,
@@ -49,13 +50,13 @@ enum{
   HVWriteValue_ID,
   HVWrite_ID,
 
-
   DGReadAddress_ID,
   DGReadValue_ID,
   DGRead_ID,
   DGWriteAddress_ID,
   DGWriteValue_ID,
   DGWrite_ID,
+
 
   ////////////////
   // Pulser tab //

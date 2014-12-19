@@ -28,20 +28,31 @@ AAVMEManager *AAVMEManager::GetInstance()
 
 AAVMEManager::AAVMEManager()
   : BREnable(true), DGEnable(true), HVEnable(true),
-    DGAddress(0x00420000), HVAddress(0x42420000),
+    BRIdentifier(0),
+    DGAddress(0x00420000), DGLinkNumber(0), DGCONETNode(0),
+    HVAddress(0x42420000), HVLinkNumber(0), 
     VMEConnectionEstablished(false)
 {
   if(TheVMEManager)
     cout << "\nError! The VMEManager was constructed twice!\n" << endl;
   TheVMEManager = this;
   
-  BRMgr = new ADAQBridge(zV1718, 0, 0x00000000);
+  BRMgr = new ADAQBridge(zV1718, 
+			 BRIdentifier);
   BRMgr->SetVerbose(true);
   
-  DGMgr = new ADAQDigitizer(zV1720, 0, DGAddress);
+  DGMgr = new ADAQDigitizer(zV1720, 
+			    DGIdentifier, 
+			    DGAddress,
+			    DGLinkNumber, 
+			    DGCONETNode);
   DGMgr->SetVerbose(true);
   
-  HVMgr = new ADAQHighVoltage(zV6534M, 0, HVAddress);
+  HVMgr = new ADAQHighVoltage(zV6534M, 
+			      HVIdentifier,
+			      HVAddress,
+			      HVLinkNumber);
+
   HVMgr->SetVerbose(true);
 }
 

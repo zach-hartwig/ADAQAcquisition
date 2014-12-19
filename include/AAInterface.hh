@@ -148,7 +148,8 @@ private:
 
   TGTextButton *VMEConnect_TB;
   TGTextView *ConnectionOutput_TV;
-  vector<TGNumberEntryField *> BoardAddress_NEF;
+  vector<ADAQNumberEntryFieldWithLabel *> BoardAddress_NEF;
+  vector<ADAQNumberEntryWithLabel *> BoardLinkNumber_NEL;
   vector<TGTextButton *> BoardEnable_TB;
 
 

@@ -86,9 +86,16 @@ public:
 private:
   static AAVMEManager *TheVMEManager;
 
-  // Use booleans and VME addresses
+  // Boolean enable flags
   bool BREnable, DGEnable, HVEnable;
-  long DGAddress, HVAddress;
+
+  int BRIdentifier;
+  
+  long DGAddress;
+  int DGIdentifier, DGLinkNumber, DGCONETNode;
+  
+  long HVAddress;
+  int HVIdentifier, HVLinkNumber;
   
   bool VMEConnectionEstablished;
   bool HVMonitorEnable;

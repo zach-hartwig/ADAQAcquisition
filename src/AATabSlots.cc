@@ -101,9 +101,13 @@ void AATabSlots::HandleConnectionTextButtons()
       
       int DGLinkOpen = -42;
       if(TheVMEManager->GetDGEnable()){
-	uint32_t Addr = TI->BoardAddress_NEF[V1720]->GetHexNumber();
+	uint32_t Addr = TI->BoardAddress_NEF[V1720]->GetEntry()->GetHexNumber();
+	int Link = TI->BoardLinkNumber_NEL[V1720]->GetEntry()->GetIntNumber();
+
 	TheVMEManager->SetDGAddress(Addr);
 	TheVMEManager->GetDGManager()->SetBoardAddress(Addr);
+	TheVMEManager->GetDGManager()->SetBoardLinkNumber(Link);
+	
 	DGLinkOpen = TheVMEManager->GetDGManager()->OpenLink();
 	
 	if(DGLinkOpen == 0)
@@ -116,7 +120,7 @@ void AATabSlots::HandleConnectionTextButtons()
 	// Connect to the VME/USB bridge WITHOUT a digitizer enabled ...
 	if(!TheVMEManager->GetDGEnable())
 	  BRLinkOpen = TheVMEManager->GetBRManager()->OpenLinkDirectly();
-
+	
 	// Connect to the VME/USB bridge VIA the digitizer
 	else if(DGLinkOpen == 0)
 	  BRLinkOpen = TheVMEManager->GetBRManager()->OpenLinkViaDigitizer(TheVMEManager->GetDGManager()->GetBoardHandle(), true);
@@ -124,9 +128,13 @@ void AATabSlots::HandleConnectionTextButtons()
       
       int HVLinkOpen = -42;
       if(TheVMEManager->GetHVEnable()){
-	uint32_t Addr = TI->BoardAddress_NEF[V6534]->GetHexNumber();
+	uint32_t Addr = TI->BoardAddress_NEF[V6534]->GetEntry()->GetHexNumber();
+	int Link = TI->BoardLinkNumber_NEL[V1720]->GetEntry()->GetIntNumber();
+
 	TheVMEManager->SetHVAddress(Addr);
 	TheVMEManager->GetHVManager()->SetBoardAddress(Addr);
+	TheVMEManager->GetHVManager()->SetBoardLinkNumber(Link);
+
 	HVLinkOpen = TheVMEManager->GetHVManager()->OpenLink();
 	
 	if(HVLinkOpen == 0)
@@ -135,7 +143,7 @@ void AATabSlots::HandleConnectionTextButtons()
       
       if(BRLinkOpen == 0 or DGLinkOpen == 0 or HVLinkOpen == 0){
 	TheVMEManager->SetVMEConnectionEstablished(true);
-
+	
 	AAAcquisitionManager::GetInstance()->Initialize();
 
 	TI->VMEConnect_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOn));
