@@ -31,20 +31,18 @@ AAAcquisitionManager *AAAcquisitionManager::GetInstance()
 
 
 AAAcquisitionManager::AAAcquisitionManager()
-  : AcquisitionEnable(false),
+  : AcquisitionEnable(false), AcquisitionTimerEnable(false),
     AcquisitionTimeStart(0), AcquisitionTimeStop(0), 
     AcquisitionTimeNow(0), AcquisitionTimePrev(0),
     EventPointer(NULL), EventWaveform(NULL), Buffer(NULL),
     BufferSize(0), ReadSize(0), FPGAEvents(0), PCEvents(0),
-
     ReadoutType(0), ReadoutTypeBit(24), ReadoutTypeMask(0b1 << ReadoutTypeBit),
     ZLEEventSizeMask(0x0fffffff), ZLEEventSize(0),
     ZLESampleAMask(0x0000ffff), ZLESampleBMask(0xffff0000), 
     ZLENumWordMask(0x000fffff), ZLEControlMask(0xc0000000),
-
     WaveformLength(0), LLD(0), ULD(0), SampleHeight(0.), TriggerHeight(0.),
     PulseHeight(0.), PulseArea(0.),
-    FillWaveformTree(false)
+    FillWaveformTree(false), ADAQFileIsOpen(false)
 {
   if(TheAcquisitionManager)
     cout << "\nError! The AcquisitionManager was constructed twice!\n" << endl;
@@ -222,7 +220,7 @@ void AAAcquisitionManager::StartAcquisition()
     DGManager->SInArmAcquisition();
   
   AcquisitionEnable = true;
-  
+
   while(AcquisitionEnable){
     
     // Handle acquisition actions in separate ROOT thread
@@ -260,7 +258,9 @@ void AAAcquisitionManager::StartAcquisition()
 	// If the timer has reached zero, i.e. the acquisition loop has
 	// run for the duration specified, then turn the acquisition off
 	if(AcquisitionTimeNow >= AcquisitionTimeStop){
+	  cout << "1" << endl;
 	  StopAcquisition();
+	  cout << "2" << endl;
 	  break;
 	}
       }
