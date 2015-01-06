@@ -25,7 +25,7 @@
 
 AASubtabSlots::AASubtabSlots(AAInterface *TheInterface)
   : TI(TheInterface),
-    WaveformFileName("DefaultWaveforms.adaq"),
+    WaveformFileName("DefaultWaveforms.adaq.root"),
     SpectrumFileName("DefaultSpectrum.root"),
     CanvasFileName("DefaultCanvas.eps")
 {;}
@@ -424,15 +424,14 @@ void AASubtabSlots::HandleTextButtons()
 
   case WaveformFileName_TB_ID:{
     
-    const char *FileTypes[] = {"ADAQ ROOT file","*.adaq",
-			       "ADAQ ROOT file","*.root",
+    const char *FileTypes[] = {"ADAQ ROOT file","*.adaq.root",
 			       0, 0};
-
+    
     WaveformFileName = TI->CreateFileDialog(FileTypes, kFDOpen);
     
     if(WaveformFileName == "NULL")
-      WaveformFileName = "DefaultWaveforms.adaq";
-
+      WaveformFileName = "DefaultWaveforms.adaq.root";
+    
     string FileNameNoPath = WaveformFileName;
     
     size_t Found = FileNameNoPath.find_last_of("/");

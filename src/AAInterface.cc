@@ -155,33 +155,33 @@ AAInterface::AAInterface()
   ///////////////////////////////////////
   // Fill each of the top-level frames //
   ///////////////////////////////////////
+  
 
   FillConnectionFrame();
   FillRegisterFrame();
 
   if(TheVMEManager->GetBREnable())
     FillPulserFrame();
-  
+
   if(TheVMEManager->GetHVEnable())
     FillVoltageFrame();
-  
-  if(TheVMEManager->GetBREnable())
+
+  if(TheVMEManager->GetDGEnable())
     FillAcquisitionFrame();
-  
 
   ///////////////////////////////////////////
   // Set manager pointers for later access //
   ///////////////////////////////////////////
 
   TheVMEManager->SetSettingsPointer(TheSettings);
-  
+
   AAAcquisitionManager::GetInstance()->SetInterfacePointer(this);
   AAAcquisitionManager::GetInstance()->SetSettingsPointer(TheSettings);
-  
+
   AAGraphics::GetInstance()->SetCanvasPointer(DisplayCanvas_EC->GetCanvas());
-  AAGraphics::GetInstance()->SetSettingsPointer(TheSettings);
-
-
+  if(TheVMEManager->GetDGEnable())
+    AAGraphics::GetInstance()->SetSettingsPointer(TheSettings);
+  
   ////////////////////////////////
   // Final setup of main window //
   ////////////////////////////////
@@ -1181,7 +1181,7 @@ void AAInterface::FillAcquisitionFrame()
 				      new TGLayoutHints(kLHintsNormal, 5,5,5,5));
   DGEventsBeforeReadout_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
   DGEventsBeforeReadout_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
-  DGEventsBeforeReadout_NEL->GetEntry()->SetNumber(5);
+  DGEventsBeforeReadout_NEL->GetEntry()->SetNumber(1);
  
   DGScopeReadoutControls_GF->AddFrame(DGCheckBufferStatus_TB = new TGTextButton(DGScopeReadoutControls_GF, "Check FPGA Buffer", CheckBufferStatus_TB_ID),
 				      new TGLayoutHints(kLHintsNormal, 5,5,5,0));
@@ -1441,7 +1441,7 @@ void AAInterface::FillAcquisitionFrame()
   WaveformFileName_TEL->GetEntry()->Resize(175, 25);
   WaveformFileName_TEL->GetEntry()->ChangeOptions(WaveformFileName_TEL->GetOptions() | kFixedSize | kSunkenFrame);
   WaveformFileName_TEL->GetEntry()->SetState(false);
-  WaveformFileName_TEL->GetEntry()->SetText("DefaultWaveforms.adaq");
+  WaveformFileName_TEL->GetEntry()->SetText("DefaultWaveforms.adaq.root");
   
   // ROOT text button to create a root file using the name in the text entry field above
   WaveformStorage_GF->AddFrame(WaveformCreateFile_TB = new TGTextButton(WaveformStorage_GF,"Create ADAQ file", WaveformCreateFile_TB_ID),

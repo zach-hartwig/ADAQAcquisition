@@ -43,7 +43,7 @@ AAAcquisitionManager::AAAcquisitionManager()
     WaveformLength(0), LLD(0), ULD(0), SampleHeight(0.), TriggerHeight(0.),
     PulseHeight(0.), PulseArea(0.),
     FillWaveformTree(false), ADAQFileIsOpen(false),
-    TheReadoutManager(new ADAQReadoutManager)
+    TheReadoutManager(new ADAQReadoutManager), WaveformData(new ADAQWaveformData)
 {
   if(TheAcquisitionManager)
     cout << "\nError! The AcquisitionManager was constructed twice!\n" << endl;
@@ -427,8 +427,10 @@ void AAAcquisitionManager::StartAcquisition()
 
 	if(TheSettings->LDEnable and !FillWaveformTree)
 	  continue;
-	
-	WaveformTree->Fill();
+
+	// Fill the waveform tree via the readout manager
+
+	TheReadoutManager->GetWaveformTree()->Fill();
 	
 	// Reset the bool used to determine if the LLD/ULD window
 	// should be used as the "trigger" for writing waveforms
@@ -675,7 +677,7 @@ void AAAcquisitionManager::CreateADAQFile(string FileName)
 {
   if(TheReadoutManager->GetADAQFileOpen())
     return;
-
+  
   // Create a new ADAQ file via the readout manager
   TheReadoutManager->CreateFile(FileName);
 
@@ -690,7 +692,7 @@ void AAAcquisitionManager::CreateADAQFile(string FileName)
     
     TheReadoutManager->CreateWaveformDataTreeBranch(ch, WaveformData);
   }
-
+  
   // Get the pointer to the ADAQ readout information and fill with all
   // relevent information via the ADAQReadoutInformation::Set*() methods
 
@@ -700,7 +702,7 @@ void AAAcquisitionManager::CreateADAQFile(string FileName)
 
 void AAAcquisitionManager::CloseADAQFile()
 {
-  if(TheReadoutManager->GetADAQFileOpen())
+  if(!TheReadoutManager->GetADAQFileOpen())
     return;
   
   TheReadoutManager->WriteFile();
