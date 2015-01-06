@@ -13,24 +13,31 @@
 #ifndef __AAAcquisitionManager_hh__
 #define __AAAcquisitionManager_hh__ 1
 
+// ROOT
 #include <TObject.h>
 #include <TFile.h>
 #include <TTree.h>
 #include <TH1F.h>
 #include <TGraph.h>
 
+// Boost
 #ifndef __CINT__
 #include <boost/cstdint.hpp>
 
 #include "ADAQDigitizer.hh"
 #endif
 
+// C++
 #include <vector>
 #include <string>
 using namespace std;
 
+// ADAQ
 #include "ADAQRootClasses.hh"
+#include "ADAQReadoutManager.hh"
+#include "ADAQWaveformData.hh"
 
+// ADAQAcquisition
 #include "AATypes.hh"
 #include "AAInterface.hh"
 #include "AASettings.hh"
@@ -102,7 +109,6 @@ private:
   // Variables for PC buffer readout
   char *Buffer;
   uint32_t BufferSize, ReadSize, FPGAEvents, PCEvents;
-  vector<vector<uint16_t> > Waveforms;
   vector<bool> BufferFull;
 
   uint32_t ReadoutType, ReadoutTypeBit, ReadoutTypeMask;
@@ -145,6 +151,14 @@ private:
 
   AAInterface *TheInterface;
   AASettings *TheSettings;
+
+  
+  ADAQReadoutManager *TheReadoutManager;
+#ifndef __CINT__
+  vector<vector<uint16_t> > Waveforms;
+#endif
+  ADAQWaveformData *WaveformData;
+  
 
 
 };

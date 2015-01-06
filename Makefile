@@ -54,7 +54,7 @@ CXX = clang++
 CXXFLAGS += -ferror-limit=5 -w -I$(INCLDIR) -I$(ADAQHOME)/include -std=c++0x
 
 # Add linker flags for ADAQ libraries
-LDFLAGS+=-L$(ADAQHOME)/lib/$(HOSTTYPE) -lADAQ 
+LDFLAGS+=-L$(ADAQHOME)/lib/$(HOSTTYPE) -lADAQ -lADAQReadout
 
 # Add linker flags for CAEN libraries (architecture dependent)
 LDFLAGS+=-L$(ADAQHOME)/lib/$(HOSTTYPE) -lCAENVME -lCAENComm -lCAENDigitizer -lncurses -lc -lm -lrt
