@@ -36,15 +36,15 @@ AAAcquisitionManager::AAAcquisitionManager()
     AcquisitionTimeNow(0), AcquisitionTimePrev(0),
     EventPointer(NULL), EventWaveform(NULL), Buffer(NULL),
     BufferSize(0), ReadSize(0), FPGAEvents(0), PCEvents(0),
-
+    
     ReadoutType(0), ReadoutTypeBit(24), ReadoutTypeMask(0b1 << ReadoutTypeBit),
     ZLEEventSizeMask(0x0fffffff), ZLEEventSize(0),
     ZLESampleAMask(0x0000ffff), ZLESampleBMask(0xffff0000), 
     ZLENumWordMask(0x000fffff), ZLEControlMask(0xc0000000),
-
-    WaveformLength(0), LLD(0), ULD(0), SampleHeight(0.), TriggerHeight(0.),
-    PulseHeight(0.), PulseArea(0.),
-    FillWaveformTree(false)
+							       WaveformLength(0), LLD(0), ULD(0), SampleHeight(0.), TriggerHeight(0.),
+							       PulseHeight(0.), PulseArea(0.),
+							       FillWaveformTree(false),
+							       TheReadoutManager(new ADAQReadoutManager)
 {
   if(TheAcquisitionManager)
     cout << "\nError! The AcquisitionManager was constructed twice!\n" << endl;
@@ -53,7 +53,10 @@ AAAcquisitionManager::AAAcquisitionManager()
 
 
 AAAcquisitionManager::~AAAcquisitionManager()
-{;}
+{
+  delete TheAcquisitionManager;
+  delete TheReadoutManager;
+}
 
 
 void AAAcquisitionManager::Initialize()
@@ -669,88 +672,37 @@ bool AAAcquisitionManager::WriteCalibration(int Channel, string FileName)
 
 void AAAcquisitionManager::CreateADAQFile(string FileName)
 {
-  if(ADAQFileIsOpen)
+  if(TheReadoutManager->GetADAQFileOpen())
     return;
-  
-  ADAQFile = new TFile(FileName.c_str(), "recreate");
-  
-  Comment = new TObjString("Comments are not presently enabled! ZSH 14 Apr 14");
 
-  Parameters = new ADAQRootMeasParams();
+  // Create a new ADAQ file via the readout manager
+  TheReadoutManager->CreateFile(FileName);
 
-  WaveformTree = new TTree("WaveformTree","Prototype tree to store all waveforms of an event");
-  
+  // Create two branches for each digitizer channel:
+  // - A branch on the waveform TTree for raw waveform readout
+  // - A branch on the waveform data TTree for analyzed waveform data readout
+
   int DGChannels = AAVMEManager::GetInstance()->GetDGManager()->GetNumChannels();
   for(int ch=0; ch<DGChannels; ch++){
-    ostringstream SS;
-
-    // Create a channel-specific branch name...
-    SS << "VoltageInADC_Ch" << ch;
-    string BranchName = SS.str();
     
-    // ...and use it to specify a channel-specific branch in
-    /// the waveform TTree. The branch holds the address of the
-    // vector that contains the digitized waveform
-    WaveformTree->Branch(BranchName.c_str(), &Waveforms[ch]);
+    TheReadoutManager->CreateWaveformTreeBranch(ch, &Waveforms[ch]);
+    
+    TheReadoutManager->CreateWaveformDataTreeBranch(ch, WaveformData);
   }
 
+  // Get the pointer to the ADAQ readout information and fill with all
+  // relevent information via the ADAQReadoutInformation::Set*() methods
 
-  // Retrieve the present voltage and drawn current for each
-  // high voltage channel and store in the MeasParam object
-  uint16_t voltage = 0;
-  uint16_t current = 0;
-
-  for(int ch=0; ch<6; ch++){
-    Parameters->DetectorVoltage.push_back(0);
-    Parameters->DetectorCurrent.push_back(0);
-  }
-
-
-  // Retrieve the present settings for each of the digitizer
-  // channels and store in the MeasParam object
-
-  for(int ch=0; ch<8; ch++){
-    Parameters->DCOffset.push_back(TheSettings->ChDCOffset[ch]);
-    Parameters->TriggerThreshold.push_back(TheSettings->ChTriggerThreshold[ch]);
-    Parameters->BaselineCalcMin.push_back(TheSettings->ChBaselineCalcMin[ch]);
-    Parameters->BaselineCalcMax.push_back(TheSettings->ChBaselineCalcMax[ch]);
-  }
-      
-  // Retrieve the record length for the acquisition window [samples].
-  Parameters->RecordLength = TheSettings->RecordLength;
-
-  // If the user has selected to reduce the output data then modify
-  // the record length accordingly. Note that this effectively
-  // destroys any pulse timing information, but it presently done to
-  // avoid modifying the structure of the ADAQ ROOT files. In the
-  // future, this should be correctly implemented. ZSH 26 AUG 13
-  if(TheSettings->DataReductionEnable)
-    Parameters->RecordLength /= TheSettings->DataReductionFactor;
-  
-  ADAQFileIsOpen = true;
+  ADAQReadoutInformation *ARI = TheReadoutManager->GetReadoutInformation();
 }
 
 
 void AAAcquisitionManager::CloseADAQFile()
 {
-  if(!ADAQFileIsOpen)
+  if(TheReadoutManager->GetADAQFileOpen())
     return;
   
-  if(WaveformTree)
-    WaveformTree->Write();
-  
-  Parameters->Write("MeasParams");
-  //Comment->Write("MeasComment");
-  
-  ADAQFile->Close();
-
-  // Free the memory allocated to ROOT objects
-  delete Parameters;
-  //delete WaveformTree;
-  delete Comment;
-  delete ADAQFile;
-    
-  ADAQFileIsOpen = false;
+  TheReadoutManager->WriteFile();
 }
 
 
