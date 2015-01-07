@@ -692,7 +692,7 @@ void AAAcquisitionManager::CreateADAQFile(string FileName)
     
     TheReadoutManager->CreateWaveformDataTreeBranch(ch, WaveformData);
   }
-  
+
   // Get the pointer to the ADAQ readout information and fill with all
   // relevent information via the ADAQReadoutInformation::Set*() methods
 
