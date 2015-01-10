@@ -262,13 +262,11 @@ void AAAcquisitionManager::StartAcquisition()
 	// If the timer has reached zero, i.e. the acquisition loop has
 	// run for the duration specified, then turn the acquisition off
 	if(AcquisitionTimeNow >= AcquisitionTimeStop){
-	  cout << "1" << endl;
 	  StopAcquisition();
-	  cout << "2" << endl;
 	  break;
 	}
       }
-
+      
       ///////////////////////////////
       // Standard waveform readout //
       ///////////////////////////////
@@ -481,6 +479,18 @@ void AAAcquisitionManager::StopAcquisition()
   DGManager->FreeReadoutBuffer(&Buffer);
   
   if(AcquisitionTimerEnable){
+
+    // Set the information in the ADAQ file to signal that the
+    // acquisition timer was used for this run and set the acquisition
+    // time. This must be done here at the end of acquisition Since
+    // when the ADAQReadoutInformation class is filled - when the file
+    // _created_ not when the acquisition timer button is pushed - the
+    // acquisition timer boolean has not yet been set.
+    
+    ADAQReadoutInformation *ARI = TheReadoutManager->GetReadoutInformation();
+    ARI->SetAcquisitionTimer(AcquisitionTimerEnable);
+    ARI->SetAcquisitionTime(TheSettings->AcquisitionTime);
+    
     AcquisitionTimerEnable = false;
     TheInterface->UpdateAfterAQTimerStopped(ADAQFileIsOpen);
   }
@@ -681,15 +691,15 @@ void AAAcquisitionManager::CreateADAQFile(string FileName)
   // Create a new ADAQ file via the readout manager
   TheReadoutManager->CreateFile(FileName);
 
+  ADAQDigitizer *DGManager = AAVMEManager::GetInstance()->GetDGManager();
+
   // Create two branches for each digitizer channel:
   // - A branch on the waveform TTree for raw waveform readout
   // - A branch on the waveform data TTree for analyzed waveform data readout
 
-  int DGChannels = AAVMEManager::GetInstance()->GetDGManager()->GetNumChannels();
+  int DGChannels = DGManager->GetNumChannels();
   for(int ch=0; ch<DGChannels; ch++){
-    
     TheReadoutManager->CreateWaveformTreeBranch(ch, &Waveforms[ch]);
-    
     TheReadoutManager->CreateWaveformDataTreeBranch(ch, WaveformData);
   }
 
@@ -697,6 +707,40 @@ void AAAcquisitionManager::CreateADAQFile(string FileName)
   // relevent information via the ADAQReadoutInformation::Set*() methods
 
   ADAQReadoutInformation *ARI = TheReadoutManager->GetReadoutInformation();
+
+  // Set physical information about the digitizer device
+  ARI->SetDGModelName      (DGManager->GetBoardModelName() );
+  ARI->SetDGSerialNumber   (DGManager->GetBoardSerialNumber() );
+  ARI->SetDGNumChannels    (DGManager->GetNumChannels() );
+  ARI->SetDGBitDepth       (DGManager->GetNumADCBits() );
+  ARI->SetDGSamplingRate   (DGManager->GetSamplingRate() );
+  ARI->SetDGROCFWRevision  (DGManager->GetBoardROCFirmwareRevision() );
+  ARI->SetDGAMCFWRevision  (DGManager->GetBoardAMCFirmwareRevision() );
+
+  // Fill the global acquisition settings
+  ARI->SetRecordLength         (TheSettings->RecordLength );
+  ARI->SetPostTrigger          (TheSettings->PostTrigger );
+  ARI->SetCoincidenceLevel     (TheSettings->TriggerCoincidenceLevel );
+  ARI->SetDataReductionMode    (TheSettings->DataReductionEnable );
+  ARI->SetZeroSuppressionMode  (TheSettings->ZeroSuppressionEnable );
+  ARI->SetTriggerType          (TheSettings->TriggerTypeName );
+  ARI->SetTriggerEdge          (TheSettings->TriggerEdgeName );
+  ARI->SetAcquisitionType      (TheSettings->AcquisitionControlName );
+  
+  // Fill the channel specific settings
+  ARI->SetTrigger          (TheSettings->ChTriggerThreshold );
+  ARI->SetBaselineCalcMin  (TheSettings->ChBaselineCalcMin );
+  ARI->SetBaselineCalcMax  (TheSettings->ChBaselineCalcMax );
+  ARI->SetChannelEnable    (TheSettings->ChEnable );
+  ARI->SetDCOffset         (TheSettings->ChDCOffset );
+  ARI->SetZLEFwd           (TheSettings->ChZLEForward );
+  ARI->SetZLEBck           (TheSettings->ChZLEBackward );
+  ARI->SetZLEThreshold     (TheSettings->ChZLEThreshold );
+
+  // Fill information regarding waveform acquisition
+  ARI->SetStoreRawWaveforms  (false);
+  ARI->SetStoreEnergyData    (false);
+  ARI->SetStorePSDData       (false);
 }
 
 

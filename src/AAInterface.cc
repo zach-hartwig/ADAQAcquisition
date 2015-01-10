@@ -1877,10 +1877,13 @@ void AAInterface::SaveSettings()
     
   TheSettings->TriggerCoincidenceLevel = DGTriggerCoincidenceLevel_CBL->GetComboBox()->GetSelected();
   TheSettings->TriggerType = DGTriggerType_CBL->GetComboBox()->GetSelected();
+  TheSettings->TriggerTypeName = DGTriggerType_CBL->GetComboBox()->GetSelectedEntry()->GetTitle();
   TheSettings->TriggerEdge = DGTriggerEdge_CBL->GetComboBox()->GetSelected();
+  TheSettings->TriggerEdgeName = DGTriggerEdge_CBL->GetComboBox()->GetSelectedEntry()->GetTitle();
 
   // Acquisition
   TheSettings->AcquisitionControl = DGAcquisitionControl_CBL->GetComboBox()->GetSelected();
+  TheSettings->AcquisitionControlName = DGAcquisitionControl_CBL->GetComboBox()->GetSelectedEntry()->GetTitle();
   TheSettings->RecordLength = DGRecordLength_NEL->GetEntry()->GetIntNumber();
   TheSettings->PostTrigger = DGPostTrigger_NEL->GetEntry()->GetIntNumber();
   TheSettings->AcquisitionTime = AQTime_NEL->GetEntry()->GetIntNumber();
