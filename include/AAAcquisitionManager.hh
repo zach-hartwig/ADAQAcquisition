@@ -127,6 +127,7 @@ private:
   int LLD, ULD;
   double SampleHeight, TriggerHeight;
   double PulseHeight, PulseArea;
+  UInt_t TimeStamp;
 
   vector<bool> CalibrationEnable;
   vector<TGraph *> CalibrationCurves;
@@ -157,7 +158,7 @@ private:
 #ifndef __CINT__
   vector<vector<uint16_t> > Waveforms;
 #endif
-  ADAQWaveformData *WaveformData;
+  vector<ADAQWaveformData *> WaveformData;
   
 
 

@@ -41,9 +41,9 @@ AAAcquisitionManager::AAAcquisitionManager()
     ZLESampleAMask(0x0000ffff), ZLESampleBMask(0xffff0000), 
     ZLENumWordMask(0x000fffff), ZLEControlMask(0xc0000000),
     WaveformLength(0), LLD(0), ULD(0), SampleHeight(0.), TriggerHeight(0.),
-    PulseHeight(0.), PulseArea(0.),
+    PulseHeight(0.), PulseArea(0.), TimeStamp(0),
     FillWaveformTree(false), ADAQFileIsOpen(false),
-    TheReadoutManager(new ADAQReadoutManager), WaveformData(new ADAQWaveformData)
+    TheReadoutManager(new ADAQReadoutManager)
 {
   if(TheAcquisitionManager)
     cout << "\nError! The AcquisitionManager was constructed twice!\n" << endl;
@@ -150,6 +150,10 @@ void AAAcquisitionManager::PreAcquisition()
     }
   }
 
+  WaveformData.clear();
+  for(int ch=0; ch<DGChannels; ch++)
+    WaveformData.push_back(new ADAQWaveformData);
+  
 
   /////////////////////////
   // Pulse spectra creation
@@ -323,6 +327,8 @@ void AAAcquisitionManager::StartAcquisition()
 	
 	BaselineValue[ch] = PulseHeight = PulseArea = 0.;
 	
+	WaveformData[ch]->Initialize();
+	
 	int NumSamples = Waveforms[ch].size();
 	for(int sample=0; sample<NumSamples; sample++){
 
@@ -346,7 +352,7 @@ void AAAcquisitionManager::StartAcquisition()
 	  
 	  ///////////////////
 	  // Pulse processing
-	  
+
 	  if(!TheSettings->UltraRateMode){
 	  
 	    // Calculate the baseline by taking the average of all
@@ -362,7 +368,7 @@ void AAAcquisitionManager::StartAcquisition()
 	      TriggerHeight = Polarity[ch] * (TheSettings->ChTriggerThreshold[ch] - BaselineValue[ch]);
 	      
 	      // Simple algorithm to determine maximum peak height in the pulse
-	      if(SampleHeight > PulseHeight)// and SampleHeight > TriggerHeight)
+	      if(SampleHeight > PulseHeight)
 		PulseHeight = SampleHeight;
 	      
 	      // Integrate the area under the pulse
@@ -372,7 +378,25 @@ void AAAcquisitionManager::StartAcquisition()
 	  }
 	} // End sample loop
 
+	// Compute the trigger time stamp for the waveform
+	TimeStamp = EventInfo.TriggerTimeTag;
+	
 	if(!TheSettings->UltraRateMode){
+	  
+	  // Fill the channel-specific ADAQWaveformData objects with
+	  // the processed waveform data. Note that this is only done
+	  // for non-ultra rate modes since it requires analysis of
+	  // the waveforms.
+	  
+	  WaveformData[ch]->SetPulseHeight(PulseHeight);
+	  WaveformData[ch]->SetPulseArea(PulseArea);
+	  WaveformData[ch]->SetBaseline(BaselineValue[ch]);
+	  WaveformData[ch]->SetPSDTotalIntegral(-1.);
+	  WaveformData[ch]->SetPSDTailIntegral(-1.);
+	  WaveformData[ch]->SetTimeStamp(TimeStamp);
+	  WaveformData[ch]->SetChannelID(ch);
+	  WaveformData[ch]->SetBoardID(DGManager->GetBoardID());
+	  
 	  
 	  // Use the calibration curves (ROOT TGraph's) to convert
 	  // the pulse height/area from ADC to the user's energy
@@ -425,10 +449,11 @@ void AAAcquisitionManager::StartAcquisition()
 
 	if(TheSettings->LDEnable and !FillWaveformTree)
 	  continue;
-
+	
 	// Fill the waveform tree via the readout manager
-
+	
 	TheReadoutManager->GetWaveformTree()->Fill();
+	TheReadoutManager->GetWaveformDataTree()->Fill();
 	
 	// Reset the bool used to determine if the LLD/ULD window
 	// should be used as the "trigger" for writing waveforms
@@ -700,14 +725,14 @@ void AAAcquisitionManager::CreateADAQFile(string FileName)
   int DGChannels = DGManager->GetNumChannels();
   for(int ch=0; ch<DGChannels; ch++){
     TheReadoutManager->CreateWaveformTreeBranch(ch, &Waveforms[ch]);
-    TheReadoutManager->CreateWaveformDataTreeBranch(ch, WaveformData);
+    TheReadoutManager->CreateWaveformDataTreeBranch(ch, WaveformData[ch]);
   }
-
+  
   // Get the pointer to the ADAQ readout information and fill with all
   // relevent information via the ADAQReadoutInformation::Set*() methods
-
+  
   ADAQReadoutInformation *ARI = TheReadoutManager->GetReadoutInformation();
-
+  
   // Set physical information about the digitizer device
   ARI->SetDGModelName      (DGManager->GetBoardModelName() );
   ARI->SetDGSerialNumber   (DGManager->GetBoardSerialNumber() );
