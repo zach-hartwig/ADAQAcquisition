@@ -51,7 +51,7 @@ public:
   void PlotSpectrum(TH1F *);
   void PlotCalibration(int);
 
-  ClassDef(AAGraphics, 0);
+  ClassDef(AAGraphics, 1);
   
 private:
   static AAGraphics *TheGraphicsManager;

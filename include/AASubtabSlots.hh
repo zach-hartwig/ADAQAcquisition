@@ -30,7 +30,7 @@ public:
   void HandleRadioButtons();
   void HandleTextButtons();
 
-  ClassDef(AASubtabSlots, 0);
+  ClassDef(AASubtabSlots, 1);
   
 private:
   AAInterface *TI;

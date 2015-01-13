@@ -340,7 +340,7 @@ void AAInterface::FillConnectionFrame()
       BoardType_CBL[board]->GetComboBox()->AddEntry("V1724", zV1724);
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5720", zDT5720);
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5730", zDT5730);
-      BoardType_CBL[board]->GetComboBox()->Select(zV1720);
+      BoardType_CBL[board]->GetComboBox()->Select(zDT5720);
     }
     else if(board == 2){
       BoardType_CBL[board]->GetComboBox()->AddEntry("V6533M", zV6533M);
@@ -1437,16 +1437,27 @@ void AAInterface::FillAcquisitionFrame()
   WaveformFileName_TB->ChangeOptions(WaveformFileName_TB->GetOptions() | kFixedSize);
 
   WaveformStorage_GF->AddFrame(WaveformFileName_TEL = new ADAQTextEntryWithLabel(WaveformStorage_GF, "", -1),
-				      new TGLayoutHints(kLHintsNormal,10,5,5,0));
+				      new TGLayoutHints(kLHintsNormal,10,5,5,5));
   WaveformFileName_TEL->GetEntry()->Resize(175, 25);
   WaveformFileName_TEL->GetEntry()->ChangeOptions(WaveformFileName_TEL->GetOptions() | kFixedSize | kSunkenFrame);
   WaveformFileName_TEL->GetEntry()->SetState(false);
   WaveformFileName_TEL->GetEntry()->SetText("DefaultWaveforms.adaq.root");
   
-  TGHorizontalFrame *WaveformCreateClose_HF = new TGHorizontalFrame(WaveformStorage_GF);
-  WaveformStorage_GF->AddFrame(WaveformCreateClose_HF, new TGLayoutHints(kLHintsNormal,0,0,0,0));
+ 
+  WaveformStorage_GF->AddFrame(WaveformStoreRaw_CB = new TGCheckButton(WaveformStorage_GF,"Store raw waveforms",WaveformStoreRaw_CB_ID),
+			       new TGLayoutHints(kLHintsNormal,10,5,0,0));
+  WaveformStoreRaw_CB->SetState(kButtonDown);
   
-  // ROOT text button to create a root file using the name in the text entry field above
+  WaveformStorage_GF->AddFrame(WaveformStoreEnergyData_CB = new TGCheckButton(WaveformStorage_GF,"Store energy data",WaveformStoreEnergyData_CB_ID),
+			       new TGLayoutHints(kLHintsNormal,10,5,0,0));
+
+  WaveformStorage_GF->AddFrame(WaveformStorePSDData_CB = new TGCheckButton(WaveformStorage_GF,"Store PSD data",WaveformStorePSDData_CB_ID),
+			       new TGLayoutHints(kLHintsNormal,10,5,0,0));
+
+
+  TGHorizontalFrame *WaveformCreateClose_HF = new TGHorizontalFrame(WaveformStorage_GF);
+  WaveformStorage_GF->AddFrame(WaveformCreateClose_HF, new TGLayoutHints(kLHintsNormal,0,0,5,0));
+  
   WaveformCreateClose_HF->AddFrame(WaveformCreateFile_TB = new TGTextButton(WaveformCreateClose_HF,"Create", WaveformCreateFile_TB_ID),
 				  new TGLayoutHints(kLHintsNormal,10,0,8,5));
   WaveformCreateFile_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
@@ -1454,32 +1465,15 @@ void AAInterface::FillAcquisitionFrame()
   WaveformCreateFile_TB->ChangeOptions(WaveformCreateFile_TB->GetOptions() | kFixedSize);
   WaveformCreateFile_TB->SetState(kButtonDisabled);
 
-  // ROOT text button to write all data to the ROOT file and close it. This button MUST be clicked to 
-  // successfully write&close the ROOT file otherwise the ROOT file will have errors.
   WaveformCreateClose_HF->AddFrame(WaveformCloseFile_TB = new TGTextButton(WaveformCreateClose_HF,"Close", WaveformCloseFile_TB_ID),
 				   new TGLayoutHints(kLHintsNormal,5,5,8,5));
   WaveformCloseFile_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
   WaveformCloseFile_TB->Resize(85,30);
   WaveformCloseFile_TB->ChangeOptions(WaveformCloseFile_TB->GetOptions() | kFixedSize);
   WaveformCloseFile_TB->SetState(kButtonDisabled);
-  
-  WaveformStorage_GF->AddFrame(WaveformStoreRaw_CB = new TGCheckButton(WaveformStorage_GF,"Store raw waveforms",WaveformStoreRaw_CB_ID),
-			       new TGLayoutHints(kLHintsNormal,10,5,0,0));
-  WaveformStoreRaw_CB->SetState(kButtonDown);
-  WaveformStoreRaw_CB->SetState(kButtonDisabled);
-  
-  WaveformStorage_GF->AddFrame(WaveformStoreEnergyData_CB = new TGCheckButton(WaveformStorage_GF,"Store energy data",WaveformStoreEnergyData_CB_ID),
-			       new TGLayoutHints(kLHintsNormal,10,5,0,0));
-  WaveformStoreEnergyData_CB->SetState(kButtonDisabled);
 
-  WaveformStorage_GF->AddFrame(WaveformStorePSDData_CB = new TGCheckButton(WaveformStorage_GF,"Store PSD data",WaveformStorePSDData_CB_ID),
-			       new TGLayoutHints(kLHintsNormal,10,5,0,0));
-  WaveformStorePSDData_CB->SetState(kButtonDisabled);
-
-  // ROOT check button to enable/disable saving data to ROOT file. Note that the data is saved to
-  // the ROOT file only while the button is checked. The 
   WaveformStorage_GF->AddFrame(WaveformStorageEnable_CB = new TGCheckButton(WaveformStorage_GF,"Data stored while checked!", WaveformStorageEnable_CB_ID),
-			       new TGLayoutHints(kLHintsNormal,10,5,10,5));
+			       new TGLayoutHints(kLHintsNormal,10,5,5,5));
   WaveformStorageEnable_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
   WaveformStorageEnable_CB->SetState(kButtonDisabled);
 
@@ -1968,6 +1962,10 @@ void AAInterface::SaveSettings()
   // Persistent storage subtab
 
   TheSettings->WaveformStorageEnable = WaveformStorageEnable_CB->IsDown();
+  TheSettings->WaveformStoreRaw = WaveformStoreRaw_CB->IsDown();
+  TheSettings->WaveformStoreEnergyData = WaveformStoreEnergyData_CB->IsDown();
+  TheSettings->WaveformStorePSDData= WaveformStorePSDData_CB->IsDown();
+
   TheSettings->SpectrumSaveWithTimeExtension = SpectrumSaveWithTimeExtension_CB->IsDown();
   TheSettings->CanvasSaveWithTimeExtension = CanvasSaveWithTimeExtension_CB->IsDown();
 
@@ -2008,6 +2006,10 @@ void AAInterface::SaveSettings()
     TheSettings->SpectrumCalibrationUseSlider = SpectrumUseCalibrationSlider_CB->IsDisabledAndSelected();
 
     TheSettings->WaveformStorageEnable = WaveformStorageEnable_CB->IsDisabledAndSelected();
+    TheSettings->WaveformStoreRaw = WaveformStoreRaw_CB->IsDisabledAndSelected();
+    TheSettings->WaveformStoreEnergyData = WaveformStoreEnergyData_CB->IsDisabledAndSelected();
+    TheSettings->WaveformStorePSDData = WaveformStorePSDData_CB->IsDisabledAndSelected();
+    
     TheSettings->SpectrumSaveWithTimeExtension = SpectrumSaveWithTimeExtension_CB->IsDisabledAndSelected();
     TheSettings->CanvasSaveWithTimeExtension = CanvasSaveWithTimeExtension_CB->IsDisabledAndSelected();
   }
@@ -2084,37 +2086,44 @@ string AAInterface::CreateFileDialog(const char *FileTypes[],
     // If the user selects "All"/"*.*" option then any entered
     // filename is acceptable (i.e. with/without file extensions, with
     // custom file extension, etc)
-
+    
     if(FileInformation.fFileTypes[FileInformation.fFileTypeIdx] == "All"){
       FileName = FileInformation.fFilename;
     }
-
+    
     // Otherwise, the filename will always have the predetermined file
     // extension that is selected in the file type selection list
-
+    
     else{
       
       // Get the file extension and strip off the leading "*" character
       FileExt = FileInformation.fFileTypes[FileInformation.fFileTypeIdx+1];
       FileExt = FileExt.erase(0,1);
 
-      // Get the file name
+
       FileName = FileInformation.fFilename;
 
-      size_t Found = FileName.find_last_of(".");
-      
-      // If the user has entered a file extension, strip and replace it
+      // If the file name string terminates with '.adaq.root' (the \0
+      // character indicates a string termination) then do nothing
+      size_t Found = FileName.find(".adaq.root\0");
       if(Found != string::npos){
-	FileName = FileName.substr(0, Found) + FileExt;
       }
-      
-      // If the user has not entered a file extension, add it
+
+      // Otherwise ...
       else{
-	FileName += FileExt;
+	
+	// If the user has entered a file extension, strip it and
+	// force the '.adaq.root' file extensions...
+	Found = FileName.find_last_of(".");
+	if(Found != string::npos)
+	  FileName = FileName.substr(0, Found) + FileExt;
+	
+	// ... or if no file extension was entered then tack on
+	// '.adaq.root' file extension
+	else
+	  FileName += FileExt;
       }
     }
   }
   return FileName;
 }
-
-

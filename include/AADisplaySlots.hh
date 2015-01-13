@@ -28,7 +28,7 @@ public:
   void HandleDoubleSliders();
   void HandleSliderPointers();
 
-  ClassDef(AADisplaySlots, 0);
+  ClassDef(AADisplaySlots, 1);
   
 private:
   AAInterface *TI;

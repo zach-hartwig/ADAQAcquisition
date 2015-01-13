@@ -311,7 +311,7 @@ private:
   TGTextButton *CanvasSave_TB;
 
   // Define the AAInterface class to ROOT 
-  ClassDef(AAInterface, 0);
+  ClassDef(AAInterface, 1);
 };
 
 

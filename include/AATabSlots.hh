@@ -29,7 +29,7 @@ public:
   void HandlePulserTextButtons();
   void HandleVoltageTextButtons();
   
-  ClassDef(AATabSlots, 0);
+  ClassDef(AATabSlots, 1);
   
 private:
   AAInterface *TI;

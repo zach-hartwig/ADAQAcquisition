@@ -452,8 +452,11 @@ void AAAcquisitionManager::StartAcquisition()
 	
 	// Fill the waveform tree via the readout manager
 	
-	TheReadoutManager->GetWaveformTree()->Fill();
-	TheReadoutManager->GetWaveformDataTree()->Fill();
+	if(TheSettings->WaveformStoreRaw)
+	  TheReadoutManager->GetWaveformTree()->Fill();
+	
+	if(TheSettings->WaveformStoreEnergyData or TheSettings->WaveformStorePSDData)
+	  TheReadoutManager->GetWaveformDataTree()->Fill();
 	
 	// Reset the bool used to determine if the LLD/ULD window
 	// should be used as the "trigger" for writing waveforms
@@ -763,9 +766,9 @@ void AAAcquisitionManager::CreateADAQFile(string FileName)
   ARI->SetZLEThreshold     (TheSettings->ChZLEThreshold );
 
   // Fill information regarding waveform acquisition
-  ARI->SetStoreRawWaveforms  (false);
-  ARI->SetStoreEnergyData    (false);
-  ARI->SetStorePSDData       (false);
+  ARI->SetStoreRawWaveforms  (TheSettings->WaveformStoreRaw);
+  ARI->SetStoreEnergyData    (TheSettings->WaveformStoreEnergyData);
+  ARI->SetStorePSDData       (TheSettings->WaveformStorePSDData);
 }
 
 

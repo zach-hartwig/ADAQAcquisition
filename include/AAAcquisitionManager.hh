@@ -88,7 +88,7 @@ public:
   TH1F *GetSpectrum(int C) {return Spectrum_H[C];}
   TGraph *GetCalibrationCurve(int C) {return CalibrationCurves[C];}
 
-  ClassDef(AAAcquisitionManager, 0);
+  ClassDef(AAAcquisitionManager, 1);
   
 private:
   static AAAcquisitionManager *TheAcquisitionManager;

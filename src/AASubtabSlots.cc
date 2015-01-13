@@ -457,9 +457,9 @@ void AASubtabSlots::HandleTextButtons()
     TI->WaveformCreateFile_TB->SetText("File open!");
     TI->WaveformCloseFile_TB->SetState(kButtonUp);
     TI->WaveformStorageEnable_CB->SetState(kButtonUp);
-    TI->WaveformStoreRaw_CB->SetState(kButtonUp);
-    TI->WaveformStoreEnergyData_CB->SetState(kButtonUp);
-    TI->WaveformStorePSDData_CB->SetState(kButtonUp);
+    TI->WaveformStoreRaw_CB->SetState(kButtonDisabled);
+    TI->WaveformStoreEnergyData_CB->SetState(kButtonDisabled);
+    TI->WaveformStorePSDData_CB->SetState(kButtonDisabled);
     break;
   }
 
@@ -477,9 +477,9 @@ void AASubtabSlots::HandleTextButtons()
       TI->WaveformCloseFile_TB->SetState(kButtonDisabled);
       TI->WaveformStorageEnable_CB->SetState(kButtonUp);
       TI->WaveformStorageEnable_CB->SetState(kButtonDisabled);
-      TI->WaveformStoreRaw_CB->SetState(kButtonDisabled);
-      TI->WaveformStoreEnergyData_CB->SetState(kButtonDisabled);
-      TI->WaveformStorePSDData_CB->SetState(kButtonDisabled);
+      TI->WaveformStoreRaw_CB->SetState(kButtonUp);
+      TI->WaveformStoreEnergyData_CB->SetState(kButtonUp);
+      TI->WaveformStorePSDData_CB->SetState(kButtonUp);
     }
     
     break;

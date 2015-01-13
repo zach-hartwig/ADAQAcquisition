@@ -135,10 +135,14 @@ public:
   // Persistent storage settings
   
   Bool_t WaveformStorageEnable;
+  Bool_t WaveformStoreRaw;
+  Bool_t WaveformStoreEnergyData;
+  Bool_t WaveformStorePSDData;
+
   Bool_t SpectrumSaveWithTimeExtension;
   Bool_t CanvasSaveWithTimeExtension;
-
-  ClassDef(AASettings, 0);
+  
+  ClassDef(AASettings, 1);
 };
 
 #endif
