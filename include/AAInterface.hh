@@ -296,6 +296,9 @@ private:
   TGTextButton *WaveformCreateFile_TB;
   TGTextButton *WaveformCloseFile_TB;
   TGCheckButton *WaveformStorageEnable_CB;
+  TGCheckButton *WaveformStoreRaw_CB;
+  TGCheckButton *WaveformStoreEnergyData_CB;
+  TGCheckButton *WaveformStorePSDData_CB;
 
   TGTextButton *SpectrumFileName_TB;
   ADAQTextEntryWithLabel *SpectrumFileName_TEL;

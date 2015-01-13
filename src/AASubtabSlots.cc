@@ -454,10 +454,12 @@ void AASubtabSlots::HandleTextButtons()
     TI->WaveformCreateFile_TB->SetState(kButtonDisabled);
     TI->WaveformCreateFile_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOn));
     TI->WaveformCreateFile_TB->SetForegroundColor(TI->ColorManager->Number2Pixel(TI->ButtonForeColor));
-    TI->WaveformCreateFile_TB->SetText("ADAQ file created");
+    TI->WaveformCreateFile_TB->SetText("File open!");
     TI->WaveformCloseFile_TB->SetState(kButtonUp);
     TI->WaveformStorageEnable_CB->SetState(kButtonUp);
-  
+    TI->WaveformStoreRaw_CB->SetState(kButtonUp);
+    TI->WaveformStoreEnergyData_CB->SetState(kButtonUp);
+    TI->WaveformStorePSDData_CB->SetState(kButtonUp);
     break;
   }
 
@@ -471,10 +473,13 @@ void AASubtabSlots::HandleTextButtons()
       TI->WaveformCreateFile_TB->SetState(kButtonUp);
       TI->WaveformCreateFile_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(18));
       TI->WaveformCreateFile_TB->SetForegroundColor(TI->ColorManager->Number2Pixel(kBlack));
-      TI->WaveformCreateFile_TB->SetText("Create ADAQ file");
+      TI->WaveformCreateFile_TB->SetText("Create");
       TI->WaveformCloseFile_TB->SetState(kButtonDisabled);
       TI->WaveformStorageEnable_CB->SetState(kButtonUp);
       TI->WaveformStorageEnable_CB->SetState(kButtonDisabled);
+      TI->WaveformStoreRaw_CB->SetState(kButtonDisabled);
+      TI->WaveformStoreEnergyData_CB->SetState(kButtonDisabled);
+      TI->WaveformStorePSDData_CB->SetState(kButtonDisabled);
     }
     
     break;

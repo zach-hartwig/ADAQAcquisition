@@ -1430,7 +1430,7 @@ void AAInterface::FillAcquisitionFrame()
   WaveformStorage_GF->SetTitlePos(TGGroupFrame::kCenter);
   DataSubframe->AddFrame(WaveformStorage_GF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
 
-  WaveformStorage_GF->AddFrame(WaveformFileName_TB = new TGTextButton(WaveformStorage_GF, "Waveform data file name", WaveformFileName_TB_ID),
+  WaveformStorage_GF->AddFrame(WaveformFileName_TB = new TGTextButton(WaveformStorage_GF, "ADAQ file name", WaveformFileName_TB_ID),
 				  new TGLayoutHints(kLHintsNormal,10,5,5,0));
   WaveformFileName_TB->Connect("Clicked()","AASubtabSlots", SubtabSlots, "HandleTextButtons()");
   WaveformFileName_TB->Resize(175, 30);
@@ -1443,30 +1443,46 @@ void AAInterface::FillAcquisitionFrame()
   WaveformFileName_TEL->GetEntry()->SetState(false);
   WaveformFileName_TEL->GetEntry()->SetText("DefaultWaveforms.adaq.root");
   
+  TGHorizontalFrame *WaveformCreateClose_HF = new TGHorizontalFrame(WaveformStorage_GF);
+  WaveformStorage_GF->AddFrame(WaveformCreateClose_HF, new TGLayoutHints(kLHintsNormal,0,0,0,0));
+  
   // ROOT text button to create a root file using the name in the text entry field above
-  WaveformStorage_GF->AddFrame(WaveformCreateFile_TB = new TGTextButton(WaveformStorage_GF,"Create ADAQ file", WaveformCreateFile_TB_ID),
-				  new TGLayoutHints(kLHintsNormal,10,5,8,5));
+  WaveformCreateClose_HF->AddFrame(WaveformCreateFile_TB = new TGTextButton(WaveformCreateClose_HF,"Create", WaveformCreateFile_TB_ID),
+				  new TGLayoutHints(kLHintsNormal,10,0,8,5));
   WaveformCreateFile_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
-  WaveformCreateFile_TB->Resize(175,30);
+  WaveformCreateFile_TB->Resize(85,30);
   WaveformCreateFile_TB->ChangeOptions(WaveformCreateFile_TB->GetOptions() | kFixedSize);
   WaveformCreateFile_TB->SetState(kButtonDisabled);
 
   // ROOT text button to write all data to the ROOT file and close it. This button MUST be clicked to 
   // successfully write&close the ROOT file otherwise the ROOT file will have errors.
-  WaveformStorage_GF->AddFrame(WaveformCloseFile_TB = new TGTextButton(WaveformStorage_GF,"Close ADAQ file", WaveformCloseFile_TB_ID),
-				  new TGLayoutHints(kLHintsNormal,10,5,0,5));
+  WaveformCreateClose_HF->AddFrame(WaveformCloseFile_TB = new TGTextButton(WaveformCreateClose_HF,"Close", WaveformCloseFile_TB_ID),
+				   new TGLayoutHints(kLHintsNormal,5,5,8,5));
   WaveformCloseFile_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
-  WaveformCloseFile_TB->Resize(175,30);
+  WaveformCloseFile_TB->Resize(85,30);
   WaveformCloseFile_TB->ChangeOptions(WaveformCloseFile_TB->GetOptions() | kFixedSize);
   WaveformCloseFile_TB->SetState(kButtonDisabled);
   
+  WaveformStorage_GF->AddFrame(WaveformStoreRaw_CB = new TGCheckButton(WaveformStorage_GF,"Store raw waveforms",WaveformStoreRaw_CB_ID),
+			       new TGLayoutHints(kLHintsNormal,10,5,0,0));
+  WaveformStoreRaw_CB->SetState(kButtonDown);
+  WaveformStoreRaw_CB->SetState(kButtonDisabled);
+  
+  WaveformStorage_GF->AddFrame(WaveformStoreEnergyData_CB = new TGCheckButton(WaveformStorage_GF,"Store energy data",WaveformStoreEnergyData_CB_ID),
+			       new TGLayoutHints(kLHintsNormal,10,5,0,0));
+  WaveformStoreEnergyData_CB->SetState(kButtonDisabled);
+
+  WaveformStorage_GF->AddFrame(WaveformStorePSDData_CB = new TGCheckButton(WaveformStorage_GF,"Store PSD data",WaveformStorePSDData_CB_ID),
+			       new TGLayoutHints(kLHintsNormal,10,5,0,0));
+  WaveformStorePSDData_CB->SetState(kButtonDisabled);
+
   // ROOT check button to enable/disable saving data to ROOT file. Note that the data is saved to
   // the ROOT file only while the button is checked. The 
-  WaveformStorage_GF->AddFrame(WaveformStorageEnable_CB = new TGCheckButton(WaveformStorage_GF,"Data stored while checked", WaveformStorageEnable_CB_ID),
-			       new TGLayoutHints(kLHintsNormal,10,5,5,5));
+  WaveformStorage_GF->AddFrame(WaveformStorageEnable_CB = new TGCheckButton(WaveformStorage_GF,"Data stored while checked!", WaveformStorageEnable_CB_ID),
+			       new TGLayoutHints(kLHintsNormal,10,5,10,5));
   WaveformStorageEnable_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
   WaveformStorageEnable_CB->SetState(kButtonDisabled);
-  
+
   
   DGDisplayAndControls_VF->AddFrame(Display_VF, new TGLayoutHints(kLHintsCenterX,5,5,5,5));
   DGDisplayAndControls_VF->AddFrame(SubtabFrame, new TGLayoutHints(kLHintsCenterX,5,5,5,5));
