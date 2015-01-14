@@ -110,10 +110,10 @@ private:
   // Channel-specific variables for analysis setting widgets
   vector<int> DGChBaselineCalcMin_NEL_ID_Vec;
   vector<int> DGChBaselineCalcMax_NEL_ID_Vec;
-  vector<int> DGPSDTotalIntegralStart_NEL_ID_Vec;
-  vector<int> DGPSDTotalIntegralStop_NEL_ID_Vec;
-  vector<int> DGPSDTailIntegralStart_NEL_ID_Vec;
-  vector<int> DGPSDTailIntegralStop_NEL_ID_Vec;
+  vector<int> DGChPSDTotalIntegralStart_NEL_ID_Vec;
+  vector<int> DGChPSDTotalIntegralStop_NEL_ID_Vec;
+  vector<int> DGChPSDTailIntegralStart_NEL_ID_Vec;
+  vector<int> DGChPSDTailIntegralStop_NEL_ID_Vec;
 
   const int NumDataChannels;
 
@@ -220,10 +220,10 @@ private:
   
   ADAQNumberEntryWithLabel *DGChBaselineCalcMin_NEL[8];
   ADAQNumberEntryWithLabel *DGChBaselineCalcMax_NEL[8];
-  ADAQNumberEntryWithLabel *DGPSDIntegralTotalStart[8];
-  ADAQNumberEntryWithLabel *DGPSDIntegralTotalStop[8];
-  ADAQNumberEntryWithLabel *DGPSDIntegralTailStart[8];
-  ADAQNumberEntryWithLabel *DGPSDIntegralTailStop[8];
+  ADAQNumberEntryWithLabel *DGChPSDTotalStart_NEL[8];
+  ADAQNumberEntryWithLabel *DGChPSDTotalStop_NEL[8];
+  ADAQNumberEntryWithLabel *DGChPSDTailStart_NEL[8];
+  ADAQNumberEntryWithLabel *DGChPSDTailStop_NEL[8];
   
   // Display specific widgets (in the upper-right subframe)
 
