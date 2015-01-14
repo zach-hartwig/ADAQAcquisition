@@ -90,10 +90,10 @@ void AADisplaySlots::HandleTextButtons()
 
   case DisplayUpdate_TB_ID:{
     
-    if(TI->TheSettings->UltraRateMode)
+    if(TI->TheSettings->DisplayNonUpdateable)
       break;
     else{
-      if(TI->TheSettings->SpectrumMode or TI->TheSettings->HighRateMode){
+      if(TI->TheSettings->SpectrumMode or TI->TheSettings->DisplayUpdateable){
 	int Channel = TI->TheSettings->SpectrumChannel;
 	TH1F *Spectrum_H = TheACQManager->GetSpectrum(Channel);
 	AAGraphics::GetInstance()->PlotSpectrum(Spectrum_H);

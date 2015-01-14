@@ -150,9 +150,8 @@ enum{
 
   AQWaveform_RB_ID,
   AQSpectrum_RB_ID,
-  AQHighRate_RB_ID,
-  AQUltraRate_RB_ID,
-
+  AQPSDHistogram_RB_ID,
+  
   DGTriggerType_CBL_ID,
   DGTriggerEdge_CBL_ID,
   DGTriggerCoincidenceEnable_CB_ID,
@@ -199,6 +198,24 @@ enum{
   SpectrumCalibrationLoad_TB_ID,
   SpectrumCalibrationWrite_TB_ID,
 
+  // Persistent storage subtab
+
+  WaveformFileName_TB_ID,
+  WaveformCreateFile_TB_ID,
+  WaveformCloseFile_TB_ID,
+  WaveformStorageEnable_CB_ID,
+  WaveformStoreRaw_CB_ID,
+  WaveformStoreEnergyData_CB_ID,
+  WaveformStorePSDData_CB_ID,
+
+  SpectrumFileName_TB_ID,
+  SpectrumSaveWithTimeExtension_CB_ID,
+  SpectrumSave_TB_ID,
+  
+  CanvasFileName_TB_ID,
+  CanvasSaveWithTimeExtension_CB_ID,
+  CanvasSave_TB_ID,
+
   // Graphics subtab
 
   DisplayLegend_CB_ID,
@@ -223,23 +240,9 @@ enum{
   DisplayYSize_NEL_ID,
   DisplayYOffset_NEL_ID,
 
-  // Persistent storage subtab
-
-  WaveformFileName_TB_ID,
-  WaveformCreateFile_TB_ID,
-  WaveformCloseFile_TB_ID,
-  WaveformStorageEnable_CB_ID,
-  WaveformStoreRaw_CB_ID,
-  WaveformStoreEnergyData_CB_ID,
-  WaveformStorePSDData_CB_ID,
-
-  SpectrumFileName_TB_ID,
-  SpectrumSaveWithTimeExtension_CB_ID,
-  SpectrumSave_TB_ID,
-  
-  CanvasFileName_TB_ID,
-  CanvasSaveWithTimeExtension_CB_ID,
-  CanvasSave_TB_ID
+  DisplayContinuous_RB_ID,
+  DisplayUpdateable_RB_ID,
+  DisplayNonUpdateable_RB_ID
 };
 
 struct CalibrationDataStruct{

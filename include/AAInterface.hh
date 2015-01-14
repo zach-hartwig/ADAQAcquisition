@@ -235,9 +235,8 @@ private:
   // Subtab specific widgets (in the bottom-right subframe)
   
   // Acquisition subtab
-
-  TGRadioButton *AQWaveform_RB, *AQSpectrum_RB;
-  TGRadioButton *AQHighRate_RB, *AQUltraRate_RB;
+  
+  TGRadioButton *AQWaveform_RB, *AQSpectrum_RB, *AQPSDHistogram_RB;
 
   ADAQComboBoxWithLabel *DGTriggerType_CBL;
   ADAQComboBoxWithLabel *DGTriggerEdge_CBL;
@@ -286,21 +285,6 @@ private:
   TGTextButton *SpectrumCalibrationLoad_TB;
   TGTextButton *SpectrumCalibrationWrite_TB;
 
-  // Graphics
-  
-  TGCheckButton *DisplayLegend_CB, *DisplayGrid_CB;
-  TGCheckButton *DisplayXAxisLog_CB, *DisplayYAxisLog_CB;
-  
-  TGRadioButton *DrawWaveformWithCurve_RB, *DrawWaveformWithMarkers_RB, *DrawWaveformWithBoth_RB;
-  TGRadioButton *DrawSpectrumWithCurve_RB, *DrawSpectrumWithMarkers_RB, *DrawSpectrumWithBars_RB;
-  
-  TGCheckButton *DisplayTitlesEnable_CB;
-  ADAQTextEntryWithLabel *DisplayTitle_TEL, *DisplayXTitle_TEL, *DisplayYTitle_TEL;
-  ADAQNumberEntryWithLabel *DisplayXTitleOffset_NEL, *DisplayXTitleSize_NEL;
-  ADAQNumberEntryWithLabel *DisplayYTitleOffset_NEL, *DisplayYTitleSize_NEL;
-
-  ADAQNumberEntryWithLabel *SpectrumRefreshRate_NEL;
-
   // Persistent storage
 
   TGTextButton *WaveformFileName_TB;
@@ -321,6 +305,24 @@ private:
   ADAQTextEntryWithLabel *CanvasFileName_TEL;
   TGCheckButton *CanvasSaveWithTimeExtension_CB;
   TGTextButton *CanvasSave_TB;
+
+  // Graphics
+  
+  TGCheckButton *DisplayLegend_CB, *DisplayGrid_CB;
+  TGCheckButton *DisplayXAxisLog_CB, *DisplayYAxisLog_CB;
+  
+  TGRadioButton *DrawWaveformWithCurve_RB, *DrawWaveformWithMarkers_RB, *DrawWaveformWithBoth_RB;
+  TGRadioButton *DrawSpectrumWithCurve_RB, *DrawSpectrumWithMarkers_RB, *DrawSpectrumWithBars_RB;
+  
+  TGCheckButton *DisplayTitlesEnable_CB;
+  ADAQTextEntryWithLabel *DisplayTitle_TEL, *DisplayXTitle_TEL, *DisplayYTitle_TEL;
+  ADAQNumberEntryWithLabel *DisplayXTitleOffset_NEL, *DisplayXTitleSize_NEL;
+  ADAQNumberEntryWithLabel *DisplayYTitleOffset_NEL, *DisplayYTitleSize_NEL;
+
+  ADAQNumberEntryWithLabel *SpectrumRefreshRate_NEL;
+
+  TGRadioButton *DisplayContinuous_RB, *DisplayUpdateable_RB, *DisplayNonUpdateable_RB;
+
 
   // Define the AAInterface class to ROOT 
   ClassDef(AAInterface, 1);

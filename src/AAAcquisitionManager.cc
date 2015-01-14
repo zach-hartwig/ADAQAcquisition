@@ -353,7 +353,7 @@ void AAAcquisitionManager::StartAcquisition()
 	  ///////////////////
 	  // Pulse processing
 
-	  if(!TheSettings->UltraRateMode){
+	  if(!TheSettings->DisplayNonUpdateable){
 	  
 	    // Calculate the baseline by taking the average of all
 	    // samples that fall within the baseline calculation region
@@ -381,7 +381,7 @@ void AAAcquisitionManager::StartAcquisition()
 	// Compute the trigger time stamp for the waveform
 	TimeStamp = EventInfo.TriggerTimeTag;
 	
-	if(!TheSettings->UltraRateMode){
+	if(!TheSettings->DisplayNonUpdateable){
 	  
 	  // Fill the channel-specific ADAQWaveformData objects with
 	  // the processed waveform data. Note that this is only done

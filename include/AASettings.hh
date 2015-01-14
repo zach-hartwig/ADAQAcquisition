@@ -69,8 +69,7 @@ public:
   // Type
   Bool_t WaveformMode;
   Bool_t SpectrumMode;
-  Bool_t HighRateMode;
-  Bool_t UltraRateMode;
+  Bool_t PSDMode;
 
   // Trigger
   Bool_t TriggerCoincidenceEnable;
@@ -129,6 +128,8 @@ public:
   Bool_t SpectrumWithCurve, SpectrumWithMarkers, SpectrumWithBars;
 
   int SpectrumRefreshRate;
+
+  Bool_t DisplayContinuous, DisplayUpdateable, DisplayNonUpdateable;
 
   
   //////////////////////////////

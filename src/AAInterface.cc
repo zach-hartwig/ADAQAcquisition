@@ -981,7 +981,6 @@ void AAInterface::FillAcquisitionFrame()
   DisplayHorizontalScale_THS->SetBackgroundColor(ColorManager->Number2Pixel(18));
   DisplayHorizontalScale_THS->Connect("PositionChanged()", "AADisplaySlots", DisplaySlots, "HandleDoubleSliders()");
   DisplayHorizontalScale_THS->Connect("PointerPositionChanged()", "AADisplaySlots", DisplaySlots, "HandleSliderPointers()");
-  
 
   TGHorizontalFrame *DGScopeDisplayButtons_HF = new TGHorizontalFrame(Display_VF);
   DGScopeDisplayButtons_HF->SetBackgroundColor(ColorManager->Number2Pixel(22));
@@ -1042,8 +1041,8 @@ void AAInterface::FillAcquisitionFrame()
   TGCompositeFrame *DataSubtab = AQControlSubtabs->AddTab("Peristent storage");
   TGCompositeFrame *DataSubframe = new TGCompositeFrame(DataSubtab, 0, 0, kHorizontalFrame);
   DataSubtab->AddFrame(DataSubframe);
-
-  TGCompositeFrame *GraphicsSubtab = AQControlSubtabs->AddTab("Graphics settings");
+  
+  TGCompositeFrame *GraphicsSubtab = AQControlSubtabs->AddTab("Display control");
   TGCompositeFrame *GraphicsSubframe = new TGCompositeFrame(GraphicsSubtab, 0, 0, kHorizontalFrame);
   GraphicsSubtab->AddFrame(GraphicsSubframe);
 
@@ -1063,7 +1062,7 @@ void AAInterface::FillAcquisitionFrame()
   // ROOT radio buttons to specify operational mode of DGScope:
   // "Waveform" == oscilloscope, "Spectrum" == MCA, "Blank" == display
   // no graphics for high data throughput
-  TGButtonGroup *DGScopeMode_BG = new TGButtonGroup(DGScopeModeAndTrigger_VF, "Scope Display Mode", kVerticalFrame);
+  TGButtonGroup *DGScopeMode_BG = new TGButtonGroup(DGScopeModeAndTrigger_VF, "Acquisition display", kVerticalFrame);
   DGScopeMode_BG->SetTitlePos(TGButtonGroup::kCenter);
   DGScopeModeAndTrigger_VF->AddFrame(DGScopeMode_BG, new TGLayoutHints(kLHintsExpandX,5,5,5,5));
   
@@ -1072,10 +1071,14 @@ void AAInterface::FillAcquisitionFrame()
 
   AQSpectrum_RB = new TGRadioButton(DGScopeMode_BG, "Pulse spectrum", AQSpectrum_RB_ID);
 
+  AQPSDHistogram_RB = new TGRadioButton(DGScopeMode_BG, "PSD Histogram", AQPSDHistogram_RB_ID);
+
+  /*
   AQHighRate_RB = new TGRadioButton(DGScopeMode_BG, "High-rate (updateable)", AQHighRate_RB_ID);
 
   AQUltraRate_RB = new TGRadioButton(DGScopeMode_BG, "Ultra-rate (non-updateable)", AQUltraRate_RB_ID);
-  
+  */
+
   DGScopeMode_BG->Show();
 
   ///////////////////
@@ -1270,15 +1273,15 @@ void AAInterface::FillAcquisitionFrame()
   SpectrumAnalysis_GF->SetTitlePos(TGGroupFrame::kCenter);
   SpectrumSubframe->AddFrame(SpectrumAnalysis_GF);
 
-  TGHButtonGroup *SpectrumAnalysis_BG = new TGHButtonGroup(SpectrumAnalysis_GF,"Analysis");
+  TGVButtonGroup *SpectrumAnalysis_BG = new TGVButtonGroup(SpectrumAnalysis_GF,"Analysis");
   SpectrumAnalysis_BG->SetBorderDrawn(false);
-  SpectrumAnalysis_GF->AddFrame(SpectrumAnalysis_BG, new TGLayoutHints(kLHintsNormal,-13,0,0,0));
+  SpectrumAnalysis_GF->AddFrame(SpectrumAnalysis_BG, new TGLayoutHints(kLHintsNormal,-13,0,0,-3));
   
-  SpectrumPulseHeight_RB = new TGRadioButton(SpectrumAnalysis_BG, "PHS  ", SpectrumPulseHeight_RB_ID);
+  SpectrumPulseHeight_RB = new TGRadioButton(SpectrumAnalysis_BG, "Pulse height spectrum  ", SpectrumPulseHeight_RB_ID);
   SpectrumPulseHeight_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
   
   
-  SpectrumPulseArea_RB = new TGRadioButton(SpectrumAnalysis_BG, "PAS", SpectrumPulseArea_RB_ID);
+  SpectrumPulseArea_RB = new TGRadioButton(SpectrumAnalysis_BG, "Pulse area spectrum", SpectrumPulseArea_RB_ID);
   SpectrumPulseArea_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
   SpectrumPulseArea_RB->SetState(kButtonDown);
 
@@ -1618,7 +1621,7 @@ void AAInterface::FillAcquisitionFrame()
   /////////////////////////////
   // misc. graphical attributes 
   
-  TGGroupFrame *DisplaySettings_GF = new TGGroupFrame(GraphicsSubframe, "Display", kVerticalFrame);
+  TGGroupFrame *DisplaySettings_GF = new TGGroupFrame(GraphicsSubframe, "Draw Options", kVerticalFrame);
   DisplaySettings_GF->SetTitlePos(TGGroupFrame::kCenter);
   GraphicsSubframe->AddFrame(DisplaySettings_GF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
 
@@ -1697,12 +1700,29 @@ void AAInterface::FillAcquisitionFrame()
 				   new TGLayoutHints(kLHintsNormal, 0,3,3,-2));
   DrawSpectrumWithBars_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
 
-
-  DisplaySettings_GF->AddFrame(SpectrumRefreshRate_NEL = new ADAQNumberEntryWithLabel(DisplaySettings_GF, "Spectrum refresh rate", -1),
-			       new TGLayoutHints(kLHintsNormal, 0,0,10,0));
+  
+  TGGroupFrame *DisplayControl_GF = new TGGroupFrame(GraphicsSubframe, "Control", kVerticalFrame);
+  DisplayControl_GF->SetTitlePos(TGGroupFrame::kCenter);
+  GraphicsSubframe->AddFrame(DisplayControl_GF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
+  
+  DisplayControl_GF->AddFrame(SpectrumRefreshRate_NEL = new ADAQNumberEntryWithLabel(DisplayControl_GF, "Event refresh rate", -1),
+			      new TGLayoutHints(kLHintsNormal, 0,0,10,0));
   SpectrumRefreshRate_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
   SpectrumRefreshRate_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
   SpectrumRefreshRate_NEL->GetEntry()->SetNumber(100);
+
+
+  TGButtonGroup *DisplayControl_BG = new TGButtonGroup(DisplayControl_GF, "");
+  DisplayControl_BG->SetBorderDrawn(false);
+  DisplayControl_GF->AddFrame(DisplayControl_BG,
+			      new TGLayoutHints(kLHintsNormal, -12,0,-3,0));
+  
+  DisplayContinuous_RB = new TGRadioButton(DisplayControl_BG, "Continuous (standard rate)", DisplayContinuous_RB_ID);
+  DisplayContinuous_RB->SetState(kButtonDown);
+  
+  DisplayUpdateable_RB = new TGRadioButton(DisplayControl_BG, "Updateable (high rate)", DisplayUpdateable_RB_ID);
+  
+  DisplayNonUpdateable_RB = new TGRadioButton(DisplayControl_BG, "Nonupdateable (ultra rate)", DisplayNonUpdateable_RB_ID);
 }
   
 
@@ -1765,9 +1785,8 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
 
   AQWaveform_RB->SetEnabled(WidgetState);
   AQSpectrum_RB->SetEnabled(WidgetState);
-  AQHighRate_RB->SetEnabled(WidgetState);
-  AQUltraRate_RB->SetEnabled(WidgetState);
-  
+  AQPSDHistogram_RB->SetEnabled(WidgetState);
+
   DGTriggerType_CBL->GetComboBox()->SetEnabled(WidgetState);
   DGTriggerEdge_CBL->GetComboBox()->SetEnabled(WidgetState);
   DGTriggerCoincidenceEnable_CB->SetState(ButtonState);
@@ -1793,6 +1812,10 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
   SpectrumLDTriggerChannel_CBL->GetComboBox()->SetEnabled(WidgetState);
   
   SpectrumRefreshRate_NEL->GetEntry()->SetState(WidgetState);
+  DisplayContinuous_RB->SetEnabled(WidgetState);
+  DisplayUpdateable_RB->SetEnabled(WidgetState);
+  DisplayNonUpdateable_RB->SetEnabled(WidgetState);
+
 
   // The following widgets have special settings depending on
   // the acquisition state
@@ -1890,8 +1913,7 @@ void AAInterface::SaveSettings()
   // Scope display
   TheSettings->WaveformMode = AQWaveform_RB->IsDown();
   TheSettings->SpectrumMode = AQSpectrum_RB->IsDown();
-  TheSettings->HighRateMode = AQHighRate_RB->IsDown();
-  TheSettings->UltraRateMode = AQUltraRate_RB->IsDown();
+  TheSettings->PSDMode = AQPSDHistogram_RB->IsDown();
     
   // Trigger control settings
   TheSettings->TriggerCoincidenceEnable = DGTriggerCoincidenceEnable_CB->IsDown();
@@ -1967,6 +1989,10 @@ void AAInterface::SaveSettings()
   TheSettings->SpectrumWithBars = DrawSpectrumWithBars_RB->IsDown();
   
   TheSettings->SpectrumRefreshRate = SpectrumRefreshRate_NEL->GetEntry()->GetIntNumber();
+
+  TheSettings->DisplayContinuous = DisplayContinuous_RB->IsDown();
+  TheSettings->DisplayUpdateable = DisplayUpdateable_RB->IsDown();
+  TheSettings->DisplayNonUpdateable = DisplayNonUpdateable_RB->IsDown();
   
 
   ////////////////////////////
@@ -1999,8 +2025,7 @@ void AAInterface::SaveSettings()
     
     TheSettings->WaveformMode = AQWaveform_RB->IsDisabledAndSelected();
     TheSettings->SpectrumMode = AQSpectrum_RB->IsDisabledAndSelected();
-    TheSettings->HighRateMode = AQHighRate_RB->IsDisabledAndSelected();
-    TheSettings->UltraRateMode = AQUltraRate_RB->IsDisabledAndSelected();
+    TheSettings->PSDMode = AQPSDHistogram_RB->IsDisabledAndSelected();
 
     TheSettings->TriggerCoincidenceEnable = DGTriggerCoincidenceEnable_CB->IsDisabledAndSelected();
 
@@ -2023,6 +2048,10 @@ void AAInterface::SaveSettings()
     
     TheSettings->SpectrumSaveWithTimeExtension = SpectrumSaveWithTimeExtension_CB->IsDisabledAndSelected();
     TheSettings->CanvasSaveWithTimeExtension = CanvasSaveWithTimeExtension_CB->IsDisabledAndSelected();
+
+    TheSettings->DisplayContinuous = DisplayContinuous_RB->IsDisabledAndSelected();
+    TheSettings->DisplayUpdateable = DisplayUpdateable_RB->IsDisabledAndSelected();
+    TheSettings->DisplayNonUpdateable = DisplayNonUpdateable_RB->IsDisabledAndSelected();
   }
 }
 
