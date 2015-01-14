@@ -129,6 +129,11 @@ AAInterface::AAInterface()
     (int)DGCh3TriggerThreshold_NEL_ID, (int)DGCh4TriggerThreshold_NEL_ID, (int)DGCh5TriggerThreshold_NEL_ID, 
     (int)DGCh6TriggerThreshold_NEL_ID, (int)DGCh7TriggerThreshold_NEL_ID;
 
+  insert(DGChTriggerThreshold_NEL_ID_Map)
+    ((int)DGCh0TriggerThreshold_NEL_ID,0) ((int)DGCh1TriggerThreshold_NEL_ID,1) ((int)DGCh2TriggerThreshold_NEL_ID,2) 
+    ((int)DGCh3TriggerThreshold_NEL_ID,3) ((int)DGCh4TriggerThreshold_NEL_ID,4) ((int)DGCh5TriggerThreshold_NEL_ID,5)
+    ((int)DGCh6TriggerThreshold_NEL_ID,6) ((int)DGCh7TriggerThreshold_NEL_ID,7);
+
   DGChBaselineCalcMin_NEL_ID_Vec += 
     (int)DGCh0BaselineCalcMin_NEL_ID, (int)DGCh1BaselineCalcMin_NEL_ID, (int)DGCh2BaselineCalcMin_NEL_ID, 
     (int)DGCh3BaselineCalcMin_NEL_ID, (int)DGCh4BaselineCalcMin_NEL_ID, (int)DGCh5BaselineCalcMin_NEL_ID,
@@ -138,11 +143,6 @@ AAInterface::AAInterface()
     (int)DGCh0BaselineCalcMax_NEL_ID, (int)DGCh1BaselineCalcMax_NEL_ID, (int)DGCh2BaselineCalcMax_NEL_ID,
     (int)DGCh3BaselineCalcMax_NEL_ID, (int)DGCh4BaselineCalcMax_NEL_ID, (int)DGCh5BaselineCalcMax_NEL_ID, 
     (int)DGCh6BaselineCalcMax_NEL_ID, (int)DGCh7BaselineCalcMax_NEL_ID;
-  
-  insert(DGChTriggerThreshold_NEL_ID_Map)
-    ((int)DGCh0TriggerThreshold_NEL_ID,0) ((int)DGCh1TriggerThreshold_NEL_ID,1) ((int)DGCh2TriggerThreshold_NEL_ID,2) 
-    ((int)DGCh3TriggerThreshold_NEL_ID,3) ((int)DGCh4TriggerThreshold_NEL_ID,4) ((int)DGCh5TriggerThreshold_NEL_ID,5)
-    ((int)DGCh6TriggerThreshold_NEL_ID,6) ((int)DGCh7TriggerThreshold_NEL_ID,7);
 
 
   ////////////////////////////////////////
@@ -820,6 +820,9 @@ void AAInterface::FillAcquisitionFrame()
     DGChannelControls_VF->AddFrame(DGChannelControl_GF, new TGLayoutHints(kLHintsCenterX, 5, 5, 5, 0));
     DGChannelControl_GF->SetTitlePos(TGGroupFrame::kLeft);
     
+    DGChannelControl_GF->AddFrame(new TGLabel(DGChannelControl_GF, "Acquisition settings"),
+				  new TGLayoutHints(kLHintsLeft,0,0,5,0));
+    
     // Horizontal frame to hold the "enable" and "pulse polarity" buttons
     TGHorizontalFrame *DGChannelControl_HF = new TGHorizontalFrame(DGChannelControl_GF);
     DGChannelControl_GF->AddFrame(DGChannelControl_HF);
@@ -831,8 +834,8 @@ void AAInterface::FillAcquisitionFrame()
       DGChEnable_CB[ch]->SetState(kButtonDown);
 
     // TGLabel for the pulse polarity radio buttons
-    DGChannelControl_HF->AddFrame(new TGLabel(DGChannelControl_HF,"Pulse \n polarity"),
-				       new TGLayoutHints(kLHintsCenterY,25,0,5,0));
+    DGChannelControl_HF->AddFrame(new TGLabel(DGChannelControl_HF,"Polarity"),
+				  new TGLayoutHints(kLHintsCenterY,25,0,5,0));
 
     TGHButtonGroup *DGChPolarity_BG = new TGHButtonGroup(DGChannelControl_HF, "");
     DGChPolarity_BG->SetTitlePos(TGButtonGroup::kCenter);
@@ -861,22 +864,6 @@ void AAInterface::FillAcquisitionFrame()
     DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumber(2000);
     DGChTriggerThreshold_NEL[ch]->GetEntry()->Resize(55,20);
     
-    // ADAQ number entry to set minimum sample for baseline calculation [sample]
-    DGChannelControl_GF->AddFrame(DGChBaselineCalcMin_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "Baseline min. (sample)", DGChBaselineCalcMin_NEL_ID_Vec[ch]),
-				  new TGLayoutHints(kLHintsNormal));
-    DGChBaselineCalcMin_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
-    
-    DGChBaselineCalcMin_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-    DGChBaselineCalcMin_NEL[ch]->GetEntry()->SetNumber(10);
-    DGChBaselineCalcMin_NEL[ch]->GetEntry()->Resize(55,20);
-
-    // ADAQ number entry to set maximum sample for baseline calculation [sample]
-    DGChannelControl_GF->AddFrame(DGChBaselineCalcMax_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "Baseline max. (sample)", DGChBaselineCalcMax_NEL_ID_Vec[ch]),
-				  new TGLayoutHints(kLHintsNormal));
-    DGChBaselineCalcMax_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-    DGChBaselineCalcMax_NEL[ch]->GetEntry()->SetNumber(45);
-    DGChBaselineCalcMax_NEL[ch]->GetEntry()->Resize(55,20);
-
     DGChannelControl_GF->AddFrame(DGChZLEThreshold_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "ZLE threshold (ADC)", -1),
 				       new TGLayoutHints(kLHintsNormal));
     DGChZLEThreshold_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
@@ -916,6 +903,30 @@ void AAInterface::FillAcquisitionFrame()
     
     DGChZLENegLogic_RB[ch] = new TGRadioButton(ZLELogicButtons_BG, "-", -1);
     DGChZLENegLogic_RB[ch]->SetState(kButtonDown);
+
+    
+    ////////////////////////////////////////
+    // Channel-specific analysis settings //
+    ////////////////////////////////////////
+
+    DGChannelControl_GF->AddFrame(new TGLabel(DGChannelControl_GF, "Analysis settings"),
+				  new TGLayoutHints(kLHintsLeft,0,0,5,5));
+
+    // ADAQ number entry to set minimum sample for baseline calculation [sample]
+    DGChannelControl_GF->AddFrame(DGChBaselineCalcMin_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "Baseline min. (sample)", DGChBaselineCalcMin_NEL_ID_Vec[ch]),
+				  new TGLayoutHints(kLHintsNormal));
+    DGChBaselineCalcMin_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
+    
+    DGChBaselineCalcMin_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+    DGChBaselineCalcMin_NEL[ch]->GetEntry()->SetNumber(10);
+    DGChBaselineCalcMin_NEL[ch]->GetEntry()->Resize(55,20);
+
+    // ADAQ number entry to set maximum sample for baseline calculation [sample]
+    DGChannelControl_GF->AddFrame(DGChBaselineCalcMax_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "Baseline max. (sample)", DGChBaselineCalcMax_NEL_ID_Vec[ch]),
+				  new TGLayoutHints(kLHintsNormal));
+    DGChBaselineCalcMax_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+    DGChBaselineCalcMax_NEL[ch]->GetEntry()->SetNumber(45);
+    DGChBaselineCalcMax_NEL[ch]->GetEntry()->Resize(55,20);
   }
   
 

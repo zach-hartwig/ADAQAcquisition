@@ -100,14 +100,21 @@ private:
   vector<int> HVChPower_TB_ID_Vec;
   map<int,int> HVChPower_TB_ID_Map;
 
-  // Variables for use with digitizer control
+  // Channel-specific variables for acquisition setting widgets
   vector<string> DGChannelLabels;
   vector<int> DGChEnable_CB_ID_Vec;
   vector<int> DGChDCOffset_NEL_ID_Vec;
   vector<int> DGChTriggerThreshold_NEL_ID_Vec;
+  map<int,int> DGChTriggerThreshold_NEL_ID_Map;
+
+  // Channel-specific variables for analysis setting widgets
   vector<int> DGChBaselineCalcMin_NEL_ID_Vec;
   vector<int> DGChBaselineCalcMax_NEL_ID_Vec;
-  map<int,int> DGChTriggerThreshold_NEL_ID_Map;
+  vector<int> DGPSDTotalIntegralStart_NEL_ID_Vec;
+  vector<int> DGPSDTotalIntegralStop_NEL_ID_Vec;
+  vector<int> DGPSDTailIntegralStart_NEL_ID_Vec;
+  vector<int> DGPSDTailIntegralStop_NEL_ID_Vec;
+
   const int NumDataChannels;
 
   // Object to convert numeric color to pixel color
@@ -205,13 +212,18 @@ private:
   TGRadioButton *DGChNegPolarity_RB[8];
   ADAQNumberEntryWithLabel *DGChDCOffset_NEL[8];
   ADAQNumberEntryWithLabel *DGChTriggerThreshold_NEL[8];
-  ADAQNumberEntryWithLabel *DGChBaselineCalcMin_NEL[8];
-  ADAQNumberEntryWithLabel *DGChBaselineCalcMax_NEL[8];
   ADAQNumberEntryWithLabel *DGChZLEThreshold_NEL[8];
   ADAQNumberEntryWithLabel *DGChZLESamples_NEL[8];
   ADAQNumberEntryWithLabel *DGChZLEForward_NEL[8];
   ADAQNumberEntryWithLabel *DGChZLEBackward_NEL[8];
   TGRadioButton *DGChZLEPosLogic_RB[8], *DGChZLENegLogic_RB[8];
+  
+  ADAQNumberEntryWithLabel *DGChBaselineCalcMin_NEL[8];
+  ADAQNumberEntryWithLabel *DGChBaselineCalcMax_NEL[8];
+  ADAQNumberEntryWithLabel *DGPSDIntegralTotalStart[8];
+  ADAQNumberEntryWithLabel *DGPSDIntegralTotalStop[8];
+  ADAQNumberEntryWithLabel *DGPSDIntegralTailStart[8];
+  ADAQNumberEntryWithLabel *DGPSDIntegralTailStop[8];
   
   // Display specific widgets (in the upper-right subframe)
 
