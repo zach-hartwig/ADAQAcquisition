@@ -110,10 +110,10 @@ private:
   // Channel-specific variables for analysis setting widgets
   vector<int> DGChBaselineCalcMin_NEL_ID_Vec;
   vector<int> DGChBaselineCalcMax_NEL_ID_Vec;
-  vector<int> DGChPSDTotalIntegralStart_NEL_ID_Vec;
-  vector<int> DGChPSDTotalIntegralStop_NEL_ID_Vec;
-  vector<int> DGChPSDTailIntegralStart_NEL_ID_Vec;
-  vector<int> DGChPSDTailIntegralStop_NEL_ID_Vec;
+  vector<int> DGChPSDTotalStart_NEL_ID_Vec;
+  vector<int> DGChPSDTotalStop_NEL_ID_Vec;
+  vector<int> DGChPSDTailStart_NEL_ID_Vec;
+  vector<int> DGChPSDTailStop_NEL_ID_Vec;
 
   const int NumDataChannels;
 
@@ -234,7 +234,7 @@ private:
 
   // Subtab specific widgets (in the bottom-right subframe)
   
-  // Acquisition subtab
+  // Data acquisition subtab
   
   TGRadioButton *AQWaveform_RB, *AQSpectrum_RB, *AQPSDHistogram_RB;
 
@@ -258,7 +258,7 @@ private:
   ADAQNumberEntryWithLabel *AQDataReductionFactor_NEL;
   TGCheckButton *DGZLEEnable_CB;
   
-  // Spectrum
+  // Pulse spectra subtab
 
   ADAQComboBoxWithLabel *SpectrumChannel_CBL;
   ADAQNumberEntryWithLabel *SpectrumNumBins_NEL;
@@ -285,7 +285,15 @@ private:
   TGTextButton *SpectrumCalibrationLoad_TB;
   TGTextButton *SpectrumCalibrationWrite_TB;
 
-  // Persistent storage
+  // Pulse discrimination subtab
+  
+  TGRadioButton *PSDTotalVsTail_RB, *PSDTotalVsPSD_RB;
+  ADAQNumberEntryWithLabel *PSDThreshold_NEL;
+  ADAQNumberEntryWithLabel *PSDTotalBins_NEL, *PSDTailBins_NEL;
+  ADAQNumberEntryWithLabel *PSDTotalMinBin_NEL, *PSDTotalMaxBin_NEL;
+  ADAQNumberEntryWithLabel *PSDTailMinBin_NEL, *PSDTailMaxBin_NEL;
+
+  // Persistent storage subtab
 
   TGTextButton *WaveformFileName_TB;
   ADAQTextEntryWithLabel *WaveformFileName_TEL;
@@ -310,6 +318,7 @@ private:
   
   TGCheckButton *DisplayLegend_CB, *DisplayGrid_CB;
   TGCheckButton *DisplayXAxisLog_CB, *DisplayYAxisLog_CB;
+  TGCheckButton *DisplayTrigger_CB, *DisplayPSDLimits_CB;
   
   TGRadioButton *DrawWaveformWithLine_RB, *DrawWaveformWithMarkers_RB, *DrawWaveformWithBoth_RB;
   TGRadioButton *DrawSpectrumWithLine_RB, *DrawSpectrumWithMarkers_RB, *DrawSpectrumWithBars_RB;

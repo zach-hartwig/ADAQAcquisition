@@ -220,6 +220,8 @@ enum{
 
   DisplayLegend_CB_ID,
   DisplayGrid_CB_ID,
+  DisplayTrigger_CB_ID,
+  DisplayPSDLimits_CB_ID,
   DisplayXAxisLog_CB_ID,
   DisplayYAxisLog_CB_ID,
 

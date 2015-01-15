@@ -1125,6 +1125,7 @@ void AAInterface::FillAcquisitionFrame()
   TGVerticalFrame *DGScopeModeAndTrigger_VF = new TGVerticalFrame(AcquisitionSubframe);
   AcquisitionSubframe->AddFrame(DGScopeModeAndTrigger_VF, new TGLayoutHints(kLHintsNormal,0,0,0,0));
 
+
   ////////////////
   // Mode controls 
 
@@ -1142,13 +1143,8 @@ void AAInterface::FillAcquisitionFrame()
 
   AQPSDHistogram_RB = new TGRadioButton(DGScopeMode_BG, "PSD Histogram", AQPSDHistogram_RB_ID);
 
-  /*
-  AQHighRate_RB = new TGRadioButton(DGScopeMode_BG, "High-rate (updateable)", AQHighRate_RB_ID);
-
-  AQUltraRate_RB = new TGRadioButton(DGScopeMode_BG, "Ultra-rate (non-updateable)", AQUltraRate_RB_ID);
-  */
-
   DGScopeMode_BG->Show();
+
 
   ///////////////////
   // Trigger controls
@@ -1505,6 +1501,76 @@ void AAInterface::FillAcquisitionFrame()
   SpectrumCalibrationWrite_TB->ChangeOptions(SpectrumCalibrationLoad_TB->GetOptions() | kFixedSize);
   SpectrumCalibrationWrite_TB->SetState(kButtonDisabled);
 
+
+  //////////////////////////
+  // Pulse discrimination //
+  //////////////////////////
+
+  TGGroupFrame *PSDHistogram_GF = new TGGroupFrame(PSDSubframe, "PSD histogram", kVerticalFrame);
+  PSDHistogram_GF->SetTitlePos(TGGroupFrame::kCenter);
+  PSDSubframe->AddFrame(PSDHistogram_GF, new TGLayoutHints(kLHintsNormal, 5,5,5,5));
+  
+  PSDHistogram_GF->AddFrame(PSDTotalVsTail_RB = new TGRadioButton(PSDHistogram_GF, "Total vs. tail", -1),
+			    new TGLayoutHints(kLHintsNormal, 0,0,5,0));
+  PSDTotalVsTail_RB->SetState(kButtonDown);
+  
+  PSDHistogram_GF->AddFrame(PSDTotalVsPSD_RB = new TGRadioButton(PSDHistogram_GF, "Total vs. (tail/total)", -1),
+			    new TGLayoutHints(kLHintsNormal, 0,0,0,10));
+  
+
+  PSDHistogram_GF->AddFrame(PSDTotalBins_NEL = new ADAQNumberEntryWithLabel(PSDHistogram_GF, "Number of total bins", -1),
+			    new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+  PSDTotalBins_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+  PSDTotalBins_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+  PSDTotalBins_NEL->GetEntry()->SetNumber(100);
+  PSDTotalBins_NEL->GetEntry()->Resize(60, 20);
+
+  TGHorizontalFrame *PSDTotal_HF = new TGHorizontalFrame(PSDHistogram_GF);
+  PSDHistogram_GF->AddFrame(PSDTotal_HF, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+
+  PSDTotal_HF->AddFrame(PSDTotalMinBin_NEL = new ADAQNumberEntryWithLabel(PSDTotal_HF, "Min.", -1),
+			new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+  PSDTotalMinBin_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+  PSDTotalMinBin_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+  PSDTotalMinBin_NEL->GetEntry()->SetNumber(100);
+  PSDTotalMinBin_NEL->GetEntry()->Resize(60, 20);
+
+  PSDTotal_HF->AddFrame(PSDTotalMaxBin_NEL = new ADAQNumberEntryWithLabel(PSDTotal_HF, "Max.", -1),
+			    new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+  PSDTotalMaxBin_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+  PSDTotalMaxBin_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+  PSDTotalMaxBin_NEL->GetEntry()->SetNumber(100);
+  PSDTotalMaxBin_NEL->GetEntry()->Resize(60, 20);
+
+
+  PSDHistogram_GF->AddFrame(PSDTailBins_NEL = new ADAQNumberEntryWithLabel(PSDHistogram_GF, "Number of tail bins", -1),
+			    new TGLayoutHints(kLHintsNormal, 0,0,10,0));
+  PSDTailBins_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+  PSDTailBins_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+  PSDTailBins_NEL->GetEntry()->SetNumber(100);
+  PSDTailBins_NEL->GetEntry()->Resize(60, 20);
+
+  TGHorizontalFrame *PSDTail_HF = new TGHorizontalFrame(PSDHistogram_GF);
+  PSDHistogram_GF->AddFrame(PSDTail_HF, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+
+  PSDTail_HF->AddFrame(PSDTailMinBin_NEL = new ADAQNumberEntryWithLabel(PSDTail_HF, "Min.", -1),
+			    new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+  PSDTailMinBin_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+  PSDTailMinBin_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+  PSDTailMinBin_NEL->GetEntry()->SetNumber(100);
+  PSDTailMinBin_NEL->GetEntry()->Resize(60, 20);
+
+  PSDTail_HF->AddFrame(PSDTailMaxBin_NEL = new ADAQNumberEntryWithLabel(PSDTail_HF, "Max.", -1),
+			    new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+  PSDTailMaxBin_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+  PSDTailMaxBin_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+  PSDTailMaxBin_NEL->GetEntry()->SetNumber(100);
+  PSDTailMaxBin_NEL->GetEntry()->Resize(60, 20);
+
+
+
+
+
   //////////////////
   // Data storage //
   //////////////////
@@ -1711,15 +1777,28 @@ void AAInterface::FillAcquisitionFrame()
 
   TGHorizontalFrame *Display_HF1 = new TGHorizontalFrame(DisplaySettings_GF);
   DisplaySettings_GF->AddFrame(Display_HF1, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+  
+  Display_HF1->AddFrame(DisplayTrigger_CB = new TGCheckButton(Display_HF1, "Draw trigger", DisplayTrigger_CB_ID),
+			new TGLayoutHints(kLHintsNormal, 0,0,5,0));
+  DisplayTrigger_CB->SetState(kButtonDown);
+  
+  Display_HF1->AddFrame(DisplayPSDLimits_CB = new TGCheckButton(Display_HF1, "Draw PSD limits", DisplayPSDLimits_CB_ID),
+			new TGLayoutHints(kLHintsNormal, 0,0,5,0));
+
+
+  TGHorizontalFrame *Display_HF2 = new TGHorizontalFrame(DisplaySettings_GF);
+  DisplaySettings_GF->AddFrame(Display_HF2, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
 
   // ROOT check buttons for specifying if X and Y axes on spectra should be logarithmic
-  Display_HF1->AddFrame(DisplayXAxisLog_CB = new TGCheckButton(Display_HF1, "Log X-axis  ", DisplayXAxisLog_CB_ID),
+  Display_HF2->AddFrame(DisplayXAxisLog_CB = new TGCheckButton(Display_HF2, "Log X-axis  ", DisplayXAxisLog_CB_ID),
 			new TGLayoutHints(kLHintsLeft,0,0,5,0));
   DisplayXAxisLog_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
   
-  Display_HF1->AddFrame(DisplayYAxisLog_CB = new TGCheckButton(Display_HF1, "Log Y-axis", DisplayYAxisLog_CB_ID),
+  Display_HF2->AddFrame(DisplayYAxisLog_CB = new TGCheckButton(Display_HF2, "Log Y-axis", DisplayYAxisLog_CB_ID),
 			new TGLayoutHints(kLHintsLeft,0,0,5,0));
   DisplayYAxisLog_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
+
+
 
   
   TGGroupFrame *WaveformDrawOptions_GF = new TGGroupFrame(DisplaySettings_GF, "Waveform options", kHorizontalFrame);
@@ -1954,13 +2033,18 @@ void AAInterface::SaveSettings()
     TheSettings->ChNegPolarity[ch] = DGChNegPolarity_RB[ch]->IsDown();
     TheSettings->ChDCOffset[ch] = DGChDCOffset_NEL[ch]->GetEntry()->GetHexNumber();
     TheSettings->ChTriggerThreshold[ch] = DGChTriggerThreshold_NEL[ch]->GetEntry()->GetIntNumber();
-    TheSettings->ChBaselineCalcMin[ch] = DGChBaselineCalcMin_NEL[ch]->GetEntry()->GetIntNumber();
-    TheSettings->ChBaselineCalcMax[ch] = DGChBaselineCalcMax_NEL[ch]->GetEntry()->GetIntNumber();
     TheSettings->ChZLEThreshold[ch] = DGChZLEThreshold_NEL[ch]->GetEntry()->GetIntNumber();
     TheSettings->ChZLEForward[ch] = DGChZLEForward_NEL[ch]->GetEntry()->GetIntNumber();
     TheSettings->ChZLEBackward[ch] = DGChZLEBackward_NEL[ch]->GetEntry()->GetIntNumber();
     TheSettings->ChZLEPosLogic[ch] = DGChZLEPosLogic_RB[ch]->IsDown();
     TheSettings->ChZLENegLogic[ch] = DGChZLENegLogic_RB[ch]->IsDown();
+
+    TheSettings->ChBaselineCalcMin[ch] = DGChBaselineCalcMin_NEL[ch]->GetEntry()->GetIntNumber();
+    TheSettings->ChBaselineCalcMax[ch] = DGChBaselineCalcMax_NEL[ch]->GetEntry()->GetIntNumber();
+    TheSettings->ChPSDTotalStart[ch] = DGChPSDTotalStart_NEL[ch]->GetEntry()->GetIntNumber();
+    TheSettings->ChPSDTotalStop[ch] = DGChPSDTotalStop_NEL[ch]->GetEntry()->GetIntNumber();
+    TheSettings->ChPSDTailStart[ch] = DGChPSDTailStart_NEL[ch]->GetEntry()->GetIntNumber();
+    TheSettings->ChPSDTailStop[ch] = DGChPSDTailStop_NEL[ch]->GetEntry()->GetIntNumber();
   }
   
   TheSettings->HorizontalSliderPtr = DisplayHorizontalScale_THS->GetPointerPosition();
@@ -1976,8 +2060,8 @@ void AAInterface::SaveSettings()
   TheSettings->VerticalSliderMax = Max;
 
 
-  /////////////////////////////
-  // Acquisition control subtab
+  //////////////////////////
+  // Data acquisition subtab
 
   // Scope display
   TheSettings->WaveformMode = AQWaveform_RB->IsDown();
@@ -2007,8 +2091,8 @@ void AAInterface::SaveSettings()
   TheSettings->ZeroSuppressionEnable = DGZLEEnable_CB->IsDown();
 
   
-  ///////////////////////////
-  // Spectrum creation subtab
+  ///////////////////////
+  // Pulse spectra subtab
 
   TheSettings->SpectrumChannel = SpectrumChannel_CBL->GetComboBox()->GetSelected();
   TheSettings->SpectrumNumBins = SpectrumNumBins_NEL->GetEntry()->GetIntNumber();
@@ -2028,9 +2112,23 @@ void AAInterface::SaveSettings()
   TheSettings->SpectrumCalibrationEnable = SpectrumCalibration_CB->IsDown();
   TheSettings->SpectrumCalibrationUseSlider = SpectrumUseCalibrationSlider_CB->IsDown();
 
-  
+
+  //////////////////////////////
+  // Pulse discrimination subtab 
+
+  TheSettings->PSDTotalVsTail = PSDTotalVsTail_RB->IsDown();
+  TheSettings->PSDTotalVsPSD = PSDTotalVsPSD_RB->IsDown();
+  TheSettings->PSDThreshold = PSDThreshold_NEL->GetEntry()->GetNumber();
+  TheSettings->PSDTotalBins = PSDTotalBins_NEL->GetEntry()->GetNumber();
+  TheSettings->PSDTotalMinBin = PSDTotalMinBin_NEL->GetEntry()->GetNumber();
+  TheSettings->PSDTotalMaxBin = PSDTotalMaxBin_NEL->GetEntry()->GetNumber();
+  TheSettings->PSDTailBins = PSDTailBins_NEL->GetEntry()->GetNumber();
+  TheSettings->PSDTailMinBin = PSDTailMinBin_NEL->GetEntry()->GetNumber();
+  TheSettings->PSDTailMaxBin = PSDTailMaxBin_NEL->GetEntry()->GetNumber();
+
+
   //////////////////////////
-  // Graphic settings subtab
+  // Display graphics subtab
 
   TheSettings->DisplayTitlesEnable = DisplayTitlesEnable_CB->IsDown();
 
@@ -2046,6 +2144,9 @@ void AAInterface::SaveSettings()
 	
   TheSettings->DisplayLegend = DisplayLegend_CB->IsDown();
   TheSettings->DisplayGrid = DisplayGrid_CB->IsDown();
+  TheSettings->DisplayTrigger = DisplayTrigger_CB->IsDown();
+  TheSettings->DisplayPSDLimits = DisplayPSDLimits_CB->IsDown();
+  
   TheSettings->DisplayXAxisInLog = DisplayXAxisLog_CB->IsDown();
   TheSettings->DisplayYAxisInLog = DisplayYAxisLog_CB->IsDown();
   
@@ -2109,6 +2210,9 @@ void AAInterface::SaveSettings()
 
     TheSettings->SpectrumCalibrationEnable = SpectrumCalibration_CB->IsDisabledAndSelected();
     TheSettings->SpectrumCalibrationUseSlider = SpectrumUseCalibrationSlider_CB->IsDisabledAndSelected();
+
+  TheSettings->PSDTotalVsTail = PSDTotalVsTail_RB->IsDisabledAndSelected();
+  TheSettings->PSDTotalVsPSD = PSDTotalVsPSD_RB->IsDisabledAndSelected();
 
     TheSettings->WaveformStorageEnable = WaveformStorageEnable_CB->IsDisabledAndSelected();
     TheSettings->WaveformStoreRaw = WaveformStoreRaw_CB->IsDisabledAndSelected();

@@ -46,13 +46,18 @@ public:
   vector<Bool_t>  ChNegPolarity;
   vector<Int_t>   ChDCOffset;
   vector<Int_t>   ChTriggerThreshold;
-  vector<Int_t>   ChBaselineCalcMin;
-  vector<Int_t>   ChBaselineCalcMax;
   vector<Int_t>   ChZLEThreshold;
   vector<Int_t>   ChZLEForward;
   vector<Int_t>   ChZLEBackward;
   vector<Bool_t>  ChZLEPosLogic;
   vector<Bool_t>  ChZLENegLogic;
+
+  vector<Int_t>   ChBaselineCalcMin;
+  vector<Int_t>   ChBaselineCalcMax;
+  vector<Int_t>   ChPSDTotalStart;
+  vector<Int_t>   ChPSDTotalStop;
+  vector<Int_t>   ChPSDTailStart;
+  vector<Int_t>   ChPSDTailStop;
 
 
   //////////////////////////
@@ -112,6 +117,16 @@ public:
   Bool_t SpectrumCalibrationUseSlider;
 
 
+  //////////////////////////////
+  // Pulse discrimination limits
+
+  Bool_t PSDTotalVsTail, PSDTotalVsPSD;
+  Double_t PSDThreshold;
+  Int_t PSDTotalBins, PSDTailBins;
+  Double_t PSDTotalMinBin, PSDTotalMaxBin;
+  Double_t PSDTailMinBin, PSDTailMaxBin;
+
+
   ///////////////////////////
   // Graphics widget settings
 
@@ -122,6 +137,7 @@ public:
   Double_t DisplayYTitleSize, DisplayYTitleOffset;
 
   Bool_t DisplayLegend, DisplayGrid;
+  Bool_t DisplayTrigger, DisplayPSDLimits;
   Bool_t DisplayXAxisInLog, DisplayYAxisInLog;
 
   Bool_t WaveformWithLine, WaveformWithMarkers, WaveformWithBoth;
