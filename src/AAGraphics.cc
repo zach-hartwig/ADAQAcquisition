@@ -146,11 +146,13 @@ void AAGraphics::PlotWaveforms(vector<vector<uint16_t> > &Waveforms,
   // Clear out the vector to start with size 0
   WaveformGraphs.clear();
 
+  Int_t NumGraphs = 0;
+  
   for(int ch=0; ch<TheSettings->ChEnable.size(); ch++){
     
     if(!TheSettings->ChEnable[ch])
       continue;
-
+    
     vector<int> Voltage (Waveforms[ch].begin(), Waveforms[ch].end());
 
     // Zero length encoding waveforms
@@ -165,24 +167,34 @@ void AAGraphics::PlotWaveforms(vector<vector<uint16_t> > &Waveforms,
 
     if(Waveform_G->GetN() == 0)
       return;
-
+    
+    // Store a pointer to the TGraphs so that they can be deleted on
+    // the next call to AAGraphics::PlotWaveform() to prevent a
+    // massive memory leak
     WaveformGraphs.push_back(Waveform_G);
 
     // Set the waveform graphical options
-
     Waveform_G->SetLineColor(ChColor[ch]);
     Waveform_G->SetLineWidth(WaveformWidth);
     Waveform_G->SetMarkerStyle(24);
     Waveform_G->SetMarkerSize(0.75);
     Waveform_G->SetMarkerColor(ChColor[ch]);
     Waveform_G->SetFillColor(ChColor[ch]);
+
+
+    TString DrawOption;
     
+    (NumGraphs == 0) ? DrawOption = "A" : DrawOption = "";
+
     if(TheSettings->WaveformWithLine)
-      Waveform_G->Draw("AL");
+      DrawOption += "L";
     else if(TheSettings->WaveformWithMarkers)
-      Waveform_G->Draw("AP");
+      DrawOption += "P";
     else
-      Waveform_G->Draw("APL");
+      DrawOption += "PL";
+
+    Waveform_G->Draw(DrawOption);
+
 
     // Set the horiz. and vert. min/max ranges of the waveform.  Note
     // the max value is the max digitizer bit value in units of ADC
@@ -255,7 +267,8 @@ void AAGraphics::PlotWaveforms(vector<vector<uint16_t> > &Waveforms,
 			  TheSettings->ChZLEThreshold[ch],
 			  XMax,
 			  TheSettings->ChZLEThreshold[ch]);
-    
+   
+    NumGraphs++;
   }
   
   if(TheSettings->DisplayLegend)
