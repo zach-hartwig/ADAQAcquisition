@@ -223,11 +223,11 @@ enum{
   DisplayXAxisLog_CB_ID,
   DisplayYAxisLog_CB_ID,
 
-  DrawWaveformWithCurve_RB_ID,
+  DrawWaveformWithLine_RB_ID,
   DrawWaveformWithMarkers_RB_ID,
   DrawWaveformWithBoth_RB_ID,
 
-  DrawSpectrumWithCurve_RB_ID,
+  DrawSpectrumWithLine_RB_ID,
   DrawSpectrumWithMarkers_RB_ID,
   DrawSpectrumWithBars_RB_ID,
 

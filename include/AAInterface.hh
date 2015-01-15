@@ -311,8 +311,8 @@ private:
   TGCheckButton *DisplayLegend_CB, *DisplayGrid_CB;
   TGCheckButton *DisplayXAxisLog_CB, *DisplayYAxisLog_CB;
   
-  TGRadioButton *DrawWaveformWithCurve_RB, *DrawWaveformWithMarkers_RB, *DrawWaveformWithBoth_RB;
-  TGRadioButton *DrawSpectrumWithCurve_RB, *DrawSpectrumWithMarkers_RB, *DrawSpectrumWithBars_RB;
+  TGRadioButton *DrawWaveformWithLine_RB, *DrawWaveformWithMarkers_RB, *DrawWaveformWithBoth_RB;
+  TGRadioButton *DrawSpectrumWithLine_RB, *DrawSpectrumWithMarkers_RB, *DrawSpectrumWithBars_RB;
   
   TGCheckButton *DisplayTitlesEnable_CB;
   ADAQTextEntryWithLabel *DisplayTitle_TEL, *DisplayXTitle_TEL, *DisplayYTitle_TEL;

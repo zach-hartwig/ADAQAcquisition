@@ -1095,19 +1095,23 @@ void AAInterface::FillAcquisitionFrame()
 
   TGTab *AQControlSubtabs = new TGTab(SubtabFrame);
 
-  TGCompositeFrame *AcquisitionSubtab = AQControlSubtabs->AddTab("Acquisition control");
+  TGCompositeFrame *AcquisitionSubtab = AQControlSubtabs->AddTab(" Data acquisition ");
   TGCompositeFrame *AcquisitionSubframe = new TGCompositeFrame(AcquisitionSubtab, 0, 0, kHorizontalFrame);
   AcquisitionSubtab->AddFrame(AcquisitionSubframe);
   
-  TGCompositeFrame *SpectrumSubtab = AQControlSubtabs->AddTab("Spectrum creation");
+  TGCompositeFrame *SpectrumSubtab = AQControlSubtabs->AddTab(" Pulse spectra ");
   TGCompositeFrame *SpectrumSubframe = new TGCompositeFrame(SpectrumSubtab, 0, 0, kHorizontalFrame);
   SpectrumSubtab->AddFrame(SpectrumSubframe);
   
-  TGCompositeFrame *DataSubtab = AQControlSubtabs->AddTab("Peristent storage");
+  TGCompositeFrame *PSDSubtab = AQControlSubtabs->AddTab(" Pulse discrimination ");
+  TGCompositeFrame *PSDSubframe = new TGCompositeFrame(PSDSubtab, 0, 0, kHorizontalFrame);
+  PSDSubtab->AddFrame(PSDSubframe);
+  
+  TGCompositeFrame *DataSubtab = AQControlSubtabs->AddTab(" Persistent storage ");
   TGCompositeFrame *DataSubframe = new TGCompositeFrame(DataSubtab, 0, 0, kHorizontalFrame);
   DataSubtab->AddFrame(DataSubframe);
   
-  TGCompositeFrame *GraphicsSubtab = AQControlSubtabs->AddTab("Display control");
+  TGCompositeFrame *GraphicsSubtab = AQControlSubtabs->AddTab(" Graphics display ");
   TGCompositeFrame *GraphicsSubframe = new TGCompositeFrame(GraphicsSubtab, 0, 0, kHorizontalFrame);
   GraphicsSubtab->AddFrame(GraphicsSubframe);
 
@@ -1722,36 +1726,36 @@ void AAInterface::FillAcquisitionFrame()
   DisplaySettings_GF->AddFrame(WaveformDrawOptions_GF,
 			       new TGLayoutHints(kLHintsTop, 0,0,5,0));
 
-  WaveformDrawOptions_GF->AddFrame(DrawWaveformWithCurve_RB = new TGRadioButton(WaveformDrawOptions_GF,
-										"Curve ",
-										DrawWaveformWithCurve_RB_ID),
+  WaveformDrawOptions_GF->AddFrame(DrawWaveformWithLine_RB = new TGRadioButton(WaveformDrawOptions_GF,
+									       "Line ",
+									       DrawWaveformWithLine_RB_ID),
 				   new TGLayoutHints(kLHintsNormal, 0,3,3,-2));
-  DrawWaveformWithCurve_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
-  DrawWaveformWithCurve_RB->SetState(kButtonDown);
+  DrawWaveformWithLine_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
+  DrawWaveformWithLine_RB->SetState(kButtonDown);
   
   WaveformDrawOptions_GF->AddFrame(DrawWaveformWithMarkers_RB = new TGRadioButton(WaveformDrawOptions_GF,
 										  "Markers ",
 										  DrawWaveformWithMarkers_RB_ID),
 				   new TGLayoutHints(kLHintsNormal, 0,3,3,-2));
   DrawWaveformWithMarkers_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
-
+  
   WaveformDrawOptions_GF->AddFrame(DrawWaveformWithBoth_RB = new TGRadioButton(WaveformDrawOptions_GF,
 									       "Both",
 									       DrawWaveformWithBoth_RB_ID),
 				   new TGLayoutHints(kLHintsNormal, 0,3,3,-2));
   DrawWaveformWithBoth_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
-
+  
   
   TGGroupFrame *SpectrumDrawOptions_GF = new TGGroupFrame(DisplaySettings_GF, "Spectrum options", kHorizontalFrame);
   DisplaySettings_GF->AddFrame(SpectrumDrawOptions_GF,
 			       new TGLayoutHints(kLHintsNormal, 0,0,5,0));
   
-  SpectrumDrawOptions_GF->AddFrame(DrawSpectrumWithCurve_RB = new TGRadioButton(SpectrumDrawOptions_GF,
-										"Curve ",
-										DrawSpectrumWithCurve_RB_ID),
+  SpectrumDrawOptions_GF->AddFrame(DrawSpectrumWithLine_RB = new TGRadioButton(SpectrumDrawOptions_GF,
+									       "Line ",
+									       DrawSpectrumWithLine_RB_ID),
 				   new TGLayoutHints(kLHintsNormal, 0,3,3,-2));
-  DrawSpectrumWithCurve_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
-  DrawSpectrumWithCurve_RB->SetState(kButtonDown);
+  DrawSpectrumWithLine_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
+  DrawSpectrumWithLine_RB->SetState(kButtonDown);
   
   SpectrumDrawOptions_GF->AddFrame(DrawSpectrumWithMarkers_RB = new TGRadioButton(SpectrumDrawOptions_GF,
 										  "Markers ",
@@ -2045,11 +2049,11 @@ void AAInterface::SaveSettings()
   TheSettings->DisplayXAxisInLog = DisplayXAxisLog_CB->IsDown();
   TheSettings->DisplayYAxisInLog = DisplayYAxisLog_CB->IsDown();
   
-  TheSettings->WaveformWithCurve = DrawWaveformWithCurve_RB->IsDown();
+  TheSettings->WaveformWithLine = DrawWaveformWithLine_RB->IsDown();
   TheSettings->WaveformWithMarkers = DrawWaveformWithMarkers_RB->IsDown();
   TheSettings->WaveformWithBoth = DrawWaveformWithBoth_RB->IsDown();
   
-  TheSettings->SpectrumWithCurve = DrawSpectrumWithCurve_RB->IsDown();
+  TheSettings->SpectrumWithLine = DrawSpectrumWithLine_RB->IsDown();
   TheSettings->SpectrumWithMarkers = DrawSpectrumWithMarkers_RB->IsDown();
   TheSettings->SpectrumWithBars = DrawSpectrumWithBars_RB->IsDown();
   

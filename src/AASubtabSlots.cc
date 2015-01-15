@@ -589,33 +589,33 @@ void AASubtabSlots::HandleRadioButtons()
     TI->SpectrumULD_NEL->GetEntry()->SetNumber(TI->TheSettings->SpectrumMaxBin);
     break;
 
-  case DrawWaveformWithCurve_RB_ID:
+  case DrawWaveformWithLine_RB_ID:
     TI->DrawWaveformWithMarkers_RB->SetState(kButtonUp);
     TI->DrawWaveformWithBoth_RB->SetState(kButtonUp);
     break;
     
   case DrawWaveformWithMarkers_RB_ID:
-    TI->DrawWaveformWithCurve_RB->SetState(kButtonUp);
+    TI->DrawWaveformWithLine_RB->SetState(kButtonUp);
     TI->DrawWaveformWithBoth_RB->SetState(kButtonUp);
     break;
     
   case DrawWaveformWithBoth_RB_ID:
-    TI->DrawWaveformWithCurve_RB->SetState(kButtonUp);
+    TI->DrawWaveformWithLine_RB->SetState(kButtonUp);
     TI->DrawWaveformWithMarkers_RB->SetState(kButtonUp);
     break;
     
-  case DrawSpectrumWithCurve_RB_ID:
+  case DrawSpectrumWithLine_RB_ID:
     TI->DrawSpectrumWithMarkers_RB->SetState(kButtonUp);
     TI->DrawSpectrumWithBars_RB->SetState(kButtonUp);
     break;
     
   case DrawSpectrumWithMarkers_RB_ID:
-    TI->DrawSpectrumWithCurve_RB->SetState(kButtonUp);
+    TI->DrawSpectrumWithLine_RB->SetState(kButtonUp);
     TI->DrawSpectrumWithBars_RB->SetState(kButtonUp);
     break;
     
   case DrawSpectrumWithBars_RB_ID:
-    TI->DrawSpectrumWithCurve_RB->SetState(kButtonUp);
+    TI->DrawSpectrumWithLine_RB->SetState(kButtonUp);
     TI->DrawSpectrumWithMarkers_RB->SetState(kButtonUp);
     break;
   }

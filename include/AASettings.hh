@@ -124,8 +124,8 @@ public:
   Bool_t DisplayLegend, DisplayGrid;
   Bool_t DisplayXAxisInLog, DisplayYAxisInLog;
 
-  Bool_t WaveformWithCurve, WaveformWithMarkers, WaveformWithBoth;
-  Bool_t SpectrumWithCurve, SpectrumWithMarkers, SpectrumWithBars;
+  Bool_t WaveformWithLine, WaveformWithMarkers, WaveformWithBoth;
+  Bool_t SpectrumWithLine, SpectrumWithMarkers, SpectrumWithBars;
 
   int SpectrumRefreshRate;
 

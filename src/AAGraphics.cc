@@ -169,12 +169,12 @@ void AAGraphics::PlotWaveforms(vector<vector<uint16_t> > &Waveforms,
     Waveform_G->SetMarkerColor(ChColor[ch]);
     Waveform_G->SetFillColor(ChColor[ch]);
     
-    if(TheSettings->WaveformWithCurve)
-      Waveform_G->Draw("AC");
+    if(TheSettings->WaveformWithLine)
+      Waveform_G->Draw("AL");
     else if(TheSettings->WaveformWithMarkers)
       Waveform_G->Draw("AP");
     else
-      Waveform_G->Draw("APC");
+      Waveform_G->Draw("APL");
 
     // Set the horiz. and vert. min/max ranges of the waveform.  Note
     // the max value is the max digitizer bit value in units of ADC
@@ -279,9 +279,9 @@ void AAGraphics::PlotSpectrum(TH1F *Spectrum_H)
   Spectrum_H->SetMarkerSize(0.75);
   Spectrum_H->SetFillColor(ChColor[Channel]);
   
-  if(TheSettings->SpectrumWithCurve){
+  if(TheSettings->SpectrumWithLine){
     Spectrum_H->SetFillStyle(0);
-    Spectrum_H->Draw("C");
+    Spectrum_H->Draw("");
   }
   else if(TheSettings->SpectrumWithMarkers)
     Spectrum_H->Draw("E1");
