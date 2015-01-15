@@ -1532,14 +1532,14 @@ void AAInterface::FillAcquisitionFrame()
 			new TGLayoutHints(kLHintsNormal, 0,0,0,0));
   PSDTotalMinBin_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
   PSDTotalMinBin_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
-  PSDTotalMinBin_NEL->GetEntry()->SetNumber(100);
+  PSDTotalMinBin_NEL->GetEntry()->SetNumber(0);
   PSDTotalMinBin_NEL->GetEntry()->Resize(60, 20);
 
   PSDTotal_HF->AddFrame(PSDTotalMaxBin_NEL = new ADAQNumberEntryWithLabel(PSDTotal_HF, "Max.", -1),
 			    new TGLayoutHints(kLHintsNormal, 0,0,0,0));
   PSDTotalMaxBin_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
   PSDTotalMaxBin_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
-  PSDTotalMaxBin_NEL->GetEntry()->SetNumber(100);
+  PSDTotalMaxBin_NEL->GetEntry()->SetNumber(5000);
   PSDTotalMaxBin_NEL->GetEntry()->Resize(60, 20);
 
 
@@ -1557,17 +1557,23 @@ void AAInterface::FillAcquisitionFrame()
 			    new TGLayoutHints(kLHintsNormal, 0,0,0,0));
   PSDTailMinBin_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
   PSDTailMinBin_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
-  PSDTailMinBin_NEL->GetEntry()->SetNumber(100);
+  PSDTailMinBin_NEL->GetEntry()->SetNumber(0);
   PSDTailMinBin_NEL->GetEntry()->Resize(60, 20);
 
   PSDTail_HF->AddFrame(PSDTailMaxBin_NEL = new ADAQNumberEntryWithLabel(PSDTail_HF, "Max.", -1),
 			    new TGLayoutHints(kLHintsNormal, 0,0,0,0));
   PSDTailMaxBin_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
   PSDTailMaxBin_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
-  PSDTailMaxBin_NEL->GetEntry()->SetNumber(100);
+  PSDTailMaxBin_NEL->GetEntry()->SetNumber(10000);
   PSDTailMaxBin_NEL->GetEntry()->Resize(60, 20);
 
-
+  
+  PSDHistogram_GF->AddFrame(PSDThreshold_NEL = new ADAQNumberEntryWithLabel(PSDHistogram_GF, "Threshold (ADC)", -1),
+			    new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+  PSDThreshold_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+  PSDThreshold_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+  PSDThreshold_NEL->GetEntry()->SetNumber(100);
+  PSDThreshold_NEL->GetEntry()->Resize(60, 20);
 
 
 
@@ -1764,41 +1770,50 @@ void AAInterface::FillAcquisitionFrame()
   TGHorizontalFrame *Display_HF0 = new TGHorizontalFrame(DisplaySettings_GF);
   DisplaySettings_GF->AddFrame(Display_HF0, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
   
-  // ROOT check button to enable/disable plotting of the legend
-  Display_HF0->AddFrame(DisplayLegend_CB = new TGCheckButton(Display_HF0, "Draw legend ", -1),
-			new TGLayoutHints(kLHintsNormal,0,0,5,0));
-  DisplayLegend_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
+  Display_HF0->AddFrame(DisplayTrigger_CB = new TGCheckButton(Display_HF0, "Trigger     ", DisplayTrigger_CB_ID),
+			new TGLayoutHints(kLHintsNormal, 0,0,2,0));
+  DisplayTrigger_CB->SetState(kButtonDown);
   
-  Display_HF0->AddFrame(DisplayGrid_CB = new TGCheckButton(Display_HF0, "Draw grid", DisplayGrid_CB_ID),
-			new TGLayoutHints(kLHintsNormal, 0,0,5,0));
-  DisplayGrid_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
-  DisplayGrid_CB->SetState(kButtonDown);
+  Display_HF0->AddFrame(DisplayBaselineBox_CB = new TGCheckButton(Display_HF0, "Baseline box", DisplayBaselineBox_CB_ID),
+		       new TGLayoutHints(kLHintsNormal, 0,0,2,0));
+  DisplayBaselineBox_CB->SetState(kButtonDown);
 
 
   TGHorizontalFrame *Display_HF1 = new TGHorizontalFrame(DisplaySettings_GF);
   DisplaySettings_GF->AddFrame(Display_HF1, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
-  
-  Display_HF1->AddFrame(DisplayTrigger_CB = new TGCheckButton(Display_HF1, "Draw trigger", DisplayTrigger_CB_ID),
-			new TGLayoutHints(kLHintsNormal, 0,0,5,0));
-  DisplayTrigger_CB->SetState(kButtonDown);
-  
-  Display_HF1->AddFrame(DisplayPSDLimits_CB = new TGCheckButton(Display_HF1, "Draw PSD limits", DisplayPSDLimits_CB_ID),
-			new TGLayoutHints(kLHintsNormal, 0,0,5,0));
+
+  Display_HF1->AddFrame(DisplayPSDLimits_CB = new TGCheckButton(Display_HF1, "PSD limits  ", DisplayPSDLimits_CB_ID),
+			new TGLayoutHints(kLHintsNormal, 0,0,2,0));
+
+  Display_HF1->AddFrame(DisplayZLEThreshold_CB = new TGCheckButton(Display_HF1, "ZLE thresh", DisplayZLEThreshold_CB_ID),
+			new TGLayoutHints(kLHintsNormal, 0,0,2,0));
 
 
   TGHorizontalFrame *Display_HF2 = new TGHorizontalFrame(DisplaySettings_GF);
   DisplaySettings_GF->AddFrame(Display_HF2, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+  
+  // ROOT check button to enable/disable plotting of the legend
+  Display_HF2->AddFrame(DisplayLegend_CB = new TGCheckButton(Display_HF2, "Legend      ", -1),
+			new TGLayoutHints(kLHintsNormal,0,0,2,0));
+  DisplayLegend_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
+  
+  Display_HF2->AddFrame(DisplayGrid_CB = new TGCheckButton(Display_HF2, "Grid", DisplayGrid_CB_ID),
+			new TGLayoutHints(kLHintsNormal, 0,0,2,0));
+  DisplayGrid_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
+  DisplayGrid_CB->SetState(kButtonDown);
+
+
+  TGHorizontalFrame *Display_HF3 = new TGHorizontalFrame(DisplaySettings_GF);
+  DisplaySettings_GF->AddFrame(Display_HF3, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
 
   // ROOT check buttons for specifying if X and Y axes on spectra should be logarithmic
-  Display_HF2->AddFrame(DisplayXAxisLog_CB = new TGCheckButton(Display_HF2, "Log X-axis  ", DisplayXAxisLog_CB_ID),
-			new TGLayoutHints(kLHintsLeft,0,0,5,0));
+  Display_HF3->AddFrame(DisplayXAxisLog_CB = new TGCheckButton(Display_HF3, "Log X-axis  ", DisplayXAxisLog_CB_ID),
+			new TGLayoutHints(kLHintsLeft,0,0,2,0));
   DisplayXAxisLog_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
   
-  Display_HF2->AddFrame(DisplayYAxisLog_CB = new TGCheckButton(Display_HF2, "Log Y-axis", DisplayYAxisLog_CB_ID),
-			new TGLayoutHints(kLHintsLeft,0,0,5,0));
+  Display_HF3->AddFrame(DisplayYAxisLog_CB = new TGCheckButton(Display_HF3, "Log Y-axis", DisplayYAxisLog_CB_ID),
+			new TGLayoutHints(kLHintsLeft,0,0,2,0));
   DisplayYAxisLog_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
-
-
 
   
   TGGroupFrame *WaveformDrawOptions_GF = new TGGroupFrame(DisplaySettings_GF, "Waveform options", kHorizontalFrame);
@@ -1853,12 +1868,13 @@ void AAInterface::FillAcquisitionFrame()
   DisplayControl_GF->SetTitlePos(TGGroupFrame::kCenter);
   GraphicsSubframe->AddFrame(DisplayControl_GF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
   
-  DisplayControl_GF->AddFrame(SpectrumRefreshRate_NEL = new ADAQNumberEntryWithLabel(DisplayControl_GF, "Event refresh rate", -1),
+  DisplayControl_GF->AddFrame(SpectrumRefreshRate_NEL = new ADAQNumberEntryWithLabel(DisplayControl_GF, "Display update freq.", -1),
 			      new TGLayoutHints(kLHintsNormal, 0,0,10,0));
   SpectrumRefreshRate_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
   SpectrumRefreshRate_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+  SpectrumRefreshRate_NEL->GetEntry()->Resize(50,20);
   SpectrumRefreshRate_NEL->GetEntry()->SetNumber(100);
-
+  
 
   TGButtonGroup *DisplayControl_BG = new TGButtonGroup(DisplayControl_GF, "");
   DisplayControl_BG->SetBorderDrawn(false);
@@ -2142,11 +2158,12 @@ void AAInterface::SaveSettings()
   TheSettings->DisplayYTitleSize = DisplayYTitleSize_NEL->GetEntry()->GetNumber();
   TheSettings->DisplayYTitleOffset = DisplayYTitleOffset_NEL->GetEntry()->GetNumber();
 	
+  TheSettings->DisplayTrigger = DisplayTrigger_CB->IsDown();
+  TheSettings->DisplayBaselineBox = DisplayBaselineBox_CB->IsDown();
+  TheSettings->DisplayPSDLimits = DisplayPSDLimits_CB->IsDown();
+  TheSettings->DisplayZLEThreshold = DisplayZLEThreshold_CB->IsDown();
   TheSettings->DisplayLegend = DisplayLegend_CB->IsDown();
   TheSettings->DisplayGrid = DisplayGrid_CB->IsDown();
-  TheSettings->DisplayTrigger = DisplayTrigger_CB->IsDown();
-  TheSettings->DisplayPSDLimits = DisplayPSDLimits_CB->IsDown();
-  
   TheSettings->DisplayXAxisInLog = DisplayXAxisLog_CB->IsDown();
   TheSettings->DisplayYAxisInLog = DisplayYAxisLog_CB->IsDown();
   
@@ -2211,8 +2228,8 @@ void AAInterface::SaveSettings()
     TheSettings->SpectrumCalibrationEnable = SpectrumCalibration_CB->IsDisabledAndSelected();
     TheSettings->SpectrumCalibrationUseSlider = SpectrumUseCalibrationSlider_CB->IsDisabledAndSelected();
 
-  TheSettings->PSDTotalVsTail = PSDTotalVsTail_RB->IsDisabledAndSelected();
-  TheSettings->PSDTotalVsPSD = PSDTotalVsPSD_RB->IsDisabledAndSelected();
+    TheSettings->PSDTotalVsTail = PSDTotalVsTail_RB->IsDisabledAndSelected();
+    TheSettings->PSDTotalVsPSD = PSDTotalVsPSD_RB->IsDisabledAndSelected();
 
     TheSettings->WaveformStorageEnable = WaveformStorageEnable_CB->IsDisabledAndSelected();
     TheSettings->WaveformStoreRaw = WaveformStoreRaw_CB->IsDisabledAndSelected();

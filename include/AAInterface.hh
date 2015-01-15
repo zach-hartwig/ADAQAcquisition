@@ -313,12 +313,12 @@ private:
   ADAQTextEntryWithLabel *CanvasFileName_TEL;
   TGCheckButton *CanvasSaveWithTimeExtension_CB;
   TGTextButton *CanvasSave_TB;
-
-  // Graphics
   
+  // Graphics
+  TGCheckButton *DisplayTrigger_CB, *DisplayPSDLimits_CB;  
+  TGCheckButton *DisplayBaselineBox_CB, *DisplayZLEThreshold_CB;
   TGCheckButton *DisplayLegend_CB, *DisplayGrid_CB;
   TGCheckButton *DisplayXAxisLog_CB, *DisplayYAxisLog_CB;
-  TGCheckButton *DisplayTrigger_CB, *DisplayPSDLimits_CB;
   
   TGRadioButton *DrawWaveformWithLine_RB, *DrawWaveformWithMarkers_RB, *DrawWaveformWithBoth_RB;
   TGRadioButton *DrawSpectrumWithLine_RB, *DrawSpectrumWithMarkers_RB, *DrawSpectrumWithBars_RB;

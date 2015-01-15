@@ -67,6 +67,14 @@ AAGraphics::AAGraphics()
     Baseline_B[ch]->SetFillColor(ChColor[ch]);
     Baseline_B[ch]->SetFillStyle(3002);
     Baseline_B[ch]->SetLineWidth(0);
+
+    PSDTotal_B.push_back(new TBox);
+    PSDTotal_B[ch]->SetFillColor(ChColor[ch]);
+    PSDTotal_B[ch]->SetFillStyle(3002);
+
+    PSDTail_B.push_back(new TBox);
+    PSDTail_B[ch]->SetFillColor(ChColor[ch]);
+    PSDTail_B[ch]->SetFillStyle(3002);
   }
 
   SpectrumCalibration_L = new TLine;
@@ -213,25 +221,41 @@ void AAGraphics::PlotWaveforms(vector<vector<uint16_t> > &Waveforms,
     Waveform_G->GetYaxis()->SetLabelSize(YSize);
 
     // Draw additional graphical objects on top of the waveform
-    
-    Trigger_L[ch]->DrawLine(XMin,
-			    TheSettings->ChTriggerThreshold[ch],
-			    XMax,
-			    TheSettings->ChTriggerThreshold[ch]);
 
-    double BaselineWidth = (YMax-YMin)*0.03;
+    if(TheSettings->DisplayTrigger)
+      Trigger_L[ch]->DrawLine(XMin,
+			      TheSettings->ChTriggerThreshold[ch],
+			      XMax,
+			      TheSettings->ChTriggerThreshold[ch]);
     
-    Baseline_B[ch]->DrawBox(TheSettings->ChBaselineCalcMin[ch],
-			    BaselineValue[ch] - BaselineWidth,
-			    TheSettings->ChBaselineCalcMax[ch],
-			    BaselineValue[ch] + BaselineWidth);
+    if(TheSettings->DisplayPSDLimits){
+      PSDTotal_B[ch]->DrawBox(TheSettings->ChPSDTotalStart[ch],
+			      YMin,
+			      TheSettings->ChPSDTotalStop[ch],
+			      YMax);
 
-    if(TheSettings->ZeroSuppressionEnable)
+      PSDTail_B[ch]->DrawBox(TheSettings->ChPSDTailStart[ch],
+			     YMin,
+			     TheSettings->ChPSDTailStop[ch],
+			      YMax);
+    }
+
+    if(TheSettings->DisplayBaselineBox){
+    
+      double BaselineWidth = (YMax-YMin)*0.03;
+      
+      Baseline_B[ch]->DrawBox(TheSettings->ChBaselineCalcMin[ch],
+			      BaselineValue[ch] - BaselineWidth,
+			      TheSettings->ChBaselineCalcMax[ch],
+			      BaselineValue[ch] + BaselineWidth);
+    }
+     
+    if(TheSettings->DisplayZLEThreshold)
       ZLE_L[ch]->DrawLine(XMin,
 			  TheSettings->ChZLEThreshold[ch],
 			  XMax,
 			  TheSettings->ChZLEThreshold[ch]);
-
+    
   }
   
   if(TheSettings->DisplayLegend)

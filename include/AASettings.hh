@@ -29,13 +29,17 @@ public:
     ChNegPolarity.resize(Channels);
     ChDCOffset.resize(Channels);
     ChTriggerThreshold.resize(Channels);
-    ChBaselineCalcMin.resize(Channels);
-    ChBaselineCalcMax.resize(Channels);
     ChZLEThreshold.resize(Channels);
     ChZLEForward.resize(Channels);
     ChZLEBackward.resize(Channels);
     ChZLEPosLogic.resize(Channels);
     ChZLENegLogic.resize(Channels);
+    ChBaselineCalcMin.resize(Channels);
+    ChBaselineCalcMax.resize(Channels);
+    ChPSDTotalStart.resize(Channels);
+    ChPSDTotalStop.resize(Channels);
+    ChPSDTailStart.resize(Channels);
+    ChPSDTailStop.resize(Channels);
   }
   
   //////////////////////////
@@ -136,8 +140,10 @@ public:
   Double_t DisplayXTitleSize, DisplayXTitleOffset;
   Double_t DisplayYTitleSize, DisplayYTitleOffset;
 
+  Bool_t DisplayTrigger, DisplayBaselineBox;
+  Bool_t DisplayPSDLimits, DisplayZLEThreshold;
   Bool_t DisplayLegend, DisplayGrid;
-  Bool_t DisplayTrigger, DisplayPSDLimits;
+
   Bool_t DisplayXAxisInLog, DisplayYAxisInLog;
 
   Bool_t WaveformWithLine, WaveformWithMarkers, WaveformWithBoth;
