@@ -39,7 +39,8 @@ AAGraphics *AAGraphics::GetInstance()
 
 
 AAGraphics::AAGraphics()
-  : WaveformWidth(2), SpectrumWidth(2)
+  : WaveformWidth(2), SpectrumWidth(2),
+    XMin(0.), XMax(1.), YMin(0.), YMax(1.)
 {
   if(TheGraphicsManager)
     cout << "\nError! The GraphicsManager was constructed twice!\n" << endl;
@@ -67,13 +68,13 @@ AAGraphics::AAGraphics()
     Baseline_B[ch]->SetFillColor(ChColor[ch]);
     Baseline_B[ch]->SetFillStyle(3002);
     Baseline_B[ch]->SetLineWidth(0);
-
+    
     PSDTotal_B.push_back(new TBox);
     PSDTotal_B[ch]->SetFillColor(ChColor[ch]);
     PSDTotal_B[ch]->SetFillStyle(3002);
-
+    
     PSDTail_B.push_back(new TBox);
-    PSDTail_B[ch]->SetFillColor(ChColor[ch]);
+    PSDTail_B[ch]->SetFillColor(kBlack);
     PSDTail_B[ch]->SetFillStyle(3002);
   }
 
@@ -135,8 +136,8 @@ void AAGraphics::SetupWaveformGraphics(int WaveformLength)
 
 
 void AAGraphics::PlotWaveforms(vector<vector<uint16_t> > &Waveforms, 
-			       int WaveformLength,
-			       vector<double> &BaselineValue)
+			       int WaveformLength)
+//			       vector<double> &BaselineValue)
 {
   // Delete previous TGraphs to prevent bleeding memory
   vector<TGraph *>::iterator it = WaveformGraphs.begin();
@@ -145,8 +146,6 @@ void AAGraphics::PlotWaveforms(vector<vector<uint16_t> > &Waveforms,
   
   // Clear out the vector to start with size 0
   WaveformGraphs.clear();
-
-  Int_t NumGraphs = 0;
   
   for(int ch=0; ch<TheSettings->ChEnable.size(); ch++){
     
@@ -181,11 +180,11 @@ void AAGraphics::PlotWaveforms(vector<vector<uint16_t> > &Waveforms,
     Waveform_G->SetMarkerColor(ChColor[ch]);
     Waveform_G->SetFillColor(ChColor[ch]);
 
-
     TString DrawOption;
-    
-    (NumGraphs == 0) ? DrawOption = "A" : DrawOption = "";
 
+    // The first TGraph must plot the x and y axes
+    (WaveformGraphs.size() == 1) ? DrawOption = "A" : DrawOption = "";
+    
     if(TheSettings->WaveformWithLine)
       DrawOption += "L";
     else if(TheSettings->WaveformWithMarkers)
@@ -199,16 +198,16 @@ void AAGraphics::PlotWaveforms(vector<vector<uint16_t> > &Waveforms,
     // Set the horiz. and vert. min/max ranges of the waveform.  Note
     // the max value is the max digitizer bit value in units of ADC
 
-    double XMin = WaveformLength * TheSettings->HorizontalSliderMin;
-    double XMax = WaveformLength * TheSettings->HorizontalSliderMax;
+    XMin = WaveformLength * TheSettings->HorizontalSliderMin;
+    XMax = WaveformLength * TheSettings->HorizontalSliderMax;
     Waveform_G->GetXaxis()->SetRangeUser(XMin, XMax);
 
     (TheSettings->DisplayXAxisInLog) ? 
       gPad->SetLogx(true) : gPad->SetLogx(false);
     
     int AbsoluteMax = AAVMEManager::GetInstance()->GetDGManager()->GetMaxADCBit();
-    double YMin = AbsoluteMax * TheSettings->VerticalSliderMin;
-    double YMax = AbsoluteMax * TheSettings->VerticalSliderMax;
+    YMin = AbsoluteMax * TheSettings->VerticalSliderMin;
+    YMax = AbsoluteMax * TheSettings->VerticalSliderMax;
     
     if(TheSettings->DisplayYAxisInLog){
       if(YMin == 0) YMin = 1;
@@ -231,8 +230,25 @@ void AAGraphics::PlotWaveforms(vector<vector<uint16_t> > &Waveforms,
     Waveform_G->GetYaxis()->SetTitleSize(YSize);
     Waveform_G->GetYaxis()->SetTitleOffset(YOffset);
     Waveform_G->GetYaxis()->SetLabelSize(YSize);
+  }
+  
+  if(TheSettings->DisplayLegend)
+    Waveform_LG->Draw();
+  
+  (TheSettings->DisplayGrid) ? gPad->SetGrid(true, true) : gPad->SetGrid(false, false);
+}
 
-    // Draw additional graphical objects on top of the waveform
+
+void AAGraphics::DrawWaveformGraphics(vector<double> &BaselineValue,
+				      vector<int> &PSDTotalAbsStart,
+				      vector<int> &PSDTotalAbsStop,
+				      vector<int> &PSDTailAbsStart,
+				      vector<int> &PSDTailAbsStop)
+{
+  for(int ch=0; ch<TheSettings->ChEnable.size(); ch++){
+    
+    if(!TheSettings->ChEnable[ch])
+      continue;
 
     if(TheSettings->DisplayTrigger)
       Trigger_L[ch]->DrawLine(XMin,
@@ -240,20 +256,7 @@ void AAGraphics::PlotWaveforms(vector<vector<uint16_t> > &Waveforms,
 			      XMax,
 			      TheSettings->ChTriggerThreshold[ch]);
     
-    if(TheSettings->DisplayPSDLimits){
-      PSDTotal_B[ch]->DrawBox(TheSettings->ChPSDTotalStart[ch],
-			      YMin,
-			      TheSettings->ChPSDTotalStop[ch],
-			      YMax);
-
-      PSDTail_B[ch]->DrawBox(TheSettings->ChPSDTailStart[ch],
-			     YMin,
-			     TheSettings->ChPSDTailStop[ch],
-			      YMax);
-    }
-
     if(TheSettings->DisplayBaselineBox){
-    
       double BaselineWidth = (YMax-YMin)*0.03;
       
       Baseline_B[ch]->DrawBox(TheSettings->ChBaselineCalcMin[ch],
@@ -261,23 +264,29 @@ void AAGraphics::PlotWaveforms(vector<vector<uint16_t> > &Waveforms,
 			      TheSettings->ChBaselineCalcMax[ch],
 			      BaselineValue[ch] + BaselineWidth);
     }
-     
+
+    if(TheSettings->DisplayPSDLimits){
+      PSDTotal_B[ch]->DrawBox(PSDTotalAbsStart[ch],
+			      YMin,
+			      PSDTotalAbsStop[ch],
+			      YMax);
+      
+      PSDTail_B[ch]->DrawBox(PSDTailAbsStart[ch],
+			     YMin,
+			     PSDTailAbsStop[ch],
+			     YMax);
+    }
+
     if(TheSettings->DisplayZLEThreshold)
       ZLE_L[ch]->DrawLine(XMin,
 			  TheSettings->ChZLEThreshold[ch],
 			  XMax,
 			  TheSettings->ChZLEThreshold[ch]);
-   
-    NumGraphs++;
   }
-  
-  if(TheSettings->DisplayLegend)
-    Waveform_LG->Draw();
-  
-  (TheSettings->DisplayGrid) ? gPad->SetGrid(true, true) : gPad->SetGrid(false, false);
-  
   TheCanvas_C->Update();
 }
+
+
 
 
 void AAGraphics::SetupSpectrumGraphics()

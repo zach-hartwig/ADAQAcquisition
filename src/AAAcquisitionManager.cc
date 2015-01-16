@@ -41,7 +41,8 @@ AAAcquisitionManager::AAAcquisitionManager()
     ZLESampleAMask(0x0000ffff), ZLESampleBMask(0xffff0000), 
     ZLENumWordMask(0x000fffff), ZLEControlMask(0xc0000000),
     WaveformLength(0), LLD(0), ULD(0), SampleHeight(0.), TriggerHeight(0.),
-    PulseHeight(0.), PulseArea(0.), TimeStamp(0),
+    PulseHeight(0.), PulseArea(0.), PSDTotal(0.), PSDTail(0.),
+    PeakPosition(0), TimeStamp(0),
     FillWaveformTree(false), ADAQFileIsOpen(false),
     TheReadoutManager(new ADAQReadoutManager)
 {
@@ -72,6 +73,11 @@ void AAAcquisitionManager::Initialize()
     BaselineStop.push_back(0);
     BaselineLength.push_back(0);
     BaselineValue.push_back(0);
+
+    PSDTotalAbsStart.push_back(0);
+    PSDTotalAbsStop.push_back(0);
+    PSDTailAbsStart.push_back(0);
+    PSDTailAbsStop.push_back(0);
     
     Polarity.push_back(0.);
     
@@ -324,8 +330,10 @@ void AAAcquisitionManager::StartAcquisition()
 	
 	if(!TheSettings->ChEnable[ch])
 	  continue;
-	
+
+	// Reset values used for to compute values at the channel-level
 	BaselineValue[ch] = PulseHeight = PulseArea = 0.;
+	PSDTotal = PSDTail = 0.;
 	
 	WaveformData[ch]->Initialize();
 	
@@ -350,8 +358,8 @@ void AAAcquisitionManager::StartAcquisition()
 	      Waveforms[ch][sample] = EventWaveform->DataChannel[ch][sample];
 	  }
 	  
-	  ///////////////////
-	  // Pulse processing
+	  //////////////////////////////
+	  // On-the-fly pulse processing
 
 	  if(!TheSettings->DisplayNonUpdateable){
 	  
@@ -367,9 +375,12 @@ void AAAcquisitionManager::StartAcquisition()
 	      SampleHeight = Polarity[ch] * (Waveforms[ch][sample] - BaselineValue[ch]);
 	      TriggerHeight = Polarity[ch] * (TheSettings->ChTriggerThreshold[ch] - BaselineValue[ch]);
 	      
-	      // Simple algorithm to determine maximum peak height in the pulse
-	      if(SampleHeight > PulseHeight)
+	      // Simple algorithm to determine the pulse height (adc)
+	      // and peak position (sample) by looping over all samples
+	      if(SampleHeight > PulseHeight){
 		PulseHeight = SampleHeight;
+		PeakPosition = sample;
+	      }
 	      
 	      // Integrate the area under the pulse
 	      if(SampleHeight > TriggerHeight)
@@ -378,9 +389,28 @@ void AAAcquisitionManager::StartAcquisition()
 	  }
 	} // End sample loop
 
+
+	/////////////////////////////////
+	// Post-sampling pulse processing
+
 	// Compute the trigger time stamp for the waveform
 	TimeStamp = EventInfo.TriggerTimeTag;
+
+	// Because the PSD integrals are computed relative to the peak
+	// position durong on-the-fly processing, we must take fast
+	// PSD integrals after sampling has concluded. We will ONLY do
+	// this if some aspect of PSD is desired by user for efficiency.
 	
+	if(TheSettings->PSDMode or TheSettings->WaveformStorePSDData){
+	  int sample = TheSettings->ChPSDTotalStart[ch];
+	  for(; sample<TheSettings->ChPSDTotalStop[ch]; sample++)
+	    PSDTotal += Waveforms[ch][sample];
+	  
+	  sample = TheSettings->ChPSDTailStart[ch];
+	  for(; sample<TheSettings->ChPSDTailStop[ch]; sample++)
+	    PSDTail += Waveforms[ch][sample];
+	}
+	  
 	if(!TheSettings->DisplayNonUpdateable){
 	  
 	  // Fill the channel-specific ADAQWaveformData objects with
@@ -391,18 +421,28 @@ void AAAcquisitionManager::StartAcquisition()
 	  WaveformData[ch]->SetPulseHeight(PulseHeight);
 	  WaveformData[ch]->SetPulseArea(PulseArea);
 	  WaveformData[ch]->SetBaseline(BaselineValue[ch]);
-	  WaveformData[ch]->SetPSDTotalIntegral(-1.);
-	  WaveformData[ch]->SetPSDTailIntegral(-1.);
+	  WaveformData[ch]->SetPSDTotalIntegral(PSDTotal);
+	  WaveformData[ch]->SetPSDTailIntegral(PSDTail);
 	  WaveformData[ch]->SetTimeStamp(TimeStamp);
 	  WaveformData[ch]->SetChannelID(ch);
 	  WaveformData[ch]->SetBoardID(DGManager->GetBoardID());
+
+	  // Compute and store the absolute sample numbers
+	  // corresponding to the PSD total/tail integration limits
+	  // based on the calculated peak position sample
 	  
+	  if(TheSettings->PSDMode or TheSettings->DisplayPSDLimits){
+	    PSDTotalAbsStart[ch] = PeakPosition + TheSettings->ChPSDTotalStart[ch];
+	    PSDTotalAbsStop[ch] = PeakPosition + TheSettings->ChPSDTotalStop[ch];
+	    PSDTailAbsStart[ch] = PeakPosition + TheSettings->ChPSDTailStart[ch];
+	    PSDTailAbsStop[ch] = PeakPosition + TheSettings->ChPSDTailStop[ch];
+	  }
 	  
 	  // Use the calibration curves (ROOT TGraph's) to convert
 	  // the pulse height/area from ADC to the user's energy
 	  // units using linear interpolation calibration points
 	  if(CalibrationEnable[ch]){
-
+	    
 	    if(TheSettings->SpectrumPulseHeight)
 	      PulseHeight = CalibrationCurves[ch]->Eval(PulseHeight);
 	    else
@@ -466,11 +506,18 @@ void AAAcquisitionManager::StartAcquisition()
       // Plot the waveform; only plot the first waveform event in the
       // case of a multievent readout to maximize efficiency
       
-      if(TheSettings->WaveformMode and evt == 0)
-	TheGraphicsManager->PlotWaveforms(Waveforms, 
-					  WaveformLength, 
-					  BaselineValue);
-    } // End readout event loop
+      if(TheSettings->WaveformMode and evt == 0){
+	// Draw the digitized waveform
+	TheGraphicsManager->PlotWaveforms(Waveforms, WaveformLength);
+	
+	// Draw graphical objects associated with the waveform
+	TheGraphicsManager->DrawWaveformGraphics(BaselineValue,
+						 PSDTotalAbsStart,
+						 PSDTotalAbsStop,
+						 PSDTailAbsStart,
+						 PSDTailAbsStop);
+      }
+    }// End readout event loop
     
     if(TheSettings->SpectrumMode){
       

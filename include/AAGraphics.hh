@@ -46,10 +46,18 @@ public:
   void SetupSpectrumGraphics();
   
 #ifndef __CINT__
-  void PlotWaveforms(vector<vector<uint16_t> > &, int, vector<double> &);
+  //void PlotWaveforms(vector<vector<uint16_t> > &, int, vector<double> &;
+  void PlotWaveforms(vector<vector<uint16_t> > &, int);
 #endif
+  void DrawWaveformGraphics(vector<Double_t> &, 
+			    vector<Int_t> &,
+			    vector<Int_t> &,
+			    vector<Int_t> &,
+			    vector<Int_t> &);
+
   void PlotSpectrum(TH1F *);
   void PlotCalibration(int);
+
 
   ClassDef(AAGraphics, 1);
   
@@ -74,6 +82,8 @@ private:
 
   string Title, XTitle, YTitle;
   double XSize, YSize, XOffset, YOffset;
+
+  double XMin, XMax, YMin, YMax;
 
   vector<TGraph *> WaveformGraphs;
 };

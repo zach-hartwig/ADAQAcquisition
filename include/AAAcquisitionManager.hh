@@ -122,13 +122,17 @@ private:
   int WaveformLength;
   vector<int> BaselineStart, BaselineStop, BaselineLength;
   vector<double> BaselineValue;
+  vector<Int_t> PSDTotalAbsStart, PSDTotalAbsStop;
+  vector<Int_t> PSDTailAbsStart, PSDTailAbsStop;
   vector<double> Polarity;
-
+  
   int LLD, ULD;
   double SampleHeight, TriggerHeight;
   double PulseHeight, PulseArea;
+  double PSDTotal, PSDTail;
+  Int_t PeakPosition;
   UInt_t TimeStamp;
-
+  
   vector<bool> CalibrationEnable;
   vector<TGraph *> CalibrationCurves;
   vector<CalibrationDataStruct> CalibrationData;
