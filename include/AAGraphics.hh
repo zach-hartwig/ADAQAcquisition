@@ -19,6 +19,7 @@
 #include <TBox.h>
 #include <TCanvas.h>
 #include <TH1F.h>
+#include <TH2F.h>
 #include <TGraph.h>
 
 #include <vector>
@@ -43,7 +44,6 @@ public:
   void SetSettingsPointer(AASettings *TS) {TheSettings = TS;}
   
   void SetupWaveformGraphics(int);
-  void SetupSpectrumGraphics();
   
 #ifndef __CINT__
   //void PlotWaveforms(vector<vector<uint16_t> > &, int, vector<double> &;
@@ -55,9 +55,13 @@ public:
 			    vector<Int_t> &,
 			    vector<Int_t> &);
 
+  void SetupSpectrumGraphics();
   void PlotSpectrum(TH1F *);
+  
+  void SetupPSDHistogramGraphics();
+  void PlotPSDHistogram(TH2F *);
+  
   void PlotCalibration(int);
-
 
   ClassDef(AAGraphics, 1);
   

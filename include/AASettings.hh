@@ -124,6 +124,7 @@ public:
   //////////////////////////////
   // Pulse discrimination limits
 
+  Int_t PSDChannel;
   Bool_t PSDTotalVsTail, PSDTotalVsPSD;
   Double_t PSDThreshold;
   Int_t PSDTotalBins, PSDTailBins;

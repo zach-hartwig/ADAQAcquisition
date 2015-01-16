@@ -198,6 +198,10 @@ enum{
   SpectrumCalibrationLoad_TB_ID,
   SpectrumCalibrationWrite_TB_ID,
 
+  // Pulse discrimination
+  
+  PSDChannel_CBL_ID,
+
   // Persistent storage subtab
 
   WaveformFileName_TB_ID,

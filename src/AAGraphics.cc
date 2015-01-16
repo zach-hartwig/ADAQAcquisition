@@ -336,16 +336,16 @@ void AAGraphics::PlotSpectrum(TH1F *Spectrum_H)
 
   // Set spectrum axes range and lin/log 
 
-  double XMin = TheSettings->SpectrumMaxBin * TheSettings->HorizontalSliderMin;
-  double XMax = TheSettings->SpectrumMaxBin * TheSettings->HorizontalSliderMax;
+  XMin = TheSettings->SpectrumMaxBin * TheSettings->HorizontalSliderMin;
+  XMax = TheSettings->SpectrumMaxBin * TheSettings->HorizontalSliderMax;
   Spectrum_H->GetXaxis()->SetRangeUser(XMin, XMax);
   
   (TheSettings->DisplayXAxisInLog) ? 
     gPad->SetLogx(true) : gPad->SetLogx(false);
   
   int AbsoluteMax = Spectrum_H->GetBinContent(Spectrum_H->GetMaximumBin()) * 1.05;
-  double YMin = AbsoluteMax * TheSettings->VerticalSliderMin;
-  double YMax = AbsoluteMax * TheSettings->VerticalSliderMax;
+  YMin = AbsoluteMax * TheSettings->VerticalSliderMin;
+  YMax = AbsoluteMax * TheSettings->VerticalSliderMax;
   
   if(TheSettings->DisplayYAxisInLog){
     if(YMin == 0) YMin = 1;
@@ -372,7 +372,6 @@ void AAGraphics::PlotSpectrum(TH1F *Spectrum_H)
   Spectrum_H->GetYaxis()->SetLabelSize(YSize);
 
   (TheSettings->DisplayLegend) ? Spectrum_H->SetStats(true) : Spectrum_H->SetStats(false);
-
   (TheSettings->DisplayGrid) ? gPad->SetGrid(true, true) : gPad->SetGrid(false, false);
   
   // If calibration is enabled the draw a vertical line corresponding
@@ -386,6 +385,78 @@ void AAGraphics::PlotSpectrum(TH1F *Spectrum_H)
 				    PulseValue,
 				    YMax);
   }
+  TheCanvas_C->Update();
+}
+
+
+void AAGraphics::SetupPSDHistogramGraphics()
+{
+  if(TheSettings->DisplayTitlesEnable){
+    Title = TheSettings->DisplayTitle;
+    XTitle = TheSettings->DisplayXTitle;
+    YTitle = TheSettings->DisplayYTitle;
+    
+    XSize = TheSettings->DisplayXTitleSize;
+    XOffset = TheSettings->DisplayXTitleOffset;
+    
+    YSize = TheSettings->DisplayYTitleSize;
+    YOffset = TheSettings->DisplayYTitleOffset;
+  }
+  else{
+    Title = "Pulse shape discrimination (PSD)";
+    XTitle = "Total integral [ADC]";
+    if(TheSettings->PSDTotalVsTail)
+      YTitle = "Tail integral [ADC]";
+    else
+      YTitle = "(Tail / Total) integrals [ADC]";
+    
+    XSize = YSize = 0.05;
+    XOffset = 1.1;
+    YOffset = 1.2;
+  }
+}
+
+void AAGraphics::PlotPSDHistogram(TH2F *PSDHistogram_H)
+{
+  int Channel = TheSettings->PSDChannel;
+  
+  PSDHistogram_H->Draw("COLZ");
+  
+  XMin = TheSettings->PSDTotalMaxBin * TheSettings->HorizontalSliderMin;
+  XMax = TheSettings->PSDTotalMaxBin * TheSettings->HorizontalSliderMax;
+  PSDHistogram_H->GetXaxis()->SetRangeUser(XMin, XMax);
+  
+  (TheSettings->DisplayXAxisInLog) ? 
+    gPad->SetLogx(true) : gPad->SetLogx(false);
+  
+  YMin = TheSettings->PSDTailMaxBin * TheSettings->VerticalSliderMin;
+  YMax = TheSettings->PSDTailMaxBin * TheSettings->VerticalSliderMax;
+  PSDHistogram_H->GetYaxis()->SetRangeUser(YMin, YMax);
+
+  if(TheSettings->DisplayYAxisInLog){
+    if(YMin == 0) YMin = 1;
+    gPad->SetLogy(true);
+  }
+  else 
+    gPad->SetLogy(false);
+
+  gPad->SetLogz(true);
+
+  PSDHistogram_H->SetTitle(Title.c_str());
+  
+  PSDHistogram_H->GetXaxis()->SetTitle(XTitle.c_str());
+  PSDHistogram_H->GetXaxis()->SetTitleSize(XSize);
+  PSDHistogram_H->GetXaxis()->SetTitleOffset(XOffset);
+  PSDHistogram_H->GetXaxis()->SetLabelSize(XSize);
+
+  PSDHistogram_H->GetYaxis()->SetTitle(YTitle.c_str());
+  PSDHistogram_H->GetYaxis()->SetTitleSize(YSize);
+  PSDHistogram_H->GetYaxis()->SetTitleOffset(YOffset);
+  PSDHistogram_H->GetYaxis()->SetLabelSize(YSize);
+
+  (TheSettings->DisplayLegend) ? PSDHistogram_H->SetStats(true) : PSDHistogram_H->SetStats(false);
+  (TheSettings->DisplayGrid) ? gPad->SetGrid(true, true) : gPad->SetGrid(false, false);
+
   TheCanvas_C->Update();
 }
 

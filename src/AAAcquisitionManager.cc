@@ -88,6 +88,9 @@ void AAAcquisitionManager::Initialize()
     
     Spectrum_H.push_back(new TH1F);
     SpectrumExists.push_back(true);
+
+    PSDHistogram_H.push_back(new TH2F);
+    PSDHistogramExists.push_back(true);
   }
 }
 
@@ -167,35 +170,61 @@ void AAAcquisitionManager::PreAcquisition()
   LLD = TheSettings->SpectrumLLD;
   ULD = TheSettings->SpectrumULD;
 
+  // Create pulse spectra and PSD histogram objects
+
   for(int ch=0; ch<DGChannels; ch++){
     
-    if(SpectrumExists[ch]) {
+    if(SpectrumExists[ch]){
       delete Spectrum_H[ch];
       SpectrumExists[ch] = false;
+      
+      stringstream SS;
+      SS << "Spectrum[Ch" << ch << "]";
+      string Name = SS.str();
+      
+      Spectrum_H[ch] = new TH1F(Name.c_str(), 
+				Name.c_str(), 
+				TheSettings->SpectrumNumBins,
+				TheSettings->SpectrumMinBin,
+				TheSettings->SpectrumMaxBin);
+
+      SpectrumExists[ch] = true;
     }
-    else 
-      continue;
-    
-    stringstream SS;
-    SS << "Spectrum[Ch" << ch << "]";
-    string Name = SS.str();
-    
-    Spectrum_H[ch] = new TH1F(Name.c_str(), 
-			      Name.c_str(), 
-			      TheSettings->SpectrumNumBins,
-			      TheSettings->SpectrumMinBin,
-			      TheSettings->SpectrumMaxBin);
 
-    SpectrumExists[ch] = true;
+    if(PSDHistogramExists[ch]){
+      delete PSDHistogram_H[ch];
+      PSDHistogramExists[ch] = false;
+
+      stringstream SS;
+      SS << "PSDHistogram[Ch" << ch << "]";
+      string Name = SS.str();
+
+      PSDHistogram_H[ch] = new TH2F(Name.c_str(),
+				    Name.c_str(),
+				    TheSettings->PSDTotalBins,
+				    TheSettings->PSDTotalMinBin,
+				    TheSettings->PSDTotalMaxBin,
+				    TheSettings->PSDTailBins,
+				    TheSettings->PSDTailMinBin,
+				    TheSettings->PSDTailMaxBin);
+
+      PSDHistogramExists[ch] = true;
+    }
   }
-  
+    
   // GraphicsManager settings
-
+  
+  // In order to maximize readout loop efficiency, any graphical
+  // object settings that only need to be set a single time are
+  // called once from this pre-acquisition method
+  
   if(TheSettings->WaveformMode)
     AAGraphics::GetInstance()->SetupWaveformGraphics(WaveformLength);
   else if(TheSettings->SpectrumMode)
     AAGraphics::GetInstance()->SetupSpectrumGraphics();
-	
+  else if(TheSettings->PSDMode)
+    AAGraphics::GetInstance()->SetupPSDHistogramGraphics();
+  
   // Initialize pointers to the event and event waveform. Memory is
   // preallocated for events here rather than at readout time
   // resulting in slightly larger memory use but faster readout
@@ -448,32 +477,39 @@ void AAAcquisitionManager::StartAcquisition()
 	    else
 	      PulseArea = CalibrationCurves[ch]->Eval(PulseArea);
 	  }
-	  
-	  // Pulse height spectrum
-	  if(TheSettings->SpectrumPulseHeight){
 
-	    if(TheSettings->LDEnable){
-	      if(PulseHeight > LLD and PulseHeight < ULD)
+	  if(TheSettings->SpectrumMode){
+	    
+	    // Pulse height spectrum
+	    if(TheSettings->SpectrumPulseHeight){
+	      
+	      if(TheSettings->LDEnable){
+		if(PulseHeight > LLD and PulseHeight < ULD)
+		  Spectrum_H[ch]->Fill(PulseHeight);
+	      }
+	      else
 		Spectrum_H[ch]->Fill(PulseHeight);
+	      
+	      if(TheSettings->LDTrigger and ch == TheSettings->LDChannel)
+		FillWaveformTree = true;
 	    }
-	    else
-	      Spectrum_H[ch]->Fill(PulseHeight);
 	    
-	    if(TheSettings->LDTrigger and ch == TheSettings->LDChannel)
-	      FillWaveformTree = true;
-	  }
-	  
-	  // Pulse area spectrum
-	  else{
-	    if(TheSettings->LDEnable){
-	      if(PulseArea > LLD and PulseArea < ULD)
+	    // Pulse area spectrum
+	    else{
+	      if(TheSettings->LDEnable){
+		if(PulseArea > LLD and PulseArea < ULD)
+		  Spectrum_H[ch]->Fill(PulseArea);
+	      }
+	      else
 		Spectrum_H[ch]->Fill(PulseArea);
+	      
+	      if(TheSettings->LDTrigger and ch == TheSettings->LDChannel)
+		FillWaveformTree = true;
 	    }
-	    else
-	      Spectrum_H[ch]->Fill(PulseArea);
-	    
-	    if(TheSettings->LDTrigger and ch == TheSettings->LDChannel)
-	      FillWaveformTree = true;
+	  }
+
+	  else if(TheSettings->PSDMode){
+	    PSDHistogram_H[ch]->Fill(PSDTotal, PSDTail);
 	  }
 	}
       } // End digitizer channel loop
@@ -520,14 +556,17 @@ void AAAcquisitionManager::StartAcquisition()
     }// End readout event loop
     
     if(TheSettings->SpectrumMode){
-      
-      // Use user set value for spectrum refresh rate to determine
-      // when to update the spectrum histogram
-
       int Entries = Spectrum_H[TheSettings->SpectrumChannel]->GetEntries();
       int Rate = TheSettings->SpectrumRefreshRate;
       if(Entries % Rate == 0)
 	TheGraphicsManager->PlotSpectrum(Spectrum_H[TheSettings->SpectrumChannel]);
+    }
+    
+    else if(TheSettings->PSDMode){
+      int Entries = Spectrum_H[TheSettings->SpectrumChannel]->GetEntries();
+      int Rate = TheSettings->SpectrumRefreshRate;
+      if(Entries % Rate == 0)
+	TheGraphicsManager->PlotPSDHistogram(PSDHistogram_H[TheSettings->SpectrumChannel]);
     }
   } // End acquisition loop
 

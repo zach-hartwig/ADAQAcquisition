@@ -1301,7 +1301,7 @@ void AAInterface::FillAcquisitionFrame()
 
   // ADAQ combo box for selecting the channel for display spectrum
   SpectrumHistogram_GF->AddFrame(SpectrumChannel_CBL = new ADAQComboBoxWithLabel(SpectrumHistogram_GF, "", SpectrumChannel_CBL_ID),
-					new TGLayoutHints(kLHintsNormal,0,0,5,5));
+				 new TGLayoutHints(kLHintsNormal,0,0,5,5));
   for(uint32_t ch=0; ch<8; ch++)
     SpectrumChannel_CBL->GetComboBox()->AddEntry(DGChannelLabels[ch].c_str(),ch);
   SpectrumChannel_CBL->GetComboBox()->Select(0);
@@ -1505,17 +1505,32 @@ void AAInterface::FillAcquisitionFrame()
   //////////////////////////
   // Pulse discrimination //
   //////////////////////////
-
+  
   TGGroupFrame *PSDHistogram_GF = new TGGroupFrame(PSDSubframe, "PSD histogram", kVerticalFrame);
   PSDHistogram_GF->SetTitlePos(TGGroupFrame::kCenter);
   PSDSubframe->AddFrame(PSDHistogram_GF, new TGLayoutHints(kLHintsNormal, 5,5,5,5));
+
+  TGHorizontalFrame *PSDOptions_HF = new TGHorizontalFrame(PSDHistogram_GF);
+  PSDHistogram_GF->AddFrame(PSDOptions_HF, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
   
-  PSDHistogram_GF->AddFrame(PSDTotalVsTail_RB = new TGRadioButton(PSDHistogram_GF, "Total vs. tail", -1),
-			    new TGLayoutHints(kLHintsNormal, 0,0,5,0));
+  // ADAQ combo box for selecting the channel for display spectrum
+  PSDOptions_HF->AddFrame(PSDChannel_CBL = new ADAQComboBoxWithLabel(PSDOptions_HF, "", PSDChannel_CBL_ID),
+			  new TGLayoutHints(kLHintsNormal,0,0,10,0));
+  for(uint32_t ch=0; ch<8; ch++)
+    PSDChannel_CBL->GetComboBox()->AddEntry(DGChannelLabels[ch].c_str(),ch);
+  PSDChannel_CBL->GetComboBox()->Select(0);
+  PSDChannel_CBL->GetComboBox()->Resize(80,20);
+  PSDChannel_CBL->GetComboBox()->Connect("Selected(int,int)", "AASubtabSlots", SubtabSlots, "HandleComboBoxes(int,int)");
+  
+  TGVerticalFrame *PSDOptions_VF = new TGVerticalFrame(PSDOptions_HF);
+  PSDOptions_HF->AddFrame(PSDOptions_VF, new TGLayoutHints(kLHintsNormal,0,0,0,0));
+
+  PSDOptions_VF->AddFrame(PSDTotalVsTail_RB = new TGRadioButton(PSDOptions_VF, "Total v. tail", -1),
+			  new TGLayoutHints(kLHintsNormal, 0,0,5,0));
   PSDTotalVsTail_RB->SetState(kButtonDown);
   
-  PSDHistogram_GF->AddFrame(PSDTotalVsPSD_RB = new TGRadioButton(PSDHistogram_GF, "Total vs. (tail/total)", -1),
-			    new TGLayoutHints(kLHintsNormal, 0,0,0,10));
+  PSDOptions_VF->AddFrame(PSDTotalVsPSD_RB = new TGRadioButton(PSDOptions_VF, "Total v. tail/total", -1),
+			  new TGLayoutHints(kLHintsNormal, 0,0,0,10));
   
 
   PSDHistogram_GF->AddFrame(PSDTotalBins_NEL = new ADAQNumberEntryWithLabel(PSDHistogram_GF, "Number of total bins", -1),
@@ -1536,7 +1551,7 @@ void AAInterface::FillAcquisitionFrame()
   PSDTotalMinBin_NEL->GetEntry()->Resize(60, 20);
 
   PSDTotal_HF->AddFrame(PSDTotalMaxBin_NEL = new ADAQNumberEntryWithLabel(PSDTotal_HF, "Max.", -1),
-			    new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+			    new TGLayoutHints(kLHintsNormal, 10,0,0,0));
   PSDTotalMaxBin_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
   PSDTotalMaxBin_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
   PSDTotalMaxBin_NEL->GetEntry()->SetNumber(5000);
@@ -1561,7 +1576,7 @@ void AAInterface::FillAcquisitionFrame()
   PSDTailMinBin_NEL->GetEntry()->Resize(60, 20);
 
   PSDTail_HF->AddFrame(PSDTailMaxBin_NEL = new ADAQNumberEntryWithLabel(PSDTail_HF, "Max.", -1),
-			    new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+			    new TGLayoutHints(kLHintsNormal, 10,0,0,0));
   PSDTailMaxBin_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
   PSDTailMaxBin_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
   PSDTailMaxBin_NEL->GetEntry()->SetNumber(10000);
@@ -2132,6 +2147,7 @@ void AAInterface::SaveSettings()
   //////////////////////////////
   // Pulse discrimination subtab 
 
+  TheSettings->PSDChannel = PSDChannel_CBL->GetComboBox()->GetSelected();
   TheSettings->PSDTotalVsTail = PSDTotalVsTail_RB->IsDown();
   TheSettings->PSDTotalVsPSD = PSDTotalVsPSD_RB->IsDown();
   TheSettings->PSDThreshold = PSDThreshold_NEL->GetEntry()->GetNumber();

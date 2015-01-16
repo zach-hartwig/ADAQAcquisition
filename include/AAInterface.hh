@@ -287,6 +287,7 @@ private:
 
   // Pulse discrimination subtab
   
+  ADAQComboBoxWithLabel *PSDChannel_CBL;
   TGRadioButton *PSDTotalVsTail_RB, *PSDTotalVsPSD_RB;
   ADAQNumberEntryWithLabel *PSDThreshold_NEL;
   ADAQNumberEntryWithLabel *PSDTotalBins_NEL, *PSDTailBins_NEL;

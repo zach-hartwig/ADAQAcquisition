@@ -18,6 +18,7 @@
 #include <TFile.h>
 #include <TTree.h>
 #include <TH1F.h>
+#include <TH2F.h>
 #include <TGraph.h>
 
 // Boost
@@ -138,8 +139,11 @@ private:
   vector<CalibrationDataStruct> CalibrationData;
   
   vector<TH1F *> Spectrum_H;
-  vector<bool> SpectrumExists;
-
+  vector<Bool_t> SpectrumExists;
+  
+  vector<TH2F *> PSDHistogram_H;
+  vector<Bool_t> PSDHistogramExists;
+  
   TTree *WaveformTree;
   bool FillWaveformTree;
 
