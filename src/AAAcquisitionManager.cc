@@ -63,9 +63,9 @@ void AAAcquisitionManager::Initialize()
 {
   ADAQDigitizer *DGManager = AAVMEManager::GetInstance()->GetDGManager();
   
-  int DGChannels = DGManager->GetNumChannels();
+  Int_t DGChannels = DGManager->GetNumChannels();
   
-  for(int ch=0; ch<DGChannels; ch++){
+  for(Int_t ch=0; ch<DGChannels; ch++){
     
     BufferFull.push_back(true);
     
@@ -99,7 +99,7 @@ void AAAcquisitionManager::PreAcquisition()
 {
   ADAQDigitizer *DGManager = AAVMEManager::GetInstance()->GetDGManager();
 
-  int DGChannels = DGManager->GetNumChannels();
+  Int_t DGChannels = DGManager->GetNumChannels();
 
   ////////////////////////////////////////////////////
   // Initialize general member data for acquisition //
@@ -115,7 +115,7 @@ void AAAcquisitionManager::PreAcquisition()
   ///////////////////////
   // Baseline calculation
 
-  for(int ch=0; ch<DGChannels; ch++){
+  for(Int_t ch=0; ch<DGChannels; ch++){
     BaselineStart[ch] = TheSettings->ChBaselineCalcMin[ch];
     BaselineStop[ch] = TheSettings->ChBaselineCalcMax[ch];
     BaselineLength[ch] = BaselineStop[ch] - BaselineStart[ch];
@@ -151,7 +151,7 @@ void AAAcquisitionManager::PreAcquisition()
     
     Waveforms.clear();
     Waveforms.resize(DGChannels);
-    for(int ch=0; ch<DGChannels; ch++){
+    for(Int_t ch=0; ch<DGChannels; ch++){
       if(TheSettings->ChEnable[ch])
 	Waveforms[ch].resize(WaveformLength);
       else
@@ -160,7 +160,7 @@ void AAAcquisitionManager::PreAcquisition()
   }
 
   WaveformData.clear();
-  for(int ch=0; ch<DGChannels; ch++)
+  for(Int_t ch=0; ch<DGChannels; ch++)
     WaveformData.push_back(new ADAQWaveformData);
   
 
@@ -172,7 +172,7 @@ void AAAcquisitionManager::PreAcquisition()
 
   // Create pulse spectra and PSD histogram objects
 
-  for(int ch=0; ch<DGChannels; ch++){
+  for(Int_t ch=0; ch<DGChannels; ch++){
     
     if(SpectrumExists[ch]){
       delete Spectrum_H[ch];
@@ -250,7 +250,7 @@ void AAAcquisitionManager::StartAcquisition()
   PreAcquisition();
 
   // Get the acquisition control setting
-  int AcqControl = TheSettings->AcquisitionControl;
+  Int_t AcqControl = TheSettings->AcquisitionControl;
 
   // If acquisition is 'standard' or 'manual' then send the software
   // (SW) signal to begin data acquisition
@@ -294,7 +294,7 @@ void AAAcquisitionManager::StartAcquisition()
 	
 	// Update the AQTimer widget only every second
 	if(AcquisitionTimePrev != AcquisitionTimeNow){
-	  int TimeRemaining = AcquisitionTimeStop - AcquisitionTimeNow;
+	  Int_t TimeRemaining = AcquisitionTimeStop - AcquisitionTimeNow;
 	  TheInterface->UpdateAQTimer(TimeRemaining);
 	}
 	
@@ -355,7 +355,7 @@ void AAAcquisitionManager::StartAcquisition()
       }
       
       // Iterate over the digitizer channels that are enabled
-      for(int ch=0; ch<DGManager->GetNumChannels(); ch++){
+      for(Int_t ch=0; ch<DGManager->GetNumChannels(); ch++){
 	
 	if(!TheSettings->ChEnable[ch])
 	  continue;
@@ -366,8 +366,8 @@ void AAAcquisitionManager::StartAcquisition()
 	
 	WaveformData[ch]->Initialize();
 	
-	int NumSamples = Waveforms[ch].size();
-	for(int sample=0; sample<NumSamples; sample++){
+	Int_t NumSamples = Waveforms[ch].size();
+	for(Int_t sample=0; sample<NumSamples; sample++){
 
 	  // For "standard" or "data reduction" readout, the Waveforms
 	  // vector-of-vectors must be filled from the CAEN EventWaveform
@@ -377,7 +377,7 @@ void AAAcquisitionManager::StartAcquisition()
 	    // Data reduction readout
 	    if(TheSettings->DataReductionEnable){
 	      if(sample % TheSettings->DataReductionFactor == 0){
-		int Index = sample / TheSettings->DataReductionFactor;
+		Int_t Index = sample / TheSettings->DataReductionFactor;
 		Waveforms[ch][Index] = EventWaveform->DataChannel[ch][sample];
 	      }
 	    }
@@ -431,7 +431,7 @@ void AAAcquisitionManager::StartAcquisition()
 	// this if some aspect of PSD is desired by user for efficiency.
 	
 	if(TheSettings->PSDMode or TheSettings->WaveformStorePSDData){
-	  int sample = TheSettings->ChPSDTotalStart[ch];
+	  Int_t sample = TheSettings->ChPSDTotalStart[ch];
 	  for(; sample<TheSettings->ChPSDTotalStop[ch]; sample++)
 	    PSDTotal += Waveforms[ch][sample];
 	  
@@ -556,17 +556,17 @@ void AAAcquisitionManager::StartAcquisition()
     }// End readout event loop
     
     if(TheSettings->SpectrumMode){
-      int Entries = Spectrum_H[TheSettings->SpectrumChannel]->GetEntries();
-      int Rate = TheSettings->SpectrumRefreshRate;
+      Int_t Entries = Spectrum_H[TheSettings->SpectrumChannel]->GetEntries();
+      Int_t Rate = TheSettings->SpectrumRefreshRate;
       if(Entries % Rate == 0)
 	TheGraphicsManager->PlotSpectrum(Spectrum_H[TheSettings->SpectrumChannel]);
     }
     
     else if(TheSettings->PSDMode){
-      int Entries = Spectrum_H[TheSettings->SpectrumChannel]->GetEntries();
-      int Rate = TheSettings->SpectrumRefreshRate;
+      Int_t Entries = Spectrum_H[TheSettings->SpectrumChannel]->GetEntries();
+      Int_t Rate = TheSettings->SpectrumRefreshRate;
       if(Entries % Rate == 0)
-	TheGraphicsManager->PlotPSDHistogram(PSDHistogram_H[TheSettings->SpectrumChannel]);
+	TheGraphicsManager->PlotPSDHistogram(PSDHistogram_H[TheSettings->PSDChannel]);
     }
   } // End acquisition loop
 
@@ -581,7 +581,7 @@ void AAAcquisitionManager::StartAcquisition()
 void AAAcquisitionManager::StopAcquisition()
 {
   ADAQDigitizer *DGManager = AAVMEManager::GetInstance()->GetDGManager();
-  int AcqControl = TheSettings->AcquisitionControl;
+  Int_t AcqControl = TheSettings->AcquisitionControl;
   if(AcqControl == 0)
     DGManager->SWStopAcquisition();
   else if(AcqControl == 1 or AcqControl == 2)
@@ -616,7 +616,7 @@ void AAAcquisitionManager::StopAcquisition()
 
 void AAAcquisitionManager::SaveSpectrum(string FileName)
 {
-  int Channel = TheSettings->SpectrumChannel;
+  Int_t Channel = TheSettings->SpectrumChannel;
 
   if(!SpectrumExists[Channel])
     return;
@@ -648,14 +648,14 @@ void AAAcquisitionManager::SaveSpectrum(string FileName)
 	Separator = ",";
       
       // Get the number of bins in the spectrum histogram
-      int NumBins = Spectrum_H[Channel]->GetNbinsX();
+      Int_t NumBins = Spectrum_H[Channel]->GetNbinsX();
       
       // Iterate over all the bins in spectrum histogram and output
       // the bin center (value on the X axis of the histogram) and the
       // bin content (value on the Y axis of the histogram)
-      for(int bin=1; bin<=NumBins; bin++){
-	double BinCenter = Spectrum_H[Channel]->GetBinCenter(bin);
-	double BinContent = Spectrum_H[Channel]->GetBinContent(bin);
+      for(Int_t bin=1; bin<=NumBins; bin++){
+	Double_t BinCenter = Spectrum_H[Channel]->GetBinCenter(bin);
+	Double_t BinContent = Spectrum_H[Channel]->GetBinContent(bin);
 	
 	SpectrumOutput << BinCenter << Separator << BinContent
 		       << endl;
@@ -675,8 +675,8 @@ void AAAcquisitionManager::SaveSpectrum(string FileName)
 }
 
 
-bool AAAcquisitionManager::AddCalibrationPoint(int Channel, int SetPoint,
-					       double Energy, double PulseUnit)
+Bool_t AAAcquisitionManager::AddCalibrationPoint(Int_t Channel, Int_t SetPoint,
+					       Double_t Energy, Double_t PulseUnit)
 {
   if(SetPoint == CalibrationData[Channel].PointID.size()){
     CalibrationData[Channel].PointID.push_back(SetPoint);
@@ -692,7 +692,7 @@ bool AAAcquisitionManager::AddCalibrationPoint(int Channel, int SetPoint,
 }
 
 
-bool AAAcquisitionManager::EnableCalibration(int Channel)
+Bool_t AAAcquisitionManager::EnableCalibration(Int_t Channel)
 {
   // If there are 2 or more points in the current channel's
   // calibration data set then create a new TGraph object. The
@@ -707,7 +707,7 @@ bool AAAcquisitionManager::EnableCalibration(int Channel)
     
     // Determine the total number of calibration points in the
     // current channel's calibration data set
-    const int NumPoints = CalibrationData[Channel].PointID.size();
+    const Int_t NumPoints = CalibrationData[Channel].PointID.size();
     
     // Create a new "CalibrationManager" TGraph object.
     CalibrationCurves[Channel] = new TGraph(NumPoints,
@@ -727,7 +727,7 @@ bool AAAcquisitionManager::EnableCalibration(int Channel)
 }
 
 
-bool AAAcquisitionManager::ResetCalibration(int Channel)
+Bool_t AAAcquisitionManager::ResetCalibration(Int_t Channel)
 {
   // Clear the channel calibration vectors for the current channel
   CalibrationData[Channel].PointID.clear();
@@ -748,7 +748,9 @@ bool AAAcquisitionManager::ResetCalibration(int Channel)
 }
 
 
-bool AAAcquisitionManager::LoadCalibration(int Channel, string FileName, int &NumPoints)
+Bool_t AAAcquisitionManager::LoadCalibration(Int_t Channel, 
+					   string FileName, 
+					   Int_t &NumPoints)
 {
   size_t Found = FileName.find_last_of(".");
   if(Found != string::npos){
@@ -757,13 +759,13 @@ bool AAAcquisitionManager::LoadCalibration(int Channel, string FileName, int &Nu
     ifstream In(FileName.c_str());
     
     // An index to control the set point
-    int SetPoint = 0;
+    Int_t SetPoint = 0;
     
     // Iterate through each line in the file and use the values
     // (column1 == energy, column2 == pulse unit) to set the
     // CalibrationData objects for the current channel
     while(In.good()){
-      double Energy, PulseUnit;
+      Double_t Energy, PulseUnit;
       In >> Energy >> PulseUnit;
       
       if(In.eof()) break;
@@ -782,12 +784,12 @@ bool AAAcquisitionManager::LoadCalibration(int Channel, string FileName, int &Nu
 }
 
 
-bool AAAcquisitionManager::WriteCalibration(int Channel, string FileName)
+Bool_t AAAcquisitionManager::WriteCalibration(Int_t Channel, string FileName)
 {
   // Set the calibration file to an input stream
   ofstream Out(FileName.c_str());
   
-  for(int i=0; i<CalibrationData[Channel].Energy.size(); i++)
+  for(Int_t i=0; i<CalibrationData[Channel].Energy.size(); i++)
     Out << setw(10) << CalibrationData[Channel].Energy[i]
 	<< setw(10) << CalibrationData[Channel].PulseUnit[i]
 	<< endl;
@@ -811,8 +813,8 @@ void AAAcquisitionManager::CreateADAQFile(string FileName)
   // - A branch on the waveform TTree for raw waveform readout
   // - A branch on the waveform data TTree for analyzed waveform data readout
 
-  int DGChannels = DGManager->GetNumChannels();
-  for(int ch=0; ch<DGChannels; ch++){
+  Int_t DGChannels = DGManager->GetNumChannels();
+  for(Int_t ch=0; ch<DGChannels; ch++){
     TheReadoutManager->CreateWaveformTreeBranch(ch, &Waveforms[ch]);
     TheReadoutManager->CreateWaveformDataTreeBranch(ch, WaveformData[ch]);
   }
@@ -868,35 +870,35 @@ void AAAcquisitionManager::CloseADAQFile()
 
 
 /*
-void AAInterface::GenerateArtificialWaveform(int RecordLength, vector<int> &Voltage, 
-						 double *Voltage_graph, double VerticalPosition)
+void AAInterface::GenerateArtificialWaveform(Int_t RecordLength, vector<int> &Voltage, 
+						 Double_t *Voltage_graph, Double_t VerticalPosition)
 {
   // Exponential time constants with small random variations
-  const double t1 = 20. - (RNG->Rndm()*10);
-  const double t2 = 80. - (RNG->Rndm()*40);;
+  const Double_t t1 = 20. - (RNG->Rndm()*10);
+  const Double_t t2 = 80. - (RNG->Rndm()*40);;
   
   // The waveform amplitude with small random variations
-  const double a = RNG->Rndm() * 30;
+  const Double_t a = RNG->Rndm() * 30;
   
   // Set an artificial baseline for the pulse
-  const double b = 3200;
+  const Double_t b = 3200;
   
   // Set an artifical polarity for the pulse
-  const double p = -1.0;
+  const Double_t p = -1.0;
   
   // Set the number of leading zeros before the waveform begins with
   // small random variations
-  const int NumLeadingSamples = 100;
+  const Int_t NumLeadingSamples = 100;
   
   // Fill the Voltage vector with the artificial waveform
-  for(int sample=0; sample<RecordLength; sample++){
+  for(Int_t sample=0; sample<RecordLength; sample++){
     
     if(sample < NumLeadingSamples){
       Voltage[sample] = b + VerticalPosition;
       Voltage_graph[sample] = b + VerticalPosition;
     }
     else{
-      double t = (sample - NumLeadingSamples)*1.0;
+      Double_t t = (sample - NumLeadingSamples)*1.0;
       Voltage[sample] = (p * (a * (t1-t2) * (exp(-t/t1)-exp(-t/t2)))) + b + VerticalPosition;
       Voltage_graph[sample] = Voltage[sample];
     }

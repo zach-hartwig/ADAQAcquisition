@@ -60,45 +60,45 @@ public:
   void CreateADAQFile(string);
   void CloseADAQFile();
 
-  bool AddCalibrationPoint(int, int, double, double );
-  bool EnableCalibration(int);
-  bool ResetCalibration(int);
-  bool LoadCalibration(int, string, int &);
-  bool WriteCalibration(int, string);
+  Bool_t AddCalibrationPoint(Int_t, Int_t, Double_t , Double_t  );
+  Bool_t EnableCalibration(Int_t);
+  Bool_t ResetCalibration(Int_t);
+  Bool_t LoadCalibration(Int_t, string, Int_t &);
+  Bool_t WriteCalibration(Int_t, string);
 
   void SaveSpectrum(string);
 
-  bool GetCalibrationEnable(int C) {return CalibrationEnable[C];}
-  CalibrationDataStruct GetCalibrationDataStruct(int C) {return CalibrationData[C];}
+  Bool_t GetCalibrationEnable(Int_t C) {return CalibrationEnable[C];}
+  CalibrationDataStruct GetCalibrationDataStruct(Int_t C) {return CalibrationData[C];}
   
-  void SetAcquisitionEnable(bool ATE) {AcquisitionEnable = ATE;}
-  bool GetAcquisitionEnable() {return AcquisitionEnable;}
+  void SetAcquisitionEnable(Bool_t ATE) {AcquisitionEnable = ATE;}
+  Bool_t GetAcquisitionEnable() {return AcquisitionEnable;}
   
-  void SetAcquisitionTimerEnable(bool ATE) {AcquisitionTimerEnable = ATE;}
-  bool GetAcquisitionTimerEnable() {return AcquisitionTimerEnable;}
+  void SetAcquisitionTimerEnable(Bool_t ATE) {AcquisitionTimerEnable = ATE;}
+  Bool_t GetAcquisitionTimerEnable() {return AcquisitionTimerEnable;}
 
-  void SetADAQFileIsOpen(bool AFIO) {ADAQFileIsOpen = AFIO;}
-  bool GetADAQFileIsOpen() {return ADAQFileIsOpen;}
+  void SetADAQFileIsOpen(Bool_t AFIO) {ADAQFileIsOpen = AFIO;}
+  Bool_t GetADAQFileIsOpen() {return ADAQFileIsOpen;}
 
-  void SetAcquisitionTimeStart(double T) {AcquisitionTimeStart = T;}
-  void SetAcquisitionTimeStop(double T) {AcquisitionTimeStop = T;}
+  void SetAcquisitionTimeStart(Double_t  T) {AcquisitionTimeStart = T;}
+  void SetAcquisitionTimeStop(Double_t  T) {AcquisitionTimeStop = T;}
   
   void SetInterfacePointer(AAInterface *TI) {TheInterface = TI;}
   void SetSettingsPointer(AASettings *TS) {TheSettings = TS;}
 
-  TH1F *GetSpectrum(int C) {return Spectrum_H[C];}
-  TGraph *GetCalibrationCurve(int C) {return CalibrationCurves[C];}
+  TH1F *GetSpectrum(Int_t C) {return Spectrum_H[C];}
+  TGraph *GetCalibrationCurve(Int_t C) {return CalibrationCurves[C];}
 
   ClassDef(AAAcquisitionManager, 1);
   
 private:
   static AAAcquisitionManager *TheAcquisitionManager;
 
-  bool AcquisitionEnable;
+  Bool_t AcquisitionEnable;
 
   //Objects for controlling timed acquisition periods
-  bool AcquisitionTimerEnable;
-  double AcquisitionTimeStart, AcquisitionTimeStop;
+  Bool_t AcquisitionTimerEnable;
+  Double_t  AcquisitionTimeStart, AcquisitionTimeStop;
   time_t AcquisitionTimeNow, AcquisitionTimePrev;
 
 #ifndef __CINT__
@@ -120,17 +120,17 @@ private:
   uint32_t ZLENumWordMask, ZLEControlMask;
 #endif
 
-  int WaveformLength;
-  vector<int> BaselineStart, BaselineStop, BaselineLength;
-  vector<double> BaselineValue;
+  Int_t WaveformLength;
+  vector<Int_t> BaselineStart, BaselineStop, BaselineLength;
+  vector<Double_t > BaselineValue;
   vector<Int_t> PSDTotalAbsStart, PSDTotalAbsStop;
   vector<Int_t> PSDTailAbsStart, PSDTailAbsStop;
-  vector<double> Polarity;
+  vector<Double_t > Polarity;
   
-  int LLD, ULD;
-  double SampleHeight, TriggerHeight;
-  double PulseHeight, PulseArea;
-  double PSDTotal, PSDTail;
+  Int_t LLD, ULD;
+  Double_t  SampleHeight, TriggerHeight;
+  Double_t  PulseHeight, PulseArea;
+  Double_t  PSDTotal, PSDTail;
   Int_t PeakPosition;
   UInt_t TimeStamp;
   
@@ -145,9 +145,9 @@ private:
   vector<Bool_t> PSDHistogramExists;
   
   TTree *WaveformTree;
-  bool FillWaveformTree;
+  Bool_t FillWaveformTree;
 
-  bool ADAQFileIsOpen;
+  Bool_t ADAQFileIsOpen;
   TFile *ADAQFile;
   
   ADAQRootMeasParams *Parameters;

@@ -83,7 +83,7 @@ void AASubtabSlots::HandleCheckButtons()
 void AASubtabSlots::HandleComboBoxes(int ActiveID, int SelectedID)
 {
   TI->SaveSettings();
-
+  
   AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
   
   if(!TheVMEManager->GetVMEConnectionEstablished())
@@ -442,6 +442,8 @@ void AASubtabSlots::HandleTextButtons()
     
     break;
   }
+
+    
 
     
   case WaveformCreateFile_TB_ID:{
