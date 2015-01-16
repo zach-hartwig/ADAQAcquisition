@@ -26,7 +26,7 @@
 AASubtabSlots::AASubtabSlots(AAInterface *TheInterface)
   : TI(TheInterface),
     WaveformFileName("DefaultWaveforms.adaq.root"),
-    SpectrumFileName("DefaultSpectrum.root"),
+    ObjectFileName("DefaultObject.root"),
     CanvasFileName("DefaultCanvas.eps")
 {;}
 
@@ -488,7 +488,7 @@ void AASubtabSlots::HandleTextButtons()
   }
 
 
-  case SpectrumFileName_TB_ID:{
+  case ObjectOutputFileName_TB_ID:{
     
     // Set the allowable file type extensions. These will be used to
     // determine the format of the data output to file
@@ -497,25 +497,33 @@ void AASubtabSlots::HandleTextButtons()
 			       "ROOT File"             , "*.root",
 			       0, 0};
     
-    SpectrumFileName = TI->CreateFileDialog(FileTypes, kFDOpen);
+    ObjectFileName = TI->CreateFileDialog(FileTypes, kFDOpen);
     
-    if(SpectrumFileName == "NULL"){
+    if(ObjectFileName == "NULL"){
     }
     else{
-      string FileNameNoPath = SpectrumFileName;
+      string FileNameNoPath = ObjectFileName;
       
       size_t Found = FileNameNoPath.find_last_of("/");
       if(Found != string::npos)
 	FileNameNoPath = FileNameNoPath.substr(Found+1, FileNameNoPath.size());
       
-      TI->SpectrumFileName_TEL->GetEntry()->SetText(FileNameNoPath.c_str());
+      TI->ObjectOutputFileName_TEL->GetEntry()->SetText(FileNameNoPath.c_str());
     }
     break;
   }
 
     
-  case SpectrumSave_TB_ID:{
-    AAAcquisitionManager::GetInstance()->SaveSpectrum(SpectrumFileName);
+  case ObjectSave_TB_ID:{
+
+    if(TI->WaveformOutput_RB->IsDown()){
+    }
+    else if(TI->SpectrumOutput_RB->IsDown()){
+      AAAcquisitionManager::GetInstance()->SaveSpectrum(ObjectFileName);
+    }
+    else if(TI->PSDHistogramOutput_RB->IsDown()){
+    }
+
     break;
   }
     

@@ -1656,33 +1656,60 @@ void AAInterface::FillAcquisitionFrame()
 
 
   // Widgets for saving the spectrum data to file
-
-  TGGroupFrame *DGScopeSpectrumStorage_GF = new TGGroupFrame(DataSubframe, "Spectrum output", kVerticalFrame);
-  DGScopeSpectrumStorage_GF->SetTitlePos(TGGroupFrame::kCenter);
-  DataSubframe->AddFrame(DGScopeSpectrumStorage_GF, new TGLayoutHints(kLHintsNormal,0,5,5,5));
-
-  DGScopeSpectrumStorage_GF->AddFrame(SpectrumFileName_TB = new TGTextButton(DGScopeSpectrumStorage_GF, "Spectrum file name", SpectrumFileName_TB_ID),
-				      new TGLayoutHints(kLHintsNormal, 5,5,5,0));
-  SpectrumFileName_TB->Resize(175, 30);
-  SpectrumFileName_TB->ChangeOptions(SpectrumFileName_TB->GetOptions() | kFixedSize);
-  SpectrumFileName_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
   
-  DGScopeSpectrumStorage_GF->AddFrame(SpectrumFileName_TEL = new ADAQTextEntryWithLabel(DGScopeSpectrumStorage_GF, "", -1),
-				      new TGLayoutHints(kLHintsNormal, 5,5,5,0));
-  SpectrumFileName_TEL->GetEntry()->Resize(175, 25);
-  SpectrumFileName_TEL->GetEntry()->ChangeOptions(SpectrumFileName_TEL->GetOptions() | kFixedSize | kSunkenFrame);
-  SpectrumFileName_TEL->GetEntry()->SetState(false);
-  SpectrumFileName_TEL->GetEntry()->SetText("DefaultSpectrum.root");
+  TGGroupFrame *DGScopeObjectStorage_GF = new TGGroupFrame(DataSubframe, "Data object output", kVerticalFrame);
+  DGScopeObjectStorage_GF->SetTitlePos(TGGroupFrame::kCenter);
+  DataSubframe->AddFrame(DGScopeObjectStorage_GF, new TGLayoutHints(kLHintsNormal,0,5,5,5));
 
-  DGScopeSpectrumStorage_GF->AddFrame(SpectrumSaveWithTimeExtension_CB = new TGCheckButton(DGScopeSpectrumStorage_GF, "Add time to file name", SpectrumSaveWithTimeExtension_CB_ID),
-				      new TGLayoutHints(kLHintsNormal, 5,5,5,5));
+
+  TGHorizontalFrame *ObjectType_HF = new TGHorizontalFrame(DGScopeObjectStorage_GF);
+  DGScopeObjectStorage_GF->AddFrame(ObjectType_HF, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+
+  TGVButtonGroup *ObjectType_BG = new TGVButtonGroup(ObjectType_HF);
+  ObjectType_BG->SetBorderDrawn(false);
+  ObjectType_HF->AddFrame(ObjectType_BG, new TGLayoutHints(kLHintsNormal,-7,0,-2,0));
   
-  DGScopeSpectrumStorage_GF->AddFrame(SpectrumSave_TB = new TGTextButton(DGScopeSpectrumStorage_GF, "Save spectrum data", SpectrumSave_TB_ID),
-				      new TGLayoutHints(kLHintsNormal, 5,5,0,5));
-  SpectrumSave_TB->Resize(175, 30);
-  SpectrumSave_TB->ChangeOptions(SpectrumSave_TB->GetOptions() | kFixedSize);
-  SpectrumSave_TB->Connect("Clicked()","AASubtabSlots", SubtabSlots, "HandleTextButtons()");
+  WaveformOutput_RB = new TGRadioButton(ObjectType_BG, "Waveform", WaveformOutput_RB_ID);
+  WaveformOutput_RB->Connect("Clicked()","AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
+  WaveformOutput_RB->SetState(kButtonDown);
+  
+  SpectrumOutput_RB = new TGRadioButton(ObjectType_BG, "Spectrum", SpectrumOutput_RB_ID);
+  SpectrumOutput_RB->Connect("Clicked()","AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
 
+  PSDHistogramOutput_RB = new TGRadioButton(ObjectType_BG, "PSD histogram", PSDHistogramOutput_RB_ID);
+  PSDHistogramOutput_RB->Connect("Clicked()","AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
+  
+  ObjectType_HF->AddFrame(ObjectOutputChannel_CBL = new ADAQComboBoxWithLabel(ObjectType_HF, "", ObjectOutputType_CBL_ID),
+			  new TGLayoutHints(kLHintsNormal,0,0,15,0));
+  for(uint32_t ch=0; ch<8; ch++)
+    ObjectOutputChannel_CBL->GetComboBox()->AddEntry(DGChannelLabels[ch].c_str(),ch);
+  ObjectOutputChannel_CBL->GetComboBox()->Select(0);
+  ObjectOutputChannel_CBL->GetComboBox()->Resize(80,20);
+  ObjectOutputChannel_CBL->GetComboBox()->Connect("Selected(int,int)", "AASubtabSlots", SubtabSlots, "HandleComboBoxes(int,int)");
+
+  
+  DGScopeObjectStorage_GF->AddFrame(ObjectOutputFileName_TB = new TGTextButton(DGScopeObjectStorage_GF, "Object file name", ObjectOutputFileName_TB_ID),
+				    new TGLayoutHints(kLHintsNormal, 5,5,-5,0));
+  ObjectOutputFileName_TB->Resize(175, 30);
+  ObjectOutputFileName_TB->ChangeOptions(ObjectOutputFileName_TB->GetOptions() | kFixedSize);
+  ObjectOutputFileName_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
+  
+  DGScopeObjectStorage_GF->AddFrame(ObjectOutputFileName_TEL = new ADAQTextEntryWithLabel(DGScopeObjectStorage_GF, "", -1),
+				    new TGLayoutHints(kLHintsNormal, 5,5,5,0));
+  ObjectOutputFileName_TEL->GetEntry()->Resize(175, 25);
+  ObjectOutputFileName_TEL->GetEntry()->ChangeOptions(ObjectOutputFileName_TEL->GetOptions() | kFixedSize | kSunkenFrame);
+  ObjectOutputFileName_TEL->GetEntry()->SetState(false);
+  ObjectOutputFileName_TEL->GetEntry()->SetText("ObjectOutput.root");
+  
+  DGScopeObjectStorage_GF->AddFrame(ObjectSaveWithTimeExtension_CB = new TGCheckButton(DGScopeObjectStorage_GF, "Add time to file name", ObjectSaveWithTimeExtension_CB_ID),
+				    new TGLayoutHints(kLHintsNormal, 5,5,5,5));
+  
+  DGScopeObjectStorage_GF->AddFrame(ObjectSave_TB = new TGTextButton(DGScopeObjectStorage_GF, "Save object data", ObjectSave_TB_ID),
+				    new TGLayoutHints(kLHintsNormal, 5,5,0,5));
+  ObjectSave_TB->Resize(175, 30);
+  ObjectSave_TB->ChangeOptions(ObjectSave_TB->GetOptions() | kFixedSize);
+  ObjectSave_TB->Connect("Clicked()","AASubtabSlots", SubtabSlots, "HandleTextButtons()");
+  
 
   // Widgets for saving the canvas graphics to file
   
@@ -2206,7 +2233,8 @@ void AAInterface::SaveSettings()
   TheSettings->WaveformStoreEnergyData = WaveformStoreEnergyData_CB->IsDown();
   TheSettings->WaveformStorePSDData= WaveformStorePSDData_CB->IsDown();
 
-  TheSettings->SpectrumSaveWithTimeExtension = SpectrumSaveWithTimeExtension_CB->IsDown();
+
+  TheSettings->ObjectSaveWithTimeExtension = ObjectSaveWithTimeExtension_CB->IsDown();
   TheSettings->CanvasSaveWithTimeExtension = CanvasSaveWithTimeExtension_CB->IsDown();
 
 
@@ -2252,7 +2280,7 @@ void AAInterface::SaveSettings()
     TheSettings->WaveformStoreEnergyData = WaveformStoreEnergyData_CB->IsDisabledAndSelected();
     TheSettings->WaveformStorePSDData = WaveformStorePSDData_CB->IsDisabledAndSelected();
     
-    TheSettings->SpectrumSaveWithTimeExtension = SpectrumSaveWithTimeExtension_CB->IsDisabledAndSelected();
+    TheSettings->ObjectSaveWithTimeExtension = ObjectSaveWithTimeExtension_CB->IsDisabledAndSelected();
     TheSettings->CanvasSaveWithTimeExtension = CanvasSaveWithTimeExtension_CB->IsDisabledAndSelected();
 
     TheSettings->DisplayContinuous = DisplayContinuous_RB->IsDisabledAndSelected();

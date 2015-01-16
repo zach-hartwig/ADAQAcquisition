@@ -211,10 +211,14 @@ enum{
   WaveformStoreRaw_CB_ID,
   WaveformStoreEnergyData_CB_ID,
   WaveformStorePSDData_CB_ID,
-
-  SpectrumFileName_TB_ID,
-  SpectrumSaveWithTimeExtension_CB_ID,
-  SpectrumSave_TB_ID,
+  
+  WaveformOutput_RB_ID,
+  SpectrumOutput_RB_ID,
+  PSDHistogramOutput_RB_ID,
+  ObjectOutputType_CBL_ID,
+  ObjectOutputFileName_TB_ID,
+  ObjectSaveWithTimeExtension_CB_ID,
+  ObjectSave_TB_ID,
   
   CanvasFileName_TB_ID,
   CanvasSaveWithTimeExtension_CB_ID,

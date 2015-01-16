@@ -163,7 +163,7 @@ public:
   Bool_t WaveformStoreEnergyData;
   Bool_t WaveformStorePSDData;
 
-  Bool_t SpectrumSaveWithTimeExtension;
+  Bool_t ObjectSaveWithTimeExtension;
   Bool_t CanvasSaveWithTimeExtension;
   
   ClassDef(AASettings, 1);

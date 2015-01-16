@@ -305,10 +305,12 @@ private:
   TGCheckButton *WaveformStoreEnergyData_CB;
   TGCheckButton *WaveformStorePSDData_CB;
 
-  TGTextButton *SpectrumFileName_TB;
-  ADAQTextEntryWithLabel *SpectrumFileName_TEL;
-  TGCheckButton *SpectrumSaveWithTimeExtension_CB;
-  TGTextButton *SpectrumSave_TB;
+  TGRadioButton *WaveformOutput_RB, *SpectrumOutput_RB, *PSDHistogramOutput_RB;
+  ADAQComboBoxWithLabel *ObjectOutputChannel_CBL;
+  TGTextButton *ObjectOutputFileName_TB;
+  ADAQTextEntryWithLabel *ObjectOutputFileName_TEL;
+  TGCheckButton *ObjectSaveWithTimeExtension_CB;
+  TGTextButton *ObjectSave_TB;
   
   TGTextButton *CanvasFileName_TB;
   ADAQTextEntryWithLabel *CanvasFileName_TEL;

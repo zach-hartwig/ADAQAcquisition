@@ -628,7 +628,7 @@ void AAAcquisitionManager::SaveSpectrum(string FileName)
     
     if(FileExtension == ".dat" or FileExtension == ".csv"){
       
-      if(TheSettings->SpectrumSaveWithTimeExtension){
+      if(TheSettings->ObjectSaveWithTimeExtension){
 	time_t Time = time(NULL);
 	stringstream SS;
 	SS << "." << Time;
