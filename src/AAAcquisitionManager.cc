@@ -614,18 +614,29 @@ void AAAcquisitionManager::StopAcquisition()
 }
 
 
-void AAAcquisitionManager::SaveSpectrum(string FileName)
+void AAAcquisitionManager::SaveObjectData(string ObjectType,
+					  string FileName)
 {
   Int_t Channel = TheSettings->SpectrumChannel;
-
-  if(!SpectrumExists[Channel])
+  
+  if(!SpectrumExists[Channel] or !PSDHistogramExists[Channel])
     return;
-
+  
   size_t Found = FileName.find_last_of(".");
   if(Found != string::npos){
 
+    // Get the file extension
     string FileExtension = FileName.substr(Found, string::npos);
     
+    // The object (waveform, spectrum, PSD histogram) will be output
+    // in a form factor that depends on the file extension:
+    //   .dat: A columnar ASCII file
+    //   .csv: a columnar CSV file
+    //   .root: ROOT object is written to disk with the name:
+    //          -> "Waveform" - Digitized waveform (TH1F)
+    //          -> "Spectrum" - Pulse spectrum (TH1F)
+    //          -> "PSDHistogram" - PSD histogram (TH2D)
+
     if(FileExtension == ".dat" or FileExtension == ".csv"){
       
       if(TheSettings->ObjectSaveWithTimeExtension){
@@ -638,7 +649,7 @@ void AAAcquisitionManager::SaveSpectrum(string FileName)
       }
       
       // Create an ofstream object to write the data to a file
-      ofstream SpectrumOutput(FileName.c_str(), ofstream::trunc);
+      ofstream ObjectOutput(FileName.c_str(), ofstream::trunc);
       
       // Assign the data separator based on file extension
       string Separator;
@@ -646,37 +657,73 @@ void AAAcquisitionManager::SaveSpectrum(string FileName)
 	Separator = "\t";
       else if(FileExtension == ".csv")
 	Separator = ",";
-      
-      // Get the number of bins in the spectrum histogram
-      Int_t NumBins = Spectrum_H[Channel]->GetNbinsX();
-      
-      // Iterate over all the bins in spectrum histogram and output
-      // the bin center (value on the X axis of the histogram) and the
-      // bin content (value on the Y axis of the histogram)
-      for(Int_t bin=1; bin<=NumBins; bin++){
-	Double_t BinCenter = Spectrum_H[Channel]->GetBinCenter(bin);
-	Double_t BinContent = Spectrum_H[Channel]->GetBinContent(bin);
+
+      if(ObjectType == "Waveform"){
+	cout << "\nAAAcquisitionManager::SaveObjectData() : Waveform output is not yet implemented!\n"
+	     << endl;
+      }
+      else if(ObjectType == "Spectrum"){
 	
-	SpectrumOutput << BinCenter << Separator << BinContent
+	// Get the number of bins in the spectrum histogram
+	Int_t NumBins = Spectrum_H[Channel]->GetNbinsX();
+	
+	// Iterate over all the bins in spectrum histogram and output
+	// the bin center (value on the X axis of the histogram) and the
+	// bin content (value on the Y axis of the histogram)
+	for(Int_t bin=1; bin<=NumBins; bin++){
+	  Double_t BinCenter = Spectrum_H[Channel]->GetBinCenter(bin);
+	  Double_t BinContent = Spectrum_H[Channel]->GetBinContent(bin);
+	  
+	  ObjectOutput << BinCenter << Separator << BinContent
 		       << endl;
+	}
+      }
+      else if(ObjectType == "PSDHistogram"){
+	Int_t NumXBins = PSDHistogram_H[Channel]->GetNbinsX();
+	Int_t NumYBins = PSDHistogram_H[Channel]->GetNbinsY();
+
+	Int_t XMin = PSDHistogram_H[Channel]->GetXaxis()->GetXmin();
+	Int_t XMax = PSDHistogram_H[Channel]->GetXaxis()->GetXmax();
+	Int_t YMin = PSDHistogram_H[Channel]->GetYaxis()->GetXmin();
+	Int_t YMax = PSDHistogram_H[Channel]->GetYaxis()->GetXmax();
+
+	cout << setw(10) << NumXBins << setw(10) << XMin << setw(10) << XMax << "\n"
+	     << setw(10) << NumYBins << setw(10) << YMin << setw(10) << YMax << "\n"
+	     << endl;
+	
+	for(Int_t xbin=1; xbin<=NumXBins; xbin++){
+	  for(Int_t ybin=1; ybin<=NumYBins; ybin++){
+	    Int_t Bin = NumYBins*xbin + ybin;
+	    ObjectOutput << PSDHistogram_H[Channel]->GetBinContent(Bin)
+			 << endl;
+	  }
+	}
       }
       
       // Close the ofstream object
-      SpectrumOutput.close();
+      ObjectOutput.close();
     }
     else if(FileExtension == ".root"){
-      TFile *SpectrumOutput = new TFile(FileName.c_str(), "recreate");
-      Spectrum_H[Channel]->Write("Spectrum");
-      SpectrumOutput->Close();
-    }
-    else{
+
+      TFile *ObjectOutput = new TFile(FileName.c_str(), "recreate");
+
+      if(ObjectType == "Waveform"){
+      }
+      
+      else if(ObjectType == "Spectrum")
+	Spectrum_H[Channel]->Write("Spectrum");
+      
+      else if(ObjectType == "PSDHistogram")
+	PSDHistogram_H[Channel]->Write("PSDHistogram");
+      
+      ObjectOutput->Close();
     }
   }
 }
 
 
 Bool_t AAAcquisitionManager::AddCalibrationPoint(Int_t Channel, Int_t SetPoint,
-					       Double_t Energy, Double_t PulseUnit)
+						 Double_t Energy, Double_t PulseUnit)
 {
   if(SetPoint == CalibrationData[Channel].PointID.size()){
     CalibrationData[Channel].PointID.push_back(SetPoint);

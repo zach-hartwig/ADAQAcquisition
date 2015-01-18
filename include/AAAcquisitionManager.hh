@@ -65,9 +65,9 @@ public:
   Bool_t ResetCalibration(Int_t);
   Bool_t LoadCalibration(Int_t, string, Int_t &);
   Bool_t WriteCalibration(Int_t, string);
-
-  void SaveSpectrum(string);
-
+  
+  void SaveObjectData(string, string);
+  
   Bool_t GetCalibrationEnable(Int_t C) {return CalibrationEnable[C];}
   CalibrationDataStruct GetCalibrationDataStruct(Int_t C) {return CalibrationData[C];}
   

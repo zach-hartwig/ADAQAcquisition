@@ -492,9 +492,9 @@ void AASubtabSlots::HandleTextButtons()
     
     // Set the allowable file type extensions. These will be used to
     // determine the format of the data output to file
-    const char *FileTypes[] = {"Space-separated format", "*.dat",
+    const char *FileTypes[] = {"ROOT File"             , "*.root",
+			       "Space-separated format", "*.dat",
 			       "Comma-separated format", "*.csv",
-			       "ROOT File"             , "*.root",
 			       0, 0};
     
     ObjectFileName = TI->CreateFileDialog(FileTypes, kFDOpen);
@@ -515,15 +515,18 @@ void AASubtabSlots::HandleTextButtons()
 
     
   case ObjectSave_TB_ID:{
+    
+    if(TI->WaveformOutput_RB->IsDown())
+      cout << "\nAASubtabSlots::HandleTextButtons() : Waveform output is not yet implemented!\n"                                                                              
+	   << endl; 
 
-    if(TI->WaveformOutput_RB->IsDown()){
-    }
-    else if(TI->SpectrumOutput_RB->IsDown()){
-      AAAcquisitionManager::GetInstance()->SaveSpectrum(ObjectFileName);
-    }
-    else if(TI->PSDHistogramOutput_RB->IsDown()){
-    }
+    else if(TI->SpectrumOutput_RB->IsDown())
+      AAAcquisitionManager::GetInstance()->SaveObjectData("Spectrum",
+							  ObjectFileName);
 
+    else if(TI->PSDHistogramOutput_RB->IsDown())
+      AAAcquisitionManager::GetInstance()->SaveObjectData("PSDHistogram",
+							  ObjectFileName);
     break;
   }
     

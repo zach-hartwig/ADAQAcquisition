@@ -46,8 +46,10 @@ AAGraphics::AAGraphics()
     cout << "\nError! The GraphicsManager was constructed twice!\n" << endl;
   TheGraphicsManager = this;
 
+  // Set the default palette used to color the PSDHistogram
+  gStyle->SetPalette(55);
+
   // Fill a vector with channel colors for plotting
-  
   ChColor += kBlue, kViolet, kRed, kOrange, 
     kYellow+1, kGreen+2, kCyan+2, kAzure+7;
   
