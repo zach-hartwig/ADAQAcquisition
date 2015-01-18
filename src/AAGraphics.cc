@@ -134,21 +134,58 @@ void AAGraphics::SetupWaveformGraphics(int WaveformLength)
     XOffset = 1.1;
     YOffset = 1.2;
   }
+
+  // In order to maximize the drawing efficiency of waveforms and to
+  // account for the possibility that the number of possible data
+  // channels might change between runs, the vector containing the
+  // TGraphs is operated on here (recall, this method is only called
+  // once at the beginning of acquisition) in the following order:
+  //
+  // 0. Previous TGraph objects are deleted to prevent memory leak
+  // 1. The vector is cleared
+  // 2. New TGraph objects are created for enabled channels
+  // 3. Static graphical attributes are set for each channel's TGraph
+
+  vector<TGraph *>::iterator it = WaveformGraphs.begin();
+  for(; it!=WaveformGraphs.end(); it++)
+    delete (*it);
+  
+  WaveformGraphs.clear();
+  
+  for(Int_t ch=0; ch<TheSettings->ChEnable.size(); ch++){
+    
+    // Create a new TGraph representing the waveform
+    WaveformGraphs.push_back(new TGraph);
+    
+    // Set the static waveform graphical options
+    WaveformGraphs[ch]->SetLineColor(ChColor[ch]);
+    WaveformGraphs[ch]->SetLineWidth(WaveformWidth);
+    WaveformGraphs[ch]->SetMarkerStyle(24);
+    WaveformGraphs[ch]->SetMarkerSize(0.75);
+    WaveformGraphs[ch]->SetMarkerColor(ChColor[ch]);
+    WaveformGraphs[ch]->SetFillColor(ChColor[ch]);
+
+    // Set the waveform title and axes properties
+    WaveformGraphs[ch]->SetTitle(Title.c_str());
+
+    WaveformGraphs[ch]->GetXaxis()->SetTitle(XTitle.c_str());
+    WaveformGraphs[ch]->GetXaxis()->SetTitleSize(XSize);
+    WaveformGraphs[ch]->GetXaxis()->SetTitleOffset(XOffset);
+    WaveformGraphs[ch]->GetXaxis()->SetLabelSize(XSize);
+
+    WaveformGraphs[ch]->GetYaxis()->SetTitle(YTitle.c_str());
+    WaveformGraphs[ch]->GetYaxis()->SetTitleSize(YSize);
+    WaveformGraphs[ch]->GetYaxis()->SetTitleOffset(YOffset);
+    WaveformGraphs[ch]->GetYaxis()->SetLabelSize(YSize);
+  }
 }
 
 
 void AAGraphics::PlotWaveforms(vector<vector<uint16_t> > &Waveforms, 
 			       int WaveformLength)
-//			       vector<double> &BaselineValue)
 {
-  // Delete previous TGraphs to prevent bleeding memory
-  vector<TGraph *>::iterator it = WaveformGraphs.begin();
-  for(; it!=WaveformGraphs.end(); it++)
-    delete (*it);
-  
-  // Clear out the vector to start with size 0
-  WaveformGraphs.clear();
-  
+  Int_t NumGraphs = 0;
+
   for(int ch=0; ch<TheSettings->ChEnable.size(); ch++){
     
     if(!TheSettings->ChEnable[ch])
@@ -156,7 +193,10 @@ void AAGraphics::PlotWaveforms(vector<vector<uint16_t> > &Waveforms,
     
     vector<int> Voltage (Waveforms[ch].begin(), Waveforms[ch].end());
 
-    // Zero length encoding waveforms
+    // Zero length encoding waveform: a vector representing time (the
+    // X-axis) must be created dynamically to account for the variable
+    // time nature of the ZLE waveform. Do this efficiently with
+    // std::iota methods
 
     if(TheSettings->ZeroSuppressionEnable){
       WaveformLength = Voltage.size();
@@ -164,45 +204,36 @@ void AAGraphics::PlotWaveforms(vector<vector<uint16_t> > &Waveforms,
       iota(begin(Time), end(Time), 0);
     }
     
-    TGraph *Waveform_G = new TGraph(WaveformLength, &Time[0], &Voltage[0]);
-
-    if(Waveform_G->GetN() == 0)
+    if(WaveformGraphs[ch]->GetN() == 0)
       return;
+
+    // Set the TGraph drawing options
     
-    // Store a pointer to the TGraphs so that they can be deleted on
-    // the next call to AAGraphics::PlotWaveform() to prevent a
-    // massive memory leak
-    WaveformGraphs.push_back(Waveform_G);
+    TString DrawOptions;
 
-    // Set the waveform graphical options
-    Waveform_G->SetLineColor(ChColor[ch]);
-    Waveform_G->SetLineWidth(WaveformWidth);
-    Waveform_G->SetMarkerStyle(24);
-    Waveform_G->SetMarkerSize(0.75);
-    Waveform_G->SetMarkerColor(ChColor[ch]);
-    Waveform_G->SetFillColor(ChColor[ch]);
-
-    TString DrawOption;
-
-    // The first TGraph must plot the x and y axes
-    (WaveformGraphs.size() == 1) ? DrawOption = "A" : DrawOption = "";
+    // The first TGraph must plot the x and y axes; the following
+    // TGraphs must overplot on the first set of axes such that all
+    // enabled waveform channels will be drawn
+    (NumGraphs == 0) ? DrawOptions = "A" : DrawOptions = "";
     
     if(TheSettings->WaveformWithLine)
-      DrawOption += "L";
+      DrawOptions += "L";
     else if(TheSettings->WaveformWithMarkers)
-      DrawOption += "P";
+      DrawOptions += "P";
     else
-      DrawOption += "PL";
-
-    Waveform_G->Draw(DrawOption);
-
+      DrawOptions += "PL";
+    
+    WaveformGraphs[ch]->DrawGraph(WaveformLength, 
+				  &Time[0], 
+				  &Voltage[0],
+				  DrawOptions);
 
     // Set the horiz. and vert. min/max ranges of the waveform.  Note
     // the max value is the max digitizer bit value in units of ADC
 
     XMin = WaveformLength * TheSettings->HorizontalSliderMin;
     XMax = WaveformLength * TheSettings->HorizontalSliderMax;
-    Waveform_G->GetXaxis()->SetRangeUser(XMin, XMax);
+    WaveformGraphs[ch]->GetXaxis()->SetRangeUser(XMin, XMax);
 
     (TheSettings->DisplayXAxisInLog) ? 
       gPad->SetLogx(true) : gPad->SetLogx(false);
@@ -218,20 +249,9 @@ void AAGraphics::PlotWaveforms(vector<vector<uint16_t> > &Waveforms,
     else
       gPad->SetLogy(false);
 
-    Waveform_G->GetYaxis()->SetRangeUser(YMin, YMax);
+    WaveformGraphs[ch]->GetYaxis()->SetRangeUser(YMin, YMax);
 
-    // Set the waveform title and axes properties
-    Waveform_G->SetTitle(Title.c_str());
-
-    Waveform_G->GetXaxis()->SetTitle(XTitle.c_str());
-    Waveform_G->GetXaxis()->SetTitleSize(XSize);
-    Waveform_G->GetXaxis()->SetTitleOffset(XOffset);
-    Waveform_G->GetXaxis()->SetLabelSize(XSize);
-
-    Waveform_G->GetYaxis()->SetTitle(YTitle.c_str());
-    Waveform_G->GetYaxis()->SetTitleSize(YSize);
-    Waveform_G->GetYaxis()->SetTitleOffset(YOffset);
-    Waveform_G->GetYaxis()->SetLabelSize(YSize);
+    NumGraphs++;
   }
   
   if(TheSettings->DisplayLegend)
@@ -251,7 +271,7 @@ void AAGraphics::DrawWaveformGraphics(vector<double> &BaselineValue,
     
     if(!TheSettings->ChEnable[ch])
       continue;
-
+    
     if(TheSettings->DisplayTrigger)
       Trigger_L[ch]->DrawLine(XMin,
 			      TheSettings->ChTriggerThreshold[ch],
