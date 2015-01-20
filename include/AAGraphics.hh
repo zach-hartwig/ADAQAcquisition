@@ -53,6 +53,7 @@ public:
 			    vector<Int_t> &,
 			    vector<Int_t> &,
 			    vector<Int_t> &,
+			    vector<Int_t> &,
 			    vector<Int_t> &);
 
   void SetupSpectrumGraphics();
@@ -70,7 +71,7 @@ private:
 
   TLegend * Waveform_LG;
   vector<TLine *> Trigger_L, ZLE_L;
-  vector<TLine *> PSDTail_L0, PSDTail_L1;
+  vector<TLine *> PSDPeak_L, PSDTail_L0, PSDTail_L1;
   vector<TBox *> Baseline_B, PSDTotal_B;
   
   TLine *Spectrum_L, *SpectrumCalibration_L;

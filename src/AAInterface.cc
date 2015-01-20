@@ -59,7 +59,7 @@ using namespace boost::assign;
 
 AAInterface::AAInterface()
   : TGMainFrame(gClient->GetRoot()),
-    DisplayWidth(1124), DisplayHeight(833), 
+    DisplayWidth(1113), DisplayHeight(833), 
     ButtonForeColor(kWhite), ButtonBackColorOn(kGreen-5), ButtonBackColorOff(kRed-3),
     NumDataChannels(8), ColorManager(new TColor), NumVMEBoards(3)
 {
@@ -1207,13 +1207,14 @@ void AAInterface::FillAcquisitionFrame()
   DGAcquisitionControl_CBL->GetComboBox()->AddEntry("Gated (TTL)",2);
   DGAcquisitionControl_CBL->GetComboBox()->Select(0);
   
-
+  
   // ADAQ number entry specifying number of samples
   DGAcquisitionControl_GF->AddFrame(DGRecordLength_NEL = new ADAQNumberEntryWithLabel(DGAcquisitionControl_GF, "Record length (#)", DGRecordLength_NEL_ID),
-					  new TGLayoutHints(kLHintsNormal,5,5,5,0));
+				    new TGLayoutHints(kLHintsNormal,5,5,5,0));
   DGRecordLength_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-  DGRecordLength_NEL->GetEntry()->SetNumber(2000);
-
+  DGRecordLength_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+  DGRecordLength_NEL->GetEntry()->SetNumber(1000);
+  
   // ADAQ number entry specifying the percentage of the acquisition
   // window that is behind (or after) the triggern (all channels)
   DGAcquisitionControl_GF->AddFrame(DGPostTrigger_NEL = new ADAQNumberEntryWithLabel(DGAcquisitionControl_GF, "Post trigger (%)", DGPostTriggerSize_NEL_ID),
@@ -1260,8 +1261,8 @@ void AAInterface::FillAcquisitionFrame()
 				      new TGLayoutHints(kLHintsNormal, 5,5,5,5));
   DGEventsBeforeReadout_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
   DGEventsBeforeReadout_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
-  DGEventsBeforeReadout_NEL->GetEntry()->SetNumber(1);
- 
+  DGEventsBeforeReadout_NEL->GetEntry()->SetNumber(15);
+  
   DGScopeReadoutControls_GF->AddFrame(DGCheckBufferStatus_TB = new TGTextButton(DGScopeReadoutControls_GF, "Check FPGA Buffer", CheckBufferStatus_TB_ID),
 				      new TGLayoutHints(kLHintsNormal, 5,5,5,0));
   DGCheckBufferStatus_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
@@ -1524,13 +1525,15 @@ void AAInterface::FillAcquisitionFrame()
   
   TGVerticalFrame *PSDOptions_VF = new TGVerticalFrame(PSDOptions_HF);
   PSDOptions_HF->AddFrame(PSDOptions_VF, new TGLayoutHints(kLHintsNormal,0,0,0,0));
-
-  PSDOptions_VF->AddFrame(PSDTotalVsTail_RB = new TGRadioButton(PSDOptions_VF, "Total v. tail", -1),
-			  new TGLayoutHints(kLHintsNormal, 0,0,5,0));
-  PSDTotalVsTail_RB->SetState(kButtonDown);
   
-  PSDOptions_VF->AddFrame(PSDTotalVsPSD_RB = new TGRadioButton(PSDOptions_VF, "Total v. tail/total", -1),
+  PSDOptions_VF->AddFrame(PSDYAxisTail_RB = new TGRadioButton(PSDOptions_VF, "Total v. tail", PSDYAxisTail_RB_ID),
+			  new TGLayoutHints(kLHintsNormal, 0,0,5,0));
+  PSDYAxisTail_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
+  PSDYAxisTail_RB->SetState(kButtonDown);
+  
+  PSDOptions_VF->AddFrame(PSDYAxisTailTotal_RB = new TGRadioButton(PSDOptions_VF, "Total v. tail/total", PSDYAxisTailTotal_RB_ID),
 			  new TGLayoutHints(kLHintsNormal, 0,0,0,10));
+  PSDYAxisTailTotal_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
   
 
   PSDHistogram_GF->AddFrame(PSDTotalBins_NEL = new ADAQNumberEntryWithLabel(PSDHistogram_GF, "Number of total bins", -1),
@@ -1545,19 +1548,17 @@ void AAInterface::FillAcquisitionFrame()
 
   PSDTotal_HF->AddFrame(PSDTotalMinBin_NEL = new ADAQNumberEntryWithLabel(PSDTotal_HF, "Min.", -1),
 			new TGLayoutHints(kLHintsNormal, 0,0,0,0));
-  PSDTotalMinBin_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-  PSDTotalMinBin_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+  PSDTotalMinBin_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
   PSDTotalMinBin_NEL->GetEntry()->SetNumber(0);
   PSDTotalMinBin_NEL->GetEntry()->Resize(60, 20);
-
+  
   PSDTotal_HF->AddFrame(PSDTotalMaxBin_NEL = new ADAQNumberEntryWithLabel(PSDTotal_HF, "Max.", -1),
-			    new TGLayoutHints(kLHintsNormal, 10,0,0,0));
-  PSDTotalMaxBin_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-  PSDTotalMaxBin_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
-  PSDTotalMaxBin_NEL->GetEntry()->SetNumber(5000);
+			new TGLayoutHints(kLHintsNormal, 10,0,0,0));
+  PSDTotalMaxBin_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
+  PSDTotalMaxBin_NEL->GetEntry()->SetNumber(10000);
   PSDTotalMaxBin_NEL->GetEntry()->Resize(60, 20);
 
-
+  
   PSDHistogram_GF->AddFrame(PSDTailBins_NEL = new ADAQNumberEntryWithLabel(PSDHistogram_GF, "Number of tail bins", -1),
 			    new TGLayoutHints(kLHintsNormal, 0,0,10,0));
   PSDTailBins_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
@@ -1569,28 +1570,25 @@ void AAInterface::FillAcquisitionFrame()
   PSDHistogram_GF->AddFrame(PSDTail_HF, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
 
   PSDTail_HF->AddFrame(PSDTailMinBin_NEL = new ADAQNumberEntryWithLabel(PSDTail_HF, "Min.", -1),
-			    new TGLayoutHints(kLHintsNormal, 0,0,0,0));
-  PSDTailMinBin_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-  PSDTailMinBin_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+		       new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+  PSDTailMinBin_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
   PSDTailMinBin_NEL->GetEntry()->SetNumber(0);
   PSDTailMinBin_NEL->GetEntry()->Resize(60, 20);
-
+  
   PSDTail_HF->AddFrame(PSDTailMaxBin_NEL = new ADAQNumberEntryWithLabel(PSDTail_HF, "Max.", -1),
-			    new TGLayoutHints(kLHintsNormal, 10,0,0,0));
-  PSDTailMaxBin_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-  PSDTailMaxBin_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
-  PSDTailMaxBin_NEL->GetEntry()->SetNumber(10000);
+		       new TGLayoutHints(kLHintsNormal, 10,0,0,0));
+  PSDTailMaxBin_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
+  PSDTailMaxBin_NEL->GetEntry()->SetNumber(3000);
   PSDTailMaxBin_NEL->GetEntry()->Resize(60, 20);
-
+  
   
   PSDHistogram_GF->AddFrame(PSDThreshold_NEL = new ADAQNumberEntryWithLabel(PSDHistogram_GF, "Threshold (ADC)", -1),
 			    new TGLayoutHints(kLHintsNormal, 0,0,0,0));
-  PSDThreshold_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+  PSDThreshold_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
   PSDThreshold_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
   PSDThreshold_NEL->GetEntry()->SetNumber(100);
   PSDThreshold_NEL->GetEntry()->Resize(60, 20);
-
-
+  
 
   //////////////////
   // Data storage //
@@ -2182,8 +2180,8 @@ void AAInterface::SaveSettings()
   // Pulse discrimination subtab 
 
   TheSettings->PSDChannel = PSDChannel_CBL->GetComboBox()->GetSelected();
-  TheSettings->PSDTotalVsTail = PSDTotalVsTail_RB->IsDown();
-  TheSettings->PSDTotalVsPSD = PSDTotalVsPSD_RB->IsDown();
+  TheSettings->PSDYAxisTail = PSDYAxisTail_RB->IsDown();
+  TheSettings->PSDYAxisTailTotal = PSDYAxisTailTotal_RB->IsDown();
   TheSettings->PSDThreshold = PSDThreshold_NEL->GetEntry()->GetNumber();
   TheSettings->PSDTotalBins = PSDTotalBins_NEL->GetEntry()->GetNumber();
   TheSettings->PSDTotalMinBin = PSDTotalMinBin_NEL->GetEntry()->GetNumber();
@@ -2279,8 +2277,8 @@ void AAInterface::SaveSettings()
     TheSettings->SpectrumCalibrationEnable = SpectrumCalibration_CB->IsDisabledAndSelected();
     TheSettings->SpectrumCalibrationUseSlider = SpectrumUseCalibrationSlider_CB->IsDisabledAndSelected();
 
-    TheSettings->PSDTotalVsTail = PSDTotalVsTail_RB->IsDisabledAndSelected();
-    TheSettings->PSDTotalVsPSD = PSDTotalVsPSD_RB->IsDisabledAndSelected();
+    TheSettings->PSDYAxisTail = PSDYAxisTail_RB->IsDisabledAndSelected();
+    TheSettings->PSDYAxisTailTotal = PSDYAxisTailTotal_RB->IsDisabledAndSelected();
 
     TheSettings->WaveformStorageEnable = WaveformStorageEnable_CB->IsDisabledAndSelected();
     TheSettings->WaveformStoreRaw = WaveformStoreRaw_CB->IsDisabledAndSelected();

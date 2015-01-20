@@ -40,7 +40,8 @@ AAAcquisitionManager::AAAcquisitionManager()
     ZLEEventSizeMask(0x0fffffff), ZLEEventSize(0),
     ZLESampleAMask(0x0000ffff), ZLESampleBMask(0xffff0000), 
     ZLENumWordMask(0x000fffff), ZLEControlMask(0xc0000000),
-    WaveformLength(0), LLD(0), ULD(0), SampleHeight(0.), TriggerHeight(0.),
+    WaveformLength(0), EventCounter(0),
+    LLD(0), ULD(0), SampleHeight(0.), TriggerHeight(0.),
     PulseHeight(0.), PulseArea(0.), PSDTotal(0.), PSDTail(0.),
     PeakPosition(0), TimeStamp(0),
     FillWaveformTree(false), ADAQFileIsOpen(false),
@@ -74,6 +75,7 @@ void AAAcquisitionManager::Initialize()
     BaselineLength.push_back(0);
     BaselineValue.push_back(0);
 
+    PeakPosition.push_back(0);
     PSDTotalAbsStart.push_back(0);
     PSDTotalAbsStop.push_back(0);
     PSDTailAbsStart.push_back(0);
@@ -194,11 +196,11 @@ void AAAcquisitionManager::PreAcquisition()
     if(PSDHistogramExists[ch]){
       delete PSDHistogram_H[ch];
       PSDHistogramExists[ch] = false;
-
+      
       stringstream SS;
       SS << "PSDHistogram[Ch" << ch << "]";
       string Name = SS.str();
-
+      
       PSDHistogram_H[ch] = new TH2F(Name.c_str(),
 				    Name.c_str(),
 				    TheSettings->PSDTotalBins,
@@ -207,11 +209,11 @@ void AAAcquisitionManager::PreAcquisition()
 				    TheSettings->PSDTailBins,
 				    TheSettings->PSDTailMinBin,
 				    TheSettings->PSDTailMaxBin);
-
+      
       PSDHistogramExists[ch] = true;
     }
   }
-    
+  
   // GraphicsManager settings
   
   // In order to maximize readout loop efficiency, any graphical
@@ -237,6 +239,9 @@ void AAAcquisitionManager::PreAcquisition()
   Buffer = NULL;
   BufferSize = ReadSize = FPGAEvents = PCEvents = 0;
   DGManager->MallocReadoutBuffer(&Buffer, &BufferSize);
+
+  // Reset the event counter
+  EventCounter = 0;
 }
 
 
@@ -408,7 +413,7 @@ void AAAcquisitionManager::StartAcquisition()
 	      // and peak position (sample) by looping over all samples
 	      if(SampleHeight > PulseHeight){
 		PulseHeight = SampleHeight;
-		PeakPosition = sample;
+		PeakPosition[ch] = sample;
 	      }
 	      
 	      // Integrate the area under the pulse
@@ -425,21 +430,38 @@ void AAAcquisitionManager::StartAcquisition()
 	// Compute the trigger time stamp for the waveform
 	TimeStamp = EventInfo.TriggerTimeTag;
 
+	// Set the absolute positions in time [sample] for the
+	// start/stop of the PSD total/tail integrals using the
+	// calculated peak position in time [sample] from above
+	PSDTotalAbsStart[ch] = PeakPosition[ch] + TheSettings->ChPSDTotalStart[ch];
+	PSDTotalAbsStop[ch] = PeakPosition[ch] + TheSettings->ChPSDTotalStop[ch];
+	PSDTailAbsStart[ch] = PeakPosition[ch] + TheSettings->ChPSDTailStart[ch];
+	PSDTailAbsStop[ch] = PeakPosition[ch] + TheSettings->ChPSDTailStop[ch];
+
+
 	// Because the PSD integrals are computed relative to the peak
-	// position durong on-the-fly processing, we must take fast
-	// PSD integrals after sampling has concluded. We will ONLY do
-	// this if some aspect of PSD is desired by user for efficiency.
+	// position durong on-the-fly processing, we must take the PSD
+	// integrals after sampling has concluded. We will ONLY do
+	// this if some aspect of PSD is desired by user to maximize
+	// efficiency of the acquisition loop
 	
-	if(TheSettings->PSDMode or TheSettings->WaveformStorePSDData){
-	  Int_t sample = TheSettings->ChPSDTotalStart[ch];
-	  for(; sample<TheSettings->ChPSDTotalStop[ch]; sample++)
-	    PSDTotal += Waveforms[ch][sample];
+	if(TheSettings->PSDMode or TheSettings->WaveformStorePSDData){	  
+
+	  // The total PSD integral
+	  Int_t sample = PSDTotalAbsStart[ch];
+	  for(; sample<PSDTotalAbsStop[ch]; sample++)
+	    PSDTotal += Polarity[ch] * (Waveforms[ch][sample] - BaselineValue[ch]);
+
+	  // The tail PSD integral
+	  sample = PSDTailAbsStart[ch];
+	  for(; sample<PSDTailAbsStop[ch]; sample++)
+	    PSDTail += Polarity[ch] * (Waveforms[ch][sample] - BaselineValue[ch]);
 	  
-	  sample = TheSettings->ChPSDTailStart[ch];
-	  for(; sample<TheSettings->ChPSDTailStop[ch]; sample++)
-	    PSDTail += Waveforms[ch][sample];
+	  // Convert the tail integral to (tail/total) if specified
+	  if(TheSettings->PSDYAxisTailTotal)
+	    PSDTail /= PSDTotal;
 	}
-	  
+	
 	if(!TheSettings->DisplayNonUpdateable){
 	  
 	  // Fill the channel-specific ADAQWaveformData objects with
@@ -456,17 +478,6 @@ void AAAcquisitionManager::StartAcquisition()
 	  WaveformData[ch]->SetChannelID(ch);
 	  WaveformData[ch]->SetBoardID(DGManager->GetBoardID());
 
-	  // Compute and store the absolute sample numbers
-	  // corresponding to the PSD total/tail integration limits
-	  // based on the calculated peak position sample
-	  
-	  if(TheSettings->PSDMode or TheSettings->DisplayPSDLimits){
-	    PSDTotalAbsStart[ch] = PeakPosition + TheSettings->ChPSDTotalStart[ch];
-	    PSDTotalAbsStop[ch] = PeakPosition + TheSettings->ChPSDTotalStop[ch];
-	    PSDTailAbsStart[ch] = PeakPosition + TheSettings->ChPSDTailStart[ch];
-	    PSDTailAbsStop[ch] = PeakPosition + TheSettings->ChPSDTailStop[ch];
-	  }
-	  
 	  // Use the calibration curves (ROOT TGraph's) to convert
 	  // the pulse height/area from ADC to the user's energy
 	  // units using linear interpolation calibration points
@@ -509,7 +520,8 @@ void AAAcquisitionManager::StartAcquisition()
 	  }
 
 	  else if(TheSettings->PSDMode){
-	    PSDHistogram_H[ch]->Fill(PSDTotal, PSDTail);
+	    if(PSDTotal > TheSettings->PSDThreshold)
+	      PSDHistogram_H[ch]->Fill(PSDTotal, PSDTail);
 	  }
 	}
       } // End digitizer channel loop
@@ -548,11 +560,13 @@ void AAAcquisitionManager::StartAcquisition()
 	
 	// Draw graphical objects associated with the waveform
 	TheGraphicsManager->DrawWaveformGraphics(BaselineValue,
+						 PeakPosition,
 						 PSDTotalAbsStart,
 						 PSDTotalAbsStop,
 						 PSDTailAbsStart,
 						 PSDTailAbsStop);
       }
+      EventCounter++;
     }// End readout event loop
     
     // Only if the display is set to continuous then plot the spectra
@@ -562,23 +576,21 @@ void AAAcquisitionManager::StartAcquisition()
     // mode is in nonupdateable mode.
 
     if(TheSettings->DisplayContinuous){
-
+      Int_t Rate = TheSettings->SpectrumRefreshRate;
+      
       if(TheSettings->SpectrumMode){
-	Int_t Entries = Spectrum_H[TheSettings->SpectrumChannel]->GetEntries();
-	Int_t Rate = TheSettings->SpectrumRefreshRate;
-	if(Entries % Rate == 0)
+	if(EventCounter % Rate == 0)
 	  TheGraphicsManager->PlotSpectrum(Spectrum_H[TheSettings->SpectrumChannel]);
       }
       
       else if(TheSettings->PSDMode){
-	Int_t Entries = Spectrum_H[TheSettings->SpectrumChannel]->GetEntries();
-	Int_t Rate = TheSettings->SpectrumRefreshRate;
-	if(Entries % Rate == 0)
+	if(EventCounter % Rate == 0){
 	  TheGraphicsManager->PlotPSDHistogram(PSDHistogram_H[TheSettings->PSDChannel]);
+	}
       }
     }
   } // End acquisition loop
-
+  
   // Free the memory preallocated for event readout
   DGManager->FreeEvent(&EventWaveform);
   

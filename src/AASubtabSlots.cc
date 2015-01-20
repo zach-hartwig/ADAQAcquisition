@@ -602,6 +602,16 @@ void AASubtabSlots::HandleRadioButtons()
     TI->SpectrumULD_NEL->GetEntry()->SetNumber(TI->TheSettings->SpectrumMaxBin);
     break;
 
+  case PSDYAxisTail_RB_ID:
+    if(TI->PSDYAxisTail_RB->IsDown())
+      TI->PSDYAxisTailTotal_RB->SetState(kButtonUp);
+    break;
+    
+  case PSDYAxisTailTotal_RB_ID:
+    if(TI->PSDYAxisTailTotal_RB->IsDown())
+      TI->PSDYAxisTail_RB->SetState(kButtonUp);
+    break;
+    
   case DrawWaveformWithLine_RB_ID:
     TI->DrawWaveformWithMarkers_RB->SetState(kButtonUp);
     TI->DrawWaveformWithBoth_RB->SetState(kButtonUp);

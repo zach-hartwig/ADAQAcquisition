@@ -125,12 +125,12 @@ public:
   // Pulse discrimination limits
 
   Int_t PSDChannel;
-  Bool_t PSDTotalVsTail, PSDTotalVsPSD;
+  Bool_t PSDYAxisTail, PSDYAxisTailTotal;
   Double_t PSDThreshold;
   Int_t PSDTotalBins, PSDTailBins;
   Double_t PSDTotalMinBin, PSDTotalMaxBin;
   Double_t PSDTailMinBin, PSDTailMaxBin;
-
+  
 
   ///////////////////////////
   // Graphics widget settings

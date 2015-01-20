@@ -201,6 +201,8 @@ enum{
   // Pulse discrimination
   
   PSDChannel_CBL_ID,
+  PSDYAxisTail_RB_ID,
+  PSDYAxisTailTotal_RB_ID,
 
   // Persistent storage subtab
 

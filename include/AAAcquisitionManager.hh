@@ -88,7 +88,9 @@ public:
 
   TH1F *GetSpectrum(Int_t C) {return Spectrum_H[C];}
   TGraph *GetCalibrationCurve(Int_t C) {return CalibrationCurves[C];}
-
+  
+  TH2F *GetPSDHistogram(Int_t C) {return PSDHistogram_H[C];}
+  
   ClassDef(AAAcquisitionManager, 1);
   
 private:
@@ -125,13 +127,14 @@ private:
   vector<Double_t > BaselineValue;
   vector<Int_t> PSDTotalAbsStart, PSDTotalAbsStop;
   vector<Int_t> PSDTailAbsStart, PSDTailAbsStop;
+  vector<Int_t> PeakPosition;
   vector<Double_t > Polarity;
   
+  ULong64_t EventCounter;
   Int_t LLD, ULD;
   Double_t  SampleHeight, TriggerHeight;
   Double_t  PulseHeight, PulseArea;
   Double_t  PSDTotal, PSDTail;
-  Int_t PeakPosition;
   UInt_t TimeStamp;
   
   vector<bool> CalibrationEnable;
@@ -160,7 +163,6 @@ private:
 
   AAInterface *TheInterface;
   AASettings *TheSettings;
-
   
   ADAQReadoutManager *TheReadoutManager;
 #ifndef __CINT__

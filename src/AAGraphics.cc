@@ -75,15 +75,20 @@ AAGraphics::AAGraphics()
     PSDTotal_B.push_back(new TBox);
     PSDTotal_B[ch]->SetFillColor(ChColor[ch]);
     PSDTotal_B[ch]->SetFillStyle(3002);
+
+    PSDPeak_L.push_back(new TLine);
+    PSDPeak_L[ch]->SetLineColor(kRed);
+    PSDPeak_L[ch]->SetLineStyle(7);
+    PSDPeak_L[ch]->SetLineWidth(2);
     
     PSDTail_L0.push_back(new TLine);
     PSDTail_L0[ch]->SetLineColor(ChColor[ch]);
-    PSDTail_L0[ch]->SetLineStyle(1);
+    PSDTail_L0[ch]->SetLineStyle(7);
     PSDTail_L0[ch]->SetLineWidth(2);
     
     PSDTail_L1.push_back(new TLine);
     PSDTail_L1[ch]->SetLineColor(ChColor[ch]);
-    PSDTail_L1[ch]->SetLineStyle(1);
+    PSDTail_L1[ch]->SetLineStyle(7);
     PSDTail_L1[ch]->SetLineWidth(2);
   }
 
@@ -296,6 +301,7 @@ void AAGraphics::PlotWaveforms(vector<vector<uint16_t> > &Waveforms,
 
 
 void AAGraphics::DrawWaveformGraphics(vector<double> &BaselineValue,
+				      vector<Int_t> &PeakPosition,
 				      vector<int> &PSDTotalAbsStart,
 				      vector<int> &PSDTotalAbsStop,
 				      vector<int> &PSDTailAbsStart,
@@ -325,6 +331,11 @@ void AAGraphics::DrawWaveformGraphics(vector<double> &BaselineValue,
       PSDTotal_B[ch]->DrawBox(PSDTotalAbsStart[ch],
 			      YMin,
 			      PSDTotalAbsStop[ch],
+			      YMax);
+      
+      PSDPeak_L[ch]->DrawLine(PeakPosition[ch],
+			      YMin,
+			      PeakPosition[ch],
 			      YMax);
       
       PSDTail_L0[ch]->DrawLine(PSDTailAbsStart[ch],
@@ -466,10 +477,10 @@ void AAGraphics::SetupPSDHistogramGraphics()
   else{
     Title = "Pulse shape discrimination (PSD)";
     XTitle = "Total integral [ADC]";
-    if(TheSettings->PSDTotalVsTail)
+    if(TheSettings->PSDYAxisTail)
       YTitle = "Tail integral [ADC]";
     else
-      YTitle = "(Tail / Total) integrals [ADC]";
+      YTitle = "(Tail / Total) integrals [None]";
     
     XSize = YSize = 0.05;
     XOffset = 1.1;
