@@ -555,18 +555,27 @@ void AAAcquisitionManager::StartAcquisition()
       }
     }// End readout event loop
     
-    if(TheSettings->SpectrumMode){
-      Int_t Entries = Spectrum_H[TheSettings->SpectrumChannel]->GetEntries();
-      Int_t Rate = TheSettings->SpectrumRefreshRate;
-      if(Entries % Rate == 0)
-	TheGraphicsManager->PlotSpectrum(Spectrum_H[TheSettings->SpectrumChannel]);
-    }
-    
-    else if(TheSettings->PSDMode){
-      Int_t Entries = Spectrum_H[TheSettings->SpectrumChannel]->GetEntries();
-      Int_t Rate = TheSettings->SpectrumRefreshRate;
-      if(Entries % Rate == 0)
-	TheGraphicsManager->PlotPSDHistogram(PSDHistogram_H[TheSettings->PSDChannel]);
+    // Only if the display is set to continuous then plot the spectra
+    // or PSD histogram; if the display mode is set to updateable the
+    // plotting is achieved by clicking the "Update Display" text
+    // button beneath the canvas. Plotting is disabled if the display
+    // mode is in nonupdateable mode.
+
+    if(TheSettings->DisplayContinuous){
+
+      if(TheSettings->SpectrumMode){
+	Int_t Entries = Spectrum_H[TheSettings->SpectrumChannel]->GetEntries();
+	Int_t Rate = TheSettings->SpectrumRefreshRate;
+	if(Entries % Rate == 0)
+	  TheGraphicsManager->PlotSpectrum(Spectrum_H[TheSettings->SpectrumChannel]);
+      }
+      
+      else if(TheSettings->PSDMode){
+	Int_t Entries = Spectrum_H[TheSettings->SpectrumChannel]->GetEntries();
+	Int_t Rate = TheSettings->SpectrumRefreshRate;
+	if(Entries % Rate == 0)
+	  TheGraphicsManager->PlotPSDHistogram(PSDHistogram_H[TheSettings->PSDChannel]);
+      }
     }
   } // End acquisition loop
 
