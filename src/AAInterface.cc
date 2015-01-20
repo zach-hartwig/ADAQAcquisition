@@ -1814,19 +1814,22 @@ void AAInterface::FillAcquisitionFrame()
   
   Display_HF0->AddFrame(DisplayTrigger_CB = new TGCheckButton(Display_HF0, "Trigger     ", DisplayTrigger_CB_ID),
 			new TGLayoutHints(kLHintsNormal, 0,0,2,0));
+  DisplayTrigger_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
   DisplayTrigger_CB->SetState(kButtonDown);
   
   Display_HF0->AddFrame(DisplayBaselineBox_CB = new TGCheckButton(Display_HF0, "Baseline box", DisplayBaselineBox_CB_ID),
 		       new TGLayoutHints(kLHintsNormal, 0,0,2,0));
+  DisplayBaselineBox_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
   DisplayBaselineBox_CB->SetState(kButtonDown);
 
 
   TGHorizontalFrame *Display_HF1 = new TGHorizontalFrame(DisplaySettings_GF);
   DisplaySettings_GF->AddFrame(Display_HF1, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
-
+  
   Display_HF1->AddFrame(DisplayPSDLimits_CB = new TGCheckButton(Display_HF1, "PSD limits  ", DisplayPSDLimits_CB_ID),
 			new TGLayoutHints(kLHintsNormal, 0,0,2,0));
-
+  DisplayPSDLimits_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
+  
   Display_HF1->AddFrame(DisplayZLEThreshold_CB = new TGCheckButton(Display_HF1, "ZLE thresh", DisplayZLEThreshold_CB_ID),
 			new TGLayoutHints(kLHintsNormal, 0,0,2,0));
 
@@ -1987,6 +1990,10 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
     DGChZLEForward_NEL[ch]->GetEntry()->SetState(WidgetState);
     DGChZLEPosLogic_RB[ch]->SetState(ButtonState);
     DGChZLENegLogic_RB[ch]->SetState(ButtonState);
+    DGChPSDTotalStart_NEL[ch]->GetEntry()->SetState(WidgetState);
+    DGChPSDTotalStop_NEL[ch]->GetEntry()->SetState(WidgetState);
+    DGChPSDTailStart_NEL[ch]->GetEntry()->SetState(WidgetState);
+    DGChPSDTailStop_NEL[ch]->GetEntry()->SetState(WidgetState);
   }
 
   AQWaveform_RB->SetEnabled(WidgetState);

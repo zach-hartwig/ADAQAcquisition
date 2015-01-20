@@ -70,8 +70,9 @@ private:
 
   TLegend * Waveform_LG;
   vector<TLine *> Trigger_L, ZLE_L;
-  vector<TBox *> Baseline_B, PSDTotal_B, PSDTail_B;
-
+  vector<TLine *> PSDTail_L0, PSDTail_L1;
+  vector<TBox *> Baseline_B, PSDTotal_B;
+  
   TLine *Spectrum_L, *SpectrumCalibration_L;
 
   TCanvas *TheCanvas_C;
@@ -88,8 +89,9 @@ private:
   double XSize, YSize, XOffset, YOffset;
 
   double XMin, XMax, YMin, YMax;
-
+  
   vector<TGraph *> WaveformGraphs;
+  TH1F *WaveformGraphAxes_H;
 };
 
 
