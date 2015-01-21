@@ -512,18 +512,37 @@ void AASubtabSlots::HandleTextButtons()
     }
     break;
   }
-
+    
     
   case ObjectSave_TB_ID:{
+    
+    if(TI->ObjectSaveWithTimeExtension_CB->IsDown()){
+
+      size_t Found0 = ObjectFileName.find_first_of(".");
+      size_t Found1 = ObjectFileName.find_last_of(".");
+      
+      if(Found1 != string::npos){
+	string FileName = ObjectFileName.substr(0, Found0);
+	string FileExtension = ObjectFileName.substr(Found1, string::npos);
+	
+	time_t Time = time(NULL);
+	
+	stringstream SS;
+	SS << "." << Time;
+	string TimeString = SS.str();
+	
+	ObjectFileName = FileName + TimeString + FileExtension;
+      }
+    }
     
     if(TI->WaveformOutput_RB->IsDown())
       cout << "\nAASubtabSlots::HandleTextButtons() : Waveform output is not yet implemented!\n"                                                                              
 	   << endl; 
-
+    
     else if(TI->SpectrumOutput_RB->IsDown())
       AAAcquisitionManager::GetInstance()->SaveObjectData("Spectrum",
 							  ObjectFileName);
-
+    
     else if(TI->PSDHistogramOutput_RB->IsDown())
       AAAcquisitionManager::GetInstance()->SaveObjectData("PSDHistogram",
 							  ObjectFileName);
@@ -560,11 +579,13 @@ void AASubtabSlots::HandleTextButtons()
     
   case CanvasSave_TB_ID:{
     
-    size_t Found = CanvasFileName.find_last_of(".");
+    size_t Found0 = CanvasFileName.find_first_of(".");
+    size_t Found1 = CanvasFileName.find_last_of(".");
     
-    if(Found != string::npos){
+    if(Found1 != string::npos){
       
-      string FileExtension = CanvasFileName.substr(Found, string::npos);
+      string FileName = CanvasFileName.substr(0, Found0);
+      string FileExtension = CanvasFileName.substr(Found1, string::npos);
       
       if(TI->CanvasSaveWithTimeExtension_CB->IsDown()){
 	time_t Time = time(NULL);
@@ -573,7 +594,7 @@ void AASubtabSlots::HandleTextButtons()
 	SS << "." << Time;
 	string TimeString = SS.str();
 	
-	CanvasFileName.insert(Found, TimeString);
+	CanvasFileName = FileName + TimeString + FileExtension;
       }
       TI->DisplayCanvas_EC->GetCanvas()->Update();
       TI->DisplayCanvas_EC->GetCanvas()->Print(CanvasFileName.c_str(),
