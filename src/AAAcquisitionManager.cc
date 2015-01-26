@@ -468,16 +468,25 @@ void AAAcquisitionManager::StartAcquisition()
 	  // the processed waveform data. Note that this is only done
 	  // for non-ultra rate modes since it requires analysis of
 	  // the waveforms.
+
+	  // Store pulse area/height data along with the baseline
+	  if(TheSettings->WaveformStoreEnergyData){
+	    WaveformData[ch]->SetBaseline(BaselineValue[ch]);
+	    WaveformData[ch]->SetPulseHeight(PulseHeight);
+	    WaveformData[ch]->SetPulseArea(PulseArea);
+	  }
 	  
-	  WaveformData[ch]->SetPulseHeight(PulseHeight);
-	  WaveformData[ch]->SetPulseArea(PulseArea);
-	  WaveformData[ch]->SetBaseline(BaselineValue[ch]);
-	  WaveformData[ch]->SetPSDTotalIntegral(PSDTotal);
-	  WaveformData[ch]->SetPSDTailIntegral(PSDTail);
+	  // Store the total and tail PSD integrals
+	  if(TheSettings->WaveformStorePSDData){
+	    WaveformData[ch]->SetPSDTotalIntegral(PSDTotal);
+	    WaveformData[ch]->SetPSDTailIntegral(PSDTail);
+	  }
+
+	  // Store the basic information about the waveform
 	  WaveformData[ch]->SetTimeStamp(TimeStamp);
 	  WaveformData[ch]->SetChannelID(ch);
 	  WaveformData[ch]->SetBoardID(DGManager->GetBoardID());
-
+	  
 	  // Use the calibration curves (ROOT TGraph's) to convert
 	  // the pulse height/area from ADC to the user's energy
 	  // units using linear interpolation calibration points
@@ -542,8 +551,12 @@ void AAAcquisitionManager::StartAcquisition()
 	
 	if(TheSettings->WaveformStoreRaw)
 	  TheReadoutManager->GetWaveformTree()->Fill();
+
+	// Fill the waveform data tree via the readout manager
 	
-	if(TheSettings->WaveformStoreEnergyData or TheSettings->WaveformStorePSDData)
+	if(TheSettings->WaveformStoreRaw or
+	   TheSettings->WaveformStoreEnergyData or 
+	   TheSettings->WaveformStorePSDData)
 	  TheReadoutManager->GetWaveformDataTree()->Fill();
 	
 	// Reset the bool used to determine if the LLD/ULD window
@@ -893,34 +906,38 @@ void AAAcquisitionManager::CreateADAQFile(string FileName)
   ADAQReadoutInformation *ARI = TheReadoutManager->GetReadoutInformation();
   
   // Set physical information about the digitizer device
-  ARI->SetDGModelName      (DGManager->GetBoardModelName() );
-  ARI->SetDGSerialNumber   (DGManager->GetBoardSerialNumber() );
-  ARI->SetDGNumChannels    (DGManager->GetNumChannels() );
-  ARI->SetDGBitDepth       (DGManager->GetNumADCBits() );
-  ARI->SetDGSamplingRate   (DGManager->GetSamplingRate() );
-  ARI->SetDGROCFWRevision  (DGManager->GetBoardROCFirmwareRevision() );
-  ARI->SetDGAMCFWRevision  (DGManager->GetBoardAMCFirmwareRevision() );
+  ARI->SetDGModelName      (DGManager->GetBoardModelName());
+  ARI->SetDGSerialNumber   (DGManager->GetBoardSerialNumber());
+  ARI->SetDGNumChannels    (DGManager->GetNumChannels());
+  ARI->SetDGBitDepth       (DGManager->GetNumADCBits());
+  ARI->SetDGSamplingRate   (DGManager->GetSamplingRate());
+  ARI->SetDGROCFWRevision  (DGManager->GetBoardROCFirmwareRevision());
+  ARI->SetDGAMCFWRevision  (DGManager->GetBoardAMCFirmwareRevision());
 
   // Fill the global acquisition settings
-  ARI->SetRecordLength         (TheSettings->RecordLength );
-  ARI->SetPostTrigger          (TheSettings->PostTrigger );
-  ARI->SetCoincidenceLevel     (TheSettings->TriggerCoincidenceLevel );
-  ARI->SetDataReductionMode    (TheSettings->DataReductionEnable );
-  ARI->SetZeroSuppressionMode  (TheSettings->ZeroSuppressionEnable );
-  ARI->SetTriggerType          (TheSettings->TriggerTypeName );
-  ARI->SetTriggerEdge          (TheSettings->TriggerEdgeName );
-  ARI->SetAcquisitionType      (TheSettings->AcquisitionControlName );
+  ARI->SetRecordLength         (TheSettings->RecordLength);
+  ARI->SetPostTrigger          (TheSettings->PostTrigger);
+  ARI->SetCoincidenceLevel     (TheSettings->TriggerCoincidenceLevel);
+  ARI->SetDataReductionMode    (TheSettings->DataReductionEnable);
+  ARI->SetZeroSuppressionMode  (TheSettings->ZeroSuppressionEnable);
+  ARI->SetTriggerType          (TheSettings->TriggerTypeName);
+  ARI->SetTriggerEdge          (TheSettings->TriggerEdgeName);
+  ARI->SetAcquisitionType      (TheSettings->AcquisitionControlName);
   
   // Fill the channel specific settings
-  ARI->SetTrigger          (TheSettings->ChTriggerThreshold );
-  ARI->SetBaselineCalcMin  (TheSettings->ChBaselineCalcMin );
-  ARI->SetBaselineCalcMax  (TheSettings->ChBaselineCalcMax );
-  ARI->SetChannelEnable    (TheSettings->ChEnable );
-  ARI->SetDCOffset         (TheSettings->ChDCOffset );
-  ARI->SetZLEFwd           (TheSettings->ChZLEForward );
-  ARI->SetZLEBck           (TheSettings->ChZLEBackward );
-  ARI->SetZLEThreshold     (TheSettings->ChZLEThreshold );
-
+  ARI->SetTrigger          (TheSettings->ChTriggerThreshold);
+  ARI->SetBaselineCalcMin  (TheSettings->ChBaselineCalcMin);
+  ARI->SetBaselineCalcMax  (TheSettings->ChBaselineCalcMax);
+  ARI->SetChannelEnable    (TheSettings->ChEnable);
+  ARI->SetDCOffset         (TheSettings->ChDCOffset);
+  ARI->SetZLEFwd           (TheSettings->ChZLEForward);
+  ARI->SetZLEBck           (TheSettings->ChZLEBackward);
+  ARI->SetZLEThreshold     (TheSettings->ChZLEThreshold);
+  ARI->SetPSDTotalStart    (TheSettings->ChPSDTotalStart);
+  ARI->SetPSDTotalStop     (TheSettings->ChPSDTotalStop);
+  ARI->SetPSDTailStart     (TheSettings->ChPSDTailStart);
+  ARI->SetPSDTailStop      (TheSettings->ChPSDTailStop);
+  
   // Fill information regarding waveform acquisition
   ARI->SetStoreRawWaveforms  (TheSettings->WaveformStoreRaw);
   ARI->SetStoreEnergyData    (TheSettings->WaveformStoreEnergyData);

@@ -59,7 +59,7 @@ using namespace boost::assign;
 
 AAInterface::AAInterface()
   : TGMainFrame(gClient->GetRoot()),
-    DisplayWidth(1113), DisplayHeight(833), 
+    DisplayWidth(1112), DisplayHeight(833), 
     ButtonForeColor(kWhite), ButtonBackColorOn(kGreen-5), ButtonBackColorOff(kRed-3),
     NumDataChannels(8), ColorManager(new TColor), NumVMEBoards(3)
 {
@@ -2355,9 +2355,9 @@ string AAInterface::CreateFileDialog(const char *FileTypes[],
   FileInformation.fFileTypes = FileTypes;
   FileInformation.fIniDir = StrDup(getenv("PWD"));
   new TGFileDialog(gClient->GetRoot(), this, DialogType, &FileInformation);
-
+  
   string FileName, FileExt;
-
+  
   if(FileInformation.fFilename == NULL)
     FileName = "NULL";
   else{
