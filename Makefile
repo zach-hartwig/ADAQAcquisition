@@ -1,7 +1,7 @@
 #********************************************************************
 #
 #  name: Makefile                  
-#  date: 28 Aug 14
+#  date: 26 Jan 15
 #  auth: Zach Hartwig              
 #  mail: hartwig@psfc.mit.edu
 #
@@ -9,9 +9,8 @@
 #
 #  dpnd: The build system requires the following dependencies:
 #        -- ROOT 
-#        -- ADAQ libraries
-#        -- CAEN libraries (CAENVME, CAENComm, CAENDigitizer)
-#        -- Boost, including Boost thread libraries
+#        -- ADAQ libraries (ADAQControl, ADAQReadout)
+#        -- Boost libraries (boost-thread)
 # 
 #  To build the binary
 #  $ make 
@@ -53,10 +52,11 @@ OBJS += $(BUILDDIR)/ADAQAcquisitionDict.o
 CXX = clang++
 CXXFLAGS += -ferror-limit=5 -w -I$(INCLDIR) -I$(ADAQHOME)/include -std=c++0x
 
-# Add linker flags for ADAQ libraries
-LDFLAGS+=-L$(ADAQHOME)/lib/$(HOSTTYPE) -lADAQ -lADAQReadout
+# Add linker flags for the ADAQ libraries
+LDFLAGS+=-L$(ADAQHOME)/lib/$(HOSTTYPE) -lADAQControl -lADAQReadout
 
-# Add linker flags for CAEN libraries (architecture dependent)
+# Add linker flags for CAEN libraries (architecture dependent). Note
+# that these libraries are PROVIDED by the ADAQ code
 LDFLAGS+=-L$(ADAQHOME)/lib/$(HOSTTYPE) -lCAENVME -lCAENComm -lCAENDigitizer -lncurses -lc -lm -lrt
 
 # Define the target binary
