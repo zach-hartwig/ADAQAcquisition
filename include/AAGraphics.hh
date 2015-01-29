@@ -19,6 +19,7 @@
 #include <TBox.h>
 #include <TCanvas.h>
 #include <TH1F.h>
+#include <TH2F.h>
 #include <TGraph.h>
 
 #include <vector>
@@ -43,23 +44,36 @@ public:
   void SetSettingsPointer(AASettings *TS) {TheSettings = TS;}
   
   void SetupWaveformGraphics(int);
-  void SetupSpectrumGraphics();
   
 #ifndef __CINT__
-  void PlotWaveforms(vector<vector<uint16_t> > &, int, vector<double> &);
+  //void PlotWaveforms(vector<vector<uint16_t> > &, int, vector<double> &;
+  void PlotWaveforms(vector<vector<uint16_t> > &, int);
 #endif
+  void DrawWaveformGraphics(vector<Double_t> &, 
+			    vector<Int_t> &,
+			    vector<Int_t> &,
+			    vector<Int_t> &,
+			    vector<Int_t> &,
+			    vector<Int_t> &);
+
+  void SetupSpectrumGraphics();
   void PlotSpectrum(TH1F *);
+  
+  void SetupPSDHistogramGraphics();
+  void PlotPSDHistogram(TH2F *);
+  
   void PlotCalibration(int);
 
-  ClassDef(AAGraphics, 0);
+  ClassDef(AAGraphics, 1);
   
 private:
   static AAGraphics *TheGraphicsManager;
 
   TLegend * Waveform_LG;
   vector<TLine *> Trigger_L, ZLE_L;
-  vector<TBox *> Baseline_B;
-
+  vector<TLine *> PSDPeak_L, PSDTail_L0, PSDTail_L1;
+  vector<TBox *> Baseline_B, PSDTotal_B;
+  
   TLine *Spectrum_L, *SpectrumCalibration_L;
 
   TCanvas *TheCanvas_C;
@@ -75,7 +89,10 @@ private:
   string Title, XTitle, YTitle;
   double XSize, YSize, XOffset, YOffset;
 
+  double XMin, XMax, YMin, YMax;
+  
   vector<TGraph *> WaveformGraphs;
+  TH1F *WaveformGraphAxes_H;
 };
 
 

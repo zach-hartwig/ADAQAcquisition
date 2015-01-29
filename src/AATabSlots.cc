@@ -103,10 +103,12 @@ void AATabSlots::HandleConnectionTextButtons()
       if(TheVMEManager->GetDGEnable()){
 	uint32_t Addr = TI->BoardAddress_NEF[V1720]->GetEntry()->GetHexNumber();
 	int Link = TI->BoardLinkNumber_NEL[V1720]->GetEntry()->GetIntNumber();
+	ZBoardType Type = (ZBoardType)TI->BoardType_CBL[V1720]->GetComboBox()->GetSelected();
 
 	TheVMEManager->SetDGAddress(Addr);
 	TheVMEManager->GetDGManager()->SetBoardAddress(Addr);
 	TheVMEManager->GetDGManager()->SetBoardLinkNumber(Link);
+	TheVMEManager->GetDGManager()->SetBoardType(Type);
 	
 	DGLinkOpen = TheVMEManager->GetDGManager()->OpenLink();
 	

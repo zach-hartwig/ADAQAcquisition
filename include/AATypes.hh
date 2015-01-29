@@ -150,9 +150,8 @@ enum{
 
   AQWaveform_RB_ID,
   AQSpectrum_RB_ID,
-  AQHighRate_RB_ID,
-  AQUltraRate_RB_ID,
-
+  AQPSDHistogram_RB_ID,
+  
   DGTriggerType_CBL_ID,
   DGTriggerEdge_CBL_ID,
   DGTriggerCoincidenceEnable_CB_ID,
@@ -199,18 +198,50 @@ enum{
   SpectrumCalibrationLoad_TB_ID,
   SpectrumCalibrationWrite_TB_ID,
 
+  // Pulse discrimination
+  
+  PSDChannel_CBL_ID,
+  PSDYAxisTail_RB_ID,
+  PSDYAxisTailTotal_RB_ID,
+
+  // Persistent storage subtab
+
+  WaveformFileName_TB_ID,
+  WaveformCreateFile_TB_ID,
+  WaveformCloseFile_TB_ID,
+  WaveformStorageEnable_CB_ID,
+  WaveformStoreRaw_CB_ID,
+  WaveformStoreEnergyData_CB_ID,
+  WaveformStorePSDData_CB_ID,
+  
+  WaveformOutput_RB_ID,
+  SpectrumOutput_RB_ID,
+  PSDHistogramOutput_RB_ID,
+  ObjectOutputType_CBL_ID,
+  ObjectOutputFileName_TB_ID,
+  ObjectSaveWithTimeExtension_CB_ID,
+  ObjectSave_TB_ID,
+  
+  CanvasFileName_TB_ID,
+  CanvasSaveWithTimeExtension_CB_ID,
+  CanvasSave_TB_ID,
+
   // Graphics subtab
 
+  DisplayTrigger_CB_ID,
+  DisplayBaselineBox_CB_ID,
+  DisplayPSDLimits_CB_ID,
+  DisplayZLEThreshold_CB_ID,
   DisplayLegend_CB_ID,
   DisplayGrid_CB_ID,
   DisplayXAxisLog_CB_ID,
   DisplayYAxisLog_CB_ID,
 
-  DrawWaveformWithCurve_RB_ID,
+  DrawWaveformWithLine_RB_ID,
   DrawWaveformWithMarkers_RB_ID,
   DrawWaveformWithBoth_RB_ID,
 
-  DrawSpectrumWithCurve_RB_ID,
+  DrawSpectrumWithLine_RB_ID,
   DrawSpectrumWithMarkers_RB_ID,
   DrawSpectrumWithBars_RB_ID,
 
@@ -223,20 +254,9 @@ enum{
   DisplayYSize_NEL_ID,
   DisplayYOffset_NEL_ID,
 
-  // Persistent storage subtab
-
-  WaveformFileName_TB_ID,
-  WaveformCreateFile_TB_ID,
-  WaveformCloseFile_TB_ID,
-  WaveformStorageEnable_CB_ID,
-
-  SpectrumFileName_TB_ID,
-  SpectrumSaveWithTimeExtension_CB_ID,
-  SpectrumSave_TB_ID,
-  
-  CanvasFileName_TB_ID,
-  CanvasSaveWithTimeExtension_CB_ID,
-  CanvasSave_TB_ID
+  DisplayContinuous_RB_ID,
+  DisplayUpdateable_RB_ID,
+  DisplayNonUpdateable_RB_ID
 };
 
 struct CalibrationDataStruct{

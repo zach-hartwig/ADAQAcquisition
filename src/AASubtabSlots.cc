@@ -25,8 +25,8 @@
 
 AASubtabSlots::AASubtabSlots(AAInterface *TheInterface)
   : TI(TheInterface),
-    WaveformFileName("DefaultWaveforms.adaq"),
-    SpectrumFileName("DefaultSpectrum.root"),
+    WaveformFileName("DefaultWaveforms.adaq.root"),
+    ObjectFileName("DefaultObject.root"),
     CanvasFileName("DefaultCanvas.eps")
 {;}
 
@@ -83,7 +83,7 @@ void AASubtabSlots::HandleCheckButtons()
 void AASubtabSlots::HandleComboBoxes(int ActiveID, int SelectedID)
 {
   TI->SaveSettings();
-
+  
   AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
   
   if(!TheVMEManager->GetVMEConnectionEstablished())
@@ -424,15 +424,14 @@ void AASubtabSlots::HandleTextButtons()
 
   case WaveformFileName_TB_ID:{
     
-    const char *FileTypes[] = {"ADAQ ROOT file","*.adaq",
-			       "ADAQ ROOT file","*.root",
+    const char *FileTypes[] = {"ADAQ ROOT file","*.adaq.root",
 			       0, 0};
-
+    
     WaveformFileName = TI->CreateFileDialog(FileTypes, kFDOpen);
     
     if(WaveformFileName == "NULL")
-      WaveformFileName = "DefaultWaveforms.adaq";
-
+      WaveformFileName = "DefaultWaveforms.adaq.root";
+    
     string FileNameNoPath = WaveformFileName;
     
     size_t Found = FileNameNoPath.find_last_of("/");
@@ -445,6 +444,8 @@ void AASubtabSlots::HandleTextButtons()
   }
 
     
+
+    
   case WaveformCreateFile_TB_ID:{
     
     TheACQManager->CreateADAQFile(WaveformFileName);
@@ -455,10 +456,12 @@ void AASubtabSlots::HandleTextButtons()
     TI->WaveformCreateFile_TB->SetState(kButtonDisabled);
     TI->WaveformCreateFile_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOn));
     TI->WaveformCreateFile_TB->SetForegroundColor(TI->ColorManager->Number2Pixel(TI->ButtonForeColor));
-    TI->WaveformCreateFile_TB->SetText("ADAQ file created");
+    TI->WaveformCreateFile_TB->SetText("File open!");
     TI->WaveformCloseFile_TB->SetState(kButtonUp);
     TI->WaveformStorageEnable_CB->SetState(kButtonUp);
-  
+    TI->WaveformStoreRaw_CB->SetState(kButtonDisabled);
+    TI->WaveformStoreEnergyData_CB->SetState(kButtonDisabled);
+    TI->WaveformStorePSDData_CB->SetState(kButtonDisabled);
     break;
   }
 
@@ -472,44 +475,77 @@ void AASubtabSlots::HandleTextButtons()
       TI->WaveformCreateFile_TB->SetState(kButtonUp);
       TI->WaveformCreateFile_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(18));
       TI->WaveformCreateFile_TB->SetForegroundColor(TI->ColorManager->Number2Pixel(kBlack));
-      TI->WaveformCreateFile_TB->SetText("Create ADAQ file");
+      TI->WaveformCreateFile_TB->SetText("Create");
       TI->WaveformCloseFile_TB->SetState(kButtonDisabled);
       TI->WaveformStorageEnable_CB->SetState(kButtonUp);
       TI->WaveformStorageEnable_CB->SetState(kButtonDisabled);
+      TI->WaveformStoreRaw_CB->SetState(kButtonUp);
+      TI->WaveformStoreEnergyData_CB->SetState(kButtonUp);
+      TI->WaveformStorePSDData_CB->SetState(kButtonUp);
     }
     
     break;
   }
 
 
-  case SpectrumFileName_TB_ID:{
+  case ObjectOutputFileName_TB_ID:{
     
     // Set the allowable file type extensions. These will be used to
     // determine the format of the data output to file
-    const char *FileTypes[] = {"Space-separated format", "*.dat",
+    const char *FileTypes[] = {"ROOT File"             , "*.root",
+			       "Space-separated format", "*.dat",
 			       "Comma-separated format", "*.csv",
-			       "ROOT File"             , "*.root",
 			       0, 0};
     
-    SpectrumFileName = TI->CreateFileDialog(FileTypes, kFDOpen);
+    ObjectFileName = TI->CreateFileDialog(FileTypes, kFDOpen);
     
-    if(SpectrumFileName == "NULL"){
+    if(ObjectFileName == "NULL"){
     }
     else{
-      string FileNameNoPath = SpectrumFileName;
+      string FileNameNoPath = ObjectFileName;
       
       size_t Found = FileNameNoPath.find_last_of("/");
       if(Found != string::npos)
 	FileNameNoPath = FileNameNoPath.substr(Found+1, FileNameNoPath.size());
       
-      TI->SpectrumFileName_TEL->GetEntry()->SetText(FileNameNoPath.c_str());
+      TI->ObjectOutputFileName_TEL->GetEntry()->SetText(FileNameNoPath.c_str());
     }
     break;
   }
-
     
-  case SpectrumSave_TB_ID:{
-    AAAcquisitionManager::GetInstance()->SaveSpectrum(SpectrumFileName);
+    
+  case ObjectSave_TB_ID:{
+    
+    if(TI->ObjectSaveWithTimeExtension_CB->IsDown()){
+
+      size_t Found0 = ObjectFileName.find_first_of(".");
+      size_t Found1 = ObjectFileName.find_last_of(".");
+      
+      if(Found1 != string::npos){
+	string FileName = ObjectFileName.substr(0, Found0);
+	string FileExtension = ObjectFileName.substr(Found1, string::npos);
+	
+	time_t Time = time(NULL);
+	
+	stringstream SS;
+	SS << "." << Time;
+	string TimeString = SS.str();
+	
+	ObjectFileName = FileName + TimeString + FileExtension;
+      }
+    }
+    
+    if(TI->WaveformOutput_RB->IsDown())
+      cout << "\nAASubtabSlots::HandleTextButtons() : Waveform output is not yet implemented!\n"                                                                              
+	   << endl; 
+    
+    else if(TI->SpectrumOutput_RB->IsDown())
+      AAAcquisitionManager::GetInstance()->SaveObjectData("Spectrum",
+							  ObjectFileName);
+    
+    else if(TI->PSDHistogramOutput_RB->IsDown())
+      AAAcquisitionManager::GetInstance()->SaveObjectData("PSDHistogram",
+							  ObjectFileName);
     break;
   }
     
@@ -543,11 +579,13 @@ void AASubtabSlots::HandleTextButtons()
     
   case CanvasSave_TB_ID:{
     
-    size_t Found = CanvasFileName.find_last_of(".");
+    size_t Found0 = CanvasFileName.find_first_of(".");
+    size_t Found1 = CanvasFileName.find_last_of(".");
     
-    if(Found != string::npos){
+    if(Found1 != string::npos){
       
-      string FileExtension = CanvasFileName.substr(Found, string::npos);
+      string FileName = CanvasFileName.substr(0, Found0);
+      string FileExtension = CanvasFileName.substr(Found1, string::npos);
       
       if(TI->CanvasSaveWithTimeExtension_CB->IsDown()){
 	time_t Time = time(NULL);
@@ -556,7 +594,7 @@ void AASubtabSlots::HandleTextButtons()
 	SS << "." << Time;
 	string TimeString = SS.str();
 	
-	CanvasFileName.insert(Found, TimeString);
+	CanvasFileName = FileName + TimeString + FileExtension;
       }
       TI->DisplayCanvas_EC->GetCanvas()->Update();
       TI->DisplayCanvas_EC->GetCanvas()->Print(CanvasFileName.c_str(),
@@ -585,33 +623,43 @@ void AASubtabSlots::HandleRadioButtons()
     TI->SpectrumULD_NEL->GetEntry()->SetNumber(TI->TheSettings->SpectrumMaxBin);
     break;
 
-  case DrawWaveformWithCurve_RB_ID:
+  case PSDYAxisTail_RB_ID:
+    if(TI->PSDYAxisTail_RB->IsDown())
+      TI->PSDYAxisTailTotal_RB->SetState(kButtonUp);
+    break;
+    
+  case PSDYAxisTailTotal_RB_ID:
+    if(TI->PSDYAxisTailTotal_RB->IsDown())
+      TI->PSDYAxisTail_RB->SetState(kButtonUp);
+    break;
+    
+  case DrawWaveformWithLine_RB_ID:
     TI->DrawWaveformWithMarkers_RB->SetState(kButtonUp);
     TI->DrawWaveformWithBoth_RB->SetState(kButtonUp);
     break;
     
   case DrawWaveformWithMarkers_RB_ID:
-    TI->DrawWaveformWithCurve_RB->SetState(kButtonUp);
+    TI->DrawWaveformWithLine_RB->SetState(kButtonUp);
     TI->DrawWaveformWithBoth_RB->SetState(kButtonUp);
     break;
     
   case DrawWaveformWithBoth_RB_ID:
-    TI->DrawWaveformWithCurve_RB->SetState(kButtonUp);
+    TI->DrawWaveformWithLine_RB->SetState(kButtonUp);
     TI->DrawWaveformWithMarkers_RB->SetState(kButtonUp);
     break;
     
-  case DrawSpectrumWithCurve_RB_ID:
+  case DrawSpectrumWithLine_RB_ID:
     TI->DrawSpectrumWithMarkers_RB->SetState(kButtonUp);
     TI->DrawSpectrumWithBars_RB->SetState(kButtonUp);
     break;
     
   case DrawSpectrumWithMarkers_RB_ID:
-    TI->DrawSpectrumWithCurve_RB->SetState(kButtonUp);
+    TI->DrawSpectrumWithLine_RB->SetState(kButtonUp);
     TI->DrawSpectrumWithBars_RB->SetState(kButtonUp);
     break;
     
   case DrawSpectrumWithBars_RB_ID:
-    TI->DrawSpectrumWithCurve_RB->SetState(kButtonUp);
+    TI->DrawSpectrumWithLine_RB->SetState(kButtonUp);
     TI->DrawSpectrumWithMarkers_RB->SetState(kButtonUp);
     break;
   }

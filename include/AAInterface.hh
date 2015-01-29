@@ -100,14 +100,21 @@ private:
   vector<int> HVChPower_TB_ID_Vec;
   map<int,int> HVChPower_TB_ID_Map;
 
-  // Variables for use with digitizer control
+  // Channel-specific variables for acquisition setting widgets
   vector<string> DGChannelLabels;
   vector<int> DGChEnable_CB_ID_Vec;
   vector<int> DGChDCOffset_NEL_ID_Vec;
   vector<int> DGChTriggerThreshold_NEL_ID_Vec;
+  map<int,int> DGChTriggerThreshold_NEL_ID_Map;
+
+  // Channel-specific variables for analysis setting widgets
   vector<int> DGChBaselineCalcMin_NEL_ID_Vec;
   vector<int> DGChBaselineCalcMax_NEL_ID_Vec;
-  map<int,int> DGChTriggerThreshold_NEL_ID_Map;
+  vector<int> DGChPSDTotalStart_NEL_ID_Vec;
+  vector<int> DGChPSDTotalStop_NEL_ID_Vec;
+  vector<int> DGChPSDTailStart_NEL_ID_Vec;
+  vector<int> DGChPSDTailStop_NEL_ID_Vec;
+
   const int NumDataChannels;
 
   // Object to convert numeric color to pixel color
@@ -205,13 +212,18 @@ private:
   TGRadioButton *DGChNegPolarity_RB[8];
   ADAQNumberEntryWithLabel *DGChDCOffset_NEL[8];
   ADAQNumberEntryWithLabel *DGChTriggerThreshold_NEL[8];
-  ADAQNumberEntryWithLabel *DGChBaselineCalcMin_NEL[8];
-  ADAQNumberEntryWithLabel *DGChBaselineCalcMax_NEL[8];
   ADAQNumberEntryWithLabel *DGChZLEThreshold_NEL[8];
   ADAQNumberEntryWithLabel *DGChZLESamples_NEL[8];
   ADAQNumberEntryWithLabel *DGChZLEForward_NEL[8];
   ADAQNumberEntryWithLabel *DGChZLEBackward_NEL[8];
   TGRadioButton *DGChZLEPosLogic_RB[8], *DGChZLENegLogic_RB[8];
+  
+  ADAQNumberEntryWithLabel *DGChBaselineCalcMin_NEL[8];
+  ADAQNumberEntryWithLabel *DGChBaselineCalcMax_NEL[8];
+  ADAQNumberEntryWithLabel *DGChPSDTotalStart_NEL[8];
+  ADAQNumberEntryWithLabel *DGChPSDTotalStop_NEL[8];
+  ADAQNumberEntryWithLabel *DGChPSDTailStart_NEL[8];
+  ADAQNumberEntryWithLabel *DGChPSDTailStop_NEL[8];
   
   // Display specific widgets (in the upper-right subframe)
 
@@ -222,10 +234,9 @@ private:
 
   // Subtab specific widgets (in the bottom-right subframe)
   
-  // Acquisition subtab
-
-  TGRadioButton *AQWaveform_RB, *AQSpectrum_RB;
-  TGRadioButton *AQHighRate_RB, *AQUltraRate_RB;
+  // Data acquisition subtab
+  
+  TGRadioButton *AQWaveform_RB, *AQSpectrum_RB, *AQPSDHistogram_RB;
 
   ADAQComboBoxWithLabel *DGTriggerType_CBL;
   ADAQComboBoxWithLabel *DGTriggerEdge_CBL;
@@ -247,7 +258,7 @@ private:
   ADAQNumberEntryWithLabel *AQDataReductionFactor_NEL;
   TGCheckButton *DGZLEEnable_CB;
   
-  // Spectrum
+  // Pulse spectra subtab
 
   ADAQComboBoxWithLabel *SpectrumChannel_CBL;
   ADAQNumberEntryWithLabel *SpectrumNumBins_NEL;
@@ -274,13 +285,46 @@ private:
   TGTextButton *SpectrumCalibrationLoad_TB;
   TGTextButton *SpectrumCalibrationWrite_TB;
 
-  // Graphics
+  // Pulse discrimination subtab
   
+  ADAQComboBoxWithLabel *PSDChannel_CBL;
+  TGRadioButton *PSDYAxisTail_RB, *PSDYAxisTailTotal_RB;
+  ADAQNumberEntryWithLabel *PSDThreshold_NEL;
+  ADAQNumberEntryWithLabel *PSDTotalBins_NEL, *PSDTailBins_NEL;
+  ADAQNumberEntryWithLabel *PSDTotalMinBin_NEL, *PSDTotalMaxBin_NEL;
+  ADAQNumberEntryWithLabel *PSDTailMinBin_NEL, *PSDTailMaxBin_NEL;
+
+  // Persistent storage subtab
+
+  TGTextButton *WaveformFileName_TB;
+  ADAQTextEntryWithLabel *WaveformFileName_TEL;
+  TGTextButton *WaveformCreateFile_TB;
+  TGTextButton *WaveformCloseFile_TB;
+  TGCheckButton *WaveformStorageEnable_CB;
+  TGCheckButton *WaveformStoreRaw_CB;
+  TGCheckButton *WaveformStoreEnergyData_CB;
+  TGCheckButton *WaveformStorePSDData_CB;
+
+  TGRadioButton *WaveformOutput_RB, *SpectrumOutput_RB, *PSDHistogramOutput_RB;
+  ADAQComboBoxWithLabel *ObjectOutputChannel_CBL;
+  TGTextButton *ObjectOutputFileName_TB;
+  ADAQTextEntryWithLabel *ObjectOutputFileName_TEL;
+  TGCheckButton *ObjectSaveWithTimeExtension_CB;
+  TGTextButton *ObjectSave_TB;
+  
+  TGTextButton *CanvasFileName_TB;
+  ADAQTextEntryWithLabel *CanvasFileName_TEL;
+  TGCheckButton *CanvasSaveWithTimeExtension_CB;
+  TGTextButton *CanvasSave_TB;
+  
+  // Graphics
+  TGCheckButton *DisplayTrigger_CB, *DisplayPSDLimits_CB;  
+  TGCheckButton *DisplayBaselineBox_CB, *DisplayZLEThreshold_CB;
   TGCheckButton *DisplayLegend_CB, *DisplayGrid_CB;
   TGCheckButton *DisplayXAxisLog_CB, *DisplayYAxisLog_CB;
   
-  TGRadioButton *DrawWaveformWithCurve_RB, *DrawWaveformWithMarkers_RB, *DrawWaveformWithBoth_RB;
-  TGRadioButton *DrawSpectrumWithCurve_RB, *DrawSpectrumWithMarkers_RB, *DrawSpectrumWithBars_RB;
+  TGRadioButton *DrawWaveformWithLine_RB, *DrawWaveformWithMarkers_RB, *DrawWaveformWithBoth_RB;
+  TGRadioButton *DrawSpectrumWithLine_RB, *DrawSpectrumWithMarkers_RB, *DrawSpectrumWithBars_RB;
   
   TGCheckButton *DisplayTitlesEnable_CB;
   ADAQTextEntryWithLabel *DisplayTitle_TEL, *DisplayXTitle_TEL, *DisplayYTitle_TEL;
@@ -289,26 +333,11 @@ private:
 
   ADAQNumberEntryWithLabel *SpectrumRefreshRate_NEL;
 
-  // Persistent storage
+  TGRadioButton *DisplayContinuous_RB, *DisplayUpdateable_RB, *DisplayNonUpdateable_RB;
 
-  TGTextButton *WaveformFileName_TB;
-  ADAQTextEntryWithLabel *WaveformFileName_TEL;
-  TGTextButton *WaveformCreateFile_TB;
-  TGTextButton *WaveformCloseFile_TB;
-  TGCheckButton *WaveformStorageEnable_CB;
-
-  TGTextButton *SpectrumFileName_TB;
-  ADAQTextEntryWithLabel *SpectrumFileName_TEL;
-  TGCheckButton *SpectrumSaveWithTimeExtension_CB;
-  TGTextButton *SpectrumSave_TB;
-  
-  TGTextButton *CanvasFileName_TB;
-  ADAQTextEntryWithLabel *CanvasFileName_TEL;
-  TGCheckButton *CanvasSaveWithTimeExtension_CB;
-  TGTextButton *CanvasSave_TB;
 
   // Define the AAInterface class to ROOT 
-  ClassDef(AAInterface, 0);
+  ClassDef(AAInterface, 1);
 };
 
 

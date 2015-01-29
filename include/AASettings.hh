@@ -19,10 +19,6 @@
 #include <iostream>
 using namespace std;
 
-#ifndef __CINT__
-#include <boost/cstdint.hpp>
-#endif
-
 class AASettings : public TObject
 {
 public:
@@ -33,119 +29,144 @@ public:
     ChNegPolarity.resize(Channels);
     ChDCOffset.resize(Channels);
     ChTriggerThreshold.resize(Channels);
-    ChBaselineCalcMin.resize(Channels);
-    ChBaselineCalcMax.resize(Channels);
     ChZLEThreshold.resize(Channels);
     ChZLEForward.resize(Channels);
     ChZLEBackward.resize(Channels);
     ChZLEPosLogic.resize(Channels);
     ChZLENegLogic.resize(Channels);
+    ChBaselineCalcMin.resize(Channels);
+    ChBaselineCalcMax.resize(Channels);
+    ChPSDTotalStart.resize(Channels);
+    ChPSDTotalStop.resize(Channels);
+    ChPSDTailStart.resize(Channels);
+    ChPSDTailStop.resize(Channels);
   }
   
-#ifndef __CINT__
-
   //////////////////////////
   // Channel widget settings
   
-  vector<bool>     ChEnable;
-  vector<bool>     ChPosPolarity;
-  vector<bool>     ChNegPolarity;
-  vector<uint32_t> ChDCOffset;
-  vector<uint32_t> ChTriggerThreshold;
-  vector<uint32_t> ChBaselineCalcMin;
-  vector<uint32_t> ChBaselineCalcMax;
-  vector<uint32_t> ChZLEThreshold;
-  vector<uint32_t> ChZLEForward;
-  vector<uint32_t> ChZLEBackward;
-  vector<bool>     ChZLEPosLogic;
-  vector<bool>     ChZLENegLogic;
+  vector<Bool_t>  ChEnable;
+  vector<Bool_t>  ChPosPolarity;
+  vector<Bool_t>  ChNegPolarity;
+  vector<Int_t>   ChDCOffset;
+  vector<Int_t>   ChTriggerThreshold;
+  vector<Int_t>   ChZLEThreshold;
+  vector<Int_t>   ChZLEForward;
+  vector<Int_t>   ChZLEBackward;
+  vector<Bool_t>  ChZLEPosLogic;
+  vector<Bool_t>  ChZLENegLogic;
+
+  vector<Int_t>   ChBaselineCalcMin;
+  vector<Int_t>   ChBaselineCalcMax;
+  vector<Int_t>   ChPSDTotalStart;
+  vector<Int_t>   ChPSDTotalStop;
+  vector<Int_t>   ChPSDTailStart;
+  vector<Int_t>   ChPSDTailStop;
 
 
   //////////////////////////
   // Display widget settings
 
-  double HorizontalSliderPtr;
-  double HorizontalSliderMin, HorizontalSliderMax;
-  double VerticalSliderMin, VerticalSliderMax;
+  Double_t HorizontalSliderPtr;
+  Double_t HorizontalSliderMin, HorizontalSliderMax;
+  Double_t VerticalSliderMin, VerticalSliderMax;
 
 
   ///////////////////////////////////////
   // Acquisition control widget settings
 
   // Type
-  bool WaveformMode;
-  bool SpectrumMode;
-  bool HighRateMode;
-  bool UltraRateMode;
+  Bool_t WaveformMode;
+  Bool_t SpectrumMode;
+  Bool_t PSDMode;
 
   // Trigger
-  bool TriggerCoincidenceEnable;
-  uint32_t TriggerCoincidenceLevel;
-  uint32_t TriggerType;
-  uint32_t TriggerEdge;
-
+  Bool_t TriggerCoincidenceEnable;
+  Int_t TriggerCoincidenceLevel;
+  Int_t TriggerType, TriggerEdge;
+  string TriggerTypeName, TriggerEdgeName;
+  
   // Acquisition
-  uint32_t AcquisitionControl;
-  uint32_t RecordLength;
-  uint32_t PostTrigger;
-  uint32_t AcquisitionTime;
+  Int_t AcquisitionControl;
+  string AcquisitionControlName;
+  Int_t RecordLength;
+  Int_t PostTrigger;
+  Int_t AcquisitionTime;
 
   // Readout
-  uint32_t EventsBeforeReadout;
-  bool DataReductionEnable;
-  uint32_t DataReductionFactor;
-  bool ZeroSuppressionEnable;
+  Int_t EventsBeforeReadout;
+  Bool_t DataReductionEnable;
+  Int_t DataReductionFactor;
+  Bool_t ZeroSuppressionEnable;
 
   
   ////////////////////////////////////
   // Spectrum creation widget settings
 
   // Histogram
-  uint32_t SpectrumChannel;
-  uint32_t SpectrumNumBins;
-  uint32_t SpectrumMinBin;
-  uint32_t SpectrumMaxBin;
+  Int_t SpectrumChannel;
+  Int_t SpectrumNumBins;
+  Int_t SpectrumMinBin;
+  Int_t SpectrumMaxBin;
 
   // Analysis
-  bool SpectrumPulseHeight, SpectrumPulseArea;
-  uint32_t SpectrumLLD, SpectrumULD;
-  bool LDEnable;
-  bool LDTrigger;
-  uint32_t LDChannel;
+  Bool_t SpectrumPulseHeight, SpectrumPulseArea;
+  Int_t SpectrumLLD, SpectrumULD;
+  Bool_t LDEnable;
+  Bool_t LDTrigger;
+  Int_t LDChannel;
 
   // Calibration
-  bool SpectrumCalibrationEnable;
-  bool SpectrumCalibrationUseSlider;
+  Bool_t SpectrumCalibrationEnable;
+  Bool_t SpectrumCalibrationUseSlider;
 
+
+  //////////////////////////////
+  // Pulse discrimination limits
+
+  Int_t PSDChannel;
+  Bool_t PSDYAxisTail, PSDYAxisTailTotal;
+  Double_t PSDThreshold;
+  Int_t PSDTotalBins, PSDTailBins;
+  Double_t PSDTotalMinBin, PSDTotalMaxBin;
+  Double_t PSDTailMinBin, PSDTailMaxBin;
+  
 
   ///////////////////////////
   // Graphics widget settings
 
-  bool DisplayTitlesEnable;
+  Bool_t DisplayTitlesEnable;
   
   string DisplayTitle, DisplayXTitle, DisplayYTitle;
-  double DisplayXTitleSize, DisplayXTitleOffset;
-  double DisplayYTitleSize, DisplayYTitleOffset;
+  Double_t DisplayXTitleSize, DisplayXTitleOffset;
+  Double_t DisplayYTitleSize, DisplayYTitleOffset;
 
-  bool DisplayLegend, DisplayGrid;
-  bool DisplayXAxisInLog, DisplayYAxisInLog;
+  Bool_t DisplayTrigger, DisplayBaselineBox;
+  Bool_t DisplayPSDLimits, DisplayZLEThreshold;
+  Bool_t DisplayLegend, DisplayGrid;
 
-  bool WaveformWithCurve, WaveformWithMarkers, WaveformWithBoth;
-  bool SpectrumWithCurve, SpectrumWithMarkers, SpectrumWithBars;
+  Bool_t DisplayXAxisInLog, DisplayYAxisInLog;
+
+  Bool_t WaveformWithLine, WaveformWithMarkers, WaveformWithBoth;
+  Bool_t SpectrumWithLine, SpectrumWithMarkers, SpectrumWithBars;
 
   int SpectrumRefreshRate;
+
+  Bool_t DisplayContinuous, DisplayUpdateable, DisplayNonUpdateable;
 
   
   //////////////////////////////
   // Persistent storage settings
   
-  bool WaveformStorageEnable;
-  bool SpectrumSaveWithTimeExtension;
-  bool CanvasSaveWithTimeExtension;
+  Bool_t WaveformStorageEnable;
+  Bool_t WaveformStoreRaw;
+  Bool_t WaveformStoreEnergyData;
+  Bool_t WaveformStorePSDData;
 
-#endif
-
-  ClassDef(AASettings, 0);
+  Bool_t ObjectSaveWithTimeExtension;
+  Bool_t CanvasSaveWithTimeExtension;
+  
+  ClassDef(AASettings, 1);
 };
 
 #endif

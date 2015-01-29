@@ -59,7 +59,7 @@ using namespace boost::assign;
 
 AAInterface::AAInterface()
   : TGMainFrame(gClient->GetRoot()),
-    DisplayWidth(1124), DisplayHeight(833), 
+    DisplayWidth(1112), DisplayHeight(833), 
     ButtonForeColor(kWhite), ButtonBackColorOn(kGreen-5), ButtonBackColorOff(kRed-3),
     NumDataChannels(8), ColorManager(new TColor), NumVMEBoards(3)
 {
@@ -129,6 +129,11 @@ AAInterface::AAInterface()
     (int)DGCh3TriggerThreshold_NEL_ID, (int)DGCh4TriggerThreshold_NEL_ID, (int)DGCh5TriggerThreshold_NEL_ID, 
     (int)DGCh6TriggerThreshold_NEL_ID, (int)DGCh7TriggerThreshold_NEL_ID;
 
+  insert(DGChTriggerThreshold_NEL_ID_Map)
+    ((int)DGCh0TriggerThreshold_NEL_ID,0) ((int)DGCh1TriggerThreshold_NEL_ID,1) ((int)DGCh2TriggerThreshold_NEL_ID,2) 
+    ((int)DGCh3TriggerThreshold_NEL_ID,3) ((int)DGCh4TriggerThreshold_NEL_ID,4) ((int)DGCh5TriggerThreshold_NEL_ID,5)
+    ((int)DGCh6TriggerThreshold_NEL_ID,6) ((int)DGCh7TriggerThreshold_NEL_ID,7);
+
   DGChBaselineCalcMin_NEL_ID_Vec += 
     (int)DGCh0BaselineCalcMin_NEL_ID, (int)DGCh1BaselineCalcMin_NEL_ID, (int)DGCh2BaselineCalcMin_NEL_ID, 
     (int)DGCh3BaselineCalcMin_NEL_ID, (int)DGCh4BaselineCalcMin_NEL_ID, (int)DGCh5BaselineCalcMin_NEL_ID,
@@ -138,11 +143,6 @@ AAInterface::AAInterface()
     (int)DGCh0BaselineCalcMax_NEL_ID, (int)DGCh1BaselineCalcMax_NEL_ID, (int)DGCh2BaselineCalcMax_NEL_ID,
     (int)DGCh3BaselineCalcMax_NEL_ID, (int)DGCh4BaselineCalcMax_NEL_ID, (int)DGCh5BaselineCalcMax_NEL_ID, 
     (int)DGCh6BaselineCalcMax_NEL_ID, (int)DGCh7BaselineCalcMax_NEL_ID;
-  
-  insert(DGChTriggerThreshold_NEL_ID_Map)
-    ((int)DGCh0TriggerThreshold_NEL_ID,0) ((int)DGCh1TriggerThreshold_NEL_ID,1) ((int)DGCh2TriggerThreshold_NEL_ID,2) 
-    ((int)DGCh3TriggerThreshold_NEL_ID,3) ((int)DGCh4TriggerThreshold_NEL_ID,4) ((int)DGCh5TriggerThreshold_NEL_ID,5)
-    ((int)DGCh6TriggerThreshold_NEL_ID,6) ((int)DGCh7TriggerThreshold_NEL_ID,7);
 
 
   ////////////////////////////////////////
@@ -155,33 +155,33 @@ AAInterface::AAInterface()
   ///////////////////////////////////////
   // Fill each of the top-level frames //
   ///////////////////////////////////////
+  
 
   FillConnectionFrame();
   FillRegisterFrame();
 
   if(TheVMEManager->GetBREnable())
     FillPulserFrame();
-  
+
   if(TheVMEManager->GetHVEnable())
     FillVoltageFrame();
-  
-  if(TheVMEManager->GetBREnable())
+
+  if(TheVMEManager->GetDGEnable())
     FillAcquisitionFrame();
-  
 
   ///////////////////////////////////////////
   // Set manager pointers for later access //
   ///////////////////////////////////////////
 
   TheVMEManager->SetSettingsPointer(TheSettings);
-  
+
   AAAcquisitionManager::GetInstance()->SetInterfacePointer(this);
   AAAcquisitionManager::GetInstance()->SetSettingsPointer(TheSettings);
-  
+
   AAGraphics::GetInstance()->SetCanvasPointer(DisplayCanvas_EC->GetCanvas());
-  AAGraphics::GetInstance()->SetSettingsPointer(TheSettings);
-
-
+  if(TheVMEManager->GetDGEnable())
+    AAGraphics::GetInstance()->SetSettingsPointer(TheSettings);
+  
   ////////////////////////////////
   // Final setup of main window //
   ////////////////////////////////
@@ -340,7 +340,7 @@ void AAInterface::FillConnectionFrame()
       BoardType_CBL[board]->GetComboBox()->AddEntry("V1724", zV1724);
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5720", zDT5720);
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5730", zDT5730);
-      BoardType_CBL[board]->GetComboBox()->Select(zV1720);
+      BoardType_CBL[board]->GetComboBox()->Select(zDT5720);
     }
     else if(board == 2){
       BoardType_CBL[board]->GetComboBox()->AddEntry("V6533M", zV6533M);
@@ -820,33 +820,40 @@ void AAInterface::FillAcquisitionFrame()
     DGChannelControls_VF->AddFrame(DGChannelControl_GF, new TGLayoutHints(kLHintsCenterX, 5, 5, 5, 0));
     DGChannelControl_GF->SetTitlePos(TGGroupFrame::kLeft);
     
+    DGChannelControl_GF->AddFrame(new TGLabel(DGChannelControl_GF, "Acquisition settings"),
+				  new TGLayoutHints(kLHintsLeft,0,0,5,0));
+    
     // Horizontal frame to hold the "enable" and "pulse polarity" buttons
     TGHorizontalFrame *DGChannelControl_HF = new TGHorizontalFrame(DGChannelControl_GF);
     DGChannelControl_GF->AddFrame(DGChannelControl_HF);
     
     // ROOT check button to enable channel for digitization
     DGChannelControl_HF->AddFrame(DGChEnable_CB[ch] = new TGCheckButton(DGChannelControl_HF, "Enable", DGChEnable_CB_ID_Vec[ch]),
-				  new TGLayoutHints(kLHintsCenterY,0,0,0,0));
+				  new TGLayoutHints(kLHintsCenterY,10,0,0,0));
     if(ch == 0) 
       DGChEnable_CB[ch]->SetState(kButtonDown);
 
     // TGLabel for the pulse polarity radio buttons
-    DGChannelControl_HF->AddFrame(new TGLabel(DGChannelControl_HF,"Pulse \n polarity"),
-				       new TGLayoutHints(kLHintsCenterY,25,0,5,0));
+
+    DGChannelControl_HF->AddFrame(new TGLabel(DGChannelControl_HF,"Polarity:"),
+				  new TGLayoutHints(kLHintsCenterY,25,0,5,0));
 
     TGHButtonGroup *DGChPolarity_BG = new TGHButtonGroup(DGChannelControl_HF, "");
     DGChPolarity_BG->SetTitlePos(TGButtonGroup::kCenter);
     DGChPolarity_BG->SetBorderDrawn(false);
-    DGChannelControl_HF->AddFrame(DGChPolarity_BG, new TGLayoutHints(kLHintsRight,-1,-15,-10,-10));
+    DGChannelControl_HF->AddFrame(DGChPolarity_BG, new TGLayoutHints(kLHintsNormal,-2,-15,-10,-10));
 
     DGChPosPolarity_RB[ch] = new TGRadioButton(DGChPolarity_BG, "+  ", -1);
     DGChNegPolarity_RB[ch] = new TGRadioButton(DGChPolarity_BG, "-", -1);
     DGChNegPolarity_RB[ch]->SetState(kButtonDown);
     DGChPolarity_BG->Show();
 
+
+
+
     // ADAQ number entry to set channel's DAC offset 
     DGChannelControl_GF->AddFrame(DGChDCOffset_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "DC offset (hex)", DGChDCOffset_NEL_ID_Vec[ch]),
-				  new TGLayoutHints(kLHintsNormal));
+				  new TGLayoutHints(kLHintsNormal, 10,0,0,0));
     DGChDCOffset_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESHex);
     DGChDCOffset_NEL[ch]->GetEntry()->SetNumLimits(TGNumberFormat::kNELLimitMinMax);
     DGChDCOffset_NEL[ch]->GetEntry()->SetLimitValues(0x0000,0xffff);
@@ -854,68 +861,137 @@ void AAInterface::FillAcquisitionFrame()
     DGChDCOffset_NEL[ch]->GetEntry()->Resize(55,20);
     
     // ADAQ number entry to set channel's trigger threshold [ADC]
-    DGChannelControl_GF->AddFrame(DGChTriggerThreshold_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "Trig. Threshold (ADC)", DGChTriggerThreshold_NEL_ID_Vec[ch]),
-				       new TGLayoutHints(kLHintsNormal));
+    DGChannelControl_GF->AddFrame(DGChTriggerThreshold_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "Trigger (ADC)", DGChTriggerThreshold_NEL_ID_Vec[ch]),
+				  new TGLayoutHints(kLHintsNormal, 10,0,0,0));
     DGChTriggerThreshold_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
     DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
     DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumber(2000);
     DGChTriggerThreshold_NEL[ch]->GetEntry()->Resize(55,20);
-    
-    // ADAQ number entry to set minimum sample for baseline calculation [sample]
-    DGChannelControl_GF->AddFrame(DGChBaselineCalcMin_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "Baseline min. (sample)", DGChBaselineCalcMin_NEL_ID_Vec[ch]),
-				  new TGLayoutHints(kLHintsNormal));
-    DGChBaselineCalcMin_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
-    
-    DGChBaselineCalcMin_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-    DGChBaselineCalcMin_NEL[ch]->GetEntry()->SetNumber(10);
-    DGChBaselineCalcMin_NEL[ch]->GetEntry()->Resize(55,20);
 
-    // ADAQ number entry to set maximum sample for baseline calculation [sample]
-    DGChannelControl_GF->AddFrame(DGChBaselineCalcMax_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "Baseline max. (sample)", DGChBaselineCalcMax_NEL_ID_Vec[ch]),
-				  new TGLayoutHints(kLHintsNormal));
-    DGChBaselineCalcMax_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-    DGChBaselineCalcMax_NEL[ch]->GetEntry()->SetNumber(45);
-    DGChBaselineCalcMax_NEL[ch]->GetEntry()->Resize(55,20);
+    
+    DGChannelControl_GF->AddFrame(new TGLabel(DGChannelControl_GF, "Zero Length Encoding (ZLE)"),
+				  new TGLayoutHints(kLHintsLeft,0,0,10,0));
+    
+    TGHorizontalFrame *ZLE_HF1 = new TGHorizontalFrame(DGChannelControl_GF);
+    DGChannelControl_GF->AddFrame(ZLE_HF1, new TGLayoutHints(kLHintsNormal, 10,0,0,0));
 
-    DGChannelControl_GF->AddFrame(DGChZLEThreshold_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "ZLE threshold (ADC)", -1),
-				       new TGLayoutHints(kLHintsNormal));
+    ZLE_HF1->AddFrame(new TGLabel(ZLE_HF1, "Logic: "),
+		      new TGLayoutHints(kLHintsNormal, 0,0,5,0));
+    
+    TGHButtonGroup *ZLELogicButtons_BG = new TGHButtonGroup(ZLE_HF1,"");
+    ZLELogicButtons_BG->SetBorderDrawn(false);
+    ZLE_HF1->AddFrame(ZLELogicButtons_BG, new TGLayoutHints(kLHintsNormal, -1,-15,-10,-10));
+    
+    DGChZLEPosLogic_RB[ch] = new TGRadioButton(ZLELogicButtons_BG, "+  ", -1);
+    
+    DGChZLENegLogic_RB[ch] = new TGRadioButton(ZLELogicButtons_BG, "-", -1);
+    DGChZLENegLogic_RB[ch]->SetState(kButtonDown);
+
+    
+    DGChannelControl_GF->AddFrame(DGChZLEThreshold_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "Threshold (ADC)", -1),
+				  new TGLayoutHints(kLHintsNormal, 10,0,0,0));
     DGChZLEThreshold_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
     DGChZLEThreshold_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEANonNegative);
     DGChZLEThreshold_NEL[ch]->GetEntry()->SetNumber(2100);
     DGChZLEThreshold_NEL[ch]->GetEntry()->Resize(55,20);
-
+    
 
     TGHorizontalFrame *ZLE_HF0 = new TGHorizontalFrame(DGChannelControl_GF);
-    DGChannelControl_GF->AddFrame(ZLE_HF0, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
-
-    ZLE_HF0->AddFrame(DGChZLEForward_NEL[ch] = new ADAQNumberEntryWithLabel(ZLE_HF0, "ZLE Frwd", -1),
+    DGChannelControl_GF->AddFrame(ZLE_HF0, new TGLayoutHints(kLHintsNormal, 10,0,0,0));
+    
+    ZLE_HF0->AddFrame(DGChZLEForward_NEL[ch] = new ADAQNumberEntryWithLabel(ZLE_HF0, "Frwd", -1),
 		     new TGLayoutHints(kLHintsNormal, 0,0,0,0));
     DGChZLEForward_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
     DGChZLEForward_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
     DGChZLEForward_NEL[ch]->GetEntry()->SetNumber(10);
     DGChZLEForward_NEL[ch]->GetEntry()->Resize(55,20);
 
-    ZLE_HF0->AddFrame(DGChZLEBackward_NEL[ch] = new ADAQNumberEntryWithLabel(ZLE_HF0, "ZLE Back", -1),
-		     new TGLayoutHints(kLHintsNormal, 10,0,0,0));
+    ZLE_HF0->AddFrame(DGChZLEBackward_NEL[ch] = new ADAQNumberEntryWithLabel(ZLE_HF0, "Back", -1),
+		     new TGLayoutHints(kLHintsNormal, 15,0,0,0));
     DGChZLEBackward_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
     DGChZLEBackward_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
     DGChZLEBackward_NEL[ch]->GetEntry()->SetNumber(10);
     DGChZLEBackward_NEL[ch]->GetEntry()->Resize(55,20);
 
-    TGHorizontalFrame *ZLE_HF1 = new TGHorizontalFrame(DGChannelControl_GF);
-    DGChannelControl_GF->AddFrame(ZLE_HF1, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
 
-    ZLE_HF1->AddFrame(new TGLabel(ZLE_HF1, "ZLE Logic"),
-		     new TGLayoutHints(kLHintsNormal, 60,0,5,0));
     
-    TGHButtonGroup *ZLELogicButtons_BG = new TGHButtonGroup(ZLE_HF1,"");
-    ZLELogicButtons_BG->SetBorderDrawn(false);
-    ZLE_HF1->AddFrame(ZLELogicButtons_BG, new TGLayoutHints(kLHintsNormal, -1,-15,-10,-10));
+    ////////////////////////////////////////
+    // Channel-specific analysis settings //
+    ////////////////////////////////////////
 
-    DGChZLEPosLogic_RB[ch] = new TGRadioButton(ZLELogicButtons_BG, "+  ", -1);
+    DGChannelControl_GF->AddFrame(new TGLabel(DGChannelControl_GF, "Baseline analysis (abs. sample)"),
+				  new TGLayoutHints(kLHintsLeft,0,0,10,5));
     
-    DGChZLENegLogic_RB[ch] = new TGRadioButton(ZLELogicButtons_BG, "-", -1);
-    DGChZLENegLogic_RB[ch]->SetState(kButtonDown);
+    TGHorizontalFrame *DGBaseline_HF = new TGHorizontalFrame(DGChannelControl_GF);
+    DGChannelControl_GF->AddFrame(DGBaseline_HF, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+    
+    // ADAQ number entry to set minimum sample for baseline calculation [sample]
+    DGBaseline_HF->AddFrame(DGChBaselineCalcMin_NEL[ch] = new ADAQNumberEntryWithLabel(DGBaseline_HF, "Min.", DGChBaselineCalcMin_NEL_ID_Vec[ch]),
+			    new TGLayoutHints(kLHintsNormal, 10,0,0,0));
+    DGChBaselineCalcMin_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
+    
+    DGChBaselineCalcMin_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+    DGChBaselineCalcMin_NEL[ch]->GetEntry()->SetNumber(0);
+    DGChBaselineCalcMin_NEL[ch]->GetEntry()->Resize(55,20);
+
+    // ADAQ number entry to set maximum sample for baseline calculation [sample]
+    DGBaseline_HF->AddFrame(DGChBaselineCalcMax_NEL[ch] = new ADAQNumberEntryWithLabel(DGBaseline_HF, "Max.", DGChBaselineCalcMax_NEL_ID_Vec[ch]),
+			    new TGLayoutHints(kLHintsNormal, 15,0.0,0));
+    DGChBaselineCalcMax_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+    DGChBaselineCalcMax_NEL[ch]->GetEntry()->SetNumber(30);
+    DGChBaselineCalcMax_NEL[ch]->GetEntry()->Resize(55,20);
+
+
+    DGChannelControl_GF->AddFrame(new TGLabel(DGChannelControl_GF, "PSD analysis (sample rel. to peak)"),
+				  new TGLayoutHints(kLHintsLeft,0,0,10,5));
+    
+    TGHorizontalFrame *DGPSDTotal_HF = new TGHorizontalFrame(DGChannelControl_GF);
+    DGChannelControl_GF->AddFrame(DGPSDTotal_HF, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+
+    DGPSDTotal_HF->AddFrame(new TGLabel(DGPSDTotal_HF, "Total: "),
+			    new TGLayoutHints(kLHintsLeft,10,0,5,0));
+    
+    DGPSDTotal_HF->AddFrame(DGChPSDTotalStart_NEL[ch] = new ADAQNumberEntryWithLabel(DGPSDTotal_HF,
+										     "Start",
+										     -1),
+			    new TGLayoutHints(kLHintsNormal, 0,10,0,0));
+    DGChPSDTotalStart_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+    DGChPSDTotalStart_NEL[ch]->GetEntry()->SetNumber(-10);
+    DGChPSDTotalStart_NEL[ch]->GetEntry()->Resize(45,20);
+    
+    
+    DGPSDTotal_HF->AddFrame(DGChPSDTotalStop_NEL[ch] = new ADAQNumberEntryWithLabel(DGPSDTotal_HF,
+										    "Stop",
+										    -1),
+			    new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+    DGChPSDTotalStop_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+    DGChPSDTotalStop_NEL[ch]->GetEntry()->SetNumber(39);
+    DGChPSDTotalStop_NEL[ch]->GetEntry()->Resize(45,20);
+
+
+    TGHorizontalFrame *DGPSDTail_HF = new TGHorizontalFrame(DGChannelControl_GF);
+    DGChannelControl_GF->AddFrame(DGPSDTail_HF, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+    
+    DGPSDTail_HF->AddFrame(new TGLabel(DGPSDTail_HF, "Tail:  "),
+			   new TGLayoutHints(kLHintsLeft,10,0,5,0));
+   
+    DGPSDTail_HF->AddFrame(DGChPSDTailStart_NEL[ch] = new ADAQNumberEntryWithLabel(DGPSDTail_HF,
+										   "Start",
+										   -1),
+			   new TGLayoutHints(kLHintsNormal, 0,10,0,0));
+    DGChPSDTailStart_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+    DGChPSDTailStart_NEL[ch]->GetEntry()->SetNumber(7);
+    DGChPSDTailStart_NEL[ch]->GetEntry()->Resize(45,20);
+    
+    
+    DGPSDTail_HF->AddFrame(DGChPSDTailStop_NEL[ch] = new ADAQNumberEntryWithLabel(DGPSDTail_HF,
+										  "Stop",
+										  -1),
+			   new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+    DGChPSDTailStop_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+    DGChPSDTailStop_NEL[ch]->GetEntry()->SetNumber(39);
+    DGChPSDTailStop_NEL[ch]->GetEntry()->Resize(45,20);
+    
   }
   
 
@@ -970,7 +1046,6 @@ void AAInterface::FillAcquisitionFrame()
   DisplayHorizontalScale_THS->SetBackgroundColor(ColorManager->Number2Pixel(18));
   DisplayHorizontalScale_THS->Connect("PositionChanged()", "AADisplaySlots", DisplaySlots, "HandleDoubleSliders()");
   DisplayHorizontalScale_THS->Connect("PointerPositionChanged()", "AADisplaySlots", DisplaySlots, "HandleSliderPointers()");
-  
 
   TGHorizontalFrame *DGScopeDisplayButtons_HF = new TGHorizontalFrame(Display_VF);
   DGScopeDisplayButtons_HF->SetBackgroundColor(ColorManager->Number2Pixel(22));
@@ -1020,19 +1095,23 @@ void AAInterface::FillAcquisitionFrame()
 
   TGTab *AQControlSubtabs = new TGTab(SubtabFrame);
 
-  TGCompositeFrame *AcquisitionSubtab = AQControlSubtabs->AddTab("Acquisition control");
+  TGCompositeFrame *AcquisitionSubtab = AQControlSubtabs->AddTab(" Data acquisition ");
   TGCompositeFrame *AcquisitionSubframe = new TGCompositeFrame(AcquisitionSubtab, 0, 0, kHorizontalFrame);
   AcquisitionSubtab->AddFrame(AcquisitionSubframe);
   
-  TGCompositeFrame *SpectrumSubtab = AQControlSubtabs->AddTab("Spectrum creation");
+  TGCompositeFrame *SpectrumSubtab = AQControlSubtabs->AddTab(" Pulse spectra ");
   TGCompositeFrame *SpectrumSubframe = new TGCompositeFrame(SpectrumSubtab, 0, 0, kHorizontalFrame);
   SpectrumSubtab->AddFrame(SpectrumSubframe);
   
-  TGCompositeFrame *DataSubtab = AQControlSubtabs->AddTab("Peristent storage");
+  TGCompositeFrame *PSDSubtab = AQControlSubtabs->AddTab(" Pulse discrimination ");
+  TGCompositeFrame *PSDSubframe = new TGCompositeFrame(PSDSubtab, 0, 0, kHorizontalFrame);
+  PSDSubtab->AddFrame(PSDSubframe);
+  
+  TGCompositeFrame *DataSubtab = AQControlSubtabs->AddTab(" Persistent storage ");
   TGCompositeFrame *DataSubframe = new TGCompositeFrame(DataSubtab, 0, 0, kHorizontalFrame);
   DataSubtab->AddFrame(DataSubframe);
-
-  TGCompositeFrame *GraphicsSubtab = AQControlSubtabs->AddTab("Graphics settings");
+  
+  TGCompositeFrame *GraphicsSubtab = AQControlSubtabs->AddTab(" Graphics display ");
   TGCompositeFrame *GraphicsSubframe = new TGCompositeFrame(GraphicsSubtab, 0, 0, kHorizontalFrame);
   GraphicsSubtab->AddFrame(GraphicsSubframe);
 
@@ -1046,13 +1125,14 @@ void AAInterface::FillAcquisitionFrame()
   TGVerticalFrame *DGScopeModeAndTrigger_VF = new TGVerticalFrame(AcquisitionSubframe);
   AcquisitionSubframe->AddFrame(DGScopeModeAndTrigger_VF, new TGLayoutHints(kLHintsNormal,0,0,0,0));
 
+
   ////////////////
   // Mode controls 
 
   // ROOT radio buttons to specify operational mode of DGScope:
   // "Waveform" == oscilloscope, "Spectrum" == MCA, "Blank" == display
   // no graphics for high data throughput
-  TGButtonGroup *DGScopeMode_BG = new TGButtonGroup(DGScopeModeAndTrigger_VF, "Scope Display Mode", kVerticalFrame);
+  TGButtonGroup *DGScopeMode_BG = new TGButtonGroup(DGScopeModeAndTrigger_VF, "Acquisition display", kVerticalFrame);
   DGScopeMode_BG->SetTitlePos(TGButtonGroup::kCenter);
   DGScopeModeAndTrigger_VF->AddFrame(DGScopeMode_BG, new TGLayoutHints(kLHintsExpandX,5,5,5,5));
   
@@ -1061,11 +1141,10 @@ void AAInterface::FillAcquisitionFrame()
 
   AQSpectrum_RB = new TGRadioButton(DGScopeMode_BG, "Pulse spectrum", AQSpectrum_RB_ID);
 
-  AQHighRate_RB = new TGRadioButton(DGScopeMode_BG, "High-rate (updateable)", AQHighRate_RB_ID);
+  AQPSDHistogram_RB = new TGRadioButton(DGScopeMode_BG, "PSD Histogram", AQPSDHistogram_RB_ID);
 
-  AQUltraRate_RB = new TGRadioButton(DGScopeMode_BG, "Ultra-rate (non-updateable)", AQUltraRate_RB_ID);
-  
   DGScopeMode_BG->Show();
+
 
   ///////////////////
   // Trigger controls
@@ -1128,13 +1207,14 @@ void AAInterface::FillAcquisitionFrame()
   DGAcquisitionControl_CBL->GetComboBox()->AddEntry("Gated (TTL)",2);
   DGAcquisitionControl_CBL->GetComboBox()->Select(0);
   
-
+  
   // ADAQ number entry specifying number of samples
   DGAcquisitionControl_GF->AddFrame(DGRecordLength_NEL = new ADAQNumberEntryWithLabel(DGAcquisitionControl_GF, "Record length (#)", DGRecordLength_NEL_ID),
-					  new TGLayoutHints(kLHintsNormal,5,5,5,0));
+				    new TGLayoutHints(kLHintsNormal,5,5,5,0));
   DGRecordLength_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-  DGRecordLength_NEL->GetEntry()->SetNumber(2000);
-
+  DGRecordLength_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+  DGRecordLength_NEL->GetEntry()->SetNumber(1000);
+  
   // ADAQ number entry specifying the percentage of the acquisition
   // window that is behind (or after) the triggern (all channels)
   DGAcquisitionControl_GF->AddFrame(DGPostTrigger_NEL = new ADAQNumberEntryWithLabel(DGAcquisitionControl_GF, "Post trigger (%)", DGPostTriggerSize_NEL_ID),
@@ -1181,8 +1261,8 @@ void AAInterface::FillAcquisitionFrame()
 				      new TGLayoutHints(kLHintsNormal, 5,5,5,5));
   DGEventsBeforeReadout_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
   DGEventsBeforeReadout_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
-  DGEventsBeforeReadout_NEL->GetEntry()->SetNumber(5);
- 
+  DGEventsBeforeReadout_NEL->GetEntry()->SetNumber(15);
+  
   DGScopeReadoutControls_GF->AddFrame(DGCheckBufferStatus_TB = new TGTextButton(DGScopeReadoutControls_GF, "Check FPGA Buffer", CheckBufferStatus_TB_ID),
 				      new TGLayoutHints(kLHintsNormal, 5,5,5,0));
   DGCheckBufferStatus_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
@@ -1222,7 +1302,7 @@ void AAInterface::FillAcquisitionFrame()
 
   // ADAQ combo box for selecting the channel for display spectrum
   SpectrumHistogram_GF->AddFrame(SpectrumChannel_CBL = new ADAQComboBoxWithLabel(SpectrumHistogram_GF, "", SpectrumChannel_CBL_ID),
-					new TGLayoutHints(kLHintsNormal,0,0,5,5));
+				 new TGLayoutHints(kLHintsNormal,0,0,5,5));
   for(uint32_t ch=0; ch<8; ch++)
     SpectrumChannel_CBL->GetComboBox()->AddEntry(DGChannelLabels[ch].c_str(),ch);
   SpectrumChannel_CBL->GetComboBox()->Select(0);
@@ -1259,15 +1339,15 @@ void AAInterface::FillAcquisitionFrame()
   SpectrumAnalysis_GF->SetTitlePos(TGGroupFrame::kCenter);
   SpectrumSubframe->AddFrame(SpectrumAnalysis_GF);
 
-  TGHButtonGroup *SpectrumAnalysis_BG = new TGHButtonGroup(SpectrumAnalysis_GF,"Analysis");
+  TGVButtonGroup *SpectrumAnalysis_BG = new TGVButtonGroup(SpectrumAnalysis_GF,"Analysis");
   SpectrumAnalysis_BG->SetBorderDrawn(false);
-  SpectrumAnalysis_GF->AddFrame(SpectrumAnalysis_BG, new TGLayoutHints(kLHintsNormal,-13,0,0,0));
+  SpectrumAnalysis_GF->AddFrame(SpectrumAnalysis_BG, new TGLayoutHints(kLHintsNormal,-13,0,0,-3));
   
-  SpectrumPulseHeight_RB = new TGRadioButton(SpectrumAnalysis_BG, "PHS  ", SpectrumPulseHeight_RB_ID);
+  SpectrumPulseHeight_RB = new TGRadioButton(SpectrumAnalysis_BG, "Pulse height spectrum  ", SpectrumPulseHeight_RB_ID);
   SpectrumPulseHeight_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
   
   
-  SpectrumPulseArea_RB = new TGRadioButton(SpectrumAnalysis_BG, "PAS", SpectrumPulseArea_RB_ID);
+  SpectrumPulseArea_RB = new TGRadioButton(SpectrumAnalysis_BG, "Pulse area spectrum", SpectrumPulseArea_RB_ID);
   SpectrumPulseArea_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
   SpectrumPulseArea_RB->SetState(kButtonDown);
 
@@ -1422,6 +1502,94 @@ void AAInterface::FillAcquisitionFrame()
   SpectrumCalibrationWrite_TB->ChangeOptions(SpectrumCalibrationLoad_TB->GetOptions() | kFixedSize);
   SpectrumCalibrationWrite_TB->SetState(kButtonDisabled);
 
+
+  //////////////////////////
+  // Pulse discrimination //
+  //////////////////////////
+  
+  TGGroupFrame *PSDHistogram_GF = new TGGroupFrame(PSDSubframe, "PSD histogram", kVerticalFrame);
+  PSDHistogram_GF->SetTitlePos(TGGroupFrame::kCenter);
+  PSDSubframe->AddFrame(PSDHistogram_GF, new TGLayoutHints(kLHintsNormal, 5,5,5,5));
+
+  TGHorizontalFrame *PSDOptions_HF = new TGHorizontalFrame(PSDHistogram_GF);
+  PSDHistogram_GF->AddFrame(PSDOptions_HF, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+  
+  // ADAQ combo box for selecting the channel for display spectrum
+  PSDOptions_HF->AddFrame(PSDChannel_CBL = new ADAQComboBoxWithLabel(PSDOptions_HF, "", PSDChannel_CBL_ID),
+			  new TGLayoutHints(kLHintsNormal,0,0,10,0));
+  for(uint32_t ch=0; ch<8; ch++)
+    PSDChannel_CBL->GetComboBox()->AddEntry(DGChannelLabels[ch].c_str(),ch);
+  PSDChannel_CBL->GetComboBox()->Select(0);
+  PSDChannel_CBL->GetComboBox()->Resize(80,20);
+  PSDChannel_CBL->GetComboBox()->Connect("Selected(int,int)", "AASubtabSlots", SubtabSlots, "HandleComboBoxes(int,int)");
+  
+  TGVerticalFrame *PSDOptions_VF = new TGVerticalFrame(PSDOptions_HF);
+  PSDOptions_HF->AddFrame(PSDOptions_VF, new TGLayoutHints(kLHintsNormal,0,0,0,0));
+  
+  PSDOptions_VF->AddFrame(PSDYAxisTail_RB = new TGRadioButton(PSDOptions_VF, "Total v. tail", PSDYAxisTail_RB_ID),
+			  new TGLayoutHints(kLHintsNormal, 0,0,5,0));
+  PSDYAxisTail_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
+  PSDYAxisTail_RB->SetState(kButtonDown);
+  
+  PSDOptions_VF->AddFrame(PSDYAxisTailTotal_RB = new TGRadioButton(PSDOptions_VF, "Total v. tail/total", PSDYAxisTailTotal_RB_ID),
+			  new TGLayoutHints(kLHintsNormal, 0,0,0,10));
+  PSDYAxisTailTotal_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
+  
+
+  PSDHistogram_GF->AddFrame(PSDTotalBins_NEL = new ADAQNumberEntryWithLabel(PSDHistogram_GF, "Number of total bins", -1),
+			    new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+  PSDTotalBins_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+  PSDTotalBins_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+  PSDTotalBins_NEL->GetEntry()->SetNumber(100);
+  PSDTotalBins_NEL->GetEntry()->Resize(60, 20);
+
+  TGHorizontalFrame *PSDTotal_HF = new TGHorizontalFrame(PSDHistogram_GF);
+  PSDHistogram_GF->AddFrame(PSDTotal_HF, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+
+  PSDTotal_HF->AddFrame(PSDTotalMinBin_NEL = new ADAQNumberEntryWithLabel(PSDTotal_HF, "Min.", -1),
+			new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+  PSDTotalMinBin_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
+  PSDTotalMinBin_NEL->GetEntry()->SetNumber(0);
+  PSDTotalMinBin_NEL->GetEntry()->Resize(60, 20);
+  
+  PSDTotal_HF->AddFrame(PSDTotalMaxBin_NEL = new ADAQNumberEntryWithLabel(PSDTotal_HF, "Max.", -1),
+			new TGLayoutHints(kLHintsNormal, 10,0,0,0));
+  PSDTotalMaxBin_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
+  PSDTotalMaxBin_NEL->GetEntry()->SetNumber(10000);
+  PSDTotalMaxBin_NEL->GetEntry()->Resize(60, 20);
+
+  
+  PSDHistogram_GF->AddFrame(PSDTailBins_NEL = new ADAQNumberEntryWithLabel(PSDHistogram_GF, "Number of tail bins", -1),
+			    new TGLayoutHints(kLHintsNormal, 0,0,10,0));
+  PSDTailBins_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+  PSDTailBins_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+  PSDTailBins_NEL->GetEntry()->SetNumber(100);
+  PSDTailBins_NEL->GetEntry()->Resize(60, 20);
+
+  TGHorizontalFrame *PSDTail_HF = new TGHorizontalFrame(PSDHistogram_GF);
+  PSDHistogram_GF->AddFrame(PSDTail_HF, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+
+  PSDTail_HF->AddFrame(PSDTailMinBin_NEL = new ADAQNumberEntryWithLabel(PSDTail_HF, "Min.", -1),
+		       new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+  PSDTailMinBin_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
+  PSDTailMinBin_NEL->GetEntry()->SetNumber(0);
+  PSDTailMinBin_NEL->GetEntry()->Resize(60, 20);
+  
+  PSDTail_HF->AddFrame(PSDTailMaxBin_NEL = new ADAQNumberEntryWithLabel(PSDTail_HF, "Max.", -1),
+		       new TGLayoutHints(kLHintsNormal, 10,0,0,0));
+  PSDTailMaxBin_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
+  PSDTailMaxBin_NEL->GetEntry()->SetNumber(3000);
+  PSDTailMaxBin_NEL->GetEntry()->Resize(60, 20);
+  
+  
+  PSDHistogram_GF->AddFrame(PSDThreshold_NEL = new ADAQNumberEntryWithLabel(PSDHistogram_GF, "Threshold (ADC)", -1),
+			    new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+  PSDThreshold_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
+  PSDThreshold_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+  PSDThreshold_NEL->GetEntry()->SetNumber(100);
+  PSDThreshold_NEL->GetEntry()->Resize(60, 20);
+  
+
   //////////////////
   // Data storage //
   //////////////////
@@ -1430,43 +1598,53 @@ void AAInterface::FillAcquisitionFrame()
   WaveformStorage_GF->SetTitlePos(TGGroupFrame::kCenter);
   DataSubframe->AddFrame(WaveformStorage_GF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
 
-  WaveformStorage_GF->AddFrame(WaveformFileName_TB = new TGTextButton(WaveformStorage_GF, "Waveform data file name", WaveformFileName_TB_ID),
+  WaveformStorage_GF->AddFrame(WaveformFileName_TB = new TGTextButton(WaveformStorage_GF, "ADAQ file name", WaveformFileName_TB_ID),
 				  new TGLayoutHints(kLHintsNormal,10,5,5,0));
   WaveformFileName_TB->Connect("Clicked()","AASubtabSlots", SubtabSlots, "HandleTextButtons()");
   WaveformFileName_TB->Resize(175, 30);
   WaveformFileName_TB->ChangeOptions(WaveformFileName_TB->GetOptions() | kFixedSize);
 
   WaveformStorage_GF->AddFrame(WaveformFileName_TEL = new ADAQTextEntryWithLabel(WaveformStorage_GF, "", -1),
-				      new TGLayoutHints(kLHintsNormal,10,5,5,0));
+				      new TGLayoutHints(kLHintsNormal,10,5,5,5));
   WaveformFileName_TEL->GetEntry()->Resize(175, 25);
   WaveformFileName_TEL->GetEntry()->ChangeOptions(WaveformFileName_TEL->GetOptions() | kFixedSize | kSunkenFrame);
   WaveformFileName_TEL->GetEntry()->SetState(false);
-  WaveformFileName_TEL->GetEntry()->SetText("DefaultWaveforms.adaq");
+  WaveformFileName_TEL->GetEntry()->SetText("DefaultWaveforms.adaq.root");
   
-  // ROOT text button to create a root file using the name in the text entry field above
-  WaveformStorage_GF->AddFrame(WaveformCreateFile_TB = new TGTextButton(WaveformStorage_GF,"Create ADAQ file", WaveformCreateFile_TB_ID),
-				  new TGLayoutHints(kLHintsNormal,10,5,8,5));
+ 
+  WaveformStorage_GF->AddFrame(WaveformStoreRaw_CB = new TGCheckButton(WaveformStorage_GF,"Store raw waveforms",WaveformStoreRaw_CB_ID),
+			       new TGLayoutHints(kLHintsNormal,10,5,0,0));
+  WaveformStoreRaw_CB->SetState(kButtonDown);
+  
+  WaveformStorage_GF->AddFrame(WaveformStoreEnergyData_CB = new TGCheckButton(WaveformStorage_GF,"Store energy data",WaveformStoreEnergyData_CB_ID),
+			       new TGLayoutHints(kLHintsNormal,10,5,0,0));
+
+  WaveformStorage_GF->AddFrame(WaveformStorePSDData_CB = new TGCheckButton(WaveformStorage_GF,"Store PSD data",WaveformStorePSDData_CB_ID),
+			       new TGLayoutHints(kLHintsNormal,10,5,0,0));
+
+
+  TGHorizontalFrame *WaveformCreateClose_HF = new TGHorizontalFrame(WaveformStorage_GF);
+  WaveformStorage_GF->AddFrame(WaveformCreateClose_HF, new TGLayoutHints(kLHintsNormal,0,0,5,0));
+  
+  WaveformCreateClose_HF->AddFrame(WaveformCreateFile_TB = new TGTextButton(WaveformCreateClose_HF,"Create", WaveformCreateFile_TB_ID),
+				  new TGLayoutHints(kLHintsNormal,10,0,8,5));
   WaveformCreateFile_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
-  WaveformCreateFile_TB->Resize(175,30);
+  WaveformCreateFile_TB->Resize(85,30);
   WaveformCreateFile_TB->ChangeOptions(WaveformCreateFile_TB->GetOptions() | kFixedSize);
   WaveformCreateFile_TB->SetState(kButtonDisabled);
 
-  // ROOT text button to write all data to the ROOT file and close it. This button MUST be clicked to 
-  // successfully write&close the ROOT file otherwise the ROOT file will have errors.
-  WaveformStorage_GF->AddFrame(WaveformCloseFile_TB = new TGTextButton(WaveformStorage_GF,"Close ADAQ file", WaveformCloseFile_TB_ID),
-				  new TGLayoutHints(kLHintsNormal,10,5,0,5));
+  WaveformCreateClose_HF->AddFrame(WaveformCloseFile_TB = new TGTextButton(WaveformCreateClose_HF,"Close", WaveformCloseFile_TB_ID),
+				   new TGLayoutHints(kLHintsNormal,5,5,8,5));
   WaveformCloseFile_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
-  WaveformCloseFile_TB->Resize(175,30);
+  WaveformCloseFile_TB->Resize(85,30);
   WaveformCloseFile_TB->ChangeOptions(WaveformCloseFile_TB->GetOptions() | kFixedSize);
   WaveformCloseFile_TB->SetState(kButtonDisabled);
-  
-  // ROOT check button to enable/disable saving data to ROOT file. Note that the data is saved to
-  // the ROOT file only while the button is checked. The 
-  WaveformStorage_GF->AddFrame(WaveformStorageEnable_CB = new TGCheckButton(WaveformStorage_GF,"Data stored while checked", WaveformStorageEnable_CB_ID),
+
+  WaveformStorage_GF->AddFrame(WaveformStorageEnable_CB = new TGCheckButton(WaveformStorage_GF,"Data stored while checked!", WaveformStorageEnable_CB_ID),
 			       new TGLayoutHints(kLHintsNormal,10,5,5,5));
   WaveformStorageEnable_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
   WaveformStorageEnable_CB->SetState(kButtonDisabled);
-  
+
   
   DGDisplayAndControls_VF->AddFrame(Display_VF, new TGLayoutHints(kLHintsCenterX,5,5,5,5));
   DGDisplayAndControls_VF->AddFrame(SubtabFrame, new TGLayoutHints(kLHintsCenterX,5,5,5,5));
@@ -1476,33 +1654,60 @@ void AAInterface::FillAcquisitionFrame()
 
 
   // Widgets for saving the spectrum data to file
-
-  TGGroupFrame *DGScopeSpectrumStorage_GF = new TGGroupFrame(DataSubframe, "Spectrum output", kVerticalFrame);
-  DGScopeSpectrumStorage_GF->SetTitlePos(TGGroupFrame::kCenter);
-  DataSubframe->AddFrame(DGScopeSpectrumStorage_GF, new TGLayoutHints(kLHintsNormal,0,5,5,5));
-
-  DGScopeSpectrumStorage_GF->AddFrame(SpectrumFileName_TB = new TGTextButton(DGScopeSpectrumStorage_GF, "Spectrum file name", SpectrumFileName_TB_ID),
-				      new TGLayoutHints(kLHintsNormal, 5,5,5,0));
-  SpectrumFileName_TB->Resize(175, 30);
-  SpectrumFileName_TB->ChangeOptions(SpectrumFileName_TB->GetOptions() | kFixedSize);
-  SpectrumFileName_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
   
-  DGScopeSpectrumStorage_GF->AddFrame(SpectrumFileName_TEL = new ADAQTextEntryWithLabel(DGScopeSpectrumStorage_GF, "", -1),
-				      new TGLayoutHints(kLHintsNormal, 5,5,5,0));
-  SpectrumFileName_TEL->GetEntry()->Resize(175, 25);
-  SpectrumFileName_TEL->GetEntry()->ChangeOptions(SpectrumFileName_TEL->GetOptions() | kFixedSize | kSunkenFrame);
-  SpectrumFileName_TEL->GetEntry()->SetState(false);
-  SpectrumFileName_TEL->GetEntry()->SetText("DefaultSpectrum.root");
+  TGGroupFrame *DGScopeObjectStorage_GF = new TGGroupFrame(DataSubframe, "Data object output", kVerticalFrame);
+  DGScopeObjectStorage_GF->SetTitlePos(TGGroupFrame::kCenter);
+  DataSubframe->AddFrame(DGScopeObjectStorage_GF, new TGLayoutHints(kLHintsNormal,0,5,5,5));
 
-  DGScopeSpectrumStorage_GF->AddFrame(SpectrumSaveWithTimeExtension_CB = new TGCheckButton(DGScopeSpectrumStorage_GF, "Add time to file name", SpectrumSaveWithTimeExtension_CB_ID),
-				      new TGLayoutHints(kLHintsNormal, 5,5,5,5));
+
+  TGHorizontalFrame *ObjectType_HF = new TGHorizontalFrame(DGScopeObjectStorage_GF);
+  DGScopeObjectStorage_GF->AddFrame(ObjectType_HF, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+
+  TGVButtonGroup *ObjectType_BG = new TGVButtonGroup(ObjectType_HF);
+  ObjectType_BG->SetBorderDrawn(false);
+  ObjectType_HF->AddFrame(ObjectType_BG, new TGLayoutHints(kLHintsNormal,-7,0,-2,0));
   
-  DGScopeSpectrumStorage_GF->AddFrame(SpectrumSave_TB = new TGTextButton(DGScopeSpectrumStorage_GF, "Save spectrum data", SpectrumSave_TB_ID),
-				      new TGLayoutHints(kLHintsNormal, 5,5,0,5));
-  SpectrumSave_TB->Resize(175, 30);
-  SpectrumSave_TB->ChangeOptions(SpectrumSave_TB->GetOptions() | kFixedSize);
-  SpectrumSave_TB->Connect("Clicked()","AASubtabSlots", SubtabSlots, "HandleTextButtons()");
+  WaveformOutput_RB = new TGRadioButton(ObjectType_BG, "Waveform", WaveformOutput_RB_ID);
+  WaveformOutput_RB->Connect("Clicked()","AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
+  WaveformOutput_RB->SetState(kButtonDown);
+  
+  SpectrumOutput_RB = new TGRadioButton(ObjectType_BG, "Spectrum", SpectrumOutput_RB_ID);
+  SpectrumOutput_RB->Connect("Clicked()","AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
 
+  PSDHistogramOutput_RB = new TGRadioButton(ObjectType_BG, "PSD histogram", PSDHistogramOutput_RB_ID);
+  PSDHistogramOutput_RB->Connect("Clicked()","AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
+  
+  ObjectType_HF->AddFrame(ObjectOutputChannel_CBL = new ADAQComboBoxWithLabel(ObjectType_HF, "", ObjectOutputType_CBL_ID),
+			  new TGLayoutHints(kLHintsNormal,0,0,15,0));
+  for(uint32_t ch=0; ch<8; ch++)
+    ObjectOutputChannel_CBL->GetComboBox()->AddEntry(DGChannelLabels[ch].c_str(),ch);
+  ObjectOutputChannel_CBL->GetComboBox()->Select(0);
+  ObjectOutputChannel_CBL->GetComboBox()->Resize(80,20);
+  ObjectOutputChannel_CBL->GetComboBox()->Connect("Selected(int,int)", "AASubtabSlots", SubtabSlots, "HandleComboBoxes(int,int)");
+
+  
+  DGScopeObjectStorage_GF->AddFrame(ObjectOutputFileName_TB = new TGTextButton(DGScopeObjectStorage_GF, "Object file name", ObjectOutputFileName_TB_ID),
+				    new TGLayoutHints(kLHintsNormal, 5,5,-5,0));
+  ObjectOutputFileName_TB->Resize(175, 30);
+  ObjectOutputFileName_TB->ChangeOptions(ObjectOutputFileName_TB->GetOptions() | kFixedSize);
+  ObjectOutputFileName_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
+  
+  DGScopeObjectStorage_GF->AddFrame(ObjectOutputFileName_TEL = new ADAQTextEntryWithLabel(DGScopeObjectStorage_GF, "", -1),
+				    new TGLayoutHints(kLHintsNormal, 5,5,5,0));
+  ObjectOutputFileName_TEL->GetEntry()->Resize(175, 25);
+  ObjectOutputFileName_TEL->GetEntry()->ChangeOptions(ObjectOutputFileName_TEL->GetOptions() | kFixedSize | kSunkenFrame);
+  ObjectOutputFileName_TEL->GetEntry()->SetState(false);
+  ObjectOutputFileName_TEL->GetEntry()->SetText("ObjectOutput.root");
+  
+  DGScopeObjectStorage_GF->AddFrame(ObjectSaveWithTimeExtension_CB = new TGCheckButton(DGScopeObjectStorage_GF, "Add time to file name", ObjectSaveWithTimeExtension_CB_ID),
+				    new TGLayoutHints(kLHintsNormal, 5,5,5,5));
+  
+  DGScopeObjectStorage_GF->AddFrame(ObjectSave_TB = new TGTextButton(DGScopeObjectStorage_GF, "Save object data", ObjectSave_TB_ID),
+				    new TGLayoutHints(kLHintsNormal, 5,5,0,5));
+  ObjectSave_TB->Resize(175, 30);
+  ObjectSave_TB->ChangeOptions(ObjectSave_TB->GetOptions() | kFixedSize);
+  ObjectSave_TB->Connect("Clicked()","AASubtabSlots", SubtabSlots, "HandleTextButtons()");
+  
 
   // Widgets for saving the canvas graphics to file
   
@@ -1597,7 +1802,7 @@ void AAInterface::FillAcquisitionFrame()
   /////////////////////////////
   // misc. graphical attributes 
   
-  TGGroupFrame *DisplaySettings_GF = new TGGroupFrame(GraphicsSubframe, "Display", kVerticalFrame);
+  TGGroupFrame *DisplaySettings_GF = new TGGroupFrame(GraphicsSubframe, "Draw Options", kVerticalFrame);
   DisplaySettings_GF->SetTitlePos(TGGroupFrame::kCenter);
   GraphicsSubframe->AddFrame(DisplaySettings_GF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
 
@@ -1605,27 +1810,52 @@ void AAInterface::FillAcquisitionFrame()
   TGHorizontalFrame *Display_HF0 = new TGHorizontalFrame(DisplaySettings_GF);
   DisplaySettings_GF->AddFrame(Display_HF0, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
   
-  // ROOT check button to enable/disable plotting of the legend
-  Display_HF0->AddFrame(DisplayLegend_CB = new TGCheckButton(Display_HF0, "Draw legend ", -1),
-			new TGLayoutHints(kLHintsNormal,0,0,5,0));
-  DisplayLegend_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
+  Display_HF0->AddFrame(DisplayTrigger_CB = new TGCheckButton(Display_HF0, "Trigger     ", DisplayTrigger_CB_ID),
+			new TGLayoutHints(kLHintsNormal, 0,0,2,0));
+  DisplayTrigger_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
+  DisplayTrigger_CB->SetState(kButtonDown);
   
-  Display_HF0->AddFrame(DisplayGrid_CB = new TGCheckButton(Display_HF0, "Draw grid", DisplayGrid_CB_ID),
-			new TGLayoutHints(kLHintsNormal, 0,0,5,0));
-  DisplayGrid_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
-  DisplayGrid_CB->SetState(kButtonDown);
+  Display_HF0->AddFrame(DisplayBaselineBox_CB = new TGCheckButton(Display_HF0, "Baseline box", DisplayBaselineBox_CB_ID),
+		       new TGLayoutHints(kLHintsNormal, 0,0,2,0));
+  DisplayBaselineBox_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
+  DisplayBaselineBox_CB->SetState(kButtonDown);
 
 
   TGHorizontalFrame *Display_HF1 = new TGHorizontalFrame(DisplaySettings_GF);
   DisplaySettings_GF->AddFrame(Display_HF1, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+  
+  Display_HF1->AddFrame(DisplayPSDLimits_CB = new TGCheckButton(Display_HF1, "PSD limits  ", DisplayPSDLimits_CB_ID),
+			new TGLayoutHints(kLHintsNormal, 0,0,2,0));
+  DisplayPSDLimits_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
+  
+  Display_HF1->AddFrame(DisplayZLEThreshold_CB = new TGCheckButton(Display_HF1, "ZLE thresh", DisplayZLEThreshold_CB_ID),
+			new TGLayoutHints(kLHintsNormal, 0,0,2,0));
+
+
+  TGHorizontalFrame *Display_HF2 = new TGHorizontalFrame(DisplaySettings_GF);
+  DisplaySettings_GF->AddFrame(Display_HF2, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+  
+  // ROOT check button to enable/disable plotting of the legend
+  Display_HF2->AddFrame(DisplayLegend_CB = new TGCheckButton(Display_HF2, "Legend      ", -1),
+			new TGLayoutHints(kLHintsNormal,0,0,2,0));
+  DisplayLegend_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
+  
+  Display_HF2->AddFrame(DisplayGrid_CB = new TGCheckButton(Display_HF2, "Grid", DisplayGrid_CB_ID),
+			new TGLayoutHints(kLHintsNormal, 0,0,2,0));
+  DisplayGrid_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
+  DisplayGrid_CB->SetState(kButtonDown);
+
+
+  TGHorizontalFrame *Display_HF3 = new TGHorizontalFrame(DisplaySettings_GF);
+  DisplaySettings_GF->AddFrame(Display_HF3, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
 
   // ROOT check buttons for specifying if X and Y axes on spectra should be logarithmic
-  Display_HF1->AddFrame(DisplayXAxisLog_CB = new TGCheckButton(Display_HF1, "Log X-axis  ", DisplayXAxisLog_CB_ID),
-			new TGLayoutHints(kLHintsLeft,0,0,5,0));
+  Display_HF3->AddFrame(DisplayXAxisLog_CB = new TGCheckButton(Display_HF3, "Log X-axis  ", DisplayXAxisLog_CB_ID),
+			new TGLayoutHints(kLHintsLeft,0,0,2,0));
   DisplayXAxisLog_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
   
-  Display_HF1->AddFrame(DisplayYAxisLog_CB = new TGCheckButton(Display_HF1, "Log Y-axis", DisplayYAxisLog_CB_ID),
-			new TGLayoutHints(kLHintsLeft,0,0,5,0));
+  Display_HF3->AddFrame(DisplayYAxisLog_CB = new TGCheckButton(Display_HF3, "Log Y-axis", DisplayYAxisLog_CB_ID),
+			new TGLayoutHints(kLHintsLeft,0,0,2,0));
   DisplayYAxisLog_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
 
   
@@ -1633,36 +1863,36 @@ void AAInterface::FillAcquisitionFrame()
   DisplaySettings_GF->AddFrame(WaveformDrawOptions_GF,
 			       new TGLayoutHints(kLHintsTop, 0,0,5,0));
 
-  WaveformDrawOptions_GF->AddFrame(DrawWaveformWithCurve_RB = new TGRadioButton(WaveformDrawOptions_GF,
-										"Curve ",
-										DrawWaveformWithCurve_RB_ID),
+  WaveformDrawOptions_GF->AddFrame(DrawWaveformWithLine_RB = new TGRadioButton(WaveformDrawOptions_GF,
+									       "Line ",
+									       DrawWaveformWithLine_RB_ID),
 				   new TGLayoutHints(kLHintsNormal, 0,3,3,-2));
-  DrawWaveformWithCurve_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
-  DrawWaveformWithCurve_RB->SetState(kButtonDown);
+  DrawWaveformWithLine_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
+  DrawWaveformWithLine_RB->SetState(kButtonDown);
   
   WaveformDrawOptions_GF->AddFrame(DrawWaveformWithMarkers_RB = new TGRadioButton(WaveformDrawOptions_GF,
 										  "Markers ",
 										  DrawWaveformWithMarkers_RB_ID),
 				   new TGLayoutHints(kLHintsNormal, 0,3,3,-2));
   DrawWaveformWithMarkers_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
-
+  
   WaveformDrawOptions_GF->AddFrame(DrawWaveformWithBoth_RB = new TGRadioButton(WaveformDrawOptions_GF,
 									       "Both",
 									       DrawWaveformWithBoth_RB_ID),
 				   new TGLayoutHints(kLHintsNormal, 0,3,3,-2));
   DrawWaveformWithBoth_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
-
+  
   
   TGGroupFrame *SpectrumDrawOptions_GF = new TGGroupFrame(DisplaySettings_GF, "Spectrum options", kHorizontalFrame);
   DisplaySettings_GF->AddFrame(SpectrumDrawOptions_GF,
 			       new TGLayoutHints(kLHintsNormal, 0,0,5,0));
   
-  SpectrumDrawOptions_GF->AddFrame(DrawSpectrumWithCurve_RB = new TGRadioButton(SpectrumDrawOptions_GF,
-										"Curve ",
-										DrawSpectrumWithCurve_RB_ID),
+  SpectrumDrawOptions_GF->AddFrame(DrawSpectrumWithLine_RB = new TGRadioButton(SpectrumDrawOptions_GF,
+									       "Line ",
+									       DrawSpectrumWithLine_RB_ID),
 				   new TGLayoutHints(kLHintsNormal, 0,3,3,-2));
-  DrawSpectrumWithCurve_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
-  DrawSpectrumWithCurve_RB->SetState(kButtonDown);
+  DrawSpectrumWithLine_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
+  DrawSpectrumWithLine_RB->SetState(kButtonDown);
   
   SpectrumDrawOptions_GF->AddFrame(DrawSpectrumWithMarkers_RB = new TGRadioButton(SpectrumDrawOptions_GF,
 										  "Markers ",
@@ -1676,12 +1906,30 @@ void AAInterface::FillAcquisitionFrame()
 				   new TGLayoutHints(kLHintsNormal, 0,3,3,-2));
   DrawSpectrumWithBars_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
 
-
-  DisplaySettings_GF->AddFrame(SpectrumRefreshRate_NEL = new ADAQNumberEntryWithLabel(DisplaySettings_GF, "Spectrum refresh rate", -1),
-			       new TGLayoutHints(kLHintsNormal, 0,0,10,0));
+  
+  TGGroupFrame *DisplayControl_GF = new TGGroupFrame(GraphicsSubframe, "Control", kVerticalFrame);
+  DisplayControl_GF->SetTitlePos(TGGroupFrame::kCenter);
+  GraphicsSubframe->AddFrame(DisplayControl_GF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
+  
+  DisplayControl_GF->AddFrame(SpectrumRefreshRate_NEL = new ADAQNumberEntryWithLabel(DisplayControl_GF, "Display update freq.", -1),
+			      new TGLayoutHints(kLHintsNormal, 0,0,10,0));
   SpectrumRefreshRate_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
   SpectrumRefreshRate_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+  SpectrumRefreshRate_NEL->GetEntry()->Resize(50,20);
   SpectrumRefreshRate_NEL->GetEntry()->SetNumber(100);
+  
+
+  TGButtonGroup *DisplayControl_BG = new TGButtonGroup(DisplayControl_GF, "");
+  DisplayControl_BG->SetBorderDrawn(false);
+  DisplayControl_GF->AddFrame(DisplayControl_BG,
+			      new TGLayoutHints(kLHintsNormal, -12,0,-3,0));
+  
+  DisplayContinuous_RB = new TGRadioButton(DisplayControl_BG, "Continuous (standard rate)", DisplayContinuous_RB_ID);
+  DisplayContinuous_RB->SetState(kButtonDown);
+  
+  DisplayUpdateable_RB = new TGRadioButton(DisplayControl_BG, "Updateable (high rate)", DisplayUpdateable_RB_ID);
+  
+  DisplayNonUpdateable_RB = new TGRadioButton(DisplayControl_BG, "Nonupdateable (ultra rate)", DisplayNonUpdateable_RB_ID);
 }
   
 
@@ -1740,13 +1988,16 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
     DGChZLEForward_NEL[ch]->GetEntry()->SetState(WidgetState);
     DGChZLEPosLogic_RB[ch]->SetState(ButtonState);
     DGChZLENegLogic_RB[ch]->SetState(ButtonState);
+    DGChPSDTotalStart_NEL[ch]->GetEntry()->SetState(WidgetState);
+    DGChPSDTotalStop_NEL[ch]->GetEntry()->SetState(WidgetState);
+    DGChPSDTailStart_NEL[ch]->GetEntry()->SetState(WidgetState);
+    DGChPSDTailStop_NEL[ch]->GetEntry()->SetState(WidgetState);
   }
 
   AQWaveform_RB->SetEnabled(WidgetState);
   AQSpectrum_RB->SetEnabled(WidgetState);
-  AQHighRate_RB->SetEnabled(WidgetState);
-  AQUltraRate_RB->SetEnabled(WidgetState);
-  
+  AQPSDHistogram_RB->SetEnabled(WidgetState);
+
   DGTriggerType_CBL->GetComboBox()->SetEnabled(WidgetState);
   DGTriggerEdge_CBL->GetComboBox()->SetEnabled(WidgetState);
   DGTriggerCoincidenceEnable_CB->SetState(ButtonState);
@@ -1772,6 +2023,10 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
   SpectrumLDTriggerChannel_CBL->GetComboBox()->SetEnabled(WidgetState);
   
   SpectrumRefreshRate_NEL->GetEntry()->SetState(WidgetState);
+  DisplayContinuous_RB->SetEnabled(WidgetState);
+  DisplayUpdateable_RB->SetEnabled(WidgetState);
+  DisplayNonUpdateable_RB->SetEnabled(WidgetState);
+
 
   // The following widgets have special settings depending on
   // the acquisition state
@@ -1841,13 +2096,18 @@ void AAInterface::SaveSettings()
     TheSettings->ChNegPolarity[ch] = DGChNegPolarity_RB[ch]->IsDown();
     TheSettings->ChDCOffset[ch] = DGChDCOffset_NEL[ch]->GetEntry()->GetHexNumber();
     TheSettings->ChTriggerThreshold[ch] = DGChTriggerThreshold_NEL[ch]->GetEntry()->GetIntNumber();
-    TheSettings->ChBaselineCalcMin[ch] = DGChBaselineCalcMin_NEL[ch]->GetEntry()->GetIntNumber();
-    TheSettings->ChBaselineCalcMax[ch] = DGChBaselineCalcMax_NEL[ch]->GetEntry()->GetIntNumber();
     TheSettings->ChZLEThreshold[ch] = DGChZLEThreshold_NEL[ch]->GetEntry()->GetIntNumber();
     TheSettings->ChZLEForward[ch] = DGChZLEForward_NEL[ch]->GetEntry()->GetIntNumber();
     TheSettings->ChZLEBackward[ch] = DGChZLEBackward_NEL[ch]->GetEntry()->GetIntNumber();
     TheSettings->ChZLEPosLogic[ch] = DGChZLEPosLogic_RB[ch]->IsDown();
     TheSettings->ChZLENegLogic[ch] = DGChZLENegLogic_RB[ch]->IsDown();
+
+    TheSettings->ChBaselineCalcMin[ch] = DGChBaselineCalcMin_NEL[ch]->GetEntry()->GetIntNumber();
+    TheSettings->ChBaselineCalcMax[ch] = DGChBaselineCalcMax_NEL[ch]->GetEntry()->GetIntNumber();
+    TheSettings->ChPSDTotalStart[ch] = DGChPSDTotalStart_NEL[ch]->GetEntry()->GetIntNumber();
+    TheSettings->ChPSDTotalStop[ch] = DGChPSDTotalStop_NEL[ch]->GetEntry()->GetIntNumber();
+    TheSettings->ChPSDTailStart[ch] = DGChPSDTailStart_NEL[ch]->GetEntry()->GetIntNumber();
+    TheSettings->ChPSDTailStop[ch] = DGChPSDTailStop_NEL[ch]->GetEntry()->GetIntNumber();
   }
   
   TheSettings->HorizontalSliderPtr = DisplayHorizontalScale_THS->GetPointerPosition();
@@ -1863,24 +2123,26 @@ void AAInterface::SaveSettings()
   TheSettings->VerticalSliderMax = Max;
 
 
-  /////////////////////////////
-  // Acquisition control subtab
+  //////////////////////////
+  // Data acquisition subtab
 
   // Scope display
   TheSettings->WaveformMode = AQWaveform_RB->IsDown();
   TheSettings->SpectrumMode = AQSpectrum_RB->IsDown();
-  TheSettings->HighRateMode = AQHighRate_RB->IsDown();
-  TheSettings->UltraRateMode = AQUltraRate_RB->IsDown();
+  TheSettings->PSDMode = AQPSDHistogram_RB->IsDown();
     
   // Trigger control settings
   TheSettings->TriggerCoincidenceEnable = DGTriggerCoincidenceEnable_CB->IsDown();
     
   TheSettings->TriggerCoincidenceLevel = DGTriggerCoincidenceLevel_CBL->GetComboBox()->GetSelected();
   TheSettings->TriggerType = DGTriggerType_CBL->GetComboBox()->GetSelected();
+  TheSettings->TriggerTypeName = DGTriggerType_CBL->GetComboBox()->GetSelectedEntry()->GetTitle();
   TheSettings->TriggerEdge = DGTriggerEdge_CBL->GetComboBox()->GetSelected();
+  TheSettings->TriggerEdgeName = DGTriggerEdge_CBL->GetComboBox()->GetSelectedEntry()->GetTitle();
 
   // Acquisition
   TheSettings->AcquisitionControl = DGAcquisitionControl_CBL->GetComboBox()->GetSelected();
+  TheSettings->AcquisitionControlName = DGAcquisitionControl_CBL->GetComboBox()->GetSelectedEntry()->GetTitle();
   TheSettings->RecordLength = DGRecordLength_NEL->GetEntry()->GetIntNumber();
   TheSettings->PostTrigger = DGPostTrigger_NEL->GetEntry()->GetIntNumber();
   TheSettings->AcquisitionTime = AQTime_NEL->GetEntry()->GetIntNumber();
@@ -1892,8 +2154,8 @@ void AAInterface::SaveSettings()
   TheSettings->ZeroSuppressionEnable = DGZLEEnable_CB->IsDown();
 
   
-  ///////////////////////////
-  // Spectrum creation subtab
+  ///////////////////////
+  // Pulse spectra subtab
 
   TheSettings->SpectrumChannel = SpectrumChannel_CBL->GetComboBox()->GetSelected();
   TheSettings->SpectrumNumBins = SpectrumNumBins_NEL->GetEntry()->GetIntNumber();
@@ -1913,9 +2175,24 @@ void AAInterface::SaveSettings()
   TheSettings->SpectrumCalibrationEnable = SpectrumCalibration_CB->IsDown();
   TheSettings->SpectrumCalibrationUseSlider = SpectrumUseCalibrationSlider_CB->IsDown();
 
-  
+
+  //////////////////////////////
+  // Pulse discrimination subtab 
+
+  TheSettings->PSDChannel = PSDChannel_CBL->GetComboBox()->GetSelected();
+  TheSettings->PSDYAxisTail = PSDYAxisTail_RB->IsDown();
+  TheSettings->PSDYAxisTailTotal = PSDYAxisTailTotal_RB->IsDown();
+  TheSettings->PSDThreshold = PSDThreshold_NEL->GetEntry()->GetNumber();
+  TheSettings->PSDTotalBins = PSDTotalBins_NEL->GetEntry()->GetNumber();
+  TheSettings->PSDTotalMinBin = PSDTotalMinBin_NEL->GetEntry()->GetNumber();
+  TheSettings->PSDTotalMaxBin = PSDTotalMaxBin_NEL->GetEntry()->GetNumber();
+  TheSettings->PSDTailBins = PSDTailBins_NEL->GetEntry()->GetNumber();
+  TheSettings->PSDTailMinBin = PSDTailMinBin_NEL->GetEntry()->GetNumber();
+  TheSettings->PSDTailMaxBin = PSDTailMaxBin_NEL->GetEntry()->GetNumber();
+
+
   //////////////////////////
-  // Graphic settings subtab
+  // Display graphics subtab
 
   TheSettings->DisplayTitlesEnable = DisplayTitlesEnable_CB->IsDown();
 
@@ -1929,27 +2206,40 @@ void AAInterface::SaveSettings()
   TheSettings->DisplayYTitleSize = DisplayYTitleSize_NEL->GetEntry()->GetNumber();
   TheSettings->DisplayYTitleOffset = DisplayYTitleOffset_NEL->GetEntry()->GetNumber();
 	
+  TheSettings->DisplayTrigger = DisplayTrigger_CB->IsDown();
+  TheSettings->DisplayBaselineBox = DisplayBaselineBox_CB->IsDown();
+  TheSettings->DisplayPSDLimits = DisplayPSDLimits_CB->IsDown();
+  TheSettings->DisplayZLEThreshold = DisplayZLEThreshold_CB->IsDown();
   TheSettings->DisplayLegend = DisplayLegend_CB->IsDown();
   TheSettings->DisplayGrid = DisplayGrid_CB->IsDown();
   TheSettings->DisplayXAxisInLog = DisplayXAxisLog_CB->IsDown();
   TheSettings->DisplayYAxisInLog = DisplayYAxisLog_CB->IsDown();
   
-  TheSettings->WaveformWithCurve = DrawWaveformWithCurve_RB->IsDown();
+  TheSettings->WaveformWithLine = DrawWaveformWithLine_RB->IsDown();
   TheSettings->WaveformWithMarkers = DrawWaveformWithMarkers_RB->IsDown();
   TheSettings->WaveformWithBoth = DrawWaveformWithBoth_RB->IsDown();
   
-  TheSettings->SpectrumWithCurve = DrawSpectrumWithCurve_RB->IsDown();
+  TheSettings->SpectrumWithLine = DrawSpectrumWithLine_RB->IsDown();
   TheSettings->SpectrumWithMarkers = DrawSpectrumWithMarkers_RB->IsDown();
   TheSettings->SpectrumWithBars = DrawSpectrumWithBars_RB->IsDown();
   
   TheSettings->SpectrumRefreshRate = SpectrumRefreshRate_NEL->GetEntry()->GetIntNumber();
+
+  TheSettings->DisplayContinuous = DisplayContinuous_RB->IsDown();
+  TheSettings->DisplayUpdateable = DisplayUpdateable_RB->IsDown();
+  TheSettings->DisplayNonUpdateable = DisplayNonUpdateable_RB->IsDown();
   
 
   ////////////////////////////
   // Persistent storage subtab
 
   TheSettings->WaveformStorageEnable = WaveformStorageEnable_CB->IsDown();
-  TheSettings->SpectrumSaveWithTimeExtension = SpectrumSaveWithTimeExtension_CB->IsDown();
+  TheSettings->WaveformStoreRaw = WaveformStoreRaw_CB->IsDown();
+  TheSettings->WaveformStoreEnergyData = WaveformStoreEnergyData_CB->IsDown();
+  TheSettings->WaveformStorePSDData= WaveformStorePSDData_CB->IsDown();
+
+
+  TheSettings->ObjectSaveWithTimeExtension = ObjectSaveWithTimeExtension_CB->IsDown();
   TheSettings->CanvasSaveWithTimeExtension = CanvasSaveWithTimeExtension_CB->IsDown();
 
 
@@ -1971,8 +2261,7 @@ void AAInterface::SaveSettings()
     
     TheSettings->WaveformMode = AQWaveform_RB->IsDisabledAndSelected();
     TheSettings->SpectrumMode = AQSpectrum_RB->IsDisabledAndSelected();
-    TheSettings->HighRateMode = AQHighRate_RB->IsDisabledAndSelected();
-    TheSettings->UltraRateMode = AQUltraRate_RB->IsDisabledAndSelected();
+    TheSettings->PSDMode = AQPSDHistogram_RB->IsDisabledAndSelected();
 
     TheSettings->TriggerCoincidenceEnable = DGTriggerCoincidenceEnable_CB->IsDisabledAndSelected();
 
@@ -1988,9 +2277,20 @@ void AAInterface::SaveSettings()
     TheSettings->SpectrumCalibrationEnable = SpectrumCalibration_CB->IsDisabledAndSelected();
     TheSettings->SpectrumCalibrationUseSlider = SpectrumUseCalibrationSlider_CB->IsDisabledAndSelected();
 
+    TheSettings->PSDYAxisTail = PSDYAxisTail_RB->IsDisabledAndSelected();
+    TheSettings->PSDYAxisTailTotal = PSDYAxisTailTotal_RB->IsDisabledAndSelected();
+
     TheSettings->WaveformStorageEnable = WaveformStorageEnable_CB->IsDisabledAndSelected();
-    TheSettings->SpectrumSaveWithTimeExtension = SpectrumSaveWithTimeExtension_CB->IsDisabledAndSelected();
+    TheSettings->WaveformStoreRaw = WaveformStoreRaw_CB->IsDisabledAndSelected();
+    TheSettings->WaveformStoreEnergyData = WaveformStoreEnergyData_CB->IsDisabledAndSelected();
+    TheSettings->WaveformStorePSDData = WaveformStorePSDData_CB->IsDisabledAndSelected();
+    
+    TheSettings->ObjectSaveWithTimeExtension = ObjectSaveWithTimeExtension_CB->IsDisabledAndSelected();
     TheSettings->CanvasSaveWithTimeExtension = CanvasSaveWithTimeExtension_CB->IsDisabledAndSelected();
+
+    TheSettings->DisplayContinuous = DisplayContinuous_RB->IsDisabledAndSelected();
+    TheSettings->DisplayUpdateable = DisplayUpdateable_RB->IsDisabledAndSelected();
+    TheSettings->DisplayNonUpdateable = DisplayNonUpdateable_RB->IsDisabledAndSelected();
   }
 }
 
@@ -2055,9 +2355,9 @@ string AAInterface::CreateFileDialog(const char *FileTypes[],
   FileInformation.fFileTypes = FileTypes;
   FileInformation.fIniDir = StrDup(getenv("PWD"));
   new TGFileDialog(gClient->GetRoot(), this, DialogType, &FileInformation);
-
+  
   string FileName, FileExt;
-
+  
   if(FileInformation.fFilename == NULL)
     FileName = "NULL";
   else{
@@ -2065,37 +2365,44 @@ string AAInterface::CreateFileDialog(const char *FileTypes[],
     // If the user selects "All"/"*.*" option then any entered
     // filename is acceptable (i.e. with/without file extensions, with
     // custom file extension, etc)
-
+    
     if(FileInformation.fFileTypes[FileInformation.fFileTypeIdx] == "All"){
       FileName = FileInformation.fFilename;
     }
-
+    
     // Otherwise, the filename will always have the predetermined file
     // extension that is selected in the file type selection list
-
+    
     else{
       
       // Get the file extension and strip off the leading "*" character
       FileExt = FileInformation.fFileTypes[FileInformation.fFileTypeIdx+1];
       FileExt = FileExt.erase(0,1);
 
-      // Get the file name
+
       FileName = FileInformation.fFilename;
 
-      size_t Found = FileName.find_last_of(".");
-      
-      // If the user has entered a file extension, strip and replace it
+      // If the file name string terminates with '.adaq.root' (the \0
+      // character indicates a string termination) then do nothing
+      size_t Found = FileName.find(".adaq.root\0");
       if(Found != string::npos){
-	FileName = FileName.substr(0, Found) + FileExt;
       }
-      
-      // If the user has not entered a file extension, add it
+
+      // Otherwise ...
       else{
-	FileName += FileExt;
+	
+	// If the user has entered a file extension, strip it and
+	// force the '.adaq.root' file extensions...
+	Found = FileName.find_last_of(".");
+	if(Found != string::npos)
+	  FileName = FileName.substr(0, Found) + FileExt;
+	
+	// ... or if no file extension was entered then tack on
+	// '.adaq.root' file extension
+	else
+	  FileName += FileExt;
       }
     }
   }
   return FileName;
 }
-
-

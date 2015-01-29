@@ -13,24 +13,32 @@
 #ifndef __AAAcquisitionManager_hh__
 #define __AAAcquisitionManager_hh__ 1
 
+// ROOT
 #include <TObject.h>
 #include <TFile.h>
 #include <TTree.h>
 #include <TH1F.h>
+#include <TH2F.h>
 #include <TGraph.h>
 
+// Boost
 #ifndef __CINT__
 #include <boost/cstdint.hpp>
 
 #include "ADAQDigitizer.hh"
 #endif
 
+// C++
 #include <vector>
 #include <string>
 using namespace std;
 
+// ADAQ
 #include "ADAQRootClasses.hh"
+#include "ADAQReadoutManager.hh"
+#include "ADAQWaveformData.hh"
 
+// ADAQAcquisition
 #include "AATypes.hh"
 #include "AAInterface.hh"
 #include "AASettings.hh"
@@ -52,45 +60,47 @@ public:
   void CreateADAQFile(string);
   void CloseADAQFile();
 
-  bool AddCalibrationPoint(int, int, double, double );
-  bool EnableCalibration(int);
-  bool ResetCalibration(int);
-  bool LoadCalibration(int, string, int &);
-  bool WriteCalibration(int, string);
-
-  void SaveSpectrum(string);
-
-  bool GetCalibrationEnable(int C) {return CalibrationEnable[C];}
-  CalibrationDataStruct GetCalibrationDataStruct(int C) {return CalibrationData[C];}
+  Bool_t AddCalibrationPoint(Int_t, Int_t, Double_t , Double_t  );
+  Bool_t EnableCalibration(Int_t);
+  Bool_t ResetCalibration(Int_t);
+  Bool_t LoadCalibration(Int_t, string, Int_t &);
+  Bool_t WriteCalibration(Int_t, string);
   
-  void SetAcquisitionEnable(bool ATE) {AcquisitionEnable = ATE;}
-  bool GetAcquisitionEnable() {return AcquisitionEnable;}
+  void SaveObjectData(string, string);
   
-  void SetAcquisitionTimerEnable(bool ATE) {AcquisitionTimerEnable = ATE;}
-  bool GetAcquisitionTimerEnable() {return AcquisitionTimerEnable;}
+  Bool_t GetCalibrationEnable(Int_t C) {return CalibrationEnable[C];}
+  CalibrationDataStruct GetCalibrationDataStruct(Int_t C) {return CalibrationData[C];}
+  
+  void SetAcquisitionEnable(Bool_t ATE) {AcquisitionEnable = ATE;}
+  Bool_t GetAcquisitionEnable() {return AcquisitionEnable;}
+  
+  void SetAcquisitionTimerEnable(Bool_t ATE) {AcquisitionTimerEnable = ATE;}
+  Bool_t GetAcquisitionTimerEnable() {return AcquisitionTimerEnable;}
 
-  void SetADAQFileIsOpen(bool AFIO) {ADAQFileIsOpen = AFIO;}
-  bool GetADAQFileIsOpen() {return ADAQFileIsOpen;}
+  void SetADAQFileIsOpen(Bool_t AFIO) {ADAQFileIsOpen = AFIO;}
+  Bool_t GetADAQFileIsOpen() {return ADAQFileIsOpen;}
 
-  void SetAcquisitionTimeStart(double T) {AcquisitionTimeStart = T;}
-  void SetAcquisitionTimeStop(double T) {AcquisitionTimeStop = T;}
+  void SetAcquisitionTimeStart(Double_t  T) {AcquisitionTimeStart = T;}
+  void SetAcquisitionTimeStop(Double_t  T) {AcquisitionTimeStop = T;}
   
   void SetInterfacePointer(AAInterface *TI) {TheInterface = TI;}
   void SetSettingsPointer(AASettings *TS) {TheSettings = TS;}
 
-  TH1F *GetSpectrum(int C) {return Spectrum_H[C];}
-  TGraph *GetCalibrationCurve(int C) {return CalibrationCurves[C];}
-
-  ClassDef(AAAcquisitionManager, 0);
+  TH1F *GetSpectrum(Int_t C) {return Spectrum_H[C];}
+  TGraph *GetCalibrationCurve(Int_t C) {return CalibrationCurves[C];}
+  
+  TH2F *GetPSDHistogram(Int_t C) {return PSDHistogram_H[C];}
+  
+  ClassDef(AAAcquisitionManager, 1);
   
 private:
   static AAAcquisitionManager *TheAcquisitionManager;
 
-  bool AcquisitionEnable;
+  Bool_t AcquisitionEnable;
 
   //Objects for controlling timed acquisition periods
-  bool AcquisitionTimerEnable;
-  double AcquisitionTimeStart, AcquisitionTimeStop;
+  Bool_t AcquisitionTimerEnable;
+  Double_t  AcquisitionTimeStart, AcquisitionTimeStop;
   time_t AcquisitionTimeNow, AcquisitionTimePrev;
 
 #ifndef __CINT__
@@ -102,7 +112,6 @@ private:
   // Variables for PC buffer readout
   char *Buffer;
   uint32_t BufferSize, ReadSize, FPGAEvents, PCEvents;
-  vector<vector<uint16_t> > Waveforms;
   vector<bool> BufferFull;
 
   uint32_t ReadoutType, ReadoutTypeBit, ReadoutTypeMask;
@@ -113,26 +122,35 @@ private:
   uint32_t ZLENumWordMask, ZLEControlMask;
 #endif
 
-  int WaveformLength;
-  vector<int> BaselineStart, BaselineStop, BaselineLength;
-  vector<double> BaselineValue;
-  vector<double> Polarity;
-
-  int LLD, ULD;
-  double SampleHeight, TriggerHeight;
-  double PulseHeight, PulseArea;
-
+  Int_t WaveformLength;
+  vector<Int_t> BaselineStart, BaselineStop, BaselineLength;
+  vector<Double_t > BaselineValue;
+  vector<Int_t> PSDTotalAbsStart, PSDTotalAbsStop;
+  vector<Int_t> PSDTailAbsStart, PSDTailAbsStop;
+  vector<Int_t> PeakPosition;
+  vector<Double_t > Polarity;
+  
+  ULong64_t EventCounter;
+  Int_t LLD, ULD;
+  Double_t  SampleHeight, TriggerHeight;
+  Double_t  PulseHeight, PulseArea;
+  Double_t  PSDTotal, PSDTail;
+  UInt_t TimeStamp;
+  
   vector<bool> CalibrationEnable;
   vector<TGraph *> CalibrationCurves;
   vector<CalibrationDataStruct> CalibrationData;
   
   vector<TH1F *> Spectrum_H;
-  vector<bool> SpectrumExists;
-
+  vector<Bool_t> SpectrumExists;
+  
+  vector<TH2F *> PSDHistogram_H;
+  vector<Bool_t> PSDHistogramExists;
+  
   TTree *WaveformTree;
-  bool FillWaveformTree;
+  Bool_t FillWaveformTree;
 
-  bool ADAQFileIsOpen;
+  Bool_t ADAQFileIsOpen;
   TFile *ADAQFile;
   
   ADAQRootMeasParams *Parameters;
@@ -145,6 +163,13 @@ private:
 
   AAInterface *TheInterface;
   AASettings *TheSettings;
+  
+  ADAQReadoutManager *TheReadoutManager;
+#ifndef __CINT__
+  vector<vector<uint16_t> > Waveforms;
+#endif
+  vector<ADAQWaveformData *> WaveformData;
+  
 
 
 };

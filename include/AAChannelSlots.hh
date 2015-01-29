@@ -26,7 +26,7 @@ public:
 
   void HandleNumberEntries();
 
-  ClassDef(AAChannelSlots, 0);
+  ClassDef(AAChannelSlots, 1);
   
 private:
   AAInterface *TI;

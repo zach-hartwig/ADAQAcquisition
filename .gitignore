@@ -1,0 +1,15 @@
+# name: .gitignore
+# date: 14 Jan 15
+# auth: Zach Hartwig
+# mail: hartwig@psfc.mit.edu
+# desc: List of files for git to completely ignore from repository 
+
+# General 
+*.o
+*.log
+*.cache
+*~
+
+# Ignore all transient build files and the binary
+build/*
+bin/*

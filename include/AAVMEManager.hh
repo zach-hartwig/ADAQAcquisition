@@ -81,7 +81,7 @@ public:
   void StopHVMonitoring();
     
 
-  ClassDef(AAVMEManager, 0);
+  ClassDef(AAVMEManager, 1);
   
 private:
   static AAVMEManager *TheVMEManager;
