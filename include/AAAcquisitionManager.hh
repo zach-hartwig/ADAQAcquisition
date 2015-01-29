@@ -77,8 +77,7 @@ public:
   void SetAcquisitionTimerEnable(Bool_t ATE) {AcquisitionTimerEnable = ATE;}
   Bool_t GetAcquisitionTimerEnable() {return AcquisitionTimerEnable;}
 
-  void SetADAQFileIsOpen(Bool_t AFIO) {ADAQFileIsOpen = AFIO;}
-  Bool_t GetADAQFileIsOpen() {return ADAQFileIsOpen;}
+  Bool_t GetADAQFileIsOpen() {return TheReadoutManager->GetADAQFileOpen();}
 
   void SetAcquisitionTimeStart(Double_t  T) {AcquisitionTimeStart = T;}
   void SetAcquisitionTimeStop(Double_t  T) {AcquisitionTimeStop = T;}
@@ -150,7 +149,6 @@ private:
   TTree *WaveformTree;
   Bool_t FillWaveformTree;
 
-  Bool_t ADAQFileIsOpen;
   TFile *ADAQFile;
   
   ADAQRootMeasParams *Parameters;

@@ -44,8 +44,7 @@ AAAcquisitionManager::AAAcquisitionManager()
     LLD(0), ULD(0), SampleHeight(0.), TriggerHeight(0.),
     PulseHeight(0.), PulseArea(0.), PSDTotal(0.), PSDTail(0.),
     PeakPosition(0), TimeStamp(0),
-    FillWaveformTree(false), ADAQFileIsOpen(false),
-    TheReadoutManager(new ADAQReadoutManager)
+    FillWaveformTree(false), TheReadoutManager(new ADAQReadoutManager)
 {
   if(TheAcquisitionManager)
     cout << "\nError! The AcquisitionManager was constructed twice!\n" << endl;
@@ -642,7 +641,7 @@ void AAAcquisitionManager::StopAcquisition()
   
   DGManager->FreeEvent(&EventWaveform);
   DGManager->FreeReadoutBuffer(&Buffer);
-  
+
   if(AcquisitionTimerEnable){
 
     // Set the information in the ADAQ file to signal that the
@@ -651,16 +650,16 @@ void AAAcquisitionManager::StopAcquisition()
     // when the ADAQReadoutInformation class is filled - when the file
     // _created_ not when the acquisition timer button is pushed - the
     // acquisition timer boolean has not yet been set.
-    
+
     ADAQReadoutInformation *ARI = TheReadoutManager->GetReadoutInformation();
     ARI->SetAcquisitionTimer(AcquisitionTimerEnable);
     ARI->SetAcquisitionTime(TheSettings->AcquisitionTime);
     
     AcquisitionTimerEnable = false;
-    TheInterface->UpdateAfterAQTimerStopped(ADAQFileIsOpen);
+    TheInterface->UpdateAfterAQTimerStopped(TheReadoutManager->GetADAQFileOpen());
   }
   
-  if(ADAQFileIsOpen)
+  if(TheReadoutManager->GetADAQFileOpen())
     CloseADAQFile();
 }
 
