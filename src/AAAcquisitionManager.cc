@@ -424,43 +424,24 @@ void AAAcquisitionManager::StartAcquisition()
 	} // End sample loop
 
 
-	/////////////////////////////////
-	// Post-sampling pulse processing
+	///////////////////////////////////
+	// Post-sampling loop processing //
+	///////////////////////////////////
 
-	// Compute the trigger time stamp for the waveform
-	TimeStamp = EventInfo.TriggerTimeTag;
+	// First, we set the most basic information about the waveform
+	// that we want to ensure is always stored in the ADAQ file
+	// regardless of acquisition mode
 
-	// Set the absolute positions in time [sample] for the
-	// start/stop of the PSD total/tail integrals using the
-	// calculated peak position in time [sample] from above
-	PSDTotalAbsStart[ch] = PeakPosition[ch] + TheSettings->ChPSDTotalStart[ch];
-	PSDTotalAbsStop[ch] = PeakPosition[ch] + TheSettings->ChPSDTotalStop[ch];
-	PSDTailAbsStart[ch] = PeakPosition[ch] + TheSettings->ChPSDTailStart[ch];
-	PSDTailAbsStop[ch] = PeakPosition[ch] + TheSettings->ChPSDTailStop[ch];
+	WaveformData[ch]->SetTimeStamp(EventInfo.TriggerTimeTag);
+	WaveformData[ch]->SetChannelID(ch);
+	WaveformData[ch]->SetBoardID(DGManager->GetBoardID());
 
-
-	// Because the PSD integrals are computed relative to the peak
-	// position durong on-the-fly processing, we must take the PSD
-	// integrals after sampling has concluded. We will ONLY do
-	// this if some aspect of PSD is desired by user to maximize
-	// efficiency of the acquisition loop
-	
-	if(TheSettings->PSDMode or TheSettings->WaveformStorePSDData){	  
-
-	  // The total PSD integral
-	  Int_t sample = PSDTotalAbsStart[ch];
-	  for(; sample<PSDTotalAbsStop[ch]; sample++)
-	    PSDTotal += Polarity[ch] * (Waveforms[ch][sample] - BaselineValue[ch]);
-
-	  // The tail PSD integral
-	  sample = PSDTailAbsStart[ch];
-	  for(; sample<PSDTailAbsStop[ch]; sample++)
-	    PSDTail += Polarity[ch] * (Waveforms[ch][sample] - BaselineValue[ch]);
-	  
-	  // Convert the tail integral to (tail/total) if specified
-	  if(TheSettings->PSDYAxisTailTotal)
-	    PSDTail /= PSDTotal;
-	}
+	// Second, if the user has NOT selected the "nonupdatable
+	// (ultra rate)" mode, we perform a number of digital pulse
+	// processing and analyzed data storage steps. In order to
+	// maximize the acquisition loop performance in ultra rate
+	// mode, such things as pulse height/area, PSD integrals, and
+	// other operations are NOT allowed.
 	
 	if(!TheSettings->DisplayNonUpdateable){
 	  
@@ -469,33 +450,59 @@ void AAAcquisitionManager::StartAcquisition()
 	  // for non-ultra rate modes since it requires analysis of
 	  // the waveforms.
 
-	  // Store pulse area/height data along with the baseline
+	  // Store pulse area/height data and baseline if specified
 	  if(TheSettings->WaveformStoreEnergyData){
 	    WaveformData[ch]->SetBaseline(BaselineValue[ch]);
 	    WaveformData[ch]->SetPulseHeight(PulseHeight);
 	    WaveformData[ch]->SetPulseArea(PulseArea);
 	  }
 	  
-	  // Store the total and tail PSD integrals
-	  if(TheSettings->WaveformStorePSDData){
-	    WaveformData[ch]->SetPSDTotalIntegral(PSDTotal);
-	    WaveformData[ch]->SetPSDTailIntegral(PSDTail);
-	  }
-
-	  // Store the basic information about the waveform
-	  WaveformData[ch]->SetTimeStamp(TimeStamp);
-	  WaveformData[ch]->SetChannelID(ch);
-	  WaveformData[ch]->SetBoardID(DGManager->GetBoardID());
-	  
 	  // Use the calibration curves (ROOT TGraph's) to convert
 	  // the pulse height/area from ADC to the user's energy
 	  // units using linear interpolation calibration points
 	  if(CalibrationEnable[ch]){
-	    
 	    if(TheSettings->SpectrumPulseHeight)
 	      PulseHeight = CalibrationCurves[ch]->Eval(PulseHeight);
 	    else
 	      PulseArea = CalibrationCurves[ch]->Eval(PulseArea);
+	  }
+
+	  // Set the absolute positions in time [sample] for the
+	  // start/stop of the PSD total/tail integrals using the
+	  // calculated peak position in time [sample] from above
+	  
+	  PSDTotalAbsStart[ch] = PeakPosition[ch] + TheSettings->ChPSDTotalStart[ch];
+	  PSDTotalAbsStop[ch] = PeakPosition[ch] + TheSettings->ChPSDTotalStop[ch];
+	  PSDTailAbsStart[ch] = PeakPosition[ch] + TheSettings->ChPSDTailStart[ch];
+	  PSDTailAbsStop[ch] = PeakPosition[ch] + TheSettings->ChPSDTailStop[ch];
+	  
+	  // Because the PSD integrals are computed relative to the peak
+	  // position - which is found during the sample loop above - we
+	  // must take the PSD integrals AFTER the sample loop has
+	  // concluded. We only do this if the user is either plotting
+	  // PSD histograms and/or storing PSD waveform data to maximize
+	  // the acquisition loop efficiency.
+	  if(TheSettings->PSDMode or TheSettings->WaveformStorePSDData){	  
+	    
+	    // The total PSD integral
+	    Int_t sample = PSDTotalAbsStart[ch];
+	    for(; sample<PSDTotalAbsStop[ch]; sample++)
+	      PSDTotal += Polarity[ch] * (Waveforms[ch][sample] - BaselineValue[ch]);
+	    
+	    // The tail PSD integral
+	    sample = PSDTailAbsStart[ch];
+	    for(; sample<PSDTailAbsStop[ch]; sample++)
+	      PSDTail += Polarity[ch] * (Waveforms[ch][sample] - BaselineValue[ch]);
+	    
+	    // Convert the tail integral to (tail/total) if specified
+	    if(TheSettings->PSDYAxisTailTotal)
+	      PSDTail /= PSDTotal;
+	  }
+	  
+	  // Store the total and tail PSD integrals if specified
+	  if(TheSettings->WaveformStorePSDData){
+	    WaveformData[ch]->SetPSDTotalIntegral(PSDTotal);
+	    WaveformData[ch]->SetPSDTailIntegral(PSDTail);
 	  }
 
 	  if(TheSettings->SpectrumMode){
@@ -503,19 +510,32 @@ void AAAcquisitionManager::StartAcquisition()
 	    // Pulse height spectrum
 	    if(TheSettings->SpectrumPulseHeight){
 	      
+	      // Determine if the pulse height is within the
+	      // acceptable lower/upper-level discrimator range if the
+	      // user has specified this check on spectrum binning;
+	      // otherwise, simply bin the pulse height in the spectrum
+
 	      if(TheSettings->LDEnable){
 		if(PulseHeight > LLD and PulseHeight < ULD)
 		  Spectrum_H[ch]->Fill(PulseHeight);
 	      }
 	      else
 		Spectrum_H[ch]->Fill(PulseHeight);
-	      
+	    
+	      // If the level-discrimantor is to be used as a
+	      // 'trigger' to output the waveform to the ADAQ 
 	      if(TheSettings->LDTrigger and ch == TheSettings->LDChannel)
 		FillWaveformTree = true;
 	    }
 	    
 	    // Pulse area spectrum
 	    else{
+
+	      // Determine if the pulse area is within the acceptable
+	      // lower/upper-level discrimator range if the user has
+	      // specified this check on spectrum binning; otherwise,
+	      // simply bin the pulse area in the spectrum
+	      
 	      if(TheSettings->LDEnable){
 		if(PulseArea > LLD and PulseArea < ULD)
 		  Spectrum_H[ch]->Fill(PulseArea);
@@ -547,17 +567,13 @@ void AAAcquisitionManager::StartAcquisition()
 	if(TheSettings->LDEnable and !FillWaveformTree)
 	  continue;
 	
-	// Fill the waveform tree via the readout manager
-	
-	if(TheSettings->WaveformStoreRaw)
-	  TheReadoutManager->GetWaveformTree()->Fill();
-
-	// Fill the waveform data tree via the readout manager
+	// If the user has specified to store ANY data at all then
+	// fill the waveform tree via the readout manager
 	
 	if(TheSettings->WaveformStoreRaw or
 	   TheSettings->WaveformStoreEnergyData or 
 	   TheSettings->WaveformStorePSDData)
-	  TheReadoutManager->GetWaveformDataTree()->Fill();
+	  TheReadoutManager->GetWaveformTree()->Fill();
 	
 	// Reset the bool used to determine if the LLD/ULD window
 	// should be used as the "trigger" for writing waveforms
@@ -579,6 +595,7 @@ void AAAcquisitionManager::StartAcquisition()
 						 PSDTailAbsStart,
 						 PSDTailAbsStop);
       }
+      
       EventCounter++;
     }// End readout event loop
     
@@ -890,15 +907,15 @@ void AAAcquisitionManager::CreateADAQFile(string FileName)
 
   ADAQDigitizer *DGManager = AAVMEManager::GetInstance()->GetDGManager();
 
-  // Create two branches for each digitizer channel:
-  // - A branch on the waveform TTree for raw waveform readout
-  // - A branch on the waveform data TTree for analyzed waveform data readout
+  // For each digitizer channel, create the two mandatory TTree branches:
+  // -A branch to store the channel's digitized waveform
+  // -A branch to store analyzed waveform data in 
 
   Int_t DGChannels = DGManager->GetNumChannels();
-  for(Int_t ch=0; ch<DGChannels; ch++){
-    TheReadoutManager->CreateWaveformTreeBranch(ch, &Waveforms[ch]);
-    TheReadoutManager->CreateWaveformDataTreeBranch(ch, WaveformData[ch]);
-  }
+  for(Int_t ch=0; ch<DGChannels; ch++)
+    TheReadoutManager->CreateWaveformTreeBranches(ch, 
+						  &Waveforms[ch],
+						  WaveformData[ch]);
   
   // Get the pointer to the ADAQ readout information and fill with all
   // relevent information via the ADAQReadoutInformation::Set*() methods
