@@ -43,16 +43,39 @@ repository at $ADAQACQUISITION/License.md or is available online at
 http://www.gnu.org/licenses.
 
 
-### Build instructions ###
+### Obtaining and building the code ###
 
-ADAQAcquisition is designed to be built locally via the provided
-GNU makefile, which handles all of the necessary header and library
-dependencies. If the user desires installation in a system-wide
-location, a Bash script is provided to correctly handle this
-operation.
+First, a word on versioning of ADAQAcquisition. Git tags of the form
+X.Y.Z are used to indicate stable, production versions of the code
+that may be deployed with confidence for general use by the general
+user. A change in the X version number indicates a major release that
+departs substantially from the previous series, while a change in the
+Y version number indicates deployment of major new code features. A
+change in the Z number is used to indicate bug fixes and very minor
+changes to the codebase. Untagged commits are considered development
+versions of the code with no guarantee of stability and should only be
+used by developers in non-production situations.
 
-The following lines should first be added to your .bashrc file to
-configure your environment correctly:
+To obtain ADAQAcquisition, you'll need to first clone the repository
+from GitHub and then switch to the appropriate git tag version before
+building the code.
+
+```bash
+  # Clone ADAQAcquisition source code from GitHub:
+  git clone https://github.com/zach-hartwig/ADAQAcquisition.git
+
+  # Switched to a tagged production branch. For example:
+  cd ADAQAcquisition
+  git checkout -b 1.0.0-beta
+  
+  # To build the binary:
+  make  
+
+  # To cleanup all build files and remove the binary:
+  make clean  
+
+Finally, add the following lines to your .bashrc file to configure
+your environment correctly before running ADAQAcquisition:
 
 ```bash 
     # ADAQAcquisition configuration
@@ -63,22 +86,6 @@ configure your environment correctly:
 ```
 Don't forget to open a new terminal for the settings to take effect!
 
-On Linux or MacOS, clone into the repository and then use the provided
-GNU Makefile to build the ADAQAcquisition binary:
-
-```bash
-  # Clone ADAQAcquisition source code from GitHub
-  git clone https://github.com/zach-hartwig/ADAQAcquisition.git
-
-  # Move to the ADAQAcquisition source code directory:
-  cd ADAQAcquisition
-  
-  # To build the binary locally
-  make  
-
-  # To cleanup all build files and remove the binary:
-  make clean  
-```
 
 ### Code dependencies ###
 
