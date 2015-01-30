@@ -64,7 +64,7 @@ building the code.
   # Clone ADAQAcquisition source code from GitHub:
   git clone https://github.com/zach-hartwig/ADAQAcquisition.git
 
-  # Switched to a tagged production branch. For example:
+  # Switch to a tagged production branch. For example:
   cd ADAQAcquisition
   git checkout -b 1.0.0-beta
   
