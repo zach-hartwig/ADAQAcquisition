@@ -73,11 +73,12 @@ building the code.
 
   # To cleanup all build files and remove the binary:
   make clean  
+```
 
-Finally, add the following lines to your .bashrc file to configure
+Finally, add the following line to your .bashrc file to configure
 your environment correctly before running ADAQAcquisition:
      
-```bash 
+```bash  
     source /full/path/to/ADAQAcquisition/scripts/setup.sh >& /dev/null
 ```
 Don't forget to open a new terminal for the settings to take effect!
