@@ -225,7 +225,7 @@ void AAAcquisitionManager::PreAcquisition()
     AAGraphics::GetInstance()->SetupSpectrumGraphics();
   else if(TheSettings->PSDMode)
     AAGraphics::GetInstance()->SetupPSDHistogramGraphics();
-  
+
   // Initialize pointers to the event and event waveform. Memory is
   // preallocated for events here rather than at readout time
   // resulting in slightly larger memory use but faster readout
@@ -236,11 +236,25 @@ void AAAcquisitionManager::PreAcquisition()
   // Initialize variables for the PC buffer and event readout. Memory
   // is preallocated for the buffer to receive readout events.
   Buffer = NULL;
-  BufferSize = ReadSize = FPGAEvents = PCEvents = 0;
-  DGManager->MallocReadoutBuffer(&Buffer, &BufferSize);
+  BufferSize = ReadSize = FPGAEvents = PCEvents = EventCounter = 0;
 
-  // Reset the event counter
-  EventCounter = 0;
+  // Get the acquisition control setting
+  Int_t AcqControl = TheSettings->AcquisitionControl;
+  
+  // If acquisition is 'standard' or 'manual' then send the software
+  // (SW) signal to begin data acquisition
+  if(AcqControl == 0)
+    DGManager->SWStartAcquisition();
+  
+  // If acquisition is 'Gated (NIM/TTL)' then arm the digitizer for
+  // reception of S IN signal as data acquisition start/stop 
+  else if(AcqControl == 1 or AcqControl == 2)
+    DGManager->SInArmAcquisition();
+  
+  // The memory for the PC readout buffer must allocated after the
+  // digitizer been programmed so ensure that this is the last line
+  // before starting acquisition
+  DGManager->MallocReadoutBuffer(&Buffer, &BufferSize);
 }
 
 
@@ -252,35 +266,25 @@ void AAAcquisitionManager::StartAcquisition()
   
   // Initialize all variables before acquisition begins
   PreAcquisition();
-
-  // Get the acquisition control setting
-  Int_t AcqControl = TheSettings->AcquisitionControl;
-
-  // If acquisition is 'standard' or 'manual' then send the software
-  // (SW) signal to begin data acquisition
-  if(AcqControl == 0)
-    DGManager->SWStartAcquisition();
   
-  // If acquisition is 'Gated (NIM/TTL)' then arm the digitizer for
-  // reception of S IN signal as data acquisition start/stop 
-  else if(AcqControl == 1 or AcqControl == 2)
-    DGManager->SInArmAcquisition();
-  
+  // Start acquisition
   AcquisitionEnable = true;
-
+  
   while(AcquisitionEnable){
     
     // Handle acquisition actions in separate ROOT thread
     gSystem->ProcessEvents();
-
+    
     // Get the number of events stored in the FPGA buffer and maximize
     // efficiency by entering the event readout loop only when the max
-    // number of readout events has been reached
-    
-    DGManager->GetNumFPGAEvents(&FPGAEvents);
-    if(FPGAEvents < TheSettings->EventsBeforeReadout)
-      continue;
+    // number of readout events has been reached. Note that this
+    // register seems to be filled ONLY for SWStart/StopAcquisition
 
+    DGManager->GetNumFPGAEvents(&FPGAEvents);
+    if(FPGAEvents < TheSettings->EventsBeforeReadout and 
+       TheSettings->AcquisitionControl == 0)
+      continue;
+    
     // Perform the FPGA buffer -> PC buffer data readout
     DGManager->ReadData(Buffer, &ReadSize);    
     
@@ -289,7 +293,7 @@ void AAAcquisitionManager::StartAcquisition()
     
     // For each event stored in the PC memory buffer...
     for(uint32_t evt=0; evt<PCEvents; evt++){
-      
+
       if(AcquisitionTimerEnable){
 	
 	// Calculate the elapsed time since the timer was started
@@ -309,7 +313,7 @@ void AAAcquisitionManager::StartAcquisition()
 	  break;
 	}
       }
-      
+
       ///////////////////////////////
       // Standard waveform readout //
       ///////////////////////////////
@@ -320,20 +324,23 @@ void AAAcquisitionManager::StartAcquisition()
       if(!TheSettings->ZeroSuppressionEnable){
 
 	// Populate the EventInfo structure and assign address to the EventPointer
+	EventPointer = NULL;
 	DGManager->GetEventInfo(Buffer, ReadSize, evt, &EventInfo, &EventPointer);
 	
 	// Seg. fault protection
-	if(EventPointer == NULL)
+	if(EventPointer == NULL){
 	  continue;
+	}
 	
 	//  Fill the EventWaveform structure with digitized signal voltages
 	DGManager->DecodeEvent(EventPointer, &EventWaveform);
 	
 	// Seg. fault protection
-	if(EventWaveform == NULL)
+	if(EventWaveform == NULL){
 	  continue;
+	}
       }
-
+      
       
       ///////////////////////////////////////////
       // Zero length encoding waveform readout //
@@ -357,19 +364,19 @@ void AAAcquisitionManager::StartAcquisition()
 	}
 	//DGManager->PrintZLEEventInfo(Buffer, evt);
       }
-      
+
       // Iterate over the digitizer channels that are enabled
       for(Int_t ch=0; ch<DGManager->GetNumChannels(); ch++){
 	
 	if(!TheSettings->ChEnable[ch])
 	  continue;
-
+	
 	// Reset values used for to compute values at the channel-level
 	BaselineValue[ch] = PulseHeight = PulseArea = 0.;
 	PSDTotal = PSDTail = 0.;
 	
 	WaveformData[ch]->Initialize();
-	
+
 	Int_t NumSamples = Waveforms[ch].size();
 	for(Int_t sample=0; sample<NumSamples; sample++){
 
@@ -415,14 +422,14 @@ void AAAcquisitionManager::StartAcquisition()
 		PeakPosition[ch] = sample;
 	      }
 	      
-	      // Integrate the area under the pulse
-	      if(SampleHeight > TriggerHeight)
-		PulseArea += SampleHeight;
+	      // Integrate the "area under the pulse" by summing the
+	      // all samples in the waveform. Note that the assumption
+	      // is made that + and - noise will cancel
+	      PulseArea += SampleHeight;
 	    }
 	  }
 	} // End sample loop
-
-
+	
 	///////////////////////////////////
 	// Post-sampling loop processing //
 	///////////////////////////////////
@@ -594,10 +601,12 @@ void AAAcquisitionManager::StartAcquisition()
 						 PSDTailAbsStart,
 						 PSDTailAbsStop);
       }
-      
+
       EventCounter++;
+
+      DGManager->FreeEvent(&EventWaveform);
     }// End readout event loop
-    
+
     // Only if the display is set to continuous then plot the spectra
     // or PSD histogram; if the display mode is set to updateable the
     // plotting is achieved by clicking the "Update Display" text
@@ -618,13 +627,8 @@ void AAAcquisitionManager::StartAcquisition()
 	}
       }
     }
+    
   } // End acquisition loop
-  
-  // Free the memory preallocated for event readout
-  DGManager->FreeEvent(&EventWaveform);
-  
-  // Free the PC memory allocated to the readout buffer
-  DGManager->FreeReadoutBuffer(&Buffer);
 }
 
 
@@ -641,9 +645,9 @@ void AAAcquisitionManager::StopAcquisition()
   
   DGManager->FreeEvent(&EventWaveform);
   DGManager->FreeReadoutBuffer(&Buffer);
-
+  
   if(AcquisitionTimerEnable){
-
+    
     // Set the information in the ADAQ file to signal that the
     // acquisition timer was used for this run and set the acquisition
     // time. This must be done here at the end of acquisition Since

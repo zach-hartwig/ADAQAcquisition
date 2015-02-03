@@ -109,7 +109,7 @@ private:
   CAEN_DGTZ_UINT16_EVENT_t *EventWaveform;
 
   // Variables for PC buffer readout
-  char *Buffer;
+  char *Buffer; 
   uint32_t BufferSize, ReadSize, FPGAEvents, PCEvents;
   vector<bool> BufferFull;
 
@@ -167,9 +167,6 @@ private:
   vector<vector<uint16_t> > Waveforms;
 #endif
   vector<ADAQWaveformData *> WaveformData;
-  
-
-
 };
 
 #endif
