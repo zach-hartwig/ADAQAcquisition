@@ -466,8 +466,18 @@ void AASubtabSlots::HandleTextButtons()
 
    
   case WaveformCommentFile_TB_ID:{
+    // Create a new customized editor and wait until the user has
+    // finished and closed the window before proceeding
     AAEditor *Editor = new AAEditor(TI,500,500);
     gClient->WaitFor(Editor->GetEditorWindow());
+
+    // Get the text from the editor as a TString and pass it to the
+    // acquisition manager. From there, it will be passed to the
+    // ADAQReadoutManager and saved properly into the ADAQ file
+    //TheACQManager->SetADAQFileComment(Editor->GetEditorText());
+
+    delete Editor;
+    
     break;
   }
     

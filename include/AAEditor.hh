@@ -18,21 +18,19 @@ public:
   
   TGTextEdit *GetEditor() { return Editor_TE; }
   TGWindow *GetEditorWindow(){return EditorWindow;}
-  TGText *GetEditorText() { return EditorText_T; }
+  TString GetEditorText() {return EditorText;}
   
-  void CloseWindow() { delete this; }
-  void DoSave();    
-
+  void DoSave();
+  void CloseWindow() { EditorWindow->CloseWindow(); }
+  
   ClassDef(AAEditor, 1);
   
 private:
   TGTransientFrame *EditorWindow;
-  
   TGTextEdit *Editor_TE;
-  
-  TGText *EditorText_T;
-  
   TGTextButton *Save_TB;
+
+  TString EditorText;
 };
 
 #endif

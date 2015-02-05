@@ -39,13 +39,16 @@ AAEditor::AAEditor(const TGWindow *MainWindow, UInt_t Width, UInt_t Height)
   EditorWindow->Resize();
   EditorWindow->MapWindow();
 
-  // editor covers right half of parent window
   EditorWindow->CenterOnParent(kTRUE, TGTransientFrame::kRight);
 }
 
 
 AAEditor::~AAEditor()
-{ EditorWindow->DeleteWindow(); }
+{
+  // Note that the AAEditor::CloseWindow() method automatically
+  // handles recursive delete of objects attached to the main
+  // frame. Thus, there is no need to delete anything here.
+}
 
 
 void AAEditor::LoadBuffer(const char *buffer)
@@ -66,7 +69,6 @@ void AAEditor::AddBuffer(const  char *buffer)
 
 void AAEditor::DoSave()
 { 
-  EditorText_T = Editor_TE->GetText();
+  EditorText = Editor_TE->GetText()->AsString();
   CloseWindow();
 }
-

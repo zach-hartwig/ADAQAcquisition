@@ -90,6 +90,8 @@ public:
   
   TH2F *GetPSDHistogram(Int_t C) {return PSDHistogram_H[C];}
   
+  void SetADAQFileComment(TString AFC) {TheReadoutManager->SetFileComment(AFC);}
+  
   ClassDef(AAAcquisitionManager, 1);
   
 private:
@@ -149,8 +151,6 @@ private:
   TTree *WaveformTree;
   Bool_t FillWaveformTree;
 
-  TFile *ADAQFile;
-  
   ADAQRootMeasParams *Parameters;
   TObjString *Comment;
   
