@@ -22,6 +22,7 @@
 #include "AAVMEManager.hh"
 #include "AAAcquisitionManager.hh"
 #include "AAGraphics.hh"
+#include "AAEditor.hh"
 
 AASubtabSlots::AASubtabSlots(AAInterface *TheInterface)
   : TI(TheInterface),
@@ -444,8 +445,6 @@ void AASubtabSlots::HandleTextButtons()
   }
 
     
-
-    
   case WaveformCreateFile_TB_ID:{
     
     TheACQManager->CreateADAQFile(WaveformFileName);
@@ -465,7 +464,14 @@ void AASubtabSlots::HandleTextButtons()
     break;
   }
 
-
+   
+  case WaveformCommentFile_TB_ID:{
+    AAEditor *Editor = new AAEditor(TI,500,500);
+    gClient->WaitFor(Editor->GetEditorWindow());
+    break;
+  }
+    
+    
   case WaveformCloseFile_TB_ID:{
     
     TheACQManager->CloseADAQFile();

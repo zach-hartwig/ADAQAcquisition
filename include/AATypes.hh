@@ -209,6 +209,7 @@ enum{
   WaveformFileName_TB_ID,
   WaveformCreateFile_TB_ID,
   WaveformCloseFile_TB_ID,
+  WaveformCommentFile_TB_ID,
   WaveformStorageEnable_CB_ID,
   WaveformStoreRaw_CB_ID,
   WaveformStoreEnergyData_CB_ID,

@@ -59,7 +59,7 @@ using namespace boost::assign;
 
 AAInterface::AAInterface()
   : TGMainFrame(gClient->GetRoot()),
-    DisplayWidth(1112), DisplayHeight(833), 
+    DisplayWidth(1121), DisplayHeight(833), 
     ButtonForeColor(kWhite), ButtonBackColorOn(kGreen-5), ButtonBackColorOff(kRed-3),
     NumDataChannels(8), ColorManager(new TColor), NumVMEBoards(3)
 {
@@ -1039,7 +1039,7 @@ void AAInterface::FillAcquisitionFrame()
   // spectrum when DGScope is set to "calibration mode" while
   // acquiring data in "spectrum mode"
   Display_VF->AddFrame(DisplayHorizontalScale_THS = new TGTripleHSlider(Display_VF, 670, kDoubleScaleBoth, DisplayHorizontalScale_THS_ID, kVerticalFrame, ColorManager->Number2Pixel(17)),
-		       new TGLayoutHints(kLHintsRight, 5, 0, 0, 5));
+		       new TGLayoutHints(kLHintsNormal, 25, 0, 0, 5));
   DisplayHorizontalScale_THS->SetRange(0,1);
   DisplayHorizontalScale_THS->SetPosition(0,1);
   DisplayHorizontalScale_THS->SetPointerPosition(0.5);
@@ -1049,7 +1049,7 @@ void AAInterface::FillAcquisitionFrame()
 
   TGHorizontalFrame *DGScopeDisplayButtons_HF = new TGHorizontalFrame(Display_VF);
   DGScopeDisplayButtons_HF->SetBackgroundColor(ColorManager->Number2Pixel(22));
-  Display_VF->AddFrame(DGScopeDisplayButtons_HF, new TGLayoutHints(kLHintsNormal, 0,0,5,0));
+  Display_VF->AddFrame(DGScopeDisplayButtons_HF, new TGLayoutHints(kLHintsNormal, 20,0,5,0));
 
   // ROOT text button for starting/stopping data acquisition by the digitizer
   DGScopeDisplayButtons_HF->AddFrame(AQStartStop_TB = new TGTextButton(DGScopeDisplayButtons_HF, "Stopped", AQStartStop_TB_ID),
@@ -1599,46 +1599,56 @@ void AAInterface::FillAcquisitionFrame()
   DataSubframe->AddFrame(WaveformStorage_GF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
 
   WaveformStorage_GF->AddFrame(WaveformFileName_TB = new TGTextButton(WaveformStorage_GF, "ADAQ file name", WaveformFileName_TB_ID),
-				  new TGLayoutHints(kLHintsNormal,10,5,5,0));
+				  new TGLayoutHints(kLHintsNormal,5,5,5,0));
   WaveformFileName_TB->Connect("Clicked()","AASubtabSlots", SubtabSlots, "HandleTextButtons()");
-  WaveformFileName_TB->Resize(175, 30);
+  WaveformFileName_TB->Resize(220, 30);
   WaveformFileName_TB->ChangeOptions(WaveformFileName_TB->GetOptions() | kFixedSize);
 
   WaveformStorage_GF->AddFrame(WaveformFileName_TEL = new ADAQTextEntryWithLabel(WaveformStorage_GF, "", -1),
-				      new TGLayoutHints(kLHintsNormal,10,5,5,5));
-  WaveformFileName_TEL->GetEntry()->Resize(175, 25);
+				      new TGLayoutHints(kLHintsNormal,5,0,5,5));
+  WaveformFileName_TEL->GetEntry()->Resize(220, 25);
   WaveformFileName_TEL->GetEntry()->ChangeOptions(WaveformFileName_TEL->GetOptions() | kFixedSize | kSunkenFrame);
   WaveformFileName_TEL->GetEntry()->SetState(false);
   WaveformFileName_TEL->GetEntry()->SetText("DefaultWaveforms.adaq.root");
   
  
   WaveformStorage_GF->AddFrame(WaveformStoreRaw_CB = new TGCheckButton(WaveformStorage_GF,"Store raw waveforms",WaveformStoreRaw_CB_ID),
-			       new TGLayoutHints(kLHintsNormal,10,5,0,0));
+			       new TGLayoutHints(kLHintsNormal,5,5,0,0));
   WaveformStoreRaw_CB->SetState(kButtonDown);
   
   WaveformStorage_GF->AddFrame(WaveformStoreEnergyData_CB = new TGCheckButton(WaveformStorage_GF,"Store energy data",WaveformStoreEnergyData_CB_ID),
-			       new TGLayoutHints(kLHintsNormal,10,5,0,0));
+			       new TGLayoutHints(kLHintsNormal,5,5,0,0));
 
   WaveformStorage_GF->AddFrame(WaveformStorePSDData_CB = new TGCheckButton(WaveformStorage_GF,"Store PSD data",WaveformStorePSDData_CB_ID),
-			       new TGLayoutHints(kLHintsNormal,10,5,0,0));
+			       new TGLayoutHints(kLHintsNormal,5,5,0,0));
 
 
   TGHorizontalFrame *WaveformCreateClose_HF = new TGHorizontalFrame(WaveformStorage_GF);
   WaveformStorage_GF->AddFrame(WaveformCreateClose_HF, new TGLayoutHints(kLHintsNormal,0,0,5,0));
   
   WaveformCreateClose_HF->AddFrame(WaveformCreateFile_TB = new TGTextButton(WaveformCreateClose_HF,"Create", WaveformCreateFile_TB_ID),
-				  new TGLayoutHints(kLHintsNormal,10,0,8,5));
+				   new TGLayoutHints(kLHintsNormal,5,0,8,5));
   WaveformCreateFile_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
-  WaveformCreateFile_TB->Resize(85,30);
+  WaveformCreateFile_TB->Resize(70,30);
   WaveformCreateFile_TB->ChangeOptions(WaveformCreateFile_TB->GetOptions() | kFixedSize);
   WaveformCreateFile_TB->SetState(kButtonDisabled);
+  
+  WaveformCreateClose_HF->AddFrame(WaveformCommentFile_TB = new TGTextButton(WaveformCreateClose_HF,"Comment", WaveformCommentFile_TB_ID),
+				   new TGLayoutHints(kLHintsNormal,5,0,8,5));
+  WaveformCommentFile_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
+  WaveformCommentFile_TB->Resize(70,30);
+  WaveformCommentFile_TB->ChangeOptions(WaveformCommentFile_TB->GetOptions() | kFixedSize);
+  //WaveformCommentFile_TB->SetState(kButtonDisabled);
+
 
   WaveformCreateClose_HF->AddFrame(WaveformCloseFile_TB = new TGTextButton(WaveformCreateClose_HF,"Close", WaveformCloseFile_TB_ID),
-				   new TGLayoutHints(kLHintsNormal,5,5,8,5));
+				   new TGLayoutHints(kLHintsNormal,5,0,8,5));
   WaveformCloseFile_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
-  WaveformCloseFile_TB->Resize(85,30);
+  WaveformCloseFile_TB->Resize(70,30);
   WaveformCloseFile_TB->ChangeOptions(WaveformCloseFile_TB->GetOptions() | kFixedSize);
   WaveformCloseFile_TB->SetState(kButtonDisabled);
+
+
 
   WaveformStorage_GF->AddFrame(WaveformStorageEnable_CB = new TGCheckButton(WaveformStorage_GF,"Data stored while checked!", WaveformStorageEnable_CB_ID),
 			       new TGLayoutHints(kLHintsNormal,10,5,5,5));
@@ -1674,7 +1684,7 @@ void AAInterface::FillAcquisitionFrame()
   SpectrumOutput_RB = new TGRadioButton(ObjectType_BG, "Spectrum", SpectrumOutput_RB_ID);
   SpectrumOutput_RB->Connect("Clicked()","AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
 
-  PSDHistogramOutput_RB = new TGRadioButton(ObjectType_BG, "PSD histogram", PSDHistogramOutput_RB_ID);
+  PSDHistogramOutput_RB = new TGRadioButton(ObjectType_BG, "PSD histo.", PSDHistogramOutput_RB_ID);
   PSDHistogramOutput_RB->Connect("Clicked()","AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
   
   ObjectType_HF->AddFrame(ObjectOutputChannel_CBL = new ADAQComboBoxWithLabel(ObjectType_HF, "", ObjectOutputType_CBL_ID),
