@@ -300,6 +300,7 @@ private:
   ADAQTextEntryWithLabel *WaveformFileName_TEL;
   TGTextButton *WaveformCreateFile_TB;
   TGTextButton *WaveformCloseFile_TB;
+  TGTextButton *WaveformCommentFile_TB;
   TGCheckButton *WaveformStorageEnable_CB;
   TGCheckButton *WaveformStoreRaw_CB;
   TGCheckButton *WaveformStoreEnergyData_CB;

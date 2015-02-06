@@ -22,6 +22,7 @@
 #include "AAVMEManager.hh"
 #include "AAAcquisitionManager.hh"
 #include "AAGraphics.hh"
+#include "AAEditor.hh"
 
 AASubtabSlots::AASubtabSlots(AAInterface *TheInterface)
   : TI(TheInterface),
@@ -444,8 +445,6 @@ void AASubtabSlots::HandleTextButtons()
   }
 
     
-
-    
   case WaveformCreateFile_TB_ID:{
     
     TheACQManager->CreateADAQFile(WaveformFileName);
@@ -457,6 +456,7 @@ void AASubtabSlots::HandleTextButtons()
     TI->WaveformCreateFile_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOn));
     TI->WaveformCreateFile_TB->SetForegroundColor(TI->ColorManager->Number2Pixel(TI->ButtonForeColor));
     TI->WaveformCreateFile_TB->SetText("File open!");
+    TI->WaveformCommentFile_TB->SetState(kButtonUp);
     TI->WaveformCloseFile_TB->SetState(kButtonUp);
     TI->WaveformStorageEnable_CB->SetState(kButtonUp);
     TI->WaveformStoreRaw_CB->SetState(kButtonDisabled);
@@ -465,7 +465,31 @@ void AASubtabSlots::HandleTextButtons()
     break;
   }
 
+   
+  case WaveformCommentFile_TB_ID:{
+    // Create a new custome editor for creating ADAQ file comments
+    AAEditor *Editor = new AAEditor(TI,500,500);
 
+    // Load any previously written comments to the editor; this allows
+    // the user to redo previously made comments just in case. In the
+    // future, one could imagine loading a template comment file...
+    Editor->LoadBuffer(TheACQManager->GetADAQFileComment());
+
+    // Wait to execute subsequent code until the editor window has
+    // been closed
+    gClient->WaitFor(Editor->GetEditorWindow());
+
+    // Get the text from the editor as a TString and pass it to the
+    // acquisition manager. From there, it will be passed to the
+    // ADAQReadoutManager and saved properly into the ADAQ file
+    TheACQManager->SetADAQFileComment(Editor->GetEditorText());
+    
+    delete Editor;
+    
+    break;
+  }
+    
+    
   case WaveformCloseFile_TB_ID:{
     
     TheACQManager->CloseADAQFile();
@@ -476,6 +500,7 @@ void AASubtabSlots::HandleTextButtons()
       TI->WaveformCreateFile_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(18));
       TI->WaveformCreateFile_TB->SetForegroundColor(TI->ColorManager->Number2Pixel(kBlack));
       TI->WaveformCreateFile_TB->SetText("Create");
+      TI->WaveformCommentFile_TB->SetState(kButtonDisabled);
       TI->WaveformCloseFile_TB->SetState(kButtonDisabled);
       TI->WaveformStorageEnable_CB->SetState(kButtonUp);
       TI->WaveformStorageEnable_CB->SetState(kButtonDisabled);

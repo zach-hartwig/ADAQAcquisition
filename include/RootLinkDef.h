@@ -38,6 +38,7 @@
 #pragma link C++ class AASubtabSlots+;
 #pragma link C++ class AATabSlots+;
 #pragma link C++ class AAVMEManager+;
+#pragma link C++ class AAEditor+;
 
 // Create a special vector of uint16_t's. This type is used for
 // storing digitized waveform information and is necessary to define
