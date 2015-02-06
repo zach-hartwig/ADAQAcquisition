@@ -1638,8 +1638,7 @@ void AAInterface::FillAcquisitionFrame()
   WaveformCommentFile_TB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleTextButtons()");
   WaveformCommentFile_TB->Resize(70,30);
   WaveformCommentFile_TB->ChangeOptions(WaveformCommentFile_TB->GetOptions() | kFixedSize);
-  //WaveformCommentFile_TB->SetState(kButtonDisabled);
-
+  WaveformCommentFile_TB->SetState(kButtonDisabled);
 
   WaveformCreateClose_HF->AddFrame(WaveformCloseFile_TB = new TGTextButton(WaveformCreateClose_HF,"Close", WaveformCloseFile_TB_ID),
 				   new TGLayoutHints(kLHintsNormal,5,0,8,5));
@@ -2056,10 +2055,11 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
     AQStartStop_TB->SetText("Stopped");
 
     WaveformCreateFile_TB->SetState(kButtonDisabled);
+    WaveformCommentFile_TB->SetState(kButtonDisabled);
     WaveformCloseFile_TB->SetState(kButtonDisabled);
     WaveformStorageEnable_CB->SetState(kButtonUp);
     WaveformStorageEnable_CB->SetState(kButtonDisabled);
-
+    
     bool AQTimerEnable = AAAcquisitionManager::GetInstance()->GetAcquisitionTimerEnable();
     
     if(AQTimerEnable){

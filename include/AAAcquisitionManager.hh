@@ -90,6 +90,7 @@ public:
   
   TH2F *GetPSDHistogram(Int_t C) {return PSDHistogram_H[C];}
   
+  TString GetADAQFileComment() {return TheReadoutManager->GetFileComment();}
   void SetADAQFileComment(TString AFC) {TheReadoutManager->SetFileComment(AFC);}
   
   ClassDef(AAAcquisitionManager, 1);
