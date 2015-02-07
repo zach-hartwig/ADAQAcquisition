@@ -493,7 +493,7 @@ void AASubtabSlots::HandleTextButtons()
   case WaveformCloseFile_TB_ID:{
     
     TheACQManager->CloseADAQFile();
-
+    
     if(!TheACQManager->GetADAQFileIsOpen()){
       TI->WaveformFileName_TB->SetState(kButtonUp);
       TI->WaveformCreateFile_TB->SetState(kButtonUp);

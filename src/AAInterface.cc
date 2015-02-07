@@ -2046,7 +2046,6 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
     AQStartStop_TB->SetText("Acquiring");
     
     WaveformCreateFile_TB->SetState(kButtonUp);
-    WaveformCloseFile_TB->SetState(kButtonUp);
   }
 
   // Acquisition is turning OFF
