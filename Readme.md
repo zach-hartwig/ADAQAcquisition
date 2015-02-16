@@ -70,8 +70,11 @@ building the code.
   
   # To build the binary:
   make  
+```
 
-  # To cleanup all build files and remove the binary:
+To remove the transient build files and the ADAQAcquisition binary, you
+can run:
+```bash
   make clean  
 ```
 
