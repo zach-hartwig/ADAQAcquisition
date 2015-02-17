@@ -13,3 +13,8 @@
 # Ignore all transient build files and the binary
 build/*
 bin/*
+
+# Ignore all documentation transients and PDF
+doc/build/*
+doc/ADAQAcquisition_UsersGuide.pdf
+
