@@ -586,27 +586,33 @@ void AAAcquisitionManager::StartAcquisition()
 	FillWaveformTree = false;
       }
       
-      // Plot the waveform; only plot the first waveform event in the
-      // case of a multievent readout to maximize efficiency
+      // Plot the waveform under specific criterion to minimize CPU
+      // intensity. Only plot the waveforms in continuous data
+      // acquisition mode and only plot the first waveform event in
+      // the case of many events in a single readout.
       
-      if(TheSettings->WaveformMode and evt == 0){
-	// Draw the digitized waveform
-	TheGraphicsManager->PlotWaveforms(Waveforms, WaveformLength);
+      if(TheSettings->WaveformMode){
 	
-	// Draw graphical objects associated with the waveform
-	TheGraphicsManager->DrawWaveformGraphics(BaselineValue,
-						 PeakPosition,
-						 PSDTotalAbsStart,
-						 PSDTotalAbsStop,
-						 PSDTailAbsStart,
-						 PSDTailAbsStop);
+	if(TheSettings->DisplayContinuous and evt == 0){
+	  
+	  // Draw the digitized waveform
+	  TheGraphicsManager->PlotWaveforms(Waveforms, WaveformLength);
+	  
+	  // Draw graphical objects associated with the waveform
+	  TheGraphicsManager->DrawWaveformGraphics(BaselineValue,
+						   PeakPosition,
+						   PSDTotalAbsStart,
+						   PSDTotalAbsStop,
+						   PSDTailAbsStart,
+						   PSDTailAbsStop);
+	}
       }
-
+      
       EventCounter++;
-
+      
       DGManager->FreeEvent(&EventWaveform);
     }// End readout event loop
-
+    
     // Only if the display is set to continuous then plot the spectra
     // or PSD histogram; if the display mode is set to updateable the
     // plotting is achieved by clicking the "Update Display" text

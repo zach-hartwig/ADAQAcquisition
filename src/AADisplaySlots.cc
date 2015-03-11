@@ -93,7 +93,12 @@ void AADisplaySlots::HandleTextButtons()
     if(TI->TheSettings->DisplayNonUpdateable)
       break;
     else{
-      if(TI->TheSettings->SpectrumMode and !TI->TheSettings->DisplayNonUpdateable){
+      
+      if(TI->TheSettings->WaveformMode and !TI->TheSettings->DisplayNonUpdateable){
+	// Possibly implement future ability to update waveform manually
+      }
+      
+      else if(TI->TheSettings->SpectrumMode and !TI->TheSettings->DisplayNonUpdateable){
 	int Channel = TI->TheSettings->SpectrumChannel;
 	TH1F *Spectrum_H = TheACQManager->GetSpectrum(Channel);
 	AAGraphics::GetInstance()->PlotSpectrum(Spectrum_H);
