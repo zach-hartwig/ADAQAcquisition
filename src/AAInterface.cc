@@ -2322,6 +2322,9 @@ void AAInterface::UpdateAfterAQTimerStopped(bool ROOTFileOpen)
   AQTimerStart_TB->SetText("Start timer");
 
   WaveformFileName_TB->SetState(kButtonUp);
+  WaveformStoreRaw_CB->SetState(kButtonUp);
+  WaveformStoreEnergyData_CB->SetState(kButtonUp);
+  WaveformStorePSDData_CB->SetState(kButtonUp);
   WaveformCreateFile_TB->SetState(kButtonDisabled);
   WaveformCreateFile_TB->SetText("Create");
   WaveformCreateFile_TB->SetBackgroundColor(ColorManager->Number2Pixel(18));
