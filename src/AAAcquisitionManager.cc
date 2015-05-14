@@ -152,6 +152,7 @@ void AAAcquisitionManager::PreAcquisition()
     
     Waveforms.clear();
     Waveforms.resize(DGChannels);
+
     for(Int_t ch=0; ch<DGChannels; ch++){
       if(TheSettings->ChEnable[ch])
 	Waveforms[ch].resize(WaveformLength);
@@ -392,7 +393,7 @@ void AAAcquisitionManager::StartAcquisition()
 		Waveforms[ch][Index] = EventWaveform->DataChannel[ch][sample];
 	      }
 	    }
-
+	    
 	    // Standard readout
 	    else
 	      Waveforms[ch][sample] = EventWaveform->DataChannel[ch][sample];
@@ -660,7 +661,7 @@ void AAAcquisitionManager::StopAcquisition()
     // when the ADAQReadoutInformation class is filled - when the file
     // _created_ not when the acquisition timer button is pushed - the
     // acquisition timer boolean has not yet been set.
-
+    
     ADAQReadoutInformation *ARI = TheReadoutManager->GetReadoutInformation();
     ARI->SetAcquisitionTimer(AcquisitionTimerEnable);
     ARI->SetAcquisitionTime(TheSettings->AcquisitionTime);
@@ -916,15 +917,48 @@ void AAAcquisitionManager::CreateADAQFile(string FileName)
 
   ADAQDigitizer *DGManager = AAVMEManager::GetInstance()->GetDGManager();
 
-  // For each digitizer channel, create the two mandatory TTree branches:
-  // -A branch to store the channel's digitized waveform
-  // -A branch to store analyzed waveform data in 
-
   Int_t DGChannels = DGManager->GetNumChannels();
-  for(Int_t ch=0; ch<DGChannels; ch++)
+  for(Int_t ch=0; ch<DGChannels; ch++){
+
+    // For each digitizer channel, create the two mandatory TTree branches:
+    // -A branch to store the channel's digitized waveform
+    // -A branch to store analyzed waveform data in 
+
     TheReadoutManager->CreateWaveformTreeBranches(ch, 
 						  &Waveforms[ch],
 						  WaveformData[ch]);
+    
+    // For each enabled digitizer channel, selectively disable
+    // WaveformTree branches according to the settings. This provides
+    // optimized and selected data storage, which should increase
+    // readout loop efficiency, increase analysis efficiency, and
+    // decrease the storage size on disk.
+    
+    if(ChEnable[ch]){
+      
+      // Disable the waveform branch if the user has declined to store
+      // raw waveforms in the ADAQ file
+      
+      if(!TheSettings->WaveformStoreRaw)
+	TheReadoutManager->SetWaveformBranchStatus(ch, false);
+      
+      //  Disable the data branch if the user has declined to store
+      //  waveform data (energy, PSD integrals, etc) in the ADAQ file
+      
+      if(!TheSettings->WaveformStoreEnergyData and 
+	 !TheSettings->WaveformStorePSDData)
+	TheReadoutManager->SetDataBranchStatus(ch, false);
+    }
+    
+    // For each disabled digitizer channel, disable both branches
+
+    else{
+      TheReadoutManager->SetWaveformBranchStatus(ch, false);
+      TheReadoutManager->SetDataBranchStatus(ch, false);
+    }
+    
+  }
+  
   
   // Get the pointer to the ADAQ readout information and fill with all
   // relevent information via the ADAQReadoutInformation::Set*() methods
