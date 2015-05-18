@@ -934,7 +934,7 @@ void AAAcquisitionManager::CreateADAQFile(string FileName)
     // readout loop efficiency, increase analysis efficiency, and
     // decrease the storage size on disk.
     
-    if(ChEnable[ch]){
+    if(TheSettings->ChEnable[ch]){
       
       // Disable the waveform branch if the user has declined to store
       // raw waveforms in the ADAQ file
