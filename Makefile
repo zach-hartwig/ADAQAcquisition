@@ -48,9 +48,8 @@ OBJS = $(subst src/,build/,$(TMP))
 # Add the mandatory ROOT dictionary object file
 OBJS += $(BUILDDIR)/ADAQAcquisitionDict.o
 
-# Define compiler and add flags
-CXX = clang++
-CXXFLAGS += -ferror-limit=5 -w -I$(INCLDIR) -I$(ADAQHOME)/include -std=c++0x
+# Add various compiler flags
+CXXFLAGS += -w -I$(INCLDIR) -I$(ADAQHOME)/include -std=c++0x
 
 # Add linker flags for the ADAQ libraries
 LDFLAGS+=-L$(ADAQHOME)/lib/$(HOSTTYPE) -lADAQControl -lADAQReadout
