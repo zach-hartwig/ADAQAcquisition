@@ -29,6 +29,7 @@
 #include <TGTripleSlider.h>
 #include <TGTextView.h>
 #include <TGFileDialog.h>
+#include <TGProgressBar.h>
 
 #include <vector>
 #include <map>
@@ -252,7 +253,7 @@ private:
 
   ADAQNumberEntryWithLabel *DGEventsBeforeReadout_NEL;
   TGTextButton *DGCheckBufferStatus_TB;
-  TGTextEntry *DGBufferStatus_TE;
+  TGHProgressBar *DGBufferStatus_PB;
 
   TGCheckButton *AQDataReductionEnable_CB;
   ADAQNumberEntryWithLabel *AQDataReductionFactor_NEL;

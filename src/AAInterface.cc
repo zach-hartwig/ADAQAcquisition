@@ -340,7 +340,7 @@ void AAInterface::FillConnectionFrame()
       BoardType_CBL[board]->GetComboBox()->AddEntry("V1724", zV1724);
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5720", zDT5720);
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5730", zDT5730);
-      BoardType_CBL[board]->GetComboBox()->Select(zDT5720);
+      BoardType_CBL[board]->GetComboBox()->Select(zV1720);
     }
     else if(board == 2){
       BoardType_CBL[board]->GetComboBox()->AddEntry("V6533M", zV6533M);
@@ -1269,12 +1269,11 @@ void AAInterface::FillAcquisitionFrame()
   DGCheckBufferStatus_TB->Resize(150,30);
   DGCheckBufferStatus_TB->ChangeOptions(DGCheckBufferStatus_TB->GetOptions() | kFixedSize);
   
-  DGScopeReadoutControls_GF->AddFrame(DGBufferStatus_TE = new TGTextEntry(DGScopeReadoutControls_GF, "<Click above check!>",-1),
+  DGScopeReadoutControls_GF->AddFrame(DGBufferStatus_PB = new TGHProgressBar(DGScopeReadoutControls_GF, TGProgressBar::kFancy, 200),
 				      new TGLayoutHints(kLHintsNormal, 5,5,5,5));
-  DGBufferStatus_TE->SetAlignment(kTextCenterX);
-  DGBufferStatus_TE->Resize(200,30);
-  DGBufferStatus_TE->ChangeOptions(DGBufferStatus_TE->GetOptions() | kFixedSize);
-
+  DGBufferStatus_PB->SetHeight(20);
+  DGBufferStatus_PB->SetBarColor(ColorManager->Number2Pixel(kGreen-5));
+  DGBufferStatus_PB->ShowPosition(kTRUE, kFALSE, "%.2f% buffer capacity");
 
   DGScopeReadoutControls_GF->AddFrame(AQDataReductionEnable_CB = new TGCheckButton(DGScopeReadoutControls_GF, "Enable data reduction", AQDataReductionEnable_CB_ID),
 				      new TGLayoutHints(kLHintsNormal, 5,5,5,0));
@@ -2052,7 +2051,12 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
   else{
     AQStartStop_TB->SetBackgroundColor(ColorManager->Number2Pixel(ButtonBackColorOff));
     AQStartStop_TB->SetText("Stopped");
-
+    
+    if(WaveformCreateFile_TB->GetString() == "File open!"){
+      WaveformCreateFile_TB->SetText("Create");
+      WaveformCreateFile_TB->SetBackgroundColor(ColorManager->Number2Pixel(18));
+      WaveformCreateFile_TB->SetForegroundColor(ColorManager->Number2Pixel(kBlack));
+    }
     WaveformCreateFile_TB->SetState(kButtonDisabled);
     WaveformCommentFile_TB->SetState(kButtonDisabled);
     WaveformCloseFile_TB->SetState(kButtonDisabled);

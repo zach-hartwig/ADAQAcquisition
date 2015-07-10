@@ -27,9 +27,9 @@ AAVMEManager *AAVMEManager::GetInstance()
 
 
 AAVMEManager::AAVMEManager()
-  : BREnable(false), DGEnable(true), HVEnable(false),
+  : BREnable(true), DGEnable(true), HVEnable(false),
     BRIdentifier(0),
-    DGIdentifier(0), DGAddress(0x00000000), DGLinkNumber(0), DGCONETNode(0),
+    DGIdentifier(0), DGAddress(0x00420000), DGLinkNumber(0), DGCONETNode(0),
     HVIdentifier(0), HVAddress(0x42420000), HVLinkNumber(0), 
     VMEConnectionEstablished(false)
 {
@@ -63,7 +63,7 @@ AAVMEManager::~AAVMEManager()
 
 bool AAVMEManager::ProgramDigitizers()
 {
-  DGMgr->Reset();
+  //DGMgr->Reset();
 
   uint32_t DGNumChEnabled = 0;
   uint32_t DGChEnableMask = 0;
@@ -127,7 +127,6 @@ bool AAVMEManager::ProgramDigitizers()
   // Ensure that at least one channel is enabled in the channel
   // enabled bit mask; if not, alert the user and return without
   // beginning acquisition since there ain't nothin' to acquire.
-
 
   ///////////////////
   // Trigger settings
@@ -211,11 +210,10 @@ bool AAVMEManager::ProgramDigitizers()
   
   DGMgr->SetRecordLength(TheSettings->RecordLength);
   DGMgr->SetPostTriggerSize(TheSettings->PostTrigger);
-
-
+  
   ///////////////////
   // Readout settings
-
+  
   DGMgr->SetMaxNumEventsBLT(TheSettings->EventsBeforeReadout);
 
   if(TheSettings->ZeroSuppressionEnable)

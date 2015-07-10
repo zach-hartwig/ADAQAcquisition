@@ -264,7 +264,7 @@ void AAAcquisitionManager::StartAcquisition()
   ADAQDigitizer *DGManager = AAVMEManager::GetInstance()->GetDGManager();
   
   AAGraphics *TheGraphicsManager = AAGraphics::GetInstance();
-  
+
   // Initialize all variables before acquisition begins
   PreAcquisition();
   
