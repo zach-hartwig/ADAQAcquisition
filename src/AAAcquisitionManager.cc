@@ -35,6 +35,7 @@ AAAcquisitionManager::AAAcquisitionManager()
     AcquisitionTimeStart(0), AcquisitionTimeStop(0), 
     AcquisitionTimeNow(0), AcquisitionTimePrev(0),
     EventPointer(NULL), EventWaveform(NULL), Buffer(NULL),
+    UsePSDFirmware(true), UseSTDFirmware(!UsePSDFirmware),
     BufferSize(0), ReadSize(0), FPGAEvents(0), PCEvents(0),
     ReadoutType(0), ReadoutTypeBit(24), ReadoutTypeMask(0b1 << ReadoutTypeBit),
     ZLEEventSizeMask(0x0fffffff), ZLEEventSize(0),
@@ -66,7 +67,7 @@ void AAAcquisitionManager::Initialize()
   Int_t DGChannels = DGManager->GetNumChannels();
   
   for(Int_t ch=0; ch<DGChannels; ch++){
-    
+
     BufferFull.push_back(true);
     
     BaselineStart.push_back(0);
@@ -227,12 +228,20 @@ void AAAcquisitionManager::PreAcquisition()
   else if(TheSettings->PSDMode)
     AAGraphics::GetInstance()->SetupPSDHistogramGraphics();
 
-  // Initialize pointers to the event and event waveform. Memory is
-  // preallocated for events here rather than at readout time
-  // resulting in slightly larger memory use but faster readout
-  EventPointer = NULL;
-  EventWaveform = NULL;
-  DGManager->AllocateEvent(&EventWaveform);
+  if(UsePSDFirmware){
+    PSDWaveforms = NULL;
+  }
+  else if(UseSTDFirmware){
+    
+    // Initialize pointers to the event and event waveform. Memory is
+    // preallocated for events here rather than at readout time
+    // resulting in slightly larger memory use but faster readout
+    
+    EventPointer = NULL;
+    EventWaveform = NULL;
+    DGManager->AllocateEvent(&EventWaveform);
+  }
+  
   
   // Initialize variables for the PC buffer and event readout. Memory
   // is preallocated for the buffer to receive readout events.
@@ -256,6 +265,11 @@ void AAAcquisitionManager::PreAcquisition()
   // digitizer been programmed so ensure that this is the last line
   // before starting acquisition
   DGManager->MallocReadoutBuffer(&Buffer, &BufferSize);
+  
+  if(UsePSDFirmware){
+    DGManager->MallocDPPEvents(PSDEvents, &PSDEventSize);
+    DGManager->MallocDPPWaveforms(&PSDWaveforms, &PSDWaveformSize);
+  }
 }
 
 

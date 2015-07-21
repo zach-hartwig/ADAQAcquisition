@@ -102,18 +102,31 @@ private:
 
   //Objects for controlling timed acquisition periods
   Bool_t AcquisitionTimerEnable;
-  Double_t  AcquisitionTimeStart, AcquisitionTimeStop;
+  Double_t AcquisitionTimeStart, AcquisitionTimeStop;
   time_t AcquisitionTimeNow, AcquisitionTimePrev;
 
 #ifndef __CINT__
-  // Variables for CAEN digitizer readout
+
+  //////////////////////////////////
+  // Variables for digitizer readout
+
+  // CAEN standard firmware
   char *EventPointer;
   CAEN_DGTZ_EventInfo_t EventInfo;
   CAEN_DGTZ_UINT16_EVENT_t *EventWaveform;
 
+  // CAEN DPP-PSD firmware
+  CAEN_DGTZ_DPP_PSD_Params_t *PSDParams[4];
+  CAEN_DGTZ_DPP_PSD_Event_t * PSDEvents[4];
+  CAEN_DGTZ_DPP_PSD_Waveforms_t *PSDWaveforms;
+
+  Bool_t UsePSDFirmware, UseSTDFirmware;
+
+  
   // Variables for PC buffer readout
   char *Buffer; 
-  uint32_t BufferSize, ReadSize, FPGAEvents, PCEvents;
+  uint32_t BufferSize, PSDEventSize, PSDWaveformSize, ReadSize;
+  uint32_t FPGAEvents, PCEvents;
   vector<bool> BufferFull;
 
   uint32_t ReadoutType, ReadoutTypeBit, ReadoutTypeMask;
