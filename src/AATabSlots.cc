@@ -132,15 +132,22 @@ void AATabSlots::HandleConnectionTextButtons()
       if(TheVMEManager->GetHVEnable()){
 	uint32_t Addr = TI->BoardAddress_NEF[V6534]->GetEntry()->GetHexNumber();
 	int Link = TI->BoardLinkNumber_NEL[V1720]->GetEntry()->GetIntNumber();
+	ZBoardType Type = (ZBoardType)TI->BoardType_CBL[V1720]->GetComboBox()->GetSelected();
 
 	TheVMEManager->SetHVAddress(Addr);
 	TheVMEManager->GetHVManager()->SetBoardAddress(Addr);
 	TheVMEManager->GetHVManager()->SetBoardLinkNumber(Link);
 
+	if(Type == zDT5790M or Type == zDT5790N or zDT5790P){
+	  uint32_t DGHandle = TheVMEManager->GetDGManager()->GetBoardHandle();
+	  TheVMEManager->GetHVManager()->SetBoardHandle(DGHandle);
+	}
+
 	HVLinkOpen = TheVMEManager->GetHVManager()->OpenLink();
 	
 	if(HVLinkOpen == 0)
 	  TheVMEManager->GetHVManager()->SetToSafeState();
+	  
       }
       
       if(BRLinkOpen == 0 or DGLinkOpen == 0 or HVLinkOpen == 0){

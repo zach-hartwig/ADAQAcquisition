@@ -27,10 +27,10 @@ AAVMEManager *AAVMEManager::GetInstance()
 
 
 AAVMEManager::AAVMEManager()
-  : BREnable(true), DGEnable(true), HVEnable(false),
+  : BREnable(false), DGEnable(true), HVEnable(true),
     BRIdentifier(0),
-    DGIdentifier(0), DGAddress(0x00420000), DGLinkNumber(0), DGCONETNode(0),
-    HVIdentifier(0), HVAddress(0x42420000), HVLinkNumber(0), 
+    DGIdentifier(0), DGAddress(0x00000000), DGLinkNumber(0), DGCONETNode(0),
+    HVIdentifier(0), HVAddress(0x00000000), HVLinkNumber(0), 
     VMEConnectionEstablished(false)
 {
   if(TheVMEManager)
@@ -41,18 +41,18 @@ AAVMEManager::AAVMEManager()
 			 BRIdentifier);
   BRMgr->SetVerbose(true);
   
-  DGMgr = new ADAQDigitizer(zV1720, 
+  DGMgr = new ADAQDigitizer(zDT5790M, 
 			    DGIdentifier, 
 			    DGAddress,
 			    DGLinkNumber, 
 			    DGCONETNode);
   DGMgr->SetVerbose(true);
   
-  HVMgr = new ADAQHighVoltage(zV6534M, 
+  HVMgr = new ADAQHighVoltage(zDT5790M,
 			      HVIdentifier,
 			      HVAddress,
 			      HVLinkNumber);
-
+  
   HVMgr->SetVerbose(true);
 }
 
