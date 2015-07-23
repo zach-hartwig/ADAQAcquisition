@@ -229,10 +229,7 @@ void AAAcquisitionManager::PrepareAcquisition()
   else if(TheSettings->PSDMode)
     AAGraphics::GetInstance()->SetupPSDHistogramGraphics();
 
-  if(UsePSDFirmware){
-    PSDWaveforms = NULL;
-  }
-  else if(UseSTDFirmware){
+  if(UseSTDFirmware){
     
     // Initialize pointers to the event and event waveform. Memory is
     // preallocated for events here rather than at readout time
@@ -242,25 +239,14 @@ void AAAcquisitionManager::PrepareAcquisition()
     EventWaveform = NULL;
     DGManager->AllocateEvent(&EventWaveform);
   }
-  
+  else if(UsePSDFirmware){
+    PSDWaveforms = NULL;
+  }
   
   // Initialize variables for the PC buffer and event readout. Memory
   // is preallocated for the buffer to receive readout events.
   Buffer = NULL;
   BufferSize = ReadSize = FPGAEvents = PCEvents = EventCounter = 0;
-
-  // Get the acquisition control setting
-  Int_t AcqControl = TheSettings->AcquisitionControl;
-  
-  // If acquisition is 'standard' or 'manual' then send the software
-  // (SW) signal to begin data acquisition
-  if(AcqControl == 0)
-    DGManager->SWStartAcquisition();
-  
-  // If acquisition is 'Gated (NIM/TTL)' then arm the digitizer for
-  // reception of S IN signal as data acquisition start/stop 
-  else if(AcqControl == 1 or AcqControl == 2)
-    DGManager->SInArmAcquisition();
   
   // The memory for the PC readout buffer must allocated after the
   // digitizer been programmed so ensure that this is the last line
@@ -271,6 +257,22 @@ void AAAcquisitionManager::PrepareAcquisition()
     DGManager->MallocDPPEvents(PSDEvents, &PSDEventSize);
     DGManager->MallocDPPWaveforms(&PSDWaveforms, &PSDWaveformSize);
   }
+
+  // Get the acquisition control setting
+  Int_t AcqControl = TheSettings->AcquisitionControl;
+
+  // If acquisition is 'standard' or 'manual' then send the software
+  // (SW) signal to begin data acquisition
+  if(AcqControl == 0)
+    DGManager->SWStartAcquisition();
+  
+  // If acquisition is 'Gated (NIM/TTL)' then arm the digitizer for
+  // reception of S IN signal as data acquisition start/stop 
+  else if(AcqControl == 1 or AcqControl == 2)
+    DGManager->SInArmAcquisition();
+
+
+  
 }
 
 
@@ -333,9 +335,9 @@ void AAAcquisitionManager::StartAcquisition()
       
       // Transfer data from FPGA buffer to PC buffer
       DGManager->ReadData(Buffer, &ReadSize);
-
+      
       // Readout events from PC buffer to DPP-PSD event structure
-      DGManager->GetDPPEvents(Buffer, BufferSize, PSDEvents, &PCEvents);
+      DGManager->GetDPPEvents(Buffer, ReadSize, PSDEvents, &PCEvents);
     }
     
     //////////////////////////////
@@ -359,7 +361,7 @@ void AAAcquisitionManager::StartAcquisition()
 	BaselineValue[ch] = PulseHeight = PulseArea = 0.;
 	PSDTotal = PSDTail = 0.;
 	WaveformData[ch]->Initialize();
-    
+
 	if(AcquisitionTimerEnable){
 	
 	  // Calculate the elapsed time since the timer was started
@@ -440,7 +442,7 @@ void AAAcquisitionManager::StartAcquisition()
 	// Post-readout waveform processing
 
 	if(UseSTDFirmware or (UsePSDFirmware and UsePSDWaveformMode)){
-	
+
 	  // Get  the total number of samples in the current waveform
 	  Int_t NumSamples = 0;
 	  if(UseSTDFirmware)
@@ -1141,414 +1143,5 @@ void AAInterface::GenerateArtificialWaveform(Int_t RecordLength, vector<int> &Vo
       Voltage_graph[sample] = Voltage[sample];
     }
   }
-}
-*/
-
-/*
-void AAAcquisitionManager::StartAcquisitionOriginal()
-{
-  ADAQDigitizer *DGManager = AAVMEManager::GetInstance()->GetDGManager();
-  
-  AAGraphics *TheGraphicsManager = AAGraphics::GetInstance();
-
-  // Initialize all variables before acquisition begins
-  PreAcquisition();
-  
-  // Start acquisition
-  AcquisitionEnable = true;
-  
-  while(AcquisitionEnable){
-    
-    // Handle the acquisition loop in a separate ROOT thread
-    gSystem->ProcessEvents();
-
-    // Standard firmware readout
-    
-    if(UseSTDFirmware){
-      
-      // Get the number of events stored in the FPGA buffer and maximize
-      // efficiency by entering the event readout loop only when the max
-      // number of readout events has been reached. Note that this
-      // register seems to be filled ONLY for SWStart/StopAcquisition
-
-      // Get the number of events stored in digitizer FPGA
-      DGManager->GetNumFPGAEvents(&FPGAEvents);
-
-      // Proceed if FPGA events exceeds user-specified readout events
-      if(FPGAEvents < TheSettings->EventsBeforeReadout and 
-	 TheSettings->AcquisitionControl == 0)
-	continue;
-
-      // Transfer data from FPGA buffer to PC buffer
-      DGManager->ReadData(Buffer, &ReadSize);
-
-      // Get the total number of events in the PC buffer
-      DGManager->GetNumEvents(Buffer, ReadSize, &PCEvents);
-    }
-
-    // DPP-PSD firmware readout
-    
-    else if(UsePSDFirmware){
-      
-      //DGManager->SendSWTrigger();
-      
-      // Transfer data from FPGA buffer to PC buffer
-      DGManager->ReadData(Buffer, &ReadSize);
-      
-      // Readout events from PC buffer to DPP-PSD event structure
-      DGManager->GetDPPEvents(Buffer, BufferSize, PSDEvents, &PCEvents);
-    }
-    
-    // For each event stored in the PC memory buffer...
-    for(uint32_t evt=0; evt<PCEvents; evt++){
-      
-      if(AcquisitionTimerEnable){
-	
-	// Calculate the elapsed time since the timer was started
-	AcquisitionTimePrev = AcquisitionTimeNow;
-	AcquisitionTimeNow = time(NULL) - AcquisitionTimeStart; // [seconds]
-	
-	// Update the AQTimer widget only every second
-	if(AcquisitionTimePrev != AcquisitionTimeNow){
-	  Int_t TimeRemaining = AcquisitionTimeStop - AcquisitionTimeNow;
-	  TheInterface->UpdateAQTimer(TimeRemaining);
-	}
-	
-	// If the timer has reached zero thenstop acquisition
-	if(AcquisitionTimeNow >= AcquisitionTimeStop){
-	  StopAcquisition();
-	  break;
-	}
-      }
-
-      
-      ///////////////////////////////
-      // Standard waveform readout //
-      ///////////////////////////////
-
-      // Standard waveforms are obtained by using the CAENDigitizer
-      // methods encapsulated by the ADAQ libraries
-
-      if(!TheSettings->ZeroSuppressionEnable){
-
-	if(UseSTDFirmware){
-	  
-	  // Populate the EventInfo structure and assign address to the EventPointer
-	  EventPointer = NULL;
-	  DGManager->GetEventInfo(Buffer, ReadSize, evt, &EventInfo, &EventPointer);
-	  
-	  // Seg. fault protection
-	  if(EventPointer == NULL){
-	    continue;
-	  }
-	  
-	  //  Fill the EventWaveform structure with digitized signal voltages
-	  DGManager->DecodeEvent(EventPointer, &EventWaveform);
-	}
-
-	else if(UsePSDFirmware){
-	}
-	
-	// Seg. fault protection
-	if(EventWaveform == NULL){
-	  continue;
-	}
-      }
-      
-      
-      ///////////////////////////////////////////
-      // Zero length encoding waveform readout //
-      ///////////////////////////////////////////
-
-      // ZLE waveforms are obtained using custom ADAQ methods to
-      // readout the PC buffer directly into the "Waveforms" data
-      // member.
-      
-      else{
-	if(DGManager->GetZLEWaveform(Buffer, evt, Waveforms) != 0){
-	  cout << "\nAAAcquisitionManager::StartAcquisition() : You've encountered a serious error!\n"
-	       <<   "  There was an error reading out Event[" << evt << "] when using ZLE mode!\n"
-	       <<   "  This issue is likely due to using a RecordLength > 4030. This setting causes\n"
-	       <<   "  -- CAEN_DGTZ_GetNumEvents() to incorrectly return a '1'\n"
-	       <<   "  -- The readout PC buffer is not correctly filled causing algorithm to segfault\n"
-	       <<   "  CAEN has been contacted regarding this bug. ZSH (16 Oct 14)\n"
-	       << endl;
-	  
-	  continue;
-	}
-	//DGManager->PrintZLEEventInfo(Buffer, evt);
-      }
-
-      continue;
-
-      // Iterate over the digitizer channels that are enabled
-      for(Int_t ch=0; ch<DGManager->GetNumChannels(); ch++){
-	
-	if(!TheSettings->ChEnable[ch])
-	  continue;
-	
-	// Reset values used for to compute values at the channel-level
-	BaselineValue[ch] = PulseHeight = PulseArea = 0.;
-	PSDTotal = PSDTail = 0.;
-	
-	WaveformData[ch]->Initialize();
-
-	Int_t NumSamples = Waveforms[ch].size();
-	for(Int_t sample=0; sample<NumSamples; sample++){
-
-	  // For "standard" or "data reduction" readout, the Waveforms
-	  // vector-of-vectors must be filled from the CAEN EventWaveform
-	  
-	  if(!TheSettings->ZeroSuppressionEnable){
-	    
-	    // Data reduction readout
-	    if(TheSettings->DataReductionEnable){
-	      if(sample % TheSettings->DataReductionFactor == 0){
-		Int_t Index = sample / TheSettings->DataReductionFactor;
-		Waveforms[ch][Index] = EventWaveform->DataChannel[ch][sample];
-	      }
-	    }
-	    
-	    // Standard readout
-	    else
-	      Waveforms[ch][sample] = EventWaveform->DataChannel[ch][sample];
-	  }
-	  
-	  //////////////////////////////
-	  // On-the-fly pulse processing
-
-	  if(!TheSettings->DisplayNonUpdateable){
-	  
-	    // Calculate the baseline by taking the average of all
-	    // samples that fall within the baseline calculation region
-	    if(sample > BaselineStart[ch] and sample <= BaselineStop[ch])
-	      BaselineValue[ch] += Waveforms[ch][sample] * 1.0 / BaselineLength[ch]; // [ADC]
-	    
-	    // Analyze the pulses to obtain pulse spectra
-	    else if(sample >= BaselineStop[ch]){
-	      
-	      // Calculate the waveform sample distance from the baseline
-	      SampleHeight = Polarity[ch] * (Waveforms[ch][sample] - BaselineValue[ch]);
-	      TriggerHeight = Polarity[ch] * (TheSettings->ChTriggerThreshold[ch] - BaselineValue[ch]);
-	      
-	      // Simple algorithm to determine the pulse height (adc)
-	      // and peak position (sample) by looping over all samples
-	      if(SampleHeight > PulseHeight){
-		PulseHeight = SampleHeight;
-		PeakPosition[ch] = sample;
-	      }
-	      
-	      // Integrate the "area under the pulse" by summing the
-	      // all samples in the waveform. Note that the assumption
-	      // is made that + and - noise will cancel
-	      PulseArea += SampleHeight;
-	    }
-	  }
-	} // End sample loop
-	
-	///////////////////////////////////
-	// Post-sampling loop processing //
-	///////////////////////////////////
-
-	// First, we set the most basic information about the waveform
-	// that we want to ensure is always stored in the ADAQ file
-	// regardless of acquisition mode
-
-	WaveformData[ch]->SetTimeStamp(EventInfo.TriggerTimeTag);
-	WaveformData[ch]->SetChannelID(ch);
-	WaveformData[ch]->SetBoardID(DGManager->GetBoardID());
-
-	// Second, if the user has NOT selected the "nonupdatable
-	// (ultra rate)" mode, we perform a number of digital pulse
-	// processing and analyzed data storage steps. In order to
-	// maximize the acquisition loop performance in ultra rate
-	// mode, such things as pulse height/area, PSD integrals, and
-	// other operations are NOT allowed.
-	
-	if(!TheSettings->DisplayNonUpdateable){
-	  
-	  // Fill the channel-specific ADAQWaveformData objects with
-	  // the processed waveform data. Note that this is only done
-	  // for non-ultra rate modes since it requires analysis of
-	  // the waveforms.
-
-	  // Store pulse area/height data and baseline if specified
-	  if(TheSettings->WaveformStoreEnergyData){
-	    WaveformData[ch]->SetBaseline(BaselineValue[ch]);
-	    WaveformData[ch]->SetPulseHeight(PulseHeight);
-	    WaveformData[ch]->SetPulseArea(PulseArea);
-	  }
-	  
-	  // Use the calibration curves (ROOT TGraph's) to convert
-	  // the pulse height/area from ADC to the user's energy
-	  // units using linear interpolation calibration points
-	  if(CalibrationEnable[ch]){
-	    if(TheSettings->SpectrumPulseHeight)
-	      PulseHeight = CalibrationCurves[ch]->Eval(PulseHeight);
-	    else
-	      PulseArea = CalibrationCurves[ch]->Eval(PulseArea);
-	  }
-
-	  // Set the absolute positions in time [sample] for the
-	  // start/stop of the PSD total/tail integrals using the
-	  // calculated peak position in time [sample] from above
-	  
-	  PSDTotalAbsStart[ch] = PeakPosition[ch] + TheSettings->ChPSDTotalStart[ch];
-	  PSDTotalAbsStop[ch] = PeakPosition[ch] + TheSettings->ChPSDTotalStop[ch];
-	  PSDTailAbsStart[ch] = PeakPosition[ch] + TheSettings->ChPSDTailStart[ch];
-	  PSDTailAbsStop[ch] = PeakPosition[ch] + TheSettings->ChPSDTailStop[ch];
-	  
-	  // Because the PSD integrals are computed relative to the peak
-	  // position - which is found during the sample loop above - we
-	  // must take the PSD integrals AFTER the sample loop has
-	  // concluded. We only do this if the user is either plotting
-	  // PSD histograms and/or storing PSD waveform data to maximize
-	  // the acquisition loop efficiency.
-	  if(TheSettings->PSDMode or TheSettings->WaveformStorePSDData){	  
-	    
-	    // The total PSD integral
-	    Int_t sample = PSDTotalAbsStart[ch];
-	    for(; sample<PSDTotalAbsStop[ch]; sample++)
-	      PSDTotal += Polarity[ch] * (Waveforms[ch][sample] - BaselineValue[ch]);
-	    
-	    // The tail PSD integral
-	    sample = PSDTailAbsStart[ch];
-	    for(; sample<PSDTailAbsStop[ch]; sample++)
-	      PSDTail += Polarity[ch] * (Waveforms[ch][sample] - BaselineValue[ch]);
-	    
-	    // Convert the tail integral to (tail/total) if specified
-	    if(TheSettings->PSDYAxisTailTotal)
-	      PSDTail /= PSDTotal;
-	  }
-	  
-	  // Store the total and tail PSD integrals if specified
-	  if(TheSettings->WaveformStorePSDData){
-	    WaveformData[ch]->SetPSDTotalIntegral(PSDTotal);
-	    WaveformData[ch]->SetPSDTailIntegral(PSDTail);
-	  }
-
-	  if(TheSettings->SpectrumMode){
-	    
-	    // Pulse height spectrum
-	    if(TheSettings->SpectrumPulseHeight){
-	      
-	      // Determine if the pulse height is within the
-	      // acceptable lower/upper-level discrimator range if the
-	      // user has specified this check on spectrum binning;
-	      // otherwise, simply bin the pulse height in the spectrum
-
-	      if(TheSettings->LDEnable){
-		if(PulseHeight > LLD and PulseHeight < ULD)
-		  Spectrum_H[ch]->Fill(PulseHeight);
-	      }
-	      else
-		Spectrum_H[ch]->Fill(PulseHeight);
-	    
-	      // If the level-discrimantor is to be used as a
-	      // 'trigger' to output the waveform to the ADAQ 
-	      if(TheSettings->LDTrigger and ch == TheSettings->LDChannel)
-		FillWaveformTree = true;
-	    }
-	    
-	    // Pulse area spectrum
-	    else{
-
-	      // Determine if the pulse area is within the acceptable
-	      // lower/upper-level discrimator range if the user has
-	      // specified this check on spectrum binning; otherwise,
-	      // simply bin the pulse area in the spectrum
-	      
-	      if(TheSettings->LDEnable){
-		if(PulseArea > LLD and PulseArea < ULD)
-		  Spectrum_H[ch]->Fill(PulseArea);
-	      }
-	      else
-		Spectrum_H[ch]->Fill(PulseArea);
-	      
-	      if(TheSettings->LDTrigger and ch == TheSettings->LDChannel)
-		FillWaveformTree = true;
-	    }
-	  }
-
-	  else if(TheSettings->PSDMode){
-	    if(PSDTotal > TheSettings->PSDThreshold)
-	      PSDHistogram_H[ch]->Fill(PSDTotal, PSDTail);
-	  }
-	}
-      } // End digitizer channel loop
-      
-      if(TheSettings->WaveformStorageEnable){
-	
-	// If the user has specified that the LLD/ULD should be used
-	// as the "trigger" (for plotting the PAS/PHS and writing to a
-	// ROOT file) but the present waveform is NOT within the
-	// LLD/ULD window (indicated by the DiscrOKForOutput bool set
-	// above during analysis of the readout waveform then do NOT
-	// write the waveform to the ROOT TTree
-	if(TheSettings->LDEnable and !FillWaveformTree)
-	  continue;
-	
-	// If the user has specified to store ANY data at all then
-	// fill the waveform tree via the readout manager
-	
-	if(TheSettings->WaveformStoreRaw or
-	   TheSettings->WaveformStoreEnergyData or 
-	   TheSettings->WaveformStorePSDData)
-	  TheReadoutManager->GetWaveformTree()->Fill();
-	
-	// Reset the bool used to determine if the LLD/ULD window
-	// should be used as the "trigger" for writing waveforms
-	FillWaveformTree = false;
-      }
-      
-      // Plot the waveform under specific criterion to minimize CPU
-      // intensity. Only plot the waveforms in continuous data
-      // acquisition mode and only plot the first waveform event in
-      // the case of many events in a single readout.
-      
-      if(TheSettings->WaveformMode){
-	
-	if(TheSettings->DisplayContinuous and evt == 0){
-	  
-	  // Draw the digitized waveform
-	  TheGraphicsManager->PlotWaveforms(Waveforms, WaveformLength);
-	  
-	  // Draw graphical objects associated with the waveform
-	  TheGraphicsManager->DrawWaveformGraphics(BaselineValue,
-						   PeakPosition,
-						   PSDTotalAbsStart,
-						   PSDTotalAbsStop,
-						   PSDTailAbsStart,
-						   PSDTailAbsStop);
-	}
-      }
-      
-      EventCounter++;
-      
-      DGManager->FreeEvent(&EventWaveform);
-    }// End readout event loop
-    
-    // Only if the display is set to continuous then plot the spectra
-    // or PSD histogram; if the display mode is set to updateable the
-    // plotting is achieved by clicking the "Update Display" text
-    // button beneath the canvas. Plotting is disabled if the display
-    // mode is in nonupdateable mode.
-
-    if(TheSettings->DisplayContinuous){
-      Int_t Rate = TheSettings->SpectrumRefreshRate;
-      
-      if(TheSettings->SpectrumMode){
-	if(EventCounter % Rate == 0)
-	  TheGraphicsManager->PlotSpectrum(Spectrum_H[TheSettings->SpectrumChannel]);
-      }
-      
-      else if(TheSettings->PSDMode){
-	if(EventCounter % Rate == 0){
-	  TheGraphicsManager->PlotPSDHistogram(PSDHistogram_H[TheSettings->PSDChannel]);
-	}
-      }
-    }
-    
-  } // End acquisition loop
 }
 */

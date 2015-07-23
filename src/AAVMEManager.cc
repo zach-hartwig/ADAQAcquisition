@@ -76,7 +76,7 @@ AAVMEManager::~AAVMEManager()
 bool AAVMEManager::ProgramDigitizers()
 {
   DGMgr->Reset();
-
+  
   uint32_t DGNumChEnabled = 0;
   uint32_t DGChEnableMask = 0;
 
@@ -243,7 +243,7 @@ bool AAVMEManager::ProgramDigitizers()
     Params.AcqMode = CAEN_DGTZ_DPP_ACQ_MODE_Mixed;
     Params.RecordLength = 512;
     Params.ChannelMask = 0x1;
-    Params.EventAggr = 10;
+    Params.EventAggr = 50;
     Params.PulsePolarity = CAEN_DGTZ_PulsePolarityNegative;
     
 
