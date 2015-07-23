@@ -53,9 +53,8 @@ public:
 
   void Initialize();
 
-  void PreAcquisition();
+  void PrepareAcquisition();
   void StartAcquisition();
-  void StartAcquisitionOriginal();
   void StopAcquisition();
   
   void CreateADAQFile(string);
@@ -117,11 +116,13 @@ private:
   CAEN_DGTZ_UINT16_EVENT_t *EventWaveform;
 
   // CAEN DPP-PSD firmware
+
   CAEN_DGTZ_DPP_PSD_Params_t *PSDParams[4];
   CAEN_DGTZ_DPP_PSD_Event_t * PSDEvents[4];
   CAEN_DGTZ_DPP_PSD_Waveforms_t *PSDWaveforms;
 
-  Bool_t UsePSDFirmware, UseSTDFirmware;
+  Bool_t UseSTDFirmware;
+  Bool_t UsePSDFirmware, UsePSDListMode, UsePSDWaveformMode;
 
   
   // Variables for PC buffer readout

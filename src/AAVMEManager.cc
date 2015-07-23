@@ -284,7 +284,7 @@ bool AAVMEManager::ProgramDigitizers()
       DGMgr->SetDPPPreTriggerSize(ch, 100);
       DGMgr->SetChannelPulsePolarity(ch, Params.PulsePolarity);
     }
-    cout << "Finished PSD programming..." << endl;
+    cout << "Finished PSD programming...This hack needs desparate refactoring" << endl;
   }
   
   return true;
