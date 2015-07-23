@@ -147,18 +147,39 @@ void AAAcquisitionManager::PreAcquisition()
   // store the waveforms since the length (== RecordLength) is
   // constant and known in advance of waveform readout
   else{
-    WaveformLength = TheSettings->RecordLength;
-    if(TheSettings->DataReductionEnable)
-      WaveformLength /= TheSettings->DataReductionFactor;
-    
-    Waveforms.clear();
-    Waveforms.resize(DGChannels);
 
-    for(Int_t ch=0; ch<DGChannels; ch++){
-      if(TheSettings->ChEnable[ch])
-	Waveforms[ch].resize(WaveformLength);
-      else
-	Waveforms[ch].resize(0);
+    if(UseSTDFirmware){
+      WaveformLength = TheSettings->RecordLength;
+      if(TheSettings->DataReductionEnable)
+	WaveformLength /= TheSettings->DataReductionFactor;
+      
+      Waveforms.clear();
+      Waveforms.resize(DGChannels);
+      
+      for(Int_t ch=0; ch<DGChannels; ch++){
+	if(TheSettings->ChEnable[ch])
+	  Waveforms[ch].resize(WaveformLength);
+	else
+	  Waveforms[ch].resize(0);
+      }
+    }
+    else if(UsePSDFirmware){
+
+      // ZSH : Must be set by DPP-PSD channel-specific settings!
+
+      WaveformLength = 512;
+
+      Waveforms.clear();
+      Waveforms.resize(DGChannels);
+      
+      for(Int_t ch=0; ch<DGChannels; ch++){
+	if(TheSettings->ChEnable[ch])
+	  Waveforms[ch].resize(512);
+	else
+	  Waveforms[ch].resize(0);
+	
+
+      }
     }
   }
 
@@ -814,11 +835,6 @@ void AAAcquisitionManager::StartAcquisition()
 	  else if(UsePSDFirmware){
 	    // Fill the PSDWaveform with the digitizer waveform
 	    DGManager->DecodeDPPWaveforms(&PSDEvents[ch][evt], PSDWaveforms);
-	    
-	    Int_t PSDWaveformSize = (Int_t)PSDWaveforms->Ns;
-	    uint16_t *PSDWaveform = PSDWaveforms->Trace1;
-	    for(Int_t sample=0; sample<PSDWaveformSize; sample++)
-	      cout << "Event[" << evt << "] voltage[" << sample << "] : " <<  PSDWaveform[sample] << " ADC" << endl;
 	  }
 	}
 	
@@ -844,26 +860,31 @@ void AAAcquisitionManager::StartAcquisition()
 	  //DGManager->PrintZLEEventInfo(Buffer, evt);
 	}
 	
-	continue;
-
 	//////////////////////////////////////////
 	// Intra-waveform readout pulse processing
 	
 	// Reset values used for to compute values at the channel-level
 	BaselineValue[ch] = PulseHeight = PulseArea = 0.;
 	PSDTotal = PSDTail = 0.;
-	
 	WaveformData[ch]->Initialize();
-
-	Int_t NumSamples = Waveforms[ch].size();
+	
+	// Determine the total number of samples in the event waveform
+	Int_t NumSamples = 0;
+	if(UseSTDFirmware)
+	  NumSamples = Waveforms[ch].size();
+	else if(UsePSDFirmware)
+	  NumSamples = (Int_t)PSDWaveforms->Ns;
+	
 	for(Int_t sample=0; sample<NumSamples; sample++){
-
-	  // For "standard" or "data reduction" readout, the Waveforms
-	  // vector-of-vectors must be filled from the CAEN EventWaveform
+	  
+	  // Store raw and data-reduction waveforms into the waveforms
+	  // data member; zero-suppression waveforms are already
+	  // stored at this point in the acquisition loop
 	  
 	  if(!TheSettings->ZeroSuppressionEnable){
 	    
-	    // Data reduction readout
+	    // Data reduction waveforms
+
 	    if(TheSettings->DataReductionEnable){
 	      if(sample % TheSettings->DataReductionFactor == 0){
 		Int_t Index = sample / TheSettings->DataReductionFactor;
@@ -871,13 +892,22 @@ void AAAcquisitionManager::StartAcquisition()
 	      }
 	    }
 	    
-	    // Standard readout
-	    else
-	      Waveforms[ch][sample] = EventWaveform->DataChannel[ch][sample];
+	    // Raw waveforms
+
+	    else{
+
+	      // CAEN standard firmware waveforms
+	      if(UseSTDFirmware)
+		Waveforms[ch][sample] = EventWaveform->DataChannel[ch][sample];
+
+	      // CAEN DPP-PSD firmware waveforms
+	      else if(UsePSDFirmware)
+		Waveforms[ch][sample] = PSDWaveforms->Trace1[sample];
+	    }
 	  }
 
 	  if(!TheSettings->DisplayNonUpdateable){
-	    
+
 	    // Calculate the baseline by taking the average of all
 	    // samples that fall within the baseline calculation region
 	    if(sample > BaselineStart[ch] and sample <= BaselineStop[ch])
@@ -885,18 +915,18 @@ void AAAcquisitionManager::StartAcquisition()
 	    
 	    // Analyze the pulses to obtain pulse spectra
 	    else if(sample >= BaselineStop[ch]){
-	      
+
 	      // Calculate the waveform sample distance from the baseline
 	      SampleHeight = Polarity[ch] * (Waveforms[ch][sample] - BaselineValue[ch]);
 	      TriggerHeight = Polarity[ch] * (TheSettings->ChTriggerThreshold[ch] - BaselineValue[ch]);
-	      
+
 	      // Simple algorithm to determine the pulse height (adc)
 	      // and peak position (sample) by looping over all samples
 	      if(SampleHeight > PulseHeight){
 		PulseHeight = SampleHeight;
 		PeakPosition[ch] = sample;
 	      }
-	      
+
 	      // Integrate the "area under the pulse" by summing the
 	      // all samples in the waveform. Note that the assumption
 	      // is made that + and - noise will cancel
@@ -911,10 +941,12 @@ void AAAcquisitionManager::StartAcquisition()
 	// First, we set the most basic information about the waveform
 	// that we want to ensure is always stored in the ADAQ file
 	// regardless of acquisition mode
-	
-	WaveformData[ch]->SetTimeStamp(EventInfo.TriggerTimeTag);
 	WaveformData[ch]->SetChannelID(ch);
 	WaveformData[ch]->SetBoardID(DGManager->GetBoardID());
+	if(UseSTDFirmware)
+	  WaveformData[ch]->SetTimeStamp(EventInfo.TriggerTimeTag);
+	else if(UsePSDFirmware)
+	  WaveformData[ch]->SetTimeStamp(PSDEvents[ch][evt].TimeTag);
 
 	// Second, if the user has NOT selected the "nonupdatable
 	// (ultra rate)" mode, we perform a number of digital pulse
@@ -1063,7 +1095,7 @@ void AAAcquisitionManager::StartAcquisition()
 	if(TheSettings->WaveformMode){
 	  
 	  if(TheSettings->DisplayContinuous and evt == 0){
-
+	    
 	    // Draw the digitized waveform
 	    TheGraphicsManager->PlotWaveforms(Waveforms, WaveformLength);
 	    

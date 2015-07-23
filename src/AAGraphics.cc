@@ -209,7 +209,7 @@ void AAGraphics::PlotWaveforms(vector<vector<uint16_t> > &Waveforms,
 			       int WaveformLength)
 {
   Int_t NumGraphs = 0;
-
+  
   for(int ch=0; ch<TheSettings->ChEnable.size(); ch++){
     
     if(!TheSettings->ChEnable[ch])

@@ -241,7 +241,7 @@ bool AAVMEManager::ProgramDigitizers()
     Params.VMEBaseAddress = 0;
     Params.IOlev = CAEN_DGTZ_IOLevel_TTL;
     Params.AcqMode = CAEN_DGTZ_DPP_ACQ_MODE_Mixed;
-    Params.RecordLength = 50;
+    Params.RecordLength = 512;
     Params.ChannelMask = 0x1;
     Params.EventAggr = 10;
     Params.PulsePolarity = CAEN_DGTZ_PulsePolarityNegative;
@@ -280,7 +280,7 @@ bool AAVMEManager::ProgramDigitizers()
     
     for(Int_t ch=0; ch<4; ch++){
       DGMgr->SetRecordLength(Params.RecordLength,ch);
-      DGMgr->SetChannelDCOffset(ch, 0x2000);
+      DGMgr->SetChannelDCOffset(ch, 0x8000);
       DGMgr->SetDPPPreTriggerSize(ch, 100);
       DGMgr->SetChannelPulsePolarity(ch, Params.PulsePolarity);
     }
