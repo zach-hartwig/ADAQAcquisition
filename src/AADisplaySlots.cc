@@ -84,7 +84,8 @@ void AADisplaySlots::HandleTextButtons()
   }
     
   case AQTrigger_TB_ID:{
-    TheVMEManager->GetDGManager()->SendSWTrigger();
+    for(int i=0; i<30; i++)
+      TheVMEManager->GetDGManager()->SendSWTrigger();
     break;
   }
 

@@ -55,6 +55,7 @@ public:
 
   void PreAcquisition();
   void StartAcquisition();
+  void StartAcquisitionOriginal();
   void StopAcquisition();
   
   void CreateADAQFile(string);

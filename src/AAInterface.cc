@@ -1167,7 +1167,7 @@ void AAInterface::FillAcquisitionFrame()
   DGTriggerType_CBL->GetComboBox()->AddEntry("External (TTL)",1);
   DGTriggerType_CBL->GetComboBox()->AddEntry("Automatic",2);
   DGTriggerType_CBL->GetComboBox()->AddEntry("Software",3);
-  DGTriggerType_CBL->GetComboBox()->Select(2);
+  DGTriggerType_CBL->GetComboBox()->Select(3);
   DGTriggerType_CBL->GetComboBox()->Resize(110,20);
   DGTriggerType_CBL->GetComboBox()->ChangeOptions(DGTriggerType_CBL->GetComboBox()->GetOptions() | kFixedSize);
 
@@ -1267,7 +1267,7 @@ void AAInterface::FillAcquisitionFrame()
 				      new TGLayoutHints(kLHintsNormal, 5,5,5,5));
   DGEventsBeforeReadout_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
   DGEventsBeforeReadout_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
-  DGEventsBeforeReadout_NEL->GetEntry()->SetNumber(15);
+  DGEventsBeforeReadout_NEL->GetEntry()->SetNumber(1);
   
   DGScopeReadoutControls_GF->AddFrame(DGCheckBufferStatus_TB = new TGTextButton(DGScopeReadoutControls_GF, "Check FPGA Buffer", CheckBufferStatus_TB_ID),
 				      new TGLayoutHints(kLHintsNormal, 5,5,5,0));
