@@ -34,9 +34,9 @@ AAAcquisitionManager::AAAcquisitionManager()
   : AcquisitionEnable(false), AcquisitionTimerEnable(false),
     AcquisitionTimeStart(0), AcquisitionTimeStop(0), 
     AcquisitionTimeNow(0), AcquisitionTimePrev(0),
-    EventPointer(NULL), EventWaveform(NULL), Buffer(NULL),
-    UseSTDFirmware(false), UsePSDFirmware(!UseSTDFirmware),
+    UseSTDFirmware(true), UsePSDFirmware(false),
     UsePSDListMode(false), UsePSDWaveformMode(!UsePSDListMode),
+    EventPointer(NULL), EventWaveform(NULL), Buffer(NULL),
     BufferSize(0), ReadSize(0), FPGAEvents(0), PCEvents(0),
     ReadoutType(0), ReadoutTypeBit(24), ReadoutTypeMask(0b1 << ReadoutTypeBit),
     ZLEEventSizeMask(0x0fffffff), ZLEEventSize(0),
@@ -147,8 +147,8 @@ void AAAcquisitionManager::PrepareAcquisition()
   // vector) are preallocated; the waveform vector (inner vector)
   // memory *is preallocated* since each channel has fixed size
   else{
-
-    WaveformLength = 512;//TheSettings->RecordLength;
+    
+    WaveformLength = TheSettings->RecordLength;
     
     if(TheSettings->DataReductionEnable)
       WaveformLength /= TheSettings->DataReductionFactor;
@@ -163,7 +163,7 @@ void AAAcquisitionManager::PrepareAcquisition()
 	Waveforms[ch].resize(0);
     }
   }
-
+  
   WaveformData.clear();
   for(Int_t ch=0; ch<DGChannels; ch++)
     WaveformData.push_back(new ADAQWaveformData);
@@ -230,6 +230,14 @@ void AAAcquisitionManager::PrepareAcquisition()
   else if(TheSettings->PSDMode)
     AAGraphics::GetInstance()->SetupPSDHistogramGraphics();
 
+  // Reset time stamp variables 
+  TimeStampRollovers = 0;
+  RawTimeStamp = 0;
+  PrevTimeStamp = 0;
+
+  for(Int_t ch=0; ch<DGChannels; ch++)
+    NumPSDEvents[ch] = 0;
+
   if(UseSTDFirmware){
     
     // Initialize pointers to the event and event waveform. Memory is
@@ -258,18 +266,10 @@ void AAAcquisitionManager::PrepareAcquisition()
     DGManager->MallocDPPEvents(PSDEvents, &PSDEventSize);
     DGManager->MallocDPPWaveforms(&PSDWaveforms, &PSDWaveformSize);
   }
-
-  for(Int_t ch=0; ch<DGChannels; ch++)
-    NumPSDEvents[ch] = 0;
-
-  // Reset time stamp variables 
-  TimeStampRollovers = 0;
-  RawTimeStamp = 0;
-  PrevTimeStamp = 0;
-
+  
   // Get the acquisition control setting
   Int_t AcqControl = TheSettings->AcquisitionControl;
-
+  
   // If acquisition is 'standard' or 'manual' then send the software
   // (SW) signal to begin data acquisition
   if(AcqControl == 0)
@@ -299,7 +299,7 @@ void AAAcquisitionManager::StartAcquisition()
   ///////////////////////////////
   
   while(AcquisitionEnable){
-
+    
     // Handle the acquisition loop in a separate ROOT thread
     gSystem->ProcessEvents();
 
@@ -307,11 +307,7 @@ void AAAcquisitionManager::StartAcquisition()
     // stop acquisition command is issued
     if(!AcquisitionEnable)
       break;
-
-    usleep(100000);
-
-    DGManager->SendSWTrigger();
-
+    
     /////////////////////////////////
     // Event readout determination //
     /////////////////////////////////
@@ -319,10 +315,10 @@ void AAAcquisitionManager::StartAcquisition()
     // Standard firmware readout
 
     if(UseSTDFirmware){
-      
+
       // Get the number of events stored in digitizer FPGA
       DGManager->GetNumFPGAEvents(&FPGAEvents);
-      
+
       // Proceed only if FPGA events exceeds user-specified readout
       // events in order to maximize efficiency
       if(FPGAEvents < TheSettings->EventsBeforeReadout and 

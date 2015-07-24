@@ -100,10 +100,14 @@ private:
 
   Bool_t AcquisitionEnable;
 
-  //Objects for controlling timed acquisition periods
+  // Objects for controlling timed acquisition periods
+
   Bool_t AcquisitionTimerEnable;
   Double_t AcquisitionTimeStart, AcquisitionTimeStop;
   time_t AcquisitionTimeNow, AcquisitionTimePrev;
+
+  Bool_t UseSTDFirmware, UsePSDFirmware;
+  Bool_t UsePSDListMode, UsePSDWaveformMode;
 
 #ifndef __CINT__
 
@@ -121,10 +125,6 @@ private:
   CAEN_DGTZ_DPP_PSD_Event_t *PSDEvents[4];
   CAEN_DGTZ_DPP_PSD_Waveforms_t *PSDWaveforms;
   uint32_t NumPSDEvents[4];
-  
-  Bool_t UseSTDFirmware;
-  Bool_t UsePSDFirmware, UsePSDListMode, UsePSDWaveformMode;
-
   
   // Variables for PC buffer readout
   char *Buffer; 

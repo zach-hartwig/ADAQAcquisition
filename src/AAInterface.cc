@@ -343,7 +343,7 @@ void AAInterface::FillConnectionFrame()
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790M", zDT5790M);
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790N", zDT5790N);
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790P", zDT5790P);
-      BoardType_CBL[board]->GetComboBox()->Select(zDT5790M);
+      BoardType_CBL[board]->GetComboBox()->Select(zV1724);
     }
     else if(board == 2){
       BoardType_CBL[board]->GetComboBox()->AddEntry("V6533M", zV6533M);
@@ -355,7 +355,7 @@ void AAInterface::FillConnectionFrame()
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790M", zDT5790M);
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790N", zDT5790N);
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790P", zDT5790P);
-      BoardType_CBL[board]->GetComboBox()->Select(zDT5790M);
+      BoardType_CBL[board]->GetComboBox()->Select(zV6534M);
     }
     
     TGHorizontalFrame *BoardAddress_HF = new TGHorizontalFrame(BoardOptions_VF);
@@ -871,7 +871,7 @@ void AAInterface::FillAcquisitionFrame()
 				  new TGLayoutHints(kLHintsNormal, 10,0,0,0));
     DGChTriggerThreshold_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
     DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-    DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumber(2000);
+    DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumber(8000);
     DGChTriggerThreshold_NEL[ch]->GetEntry()->Resize(55,20);
 
     
@@ -1167,7 +1167,7 @@ void AAInterface::FillAcquisitionFrame()
   DGTriggerType_CBL->GetComboBox()->AddEntry("External (TTL)",1);
   DGTriggerType_CBL->GetComboBox()->AddEntry("Automatic",2);
   DGTriggerType_CBL->GetComboBox()->AddEntry("Software",3);
-  DGTriggerType_CBL->GetComboBox()->Select(3);
+  DGTriggerType_CBL->GetComboBox()->Select(2);
   DGTriggerType_CBL->GetComboBox()->Resize(110,20);
   DGTriggerType_CBL->GetComboBox()->ChangeOptions(DGTriggerType_CBL->GetComboBox()->GetOptions() | kFixedSize);
 

@@ -39,10 +39,10 @@ AAVMEManager *AAVMEManager::GetInstance()
 
 
 AAVMEManager::AAVMEManager()
-  : BREnable(false), DGEnable(true), HVEnable(true),
+  : BREnable(true), DGEnable(true), HVEnable(true),
     BRIdentifier(0),
-    DGIdentifier(0), DGAddress(0x00000000), DGLinkNumber(0), DGCONETNode(0),
-    HVIdentifier(0), HVAddress(0x00000000), HVLinkNumber(0), 
+    DGIdentifier(0), DGAddress(0x00420000), DGLinkNumber(0), DGCONETNode(0),
+    HVIdentifier(0), HVAddress(0x42420000), HVLinkNumber(0), 
     VMEConnectionEstablished(false)
 {
   if(TheVMEManager)
@@ -53,14 +53,14 @@ AAVMEManager::AAVMEManager()
 			 BRIdentifier);
   BRMgr->SetVerbose(true);
   
-  DGMgr = new ADAQDigitizer(zDT5790M, 
+  DGMgr = new ADAQDigitizer(zV1724,
 			    DGIdentifier, 
 			    DGAddress,
 			    DGLinkNumber, 
 			    DGCONETNode);
   DGMgr->SetVerbose(true);
   
-  HVMgr = new ADAQHighVoltage(zDT5790M,
+  HVMgr = new ADAQHighVoltage(zV6534M,
 			      HVIdentifier,
 			      HVAddress,
 			      HVLinkNumber);
@@ -233,7 +233,7 @@ bool AAVMEManager::ProgramDigitizers()
   else
     DGMgr->SetZSMode("None");
 
-  if(true){
+  if(false){
 
     DigitizerParams_t Params;
 
@@ -248,7 +248,7 @@ bool AAVMEManager::ProgramDigitizers()
     
 
     CAEN_DGTZ_DPP_PSD_Params_t PSDParams;
-
+    
     for(Int_t ch=0; ch<4; ch++){
       PSDParams.thr[ch]   = 50; // threshold [ADC]
       PSDParams.nsbl[ch]  = 2;  // 2**nbsl blocks for baseline calc
@@ -265,11 +265,11 @@ bool AAVMEManager::ProgramDigitizers()
     PSDParams.blthr = 3;     // Baseline Threshold
     PSDParams.bltmo = 100;   // Baseline Timeout
     PSDParams.trgho = 8;     // Trigger HoldOff
-
-
+    
+    
     DGMgr->SetDPPAcquisitionMode(Params.AcqMode,
 				 CAEN_DGTZ_DPP_SAVE_PARAM_EnergyAndTime);
-
+    
     DGMgr->SetIOLevel(Params.IOlev);
     
     DGMgr->SetDPPEventAggregation(Params.EventAggr,
