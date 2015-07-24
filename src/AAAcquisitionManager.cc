@@ -45,7 +45,8 @@ AAAcquisitionManager::AAAcquisitionManager()
     WaveformLength(0), EventCounter(0),
     LLD(0), ULD(0), SampleHeight(0.), TriggerHeight(0.),
     PulseHeight(0.), PulseArea(0.), PSDTotal(0.), PSDTail(0.),
-    PeakPosition(0), TimeStamp(0),
+    PeakPosition(0), RawTimeStamp(0), PrevTimeStamp(0),
+    TimeStampRollovers(0), TimeStampGap(0), TimeStamp(0),
     FillWaveformTree(false), TheReadoutManager(new ADAQReadoutManager)
 {
   if(TheAcquisitionManager)
@@ -258,6 +259,14 @@ void AAAcquisitionManager::PrepareAcquisition()
     DGManager->MallocDPPWaveforms(&PSDWaveforms, &PSDWaveformSize);
   }
 
+  for(Int_t ch=0; ch<DGChannels; ch++)
+    NumPSDEvents[ch] = 0;
+
+  // Reset time stamp variables 
+  TimeStampRollovers = 0;
+  RawTimeStamp = 0;
+  PrevTimeStamp = 0;
+
   // Get the acquisition control setting
   Int_t AcqControl = TheSettings->AcquisitionControl;
 
@@ -270,9 +279,6 @@ void AAAcquisitionManager::PrepareAcquisition()
   // reception of S IN signal as data acquisition start/stop 
   else if(AcqControl == 1 or AcqControl == 2)
     DGManager->SInArmAcquisition();
-
-
-  
 }
 
 
@@ -301,6 +307,10 @@ void AAAcquisitionManager::StartAcquisition()
     // stop acquisition command is issued
     if(!AcquisitionEnable)
       break;
+
+    usleep(100000);
+
+    DGManager->SendSWTrigger();
 
     /////////////////////////////////
     // Event readout determination //
@@ -337,20 +347,23 @@ void AAAcquisitionManager::StartAcquisition()
       DGManager->ReadData(Buffer, &ReadSize);
       
       // Readout events from PC buffer to DPP-PSD event structure
-      DGManager->GetDPPEvents(Buffer, ReadSize, PSDEvents, &PCEvents);
+      DGManager->GetDPPEvents(Buffer, ReadSize, PSDEvents, NumPSDEvents);
     }
     
     //////////////////////////////
     // Event data readout loops //
     //////////////////////////////
-
+    
     // Loop over the digitizer readout channels
     for(Int_t ch=0; ch<DGManager->GetNumChannels(); ch++){
-
+      
       // Skip channels that are not enabled for efficiency
       if(!TheSettings->ChEnable[ch])
 	continue;
 
+      if(UsePSDFirmware)
+	PCEvents = NumPSDEvents[ch];
+      
       // Loop over the digitizer stored events in the PC buffer
       for(Int_t evt=0; evt<PCEvents; evt++){
 
@@ -569,10 +582,37 @@ void AAAcquisitionManager::StartAcquisition()
 	// regardless of acquisition mode
 	WaveformData[ch]->SetChannelID(ch);
 	WaveformData[ch]->SetBoardID(DGManager->GetBoardID());
+
+	// Correct the time stamp for rollover. Note the timestamp is
+	// stored in a bits [31:1] of a 32-bit unsigned integer. The
+	// formula to compute the absolute time stamp is:
+	//
+	//   Time = Raw + Gap + n*2^31
+	//
+	// where:
+	//  - 'Time' is the absolute non-rollover time stamp
+	//  - 'Raw' is the unmodified 31-bit time stamp
+	//  - 'Gap' is skipped time : (2^31-Prev) @ rollover; 0 @ otherwise
+	//  - 'Prev' is final raw time stamp before rollover
+	//  - 'n' is the number of rollovers that have occured
+	
 	if(UseSTDFirmware)
-	  WaveformData[ch]->SetTimeStamp(EventInfo.TriggerTimeTag);
+	  RawTimeStamp = (EventInfo.TriggerTimeTag >> 1);
 	else if(UsePSDFirmware)
-	  WaveformData[ch]->SetTimeStamp(PSDEvents[ch][evt].TimeTag);
+	  RawTimeStamp = (PSDEvents[ch][evt].TimeTag >> 1);
+	
+	if(RawTimeStamp < PrevTimeStamp){
+	  TimeStampRollovers++;
+	  TimeStampGap = pow(2,31) - PrevTimeStamp;
+	}
+	else
+	  TimeStampGap = 0;
+	
+	TimeStamp = RawTimeStamp + TimeStampGap + TimeStampRollovers*pow(2,31);
+	
+	PrevTimeStamp = RawTimeStamp;
+
+	WaveformData[ch]->SetTimeStamp(TimeStamp);
 
 	// Second, if the user has NOT selected the "nonupdatable
 	// (ultra rate)" mode, we perform a number of digital pulse
@@ -698,8 +738,20 @@ void AAAcquisitionManager::StartAcquisition()
 	EventCounter++;
 
       } // End of the data readout loop over events
+
+      // ZSH (23 Jul 15) : It is not clear to me why the following
+      // reset of PSD event counter is needed. The value should
+      // readout automatically from the ADAQDigitizer::GetDPPEvents()
+      // method at the top of the acquisition loop. The reset is
+      // needed to looping over previously readout events...?
+
+      // Zero the number of of PSD events after each channel readout.
+      if(UsePSDFirmware)
+	NumPSDEvents[ch] = 0;
       
     }// End of the data readout loop over channels
+
+
 
     /////////////////////////////////////
     // Post-data readout loop plotting //

@@ -116,11 +116,12 @@ private:
   CAEN_DGTZ_UINT16_EVENT_t *EventWaveform;
 
   // CAEN DPP-PSD firmware
-
+  
   CAEN_DGTZ_DPP_PSD_Params_t *PSDParams[4];
-  CAEN_DGTZ_DPP_PSD_Event_t * PSDEvents[4];
+  CAEN_DGTZ_DPP_PSD_Event_t *PSDEvents[4];
   CAEN_DGTZ_DPP_PSD_Waveforms_t *PSDWaveforms;
-
+  uint32_t NumPSDEvents[4];
+  
   Bool_t UseSTDFirmware;
   Bool_t UsePSDFirmware, UsePSDListMode, UsePSDWaveformMode;
 
@@ -152,7 +153,12 @@ private:
   Double_t  SampleHeight, TriggerHeight;
   Double_t  PulseHeight, PulseArea;
   Double_t  PSDTotal, PSDTail;
-  UInt_t TimeStamp;
+  
+#ifndef __CINT__
+  uint32_t RawTimeStamp, PrevTimeStamp;
+  uint32_t TimeStampRollovers, TimeStampGap;
+  uint64_t TimeStamp;
+#endif
   
   vector<bool> CalibrationEnable;
   vector<TGraph *> CalibrationCurves;
