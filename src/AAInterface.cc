@@ -1943,7 +1943,7 @@ void AAInterface::FillAcquisitionFrame()
   
   DisplayUpdateable_RB = new TGRadioButton(DisplayControl_BG, "Updateable (high rate)", DisplayUpdateable_RB_ID);
   
-  DisplayNonUpdateable_RB = new TGRadioButton(DisplayControl_BG, "Nonupdateable (ultra rate)", DisplayNonUpdateable_RB_ID);
+  DisplayNonUpdateable_RB = new TGRadioButton(DisplayControl_BG, "Waveform storage only!", DisplayNonUpdateable_RB_ID);
 }
   
 

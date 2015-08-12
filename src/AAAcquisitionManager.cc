@@ -34,7 +34,7 @@ AAAcquisitionManager::AAAcquisitionManager()
   : AcquisitionEnable(false), AcquisitionTimerEnable(false),
     AcquisitionTimeStart(0), AcquisitionTimeStop(0), 
     AcquisitionTimeNow(0), AcquisitionTimePrev(0),
-    UseSTDFirmware(true), UsePSDFirmware(false),
+    UseSTDFirmware(false), UsePSDFirmware(true),
     UsePSDListMode(false), UsePSDWaveformMode(!UsePSDListMode),
     EventPointer(NULL), EventWaveform(NULL), Buffer(NULL),
     BufferSize(0), ReadSize(0), FPGAEvents(0), PCEvents(0),

@@ -233,7 +233,7 @@ bool AAVMEManager::ProgramDigitizers()
   else
     DGMgr->SetZSMode("None");
 
-  if(false){
+  if(true){
 
     DigitizerParams_t Params;
 
@@ -241,7 +241,7 @@ bool AAVMEManager::ProgramDigitizers()
     Params.VMEBaseAddress = 0;
     Params.IOlev = CAEN_DGTZ_IOLevel_TTL;
     Params.AcqMode = CAEN_DGTZ_DPP_ACQ_MODE_Mixed;
-    Params.RecordLength = 512;
+    Params.RecordLength = 5000;
     Params.ChannelMask = 0x1;
     Params.EventAggr = 10;
     Params.PulsePolarity = CAEN_DGTZ_PulsePolarityNegative;
