@@ -429,6 +429,30 @@ void AATabSlots::HandlePulserTextButtons()
 }
 
 
+void AATabSlots::HandleRadioButtons()
+{
+  TGRadioButton *ActiveButton = (TGRadioButton *) gTQSender;
+  int ActiveID = ActiveButton->WidgetId();
+  
+  TI->SaveSettings();
+  
+  switch(ActiveID){
+  case DGStandardFW_RB_ID:
+    if(TI->DGStandardFW_RB->IsDown())
+      TI->DGDPPPSDFW_RB->SetState(kButtonUp);
+    break;
+
+  case DGDPPPSDFW_RB_ID:
+    if(TI->DGDPPPSDFW_RB->IsDown())
+      TI->DGStandardFW_RB->SetState(kButtonUp);
+    break;
+
+  default:
+    break;
+  }
+}
+
+
 void AATabSlots::HandleVoltageTextButtons()
 {
   TGTextButton *TextButton = (TGTextButton *) gTQSender;

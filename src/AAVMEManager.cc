@@ -232,9 +232,9 @@ bool AAVMEManager::ProgramDigitizers()
     DGMgr->SetZSMode("ZLE");
   else
     DGMgr->SetZSMode("None");
-
-  if(true){
-
+  
+  if(TheSettings->PSDFirmware){
+    
     DigitizerParams_t Params;
 
     Params.LinkType = CAEN_DGTZ_USB;

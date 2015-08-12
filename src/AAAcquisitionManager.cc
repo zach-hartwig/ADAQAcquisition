@@ -238,6 +238,11 @@ void AAAcquisitionManager::PrepareAcquisition()
   for(Int_t ch=0; ch<DGChannels; ch++)
     NumPSDEvents[ch] = 0;
 
+
+  // Set class member firwmare booleans from the settings class
+  UseSTDFirmware = TheSettings->STDFirmware;
+  UsePSDFirmware = TheSettings->PSDFirmware;
+
   if(UseSTDFirmware){
     
     // Initialize pointers to the event and event waveform. Memory is

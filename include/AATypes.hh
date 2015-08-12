@@ -31,6 +31,9 @@ enum{
   DGBoardAddress_ID,
   DGBoardLinkNumber_ID,
 
+  DGStandardFW_RB_ID,
+  DGDPPPSDFW_RB_ID,
+
   
   ///////////////////
   // Registers tab //

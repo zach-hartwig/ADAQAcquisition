@@ -27,6 +27,7 @@ public:
   void HandleConnectionTextButtons();
   void HandleRegisterTextButtons();
   void HandlePulserTextButtons();
+  void HandleRadioButtons();
   void HandleVoltageTextButtons();
   
   ClassDef(AATabSlots, 1);

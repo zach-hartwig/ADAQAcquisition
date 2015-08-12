@@ -41,6 +41,11 @@ public:
     ChPSDTailStart.resize(Channels);
     ChPSDTailStop.resize(Channels);
   }
+
+  /////////////////////////////////
+  // VME connection widget settings
+
+  Bool_t STDFirmware, PSDFirmware;
   
   //////////////////////////
   // Channel widget settings

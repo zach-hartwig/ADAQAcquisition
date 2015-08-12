@@ -160,6 +160,7 @@ private:
   vector<ADAQNumberEntryFieldWithLabel *> BoardAddress_NEF;
   vector<ADAQNumberEntryWithLabel *> BoardLinkNumber_NEL;
   vector<TGTextButton *> BoardEnable_TB;
+  TGRadioButton *DGStandardFW_RB, *DGDPPPSDFW_RB;
 
 
   /////////////////
