@@ -257,9 +257,8 @@ void AAAcquisitionManager::PrepareAcquisition()
   Buffer = NULL;
   BufferSize = ReadSize = FPGAEvents = PCEvents = EventCounter = 0;
   
-  // The memory for the PC readout buffer must allocated after the
-  // digitizer been programmed so ensure that this is the last line
-  // before starting acquisition
+  // Allocate memory for the PC readout buffer only after the
+  // digitizer been completely programmed
   DGManager->MallocReadoutBuffer(&Buffer, &BufferSize);
   
   if(UsePSDFirmware){
@@ -349,6 +348,14 @@ void AAAcquisitionManager::StartAcquisition()
     //////////////////////////////
     // Event data readout loops //
     //////////////////////////////
+
+    // In order to accomodate both CAEN STD and DPP-PSD firmware,
+    // which handle event aggregation differently, the nested
+    // hierarchy of the readout loop is as follows:
+    //
+    //   for(all enabled channels)
+    //     for(all channel-specific events)
+    //       for(waveform samples) {only if settings require}
     
     // Loop over the digitizer readout channels
     for(Int_t ch=0; ch<DGManager->GetNumChannels(); ch++){
@@ -357,6 +364,7 @@ void AAAcquisitionManager::StartAcquisition()
       if(!TheSettings->ChEnable[ch])
 	continue;
 
+      // If DPP-PSD, get number of events in present channel
       if(UsePSDFirmware)
 	PCEvents = NumPSDEvents[ch];
       
@@ -504,8 +512,8 @@ void AAAcquisitionManager::StartAcquisition()
 		SampleHeight = Polarity[ch] * (Waveforms[ch][sample] - BaselineValue[ch]);
 		TriggerHeight = Polarity[ch] * (TheSettings->ChTriggerThreshold[ch] - BaselineValue[ch]);
 		
-		// Simple algorithm to determine the pulse height (adc)
-		// and peak position (sample) by looping over all samples
+		// Simple algorithm to determine the pulse height [ADC]
+		// and peak position [sample] by looping over all samples
 		if(SampleHeight > PulseHeight){
 		  PulseHeight = SampleHeight;
 		  PeakPosition[ch] = sample;
@@ -542,17 +550,13 @@ void AAAcquisitionManager::StartAcquisition()
 	    sample = PSDTailAbsStart[ch];
 	    for(; sample<PSDTailAbsStop[ch]; sample++)
 	      PSDTail += Polarity[ch] * (Waveforms[ch][sample] - BaselineValue[ch]);
-	    
-	    // Convert the tail integral to (tail/total) if specified
-	    if(TheSettings->PSDYAxisTailTotal)
-	      PSDTail /= PSDTotal;
 	  }
 	}
 	
 	else if(UsePSDFirmware and UsePSDListMode){
 	  
 	  // These options enable DPP-PSD firmware to provide basic
-	  // pulse baseline and area; pulse height in not available
+	  // pulse baseline and area; pulse height is not available
 
 	  BaselineValue[ch] = PSDEvents[ch][evt].Baseline;
 	  PulseArea = PSDEvents[ch][evt].ChargeLong;
@@ -679,8 +683,18 @@ void AAAcquisitionManager::StartAcquisition()
 	  }
 
 	  else if(TheSettings->PSDMode){
-	    if(PSDTotal > TheSettings->PSDThreshold)
-	      PSDHistogram_H[ch]->Fill(PSDTotal, PSDTail);
+	    if(PSDTotal > TheSettings->PSDThreshold){
+	      
+	      // The Y-axis value of the PSD histogram is the 'PSD
+	      // parameter', which it typically the tail integral or
+	      // the ratio of tail divided by the total integral
+	      
+	      Double_t PSDParameter = PSDTail;
+	      if(TheSettings->PSDYAxisTailTotal)
+		PSDParameter /= PSDTotal;
+	      
+	      PSDHistogram_H[ch]->Fill(PSDTotal, PSDParameter);
+	    }
 	  }
 	}
 	
@@ -736,17 +750,17 @@ void AAAcquisitionManager::StartAcquisition()
       } // End of the data readout loop over events
 
       // ZSH (23 Jul 15) : It is not clear to me why the following
-      // reset of PSD event counter is needed. The value should
-      // readout automatically from the ADAQDigitizer::GetDPPEvents()
-      // method at the top of the acquisition loop. The reset is
-      // needed to looping over previously readout events...?
+      // reset of PSD event counter variable is needed. The value
+      // should be set automatically during readout from the
+      // ADAQDigitizer::GetDPPEvents() method at the top of the
+      // acquisition loop. The reset is needed to prevent looping over
+      // previously readout events but why...?
 
       // Zero the number of of PSD events after each channel readout.
       if(UsePSDFirmware)
 	NumPSDEvents[ch] = 0;
       
     }// End of the data readout loop over channels
-
 
 
     /////////////////////////////////////
