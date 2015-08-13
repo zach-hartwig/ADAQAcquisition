@@ -71,10 +71,27 @@ AAInterface::AAInterface()
 
   // Create the slot handler classes to receive signals from the
   // widgets; handlers are roughly grouped by GUI tab layout
+
   ChannelSlots = new AAChannelSlots(this);
   DisplaySlots = new AADisplaySlots(this);
   SubtabSlots = new AASubtabSlots(this);
   TabSlots = new AATabSlots(this);
+
+
+  // Create the top-level frames, which include the main frame and
+  // the major tabs for different applications
+
+  CreateTopLevelFrames();
+
+  
+  ///////////////////////////////////////
+  // Fill each of the top-level frames //
+  ///////////////////////////////////////
+  
+  
+  FillConnectionFrame();
+
+  /*
 
   TheVMEManager = AAVMEManager::GetInstance();
   
@@ -144,21 +161,12 @@ AAInterface::AAInterface()
     (int)DGCh3BaselineCalcMax_NEL_ID, (int)DGCh4BaselineCalcMax_NEL_ID, (int)DGCh5BaselineCalcMax_NEL_ID, 
     (int)DGCh6BaselineCalcMax_NEL_ID, (int)DGCh7BaselineCalcMax_NEL_ID;
 
+  */
 
-  ////////////////////////////////////////
-  // Create each of the top-level frame //
-  ////////////////////////////////////////
 
-  CreateTopLevelFrames();
+  /*
 
-  
-  ///////////////////////////////////////
-  // Fill each of the top-level frames //
-  ///////////////////////////////////////
-  
-
-  FillConnectionFrame();
-  FillRegisterFrame();
+    FillRegisterFrame();
 
   if(TheVMEManager->GetBREnable())
     FillPulserFrame();
@@ -181,7 +189,7 @@ AAInterface::AAInterface()
   AAGraphics::GetInstance()->SetCanvasPointer(DisplayCanvas_EC->GetCanvas());
   if(TheVMEManager->GetDGEnable())
     AAGraphics::GetInstance()->SetSettingsPointer(TheSettings);
-  
+  */  
   ////////////////////////////////
   // Final setup of main window //
   ////////////////////////////////
@@ -240,7 +248,7 @@ void AAInterface::CreateTopLevelFrames()
   ConnectionTab->AddFrame(ConnectionFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 5,5,5,5));
   
   RegisterTab = TopLevelTabs->AddTab(" Register R/W ");
-  RegisterFrame = new TGCompositeFrame(RegisterTab, 200, 20, kVerticalFrame);
+  RegisterFrame = new TGCompositeFrame(RegisterTab, 60, 20, kVerticalFrame);
   RegisterTab->AddFrame(RegisterFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 5,5,5,5));
   
   PulserTab = TopLevelTabs->AddTab(" Pulsers ");
@@ -266,7 +274,7 @@ void AAInterface::CreateTopLevelFrames()
   
   TopFrame->AddFrame(TabFrame, new TGLayoutHints(kLHintsCenterX, 35,5,5,5));
 
-  AddFrame(TopFrame, new TGLayoutHints(kLHintsCenterX, 0,0,0,0));
+  AddFrame(TopFrame, new TGLayoutHints(kLHintsExpandX, 0,0,0,0));
 
   SetBackgroundColor(ColorManager->Number2Pixel(22));
 }
@@ -290,7 +298,7 @@ void AAInterface::FillConnectionFrame()
 
   // A text view window to capture/display std::cout information
 
-  Connection_GF->AddFrame(ConnectionOutput_TV = new TGTextView(Connection_GF, 700, 400, -42),
+  Connection_GF->AddFrame(ConnectionOutput_TV = new TGTextView(Connection_GF, 900, 475, -42),
 			  new TGLayoutHints(kLHintsTop | kLHintsExpandX, 15,15,5,25));
   ConnectionOutput_TV->SetBackground(ColorManager->Number2Pixel(18));
   
@@ -306,13 +314,13 @@ void AAInterface::FillConnectionFrame()
   BoardLinkNumberID += (int)0, (int)DGBoardLinkNumber_ID, (int)HVBoardLinkNumber_ID;
   
   vector<uint32_t> BoardAddress, BoardLinkNumber;
-  BoardAddress += (int)0, 
-    (int)TheVMEManager->GetDGManager()->GetBoardAddress(), 
-    (int)TheVMEManager->GetHVManager()->GetBoardAddress();
+  BoardAddress += 0, 0x00000000, 0x00000000;
+  //    (int)TheVMEManager->GetDGManager()->GetBoardAddress(), 
+  //    (int)TheVMEManager->GetHVManager()->GetBoardAddress();
   
-  BoardLinkNumber += (int)0, 
-    (int)TheVMEManager->GetDGManager()->GetBoardLinkNumber(), 
-    (int)TheVMEManager->GetHVManager()->GetBoardLinkNumber();
+  BoardLinkNumber += 0, 0, 0;
+  //    (int)TheVMEManager->GetDGManager()->GetBoardLinkNumber(), 
+  //    (int)TheVMEManager->GetHVManager()->GetBoardLinkNumber();
 
   TGGroupFrame *DeviceSettings_GF = new TGGroupFrame(ConnectionFrame, "CAEN Device Settings", kHorizontalFrame);
   ConnectionFrame->AddFrame(DeviceSettings_GF, new TGLayoutHints(kLHintsTop | kLHintsCenterX, 5,5,5,5));
@@ -440,7 +448,8 @@ void AAInterface::FillConnectionFrame()
     BoardEnable_TB[board]->SetForegroundColor(ColorManager->Number2Pixel(kWhite));
     BoardEnable_TB[board]->ChangeOptions(BoardEnable_TB[board]->GetOptions() | kFixedSize);
   }
-  
+
+  /*
   if(!TheVMEManager->GetBREnable()){
     BoardEnable_TB[V1718]->SetText("Board disabled");
     BoardEnable_TB[V1718]->SetBackgroundColor(ColorManager->Number2Pixel(ButtonBackColorOff));
@@ -455,6 +464,7 @@ void AAInterface::FillConnectionFrame()
     BoardEnable_TB[V6534]->SetText("Board disabled");
     BoardEnable_TB[V6534]->SetBackgroundColor(ColorManager->Number2Pixel(ButtonBackColorOff));
   }
+  */
 }
 
 
@@ -1975,7 +1985,7 @@ void AAInterface::FillAcquisitionFrame()
 // AAInterface software from the VME boards
 void AAInterface::HandleDisconnectAndTerminate(bool Terminate)
 {
-  TheVMEManager->SafelyDisconnectVMEBoards();
+  AAVMEManager::GetInstance()->SafelyDisconnectVMEBoards();
   
   if(Terminate)
     gApplication->Terminate();

@@ -23,12 +23,13 @@ public:
   AATabSlots(AAInterface *);
   ~AATabSlots();
 
-  void HandleCheckButtons();
   void HandleConnectionTextButtons();
-  void HandleRegisterTextButtons();
   void HandlePulserTextButtons();
-  void HandleRadioButtons();
+  void HandleRegisterTextButtons();
   void HandleVoltageTextButtons();
+
+  void HandleCheckButtons();
+  void HandleRadioButtons();
   
   ClassDef(AATabSlots, 1);
   

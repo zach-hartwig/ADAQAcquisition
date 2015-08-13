@@ -39,38 +39,78 @@ AAVMEManager *AAVMEManager::GetInstance()
 
 
 AAVMEManager::AAVMEManager()
-  : BREnable(false), DGEnable(true), HVEnable(true),
-    BRIdentifier(0),
-    DGIdentifier(0), DGAddress(0x00000000), DGLinkNumber(0), DGCONETNode(0),
-    HVIdentifier(0), HVAddress(0x00000000), HVLinkNumber(0), 
+  : BREnable(false), BRType(0), BRIdentifier(0),
+    DGEnable(false), DGIdentifier(0), DGAddress(0x00000000), DGLinkNumber(0), DGCONETNode(0),
+    HVEnable(false), HVIdentifier(0), HVAddress(0x00000000), HVLinkNumber(0), 
     VMEConnectionEstablished(false)
 {
   if(TheVMEManager)
     cout << "\nError! The VMEManager was constructed twice!\n" << endl;
   TheVMEManager = this;
-  
-  BRMgr = new ADAQBridge(zV1718, 
-			 BRIdentifier);
-  BRMgr->SetVerbose(true);
-  
-  DGMgr = new ADAQDigitizer(zDT5790M,
-			    DGIdentifier, 
-			    DGAddress,
-			    DGLinkNumber, 
-			    DGCONETNode);
-  DGMgr->SetVerbose(true);
-  
-  HVMgr = new ADAQHighVoltage(zDT5790M,
-			      HVIdentifier,
-			      HVAddress,
-			      HVLinkNumber);
-  
-  HVMgr->SetVerbose(true);
 }
 
 
 AAVMEManager::~AAVMEManager()
 {;}
+
+
+Int_t AAVMEManager::InitializeBridge()
+{
+  BRMgr = new ADAQBridge((ZBoardType)BRType,
+			 BRIdentifier);
+  
+  BRMgr->SetVerbose(true);
+  
+  Int_t Status = -42;
+  
+  // Connect to the VME/USB bridge WITHOUT a digitizer enabled ...
+  if(!TheVMEManager->GetDGEnable())
+    Status = BRMgr->OpenLinkDirectly();
+  
+  // Connect to the VME/USB bridge VIA the digitizer
+  else if(DGEnable == 0)
+    Status = BRMgr->OpenLinkViaDigitizer(DGMgr->GetBoardHandle(),
+					 true);
+  
+  return Status;
+}
+
+
+Int_t AAVMEManager::InitializeDigitizer()
+{
+  DGMgr = new ADAQDigitizer((ZBoardType)DGType,
+			    DGIdentifier, 
+			    DGAddress,
+			    DGLinkNumber, 
+			    DGCONETNode);
+  
+  DGMgr->SetVerbose(true);
+  
+  Int_t Status = DGMgr->OpenLink();
+  
+  return Status;
+}
+
+
+Int_t AAVMEManager::InitializeHighVoltage()
+{
+  HVMgr = new ADAQHighVoltage((ZBoardType)HVType,
+			      HVIdentifier,
+			      HVAddress,
+			      HVLinkNumber);
+  
+  
+  HVMgr->SetVerbose(true);
+  
+  if(HVType == zDT5790M or HVType == zDT5790N or HVType == zDT5790P){
+    Int_t DGHandle = TheVMEManager->GetDGManager()->GetBoardHandle();
+    HVMgr->SetBoardHandle(DGHandle);
+  }
+  
+  Int_t Status = HVMgr->OpenLink();
+  
+  return Status;
+}
 
 
 bool AAVMEManager::ProgramDigitizers()
@@ -297,12 +337,13 @@ void AAVMEManager::SafelyDisconnectVMEBoards()
     HVMgr->SetToSafeState();
     HVMgr->CloseLink();
   }
-  
+
   if(DGEnable)
-    DGMgr->CloseLink();
-  
-  if(BREnable)
-    BRMgr->CloseLink();
+    //DGMgr->CloseLink();
+
+  if(BREnable){
+    //BRMgr->CloseLink();
+  }
 }
 
 

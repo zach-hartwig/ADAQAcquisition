@@ -24,6 +24,9 @@
 class ADAQBridge;
 class ADAQDigitizer;
 class ADAQHighVoltage;
+#ifndef __CINT__
+#include "ADAQVBoard.hh"
+#endif
 
 #include "AAInterface.hh"
 #include "AASettings.hh"
@@ -35,6 +38,10 @@ public:
   ~AAVMEManager();
 
   static AAVMEManager *GetInstance();
+
+  Int_t InitializeBridge();
+  Int_t InitializeDigitizer();
+  Int_t InitializeHighVoltage();
 
   bool ProgramDigitizers();
 
@@ -49,27 +56,44 @@ public:
   bool GetVMEConnectionEstablished() {return VMEConnectionEstablished;}
 
   void SetSettingsPointer(AASettings *TS) {TheSettings = TS;}
-  
-  // VME board enable booleans
 
+  // Set/Get methods for VME/USB bridge (BR) settings
+  
   void SetBREnable(bool E) {BREnable = E;}
   bool GetBREnable() {return BREnable;}
+
+  void SetBRType(Int_t T) {BRType = T;}
+  Int_t GetBRType() {return BRType;}
+
+  // Set/Get methods for the digitizer (DG) settings
 
   void SetDGEnable(bool E) {DGEnable = E;}
   bool GetDGEnable() {return DGEnable;}
 
-  void SetHVEnable(bool E) {HVEnable = E;}
-  bool GetHVEnable() {return HVEnable;}
-
-  // Get VME board addresses
+  void SetDGType(Int_t T) {DGType = T;}
+  Int_t GetDGType() {return DGType;}
 
   void SetDGAddress(long BA) {DGAddress = BA;}
   long GetDGAddress() {return DGAddress;}
 
+  void SetDGLinkNumber(Int_t LN) {DGLinkNumber = LN;}
+  Int_t GetDGLinkNumber() {return DGLinkNumber;}
+
+  // Set/Get methods for high voltage (HV) settings
+
+  void SetHVEnable(bool E) {HVEnable = E;}
+  bool GetHVEnable() {return HVEnable;}
+
+  void SetHVType(Int_t T) {HVType = T;}
+  Int_t GetHVType() {return HVType;}
+
   void SetHVAddress(long BA) {HVAddress = BA;}
   long GetHVAddress() {return HVAddress;}
 
-  // Get the VME board managers
+  void SetHVLinkNumber(Int_t LN) {HVLinkNumber = LN;}
+  Int_t GetHVLinkNumber() {return HVLinkNumber;}
+
+  // Public access methods to obtain the board managers
 
   ADAQBridge *GetBRManager() {return BRMgr;}
   ADAQDigitizer *GetDGManager() {return DGMgr;}
@@ -87,18 +111,22 @@ private:
   static AAVMEManager *TheVMEManager;
 
   // Boolean enable flags
-  bool BREnable, DGEnable, HVEnable;
-
+  Bool_t BREnable;
+  Int_t BRType;
   int BRIdentifier;
-  
+
+  Bool_t DGEnable;
+  Int_t DGType;
   long DGAddress;
-  int DGIdentifier, DGLinkNumber, DGCONETNode;
-  
+  Int_t DGIdentifier, DGLinkNumber, DGCONETNode;
+
+  Bool_t HVEnable;
+  Int_t HVType;
   long HVAddress;
-  int HVIdentifier, HVLinkNumber;
+  Int_t HVIdentifier, HVLinkNumber;
   
-  bool VMEConnectionEstablished;
-  bool HVMonitorEnable;
+  Bool_t VMEConnectionEstablished;
+  Bool_t HVMonitorEnable;
 
   ADAQBridge *BRMgr;
   ADAQDigitizer *DGMgr;
