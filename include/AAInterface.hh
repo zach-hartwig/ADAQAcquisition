@@ -67,7 +67,7 @@ public:
   void FillPulserFrame();
   void FillVoltageFrame();
   void FillAcquisitionFrame();
-  
+
   void UpdateAQTimer(int);
   void UpdateAfterAQTimerStopped(bool);
   void UpdateAfterCalibrationPointAdded(int);
@@ -115,8 +115,6 @@ private:
   vector<int> DGChPSDTotalStop_NEL_ID_Vec;
   vector<int> DGChPSDTailStart_NEL_ID_Vec;
   vector<int> DGChPSDTailStop_NEL_ID_Vec;
-
-  const int NumDataChannels;
 
   // Object to convert numeric color to pixel color
   TColor *ColorManager;

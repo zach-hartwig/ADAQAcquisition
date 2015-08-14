@@ -39,12 +39,12 @@ enum{
   // Registers tab //
   ///////////////////
 
-  V1718ReadAddress_ID,
-  V1718ReadValue_ID,
-  V1718Read_ID,
-  V1718WriteAddress_ID,
-  V1718WriteValue_ID,
-  V1718Write_ID,
+  BRReadAddress_ID,
+  BRReadValue_ID,
+  BRRead_ID,
+  BRWriteAddress_ID,
+  BRWriteValue_ID,
+  BRWrite_ID,
 
   HVReadAddress_ID,
   HVReadValue_ID,

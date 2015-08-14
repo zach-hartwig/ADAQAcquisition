@@ -116,6 +116,17 @@ void AATabSlots::HandleConnectionTextButtons()
 	
 	AAAcquisitionManager::GetInstance()->Initialize();
 
+	TI->FillRegisterFrame();
+
+	if(BRLinkOpen == 0)
+	  TI->FillPulserFrame();
+
+	if(HVLinkOpen == 0)
+	  TI->FillVoltageFrame();
+
+	if(DGLinkOpen == 0)
+	  TI->FillAcquisitionFrame();
+
 	TI->VMEConnect_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOn));
 	TI->VMEConnect_TB->SetText("Connected: click to disconnect");
 	
@@ -307,12 +318,12 @@ void AATabSlots::HandleRegisterTextButtons()
   int Board = 0;
   switch(TextButtonID){
     
-  case V1718Read_ID:
+  case BRRead_ID:
     Action = READ;
     Board = V1718;
     break;
 
-  case V1718Write_ID:
+  case BRWrite_ID:
     Action = WRITE;
     Board = V1718;
     break;

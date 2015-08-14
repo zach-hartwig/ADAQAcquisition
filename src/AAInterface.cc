@@ -61,7 +61,7 @@ AAInterface::AAInterface()
   : TGMainFrame(gClient->GetRoot()),
     DisplayWidth(1121), DisplayHeight(833), 
     ButtonForeColor(kWhite), ButtonBackColorOn(kGreen-5), ButtonBackColorOff(kRed-3),
-    NumDataChannels(8), ColorManager(new TColor), NumVMEBoards(3)
+    ColorManager(new TColor), NumVMEBoards(3)
 {
   // Allow environmental variable to control small version of GUI
   if(getenv("ADAQACQUISITION_SMALL")!=NULL){
@@ -71,7 +71,6 @@ AAInterface::AAInterface()
 
   // Create the slot handler classes to receive signals from the
   // widgets; handlers are roughly grouped by GUI tab layout
-
   ChannelSlots = new AAChannelSlots(this);
   DisplaySlots = new AADisplaySlots(this);
   SubtabSlots = new AASubtabSlots(this);
@@ -80,136 +79,38 @@ AAInterface::AAInterface()
 
   // Create the top-level frames, which include the main frame and
   // the major tabs for different applications
-
   CreateTopLevelFrames();
 
-  
-  ///////////////////////////////////////
-  // Fill each of the top-level frames //
-  ///////////////////////////////////////
-  
-  
+  // Fill the connection frame, which contains GUI widgets for
+  // establishing connection to the DAQ devices
   FillConnectionFrame();
-
-  /*
-
-  TheVMEManager = AAVMEManager::GetInstance();
-  
-  // A structure to important widget settings;
-  TheSettings = new AASettings(NumDataChannels);
-  
-  /////////////////////////////
-  // Initialize HV variables //
-  /////////////////////////////
-  // Initialize C++ stdlib vectors and maps but using the
-  // Boost::Assign functionality for its utility and concision
-  
-  int NumHVChannels = TheVMEManager->GetHVManager()->GetNumChannels();
-  for(int ch=0; ch<NumHVChannels; ch++){
-    stringstream SS;
-    SS << "Channel " << ch << " (" << TheVMEManager->GetHVManager()->GetPolarityString(ch)
-       << ")";
-    
-    HVChLabels.push_back(SS.str());
-  }
-  
-  // std::vector to return the ROOT channel power widget ID from the HV channel number
-  HVChPower_TB_ID_Vec += 
-    (int)HVCh0Power_TB_ID, (int)HVCh1Power_TB_ID, (int)HVCh2Power_TB_ID,
-    (int)HVCh3Power_TB_ID, (int)HVCh4Power_TB_ID, (int)HVCh5Power_TB_ID;
-  
-  // std::map to return the HV channel number from the ROOT channel power widget ID
-  insert(HVChPower_TB_ID_Map) 
-    ((int)HVCh0Power_TB_ID,0) ((int)HVCh1Power_TB_ID,1) ((int)HVCh2Power_TB_ID,2)
-    ((int)HVCh3Power_TB_ID,3) ((int)HVCh4Power_TB_ID,4) ((int)HVCh5Power_TB_ID,5);
-
-  /////////////////////////////
-  // Initialize DG variables //
-  /////////////////////////////
-
-  DGChannelLabels += 
-    "Channel 0", "Channel 1", "Channel 2", "Channel 3", 
-    "Channel 4", "Channel 5", "Channel 6", "Channel 7";
-
-  DGChEnable_CB_ID_Vec += 
-    (int)DGCh0Enable_CB_ID, (int)DGCh1Enable_CB_ID, (int)DGCh2Enable_CB_ID, 
-    (int)DGCh3Enable_CB_ID, (int)DGCh4Enable_CB_ID, (int)DGCh5Enable_CB_ID, 
-    (int)DGCh6Enable_CB_ID, (int)DGCh7Enable_CB_ID;
-  
-  DGChDCOffset_NEL_ID_Vec += 
-    (int)DGCh0DCOffset_NEL_ID, (int)DGCh1DCOffset_NEL_ID, (int)DGCh2DCOffset_NEL_ID, 
-    (int)DGCh3DCOffset_NEL_ID, (int)DGCh4DCOffset_NEL_ID, (int)DGCh5DCOffset_NEL_ID, 
-    (int)DGCh6DCOffset_NEL_ID, (int)DGCh7DCOffset_NEL_ID;
-
-  DGChTriggerThreshold_NEL_ID_Vec += 
-    (int)DGCh0TriggerThreshold_NEL_ID, (int)DGCh1TriggerThreshold_NEL_ID, (int)DGCh2TriggerThreshold_NEL_ID, 
-    (int)DGCh3TriggerThreshold_NEL_ID, (int)DGCh4TriggerThreshold_NEL_ID, (int)DGCh5TriggerThreshold_NEL_ID, 
-    (int)DGCh6TriggerThreshold_NEL_ID, (int)DGCh7TriggerThreshold_NEL_ID;
-
-  insert(DGChTriggerThreshold_NEL_ID_Map)
-    ((int)DGCh0TriggerThreshold_NEL_ID,0) ((int)DGCh1TriggerThreshold_NEL_ID,1) ((int)DGCh2TriggerThreshold_NEL_ID,2) 
-    ((int)DGCh3TriggerThreshold_NEL_ID,3) ((int)DGCh4TriggerThreshold_NEL_ID,4) ((int)DGCh5TriggerThreshold_NEL_ID,5)
-    ((int)DGCh6TriggerThreshold_NEL_ID,6) ((int)DGCh7TriggerThreshold_NEL_ID,7);
-
-  DGChBaselineCalcMin_NEL_ID_Vec += 
-    (int)DGCh0BaselineCalcMin_NEL_ID, (int)DGCh1BaselineCalcMin_NEL_ID, (int)DGCh2BaselineCalcMin_NEL_ID, 
-    (int)DGCh3BaselineCalcMin_NEL_ID, (int)DGCh4BaselineCalcMin_NEL_ID, (int)DGCh5BaselineCalcMin_NEL_ID,
-    (int)DGCh6BaselineCalcMin_NEL_ID, (int)DGCh7BaselineCalcMin_NEL_ID;
-
-  DGChBaselineCalcMax_NEL_ID_Vec += 
-    (int)DGCh0BaselineCalcMax_NEL_ID, (int)DGCh1BaselineCalcMax_NEL_ID, (int)DGCh2BaselineCalcMax_NEL_ID,
-    (int)DGCh3BaselineCalcMax_NEL_ID, (int)DGCh4BaselineCalcMax_NEL_ID, (int)DGCh5BaselineCalcMax_NEL_ID, 
-    (int)DGCh6BaselineCalcMax_NEL_ID, (int)DGCh7BaselineCalcMax_NEL_ID;
-
-  */
-
-
-  /*
-
-    FillRegisterFrame();
-
-  if(TheVMEManager->GetBREnable())
-    FillPulserFrame();
-
-  if(TheVMEManager->GetHVEnable())
-    FillVoltageFrame();
-
-  if(TheVMEManager->GetDGEnable())
-    FillAcquisitionFrame();
-
-  ///////////////////////////////////////////
-  // Set manager pointers for later access //
-  ///////////////////////////////////////////
-
-  TheVMEManager->SetSettingsPointer(TheSettings);
-
-  AAAcquisitionManager::GetInstance()->SetInterfacePointer(this);
-  AAAcquisitionManager::GetInstance()->SetSettingsPointer(TheSettings);
-
-  AAGraphics::GetInstance()->SetCanvasPointer(DisplayCanvas_EC->GetCanvas());
-  if(TheVMEManager->GetDGEnable())
-    AAGraphics::GetInstance()->SetSettingsPointer(TheSettings);
-  */  
-  ////////////////////////////////
-  // Final setup of main window //
-  ////////////////////////////////
 
   // Set cleanup upon destruction
   SetCleanup(kDeepCleanup);
-
+  
   // Connect main window buttons to close properly
   Connect("CloseWindow()", "AAInterface", this, "HandleDisconnectAndTerminate()");
 
+  // Set the main window title
   string TitleString;
   if(VersionString == "Development")
     TitleString = "AIMS Data Acquisition (Development version)               Fear is the mind-killer.";
   else
     TitleString = "AIMS Data Acquisition (Production version " + VersionString + ")               Fear is the mind-killer.";
-
   SetWindowName(TitleString.c_str());
-  MapSubwindows();
+
+  // Set the ain window size
   Resize(DisplayWidth, DisplayHeight);
+  
+  // Map the GUIs onto the main window frame
+  MapSubwindows();
   MapWindow();
+
+  ///////////////////////////////////////////
+  // Set manager pointers for later access //
+  ///////////////////////////////////////////
+
+  AAAcquisitionManager::GetInstance()->SetInterfacePointer(this);
 }
 
 
@@ -298,7 +199,7 @@ void AAInterface::FillConnectionFrame()
 
   // A text view window to capture/display std::cout information
 
-  Connection_GF->AddFrame(ConnectionOutput_TV = new TGTextView(Connection_GF, 900, 475, -42),
+  Connection_GF->AddFrame(ConnectionOutput_TV = new TGTextView(Connection_GF, 987, 455, -42),
 			  new TGLayoutHints(kLHintsTop | kLHintsExpandX, 15,15,5,25));
   ConnectionOutput_TV->SetBackground(ColorManager->Number2Pixel(18));
   
@@ -315,12 +216,7 @@ void AAInterface::FillConnectionFrame()
   
   vector<uint32_t> BoardAddress, BoardLinkNumber;
   BoardAddress += 0, 0x00000000, 0x00000000;
-  //    (int)TheVMEManager->GetDGManager()->GetBoardAddress(), 
-  //    (int)TheVMEManager->GetHVManager()->GetBoardAddress();
-  
   BoardLinkNumber += 0, 0, 0;
-  //    (int)TheVMEManager->GetDGManager()->GetBoardLinkNumber(), 
-  //    (int)TheVMEManager->GetHVManager()->GetBoardLinkNumber();
 
   TGGroupFrame *DeviceSettings_GF = new TGGroupFrame(ConnectionFrame, "CAEN Device Settings", kHorizontalFrame);
   ConnectionFrame->AddFrame(DeviceSettings_GF, new TGLayoutHints(kLHintsTop | kLHintsCenterX, 5,5,5,5));
@@ -448,47 +344,34 @@ void AAInterface::FillConnectionFrame()
     BoardEnable_TB[board]->SetForegroundColor(ColorManager->Number2Pixel(kWhite));
     BoardEnable_TB[board]->ChangeOptions(BoardEnable_TB[board]->GetOptions() | kFixedSize);
   }
-
-  /*
-  if(!TheVMEManager->GetBREnable()){
-    BoardEnable_TB[V1718]->SetText("Board disabled");
-    BoardEnable_TB[V1718]->SetBackgroundColor(ColorManager->Number2Pixel(ButtonBackColorOff));
-  }
-  
-  if(!TheVMEManager->GetDGEnable()){
-    BoardEnable_TB[V1720]->SetText("Board disabled");
-    BoardEnable_TB[V1720]->SetBackgroundColor(ColorManager->Number2Pixel(ButtonBackColorOff));
-  }
-  
-  if(!TheVMEManager->GetHVEnable()){
-    BoardEnable_TB[V6534]->SetText("Board disabled");
-    BoardEnable_TB[V6534]->SetBackgroundColor(ColorManager->Number2Pixel(ButtonBackColorOff));
-  }
-  */
 }
 
 
 void AAInterface::FillRegisterFrame()
 {
-  const int NumVMEBoards = 3;
+  // There will always be only 3 devices on the register frame: (1) A
+  // VME bridge; (2) a digitizer; (3) a high voltage unit
+  const Int_t NumDevices = 3;
 
-  string FrameTitle[NumVMEBoards] = {"V1718 VME/USB Module", "CAEN Digitizer Module", "CAEN High Voltage Module"};
+  string FrameTitle[NumDevices] = {"CAEN VME Bridge Module", "CAEN Digitizer Module", "CAEN High Voltage Module"};
 
-  int ReadAddressID[NumVMEBoards] = {V1718ReadAddress_ID, DGReadAddress_ID, HVReadAddress_ID};
-  int ReadValueID[NumVMEBoards] = {V1718ReadValue_ID, DGReadValue_ID, HVReadValue_ID};
+  Int_t ReadAddressID[NumDevices] = {BRReadAddress_ID, DGReadAddress_ID, HVReadAddress_ID};
+  Int_t ReadValueID[NumDevices] = {BRReadValue_ID, DGReadValue_ID, HVReadValue_ID};
 
-  int WriteAddressID[NumVMEBoards] = {V1718WriteAddress_ID, DGWriteAddress_ID, HVWriteAddress_ID};
-  int WriteValueID[NumVMEBoards] = {V1718WriteValue_ID, DGWriteValue_ID, HVWriteValue_ID};
+  Int_t WriteAddressID[NumDevices] = {BRWriteAddress_ID, DGWriteAddress_ID, HVWriteAddress_ID};
+  Int_t WriteValueID[NumDevices] = {BRWriteValue_ID, DGWriteValue_ID, HVWriteValue_ID};
 
-  int ReadID[NumVMEBoards] = {V1718Read_ID, DGRead_ID, HVRead_ID};
-  int WriteID[NumVMEBoards] = {V1718Write_ID, DGWrite_ID, HVWrite_ID};
+  Int_t ReadID[NumDevices] = {BRRead_ID, DGRead_ID, HVRead_ID};
+  Int_t WriteID[NumDevices] = {BRWrite_ID, DGWrite_ID, HVWrite_ID};
 
-  const int RWButtonX = 250;
-  const int RWButtonY = 30;
-  const int RWFGColor = ColorManager->Number2Pixel(0);
-  const int RWBGColor = ColorManager->Number2Pixel(36);
+  const Int_t RWButtonX = 250;
+  const Int_t RWButtonY = 30;
+  const Int_t RWFGColor = ColorManager->Number2Pixel(0);
+  const Int_t RWBGColor = ColorManager->Number2Pixel(36);
 
-  for(int board=0; board<NumVMEBoards; board++){
+  AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
+
+  for(Int_t board=0; board<NumDevices; board++){
 
     ////////////////////////////////////////////////////
     // Create the group frame to hold all the subwidgets
@@ -618,6 +501,9 @@ void AAInterface::FillRegisterFrame()
     // Add the top-level group frame to the hierarchy
     RegisterFrame->AddFrame(RegisterRW_GF, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 5,5,5,40));
   }
+
+  MapSubwindows();
+  MapWindow();
 }
 
 
@@ -742,6 +628,8 @@ void AAInterface::FillPulserFrame()
     V1718PulserStartStop_TB[pulser]->Connect("Pressed()", "AATabSlots", TabSlots, "HandlePulserTextButtons()");
   }  
 
+  MapSubwindows();
+  MapWindow();
 }
 
 
@@ -752,11 +640,42 @@ void AAInterface::FillPulserFrame()
 // on. This may be updated in the future to enable real-time changes.
 void AAInterface::FillVoltageFrame()
 {
+  AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
+  
+  const int NumHVChannels = TheVMEManager->GetHVManager()->GetNumChannels();
+
+  /////////////////////////////
+  // Initialize HV variables //
+  /////////////////////////////
+  // Initialize C++ stdlib vectors and maps but using the
+  // Boost::Assign functionality for its utility and concision
+  
+  for(int ch=0; ch<NumHVChannels; ch++){
+    stringstream SS;
+    SS << "Channel " << ch << " (" << TheVMEManager->GetHVManager()->GetPolarityString(ch)
+       << ")";
+    
+    HVChLabels.push_back(SS.str());
+  }
+  
+  // std::vector to return the ROOT channel power widget ID from the HV channel number
+  HVChPower_TB_ID_Vec += 
+    (int)HVCh0Power_TB_ID, (int)HVCh1Power_TB_ID, (int)HVCh2Power_TB_ID,
+    (int)HVCh3Power_TB_ID, (int)HVCh4Power_TB_ID, (int)HVCh5Power_TB_ID;
+  
+  // std::map to return the HV channel number from the ROOT channel power widget ID
+  insert(HVChPower_TB_ID_Map) 
+    ((int)HVCh0Power_TB_ID,0) ((int)HVCh1Power_TB_ID,1) ((int)HVCh2Power_TB_ID,2)
+    ((int)HVCh3Power_TB_ID,3) ((int)HVCh4Power_TB_ID,4) ((int)HVCh5Power_TB_ID,5);
+
+
+  /////////////////////////////////
+  // Build the high voltage GUIs //
+  /////////////////////////////////
+
   TGVerticalFrame *HVChannelControls_VF = new TGVerticalFrame(VoltageFrame);
   
-  const int HVChannels = TheVMEManager->GetHVManager()->GetNumChannels();
-  
-  for(int ch=0; ch<HVChannels; ch++){
+  for(int ch=0; ch<NumHVChannels; ch++){
     
     TGGroupFrame *HVChannel_GF = new TGGroupFrame(HVChannelControls_VF, HVChLabels[ch].c_str(), kHorizontalFrame);
     HVChannel_GF->SetTitlePos(TGGroupFrame::kCenter);
@@ -826,11 +745,57 @@ void AAInterface::FillVoltageFrame()
   HVMonitorEnable_CB->SetState(kButtonUp);
   
   VoltageFrame->AddFrame(HVChannelControls_VF, new TGLayoutHints(kLHintsTop | kLHintsCenterX, 5, 5, 5, 5));
+
+  MapSubwindows();
+  MapWindow();
 }
 
  
 void AAInterface::FillAcquisitionFrame()
 {
+  AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
+  
+  const int NumDGChannels = TheVMEManager->GetHVManager()->GetNumChannels();
+
+  /////////////////////////////
+  // Initialize DG variables //
+  /////////////////////////////
+
+  DGChannelLabels += 
+    "Channel 0", "Channel 1", "Channel 2", "Channel 3", 
+    "Channel 4", "Channel 5", "Channel 6", "Channel 7";
+
+  DGChEnable_CB_ID_Vec += 
+    (int)DGCh0Enable_CB_ID, (int)DGCh1Enable_CB_ID, (int)DGCh2Enable_CB_ID, 
+    (int)DGCh3Enable_CB_ID, (int)DGCh4Enable_CB_ID, (int)DGCh5Enable_CB_ID, 
+    (int)DGCh6Enable_CB_ID, (int)DGCh7Enable_CB_ID;
+  
+  DGChDCOffset_NEL_ID_Vec += 
+    (int)DGCh0DCOffset_NEL_ID, (int)DGCh1DCOffset_NEL_ID, (int)DGCh2DCOffset_NEL_ID, 
+    (int)DGCh3DCOffset_NEL_ID, (int)DGCh4DCOffset_NEL_ID, (int)DGCh5DCOffset_NEL_ID, 
+    (int)DGCh6DCOffset_NEL_ID, (int)DGCh7DCOffset_NEL_ID;
+
+  DGChTriggerThreshold_NEL_ID_Vec += 
+    (int)DGCh0TriggerThreshold_NEL_ID, (int)DGCh1TriggerThreshold_NEL_ID, (int)DGCh2TriggerThreshold_NEL_ID, 
+    (int)DGCh3TriggerThreshold_NEL_ID, (int)DGCh4TriggerThreshold_NEL_ID, (int)DGCh5TriggerThreshold_NEL_ID, 
+    (int)DGCh6TriggerThreshold_NEL_ID, (int)DGCh7TriggerThreshold_NEL_ID;
+
+  insert(DGChTriggerThreshold_NEL_ID_Map)
+    ((int)DGCh0TriggerThreshold_NEL_ID,0) ((int)DGCh1TriggerThreshold_NEL_ID,1) ((int)DGCh2TriggerThreshold_NEL_ID,2) 
+    ((int)DGCh3TriggerThreshold_NEL_ID,3) ((int)DGCh4TriggerThreshold_NEL_ID,4) ((int)DGCh5TriggerThreshold_NEL_ID,5)
+    ((int)DGCh6TriggerThreshold_NEL_ID,6) ((int)DGCh7TriggerThreshold_NEL_ID,7);
+
+  DGChBaselineCalcMin_NEL_ID_Vec += 
+    (int)DGCh0BaselineCalcMin_NEL_ID, (int)DGCh1BaselineCalcMin_NEL_ID, (int)DGCh2BaselineCalcMin_NEL_ID, 
+    (int)DGCh3BaselineCalcMin_NEL_ID, (int)DGCh4BaselineCalcMin_NEL_ID, (int)DGCh5BaselineCalcMin_NEL_ID,
+    (int)DGCh6BaselineCalcMin_NEL_ID, (int)DGCh7BaselineCalcMin_NEL_ID;
+
+  DGChBaselineCalcMax_NEL_ID_Vec += 
+    (int)DGCh0BaselineCalcMax_NEL_ID, (int)DGCh1BaselineCalcMax_NEL_ID, (int)DGCh2BaselineCalcMax_NEL_ID,
+    (int)DGCh3BaselineCalcMax_NEL_ID, (int)DGCh4BaselineCalcMax_NEL_ID, (int)DGCh5BaselineCalcMax_NEL_ID, 
+    (int)DGCh6BaselineCalcMax_NEL_ID, (int)DGCh7BaselineCalcMax_NEL_ID;
+
+  
   //////////////////////////////
   // Fill left vertical panel //
   //////////////////////////////
@@ -853,7 +818,7 @@ void AAInterface::FillAcquisitionFrame()
   // constructed in a "for" loop previously initialized using
   // vectors to assign parameters that are unique to each channel
   // (names and IDs).
-  for(int ch=0; ch<NumDataChannels; ch++){
+  for(int ch=0; ch<NumDGChannels; ch++){
 
     // Each channel's widgets are grouped under its own TGGroupFrame.
     TGGroupFrame *DGChannelControl_GF = new TGGroupFrame(DGChannelControls_VF, DGChannelLabels[ch].c_str(), kVerticalFrame);
@@ -1978,6 +1943,19 @@ void AAInterface::FillAcquisitionFrame()
   DisplayUpdateable_RB = new TGRadioButton(DisplayControl_BG, "Updateable (high rate)", DisplayUpdateable_RB_ID);
   
   DisplayNonUpdateable_RB = new TGRadioButton(DisplayControl_BG, "Waveform storage only!", DisplayNonUpdateable_RB_ID);
+
+  MapSubwindows();
+  MapWindow();
+
+  TheSettings = new AASettings(NumDGChannels);
+  TheVMEManager->SetSettingsPointer(TheSettings);
+  AAAcquisitionManager::GetInstance()->SetSettingsPointer(TheSettings);
+
+  AAGraphics::GetInstance()->SetCanvasPointer(DisplayCanvas_EC->GetCanvas());
+  if(TheVMEManager->GetDGEnable())
+    AAGraphics::GetInstance()->SetSettingsPointer(TheSettings);
+
+
 }
   
 
@@ -2005,7 +1983,10 @@ void AAInterface::SetVoltageChannelWidgetState(int HVChannel, bool HVActive)
 
 void AAInterface::SetVoltageWidgetState(bool WidgetState, EButtonState ButtonState)
 {
-  for(int ch=0; ch<6; ch++){
+  AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
+  const int NumHVChannels = TheVMEManager->GetHVManager()->GetNumChannels();
+  
+  for(int ch=0; ch<NumHVChannels; ch++){
     HVChVoltage_NEL[ch]->GetEntry()->SetState(WidgetState);
     HVChCurrent_NEL[ch]->GetEntry()->SetState(WidgetState);
 
@@ -2020,10 +2001,10 @@ void AAInterface::SetVoltageWidgetState(bool WidgetState, EButtonState ButtonSta
 
 void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState ButtonState)
 {
-  // Widgets that have straightforward on/off behavoir depending on
-  // the acquisition state
+  AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
+  const int NumDGChannels = TheVMEManager->GetDGManager()->GetNumChannels();
 
-  for(uint32_t ch=0; ch<8; ch++){
+  for(Int_t ch=0; ch<NumDGChannels; ch++){
     DGChEnable_CB[ch]->SetState(ButtonState);
     DGChPosPolarity_RB[ch]->SetState(ButtonState);
     DGChNegPolarity_RB[ch]->SetState(ButtonState);
@@ -2142,11 +2123,14 @@ void AAInterface::SetTitlesWidgetState(bool WidgetState, EButtonState ButtonStat
 
 void AAInterface::SaveSettings()
 {
+  AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
+  const Int_t NumDGChannels = TheVMEManager->GetDGManager()->GetNumChannels();
+  
   TheSettings->STDFirmware = DGStandardFW_RB->IsDown();
   TheSettings->PSDFirmware = DGDPPPSDFW_RB->IsDown();
   
   // Acquisition channel 
-  for(int ch=0; ch<NumDataChannels; ch++){
+  for(Int_t ch=0; ch<NumDGChannels; ch++){
     TheSettings->ChEnable[ch] = DGChEnable_CB[ch]->IsDown();
     TheSettings->ChPosPolarity[ch] = DGChPosPolarity_RB[ch]->IsDown();
     TheSettings->ChNegPolarity[ch] = DGChNegPolarity_RB[ch]->IsDown();
@@ -2307,7 +2291,7 @@ void AAInterface::SaveSettings()
   bool AcquisitionOn = AAAcquisitionManager::GetInstance()->GetAcquisitionEnable();
 
   if(AcquisitionOn){
-    for(int ch=0; ch<NumDataChannels; ch++){
+    for(int ch=0; ch<NumDGChannels; ch++){
       TheSettings->ChEnable[ch] = DGChEnable_CB[ch]->IsDisabledAndSelected();
       TheSettings->ChPosPolarity[ch] = DGChPosPolarity_RB[ch]->IsDisabledAndSelected();
       TheSettings->ChNegPolarity[ch] = DGChNegPolarity_RB[ch]->IsDisabledAndSelected();
