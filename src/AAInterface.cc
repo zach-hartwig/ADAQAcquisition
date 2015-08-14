@@ -818,8 +818,8 @@ void AAInterface::FillAcquisitionFrame()
   
   AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
   
-  const int NumDGChannels = TheVMEManager->GetHVManager()->GetNumChannels();
-
+  const int NumDGChannels = TheVMEManager->GetDGManager()->GetNumChannels();
+  
   /////////////////////////////
   // Initialize DG variables //
   /////////////////////////////
