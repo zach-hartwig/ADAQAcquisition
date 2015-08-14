@@ -113,19 +113,10 @@ void AATabSlots::HandleConnectionTextButtons()
       if(BRLinkOpen == 0 or DGLinkOpen == 0 or HVLinkOpen == 0){
 	
 	TheVMEManager->SetVMEConnectionEstablished(true);
+
+	TI->BuildSecondaryFrames();
 	
 	AAAcquisitionManager::GetInstance()->Initialize();
-
-	TI->FillRegisterFrame();
-
-	if(BRLinkOpen == 0)
-	  TI->FillPulserFrame();
-
-	if(HVLinkOpen == 0)
-	  TI->FillVoltageFrame();
-
-	if(DGLinkOpen == 0)
-	  TI->FillAcquisitionFrame();
 
 	TI->VMEConnect_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOn));
 	TI->VMEConnect_TB->SetText("Connected: click to disconnect");
@@ -202,7 +193,7 @@ void AATabSlots::HandleConnectionTextButtons()
     }
     break;
 
-  case V1718BoardEnable_TB_ID:
+  case BRBoardEnable_TB_ID:
     if(TI->BoardEnable_TB[BR]->GetString() == "Board enabled"){
       TI->BoardEnable_TB[BR]->SetText("Board disabled");
       TI->BoardEnable_TB[BR]->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOff));

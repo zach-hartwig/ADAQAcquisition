@@ -20,8 +20,8 @@ enum{
 
   VMEConnect_TB_ID,
 
-  V1718BoardEnable_TB_ID,
-  V1718BoardAddress_ID,
+  BRBoardEnable_TB_ID,
+  BRBoardAddress_ID,
 
   HVBoardEnable_TB_ID,
   HVBoardAddress_ID,

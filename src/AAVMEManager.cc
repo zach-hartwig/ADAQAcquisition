@@ -39,9 +39,11 @@ AAVMEManager *AAVMEManager::GetInstance()
 
 
 AAVMEManager::AAVMEManager()
-  : BREnable(false), BRType(0), BRIdentifier(0),
-    DGEnable(false), DGIdentifier(0), DGAddress(0x00000000), DGLinkNumber(0), DGCONETNode(0),
-    HVEnable(false), HVIdentifier(0), HVAddress(0x00000000), HVLinkNumber(0), 
+  : BREnable(false), BRType(0), BRIdentifier(0), BRLinkOpen(false),
+    DGEnable(false), DGIdentifier(0), DGAddress(0x00000000),
+    DGLinkNumber(0), DGCONETNode(0), DGLinkOpen(false),
+    HVEnable(false), HVIdentifier(0), HVAddress(0x00000000),
+    HVLinkNumber(0), HVLinkOpen(false),
     VMEConnectionEstablished(false)
 {
   if(TheVMEManager)
@@ -71,6 +73,9 @@ Int_t AAVMEManager::InitializeBridge()
   else if(DGEnable == 0)
     Status = BRMgr->OpenLinkViaDigitizer(DGMgr->GetBoardHandle(),
 					 true);
+
+  if(BRMgr->GetLinkEstablished())
+    BRLinkOpen = true;
   
   return Status;
 }
@@ -87,6 +92,9 @@ Int_t AAVMEManager::InitializeDigitizer()
   DGMgr->SetVerbose(true);
   
   Int_t Status = DGMgr->OpenLink();
+
+  if(DGMgr->GetLinkEstablished())
+    DGLinkOpen = true;
   
   return Status;
 }
@@ -101,13 +109,23 @@ Int_t AAVMEManager::InitializeHighVoltage()
   
   
   HVMgr->SetVerbose(true);
+
+  Int_t Status = -42;
   
   if(HVType == zDT5790M or HVType == zDT5790N or HVType == zDT5790P){
-    Int_t DGHandle = TheVMEManager->GetDGManager()->GetBoardHandle();
-    HVMgr->SetBoardHandle(DGHandle);
+
+    if(!DGMgr->GetLinkEstablished())
+      return Status;
+    else{
+      Int_t DGHandle = DGMgr->GetBoardHandle();
+      HVMgr->SetBoardHandle(DGHandle);
+    }
   }
   
-  Int_t Status = HVMgr->OpenLink();
+  Status = HVMgr->OpenLink();
+
+  if(HVMgr->GetLinkEstablished())
+    HVLinkOpen = true;
   
   return Status;
 }
@@ -333,16 +351,26 @@ bool AAVMEManager::ProgramDigitizers()
 
 void AAVMEManager::SafelyDisconnectVMEBoards()
 {
-  if(HVEnable){
+  if(HVLinkOpen){
+    
     HVMgr->SetToSafeState();
-    HVMgr->CloseLink();
+    
+    if(HVType == zDT5790M or HVType == zDT5790N or HVType == zDT5790P){
+    }
+    else
+      HVMgr->CloseLink();
+
+    HVLinkOpen = false;
   }
-
-  if(DGEnable)
-    //DGMgr->CloseLink();
-
-  if(BREnable){
-    //BRMgr->CloseLink();
+  
+  if(DGLinkOpen){
+    DGMgr->CloseLink();
+    DGLinkOpen = false;
+  }
+  
+  if(BRLinkOpen){
+    BRMgr->CloseLink();
+    BRLinkOpen = false;
   }
 }
 

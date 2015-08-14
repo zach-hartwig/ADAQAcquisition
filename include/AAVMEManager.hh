@@ -65,6 +65,8 @@ public:
   void SetBRType(Int_t T) {BRType = T;}
   Int_t GetBRType() {return BRType;}
 
+  Bool_t GetBRLinkOpen() {return BRLinkOpen;}
+
   // Set/Get methods for the digitizer (DG) settings
 
   void SetDGEnable(bool E) {DGEnable = E;}
@@ -79,6 +81,8 @@ public:
   void SetDGLinkNumber(Int_t LN) {DGLinkNumber = LN;}
   Int_t GetDGLinkNumber() {return DGLinkNumber;}
 
+  Bool_t GetDGLinkOpen() {return DGLinkOpen;}
+
   // Set/Get methods for high voltage (HV) settings
 
   void SetHVEnable(bool E) {HVEnable = E;}
@@ -92,6 +96,8 @@ public:
 
   void SetHVLinkNumber(Int_t LN) {HVLinkNumber = LN;}
   Int_t GetHVLinkNumber() {return HVLinkNumber;}
+
+  Bool_t GetHVLinkOpen() {return HVLinkOpen;}
 
   // Public access methods to obtain the board managers
 
@@ -114,16 +120,19 @@ private:
   Bool_t BREnable;
   Int_t BRType;
   int BRIdentifier;
+  Bool_t BRLinkOpen;
 
   Bool_t DGEnable;
   Int_t DGType;
   long DGAddress;
   Int_t DGIdentifier, DGLinkNumber, DGCONETNode;
+  Bool_t DGLinkOpen;
 
   Bool_t HVEnable;
   Int_t HVType;
   long HVAddress;
   Int_t HVIdentifier, HVLinkNumber;
+  Bool_t HVLinkOpen;
   
   Bool_t VMEConnectionEstablished;
   Bool_t HVMonitorEnable;

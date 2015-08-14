@@ -59,6 +59,9 @@ public:
 
   AAInterface();
   ~AAInterface();
+
+  void BuildPrimaryFrames();
+  void BuildSecondaryFrames();
   
   // Create the GUI and populate with widgets
   void CreateTopLevelFrames();
@@ -91,7 +94,9 @@ private:
   ///////////////////////////
   // General use variables //
   ///////////////////////////
-
+  
+  Bool_t InterfaceBuildComplete;
+  
   // Dimensions for interface window
   int DisplayWidth, DisplayHeight;
   int ButtonForeColor, ButtonBackColorOn, ButtonBackColorOff;
@@ -121,7 +126,6 @@ private:
 
     // IDs for each module
   enum{V1718, V1720, V6534};
-  const int NumVMEBoards;
 
   AAVMEManager *TheVMEManager;
   AAAcquisitionManager *TheACQManager;

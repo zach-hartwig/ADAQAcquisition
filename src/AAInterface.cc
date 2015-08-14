@@ -59,9 +59,10 @@ using namespace boost::assign;
 
 AAInterface::AAInterface()
   : TGMainFrame(gClient->GetRoot()),
+    InterfaceBuildComplete(false),
     DisplayWidth(1121), DisplayHeight(833), 
     ButtonForeColor(kWhite), ButtonBackColorOn(kGreen-5), ButtonBackColorOff(kRed-3),
-    ColorManager(new TColor), NumVMEBoards(3)
+    ColorManager(new TColor)
 {
   // Allow environmental variable to control small version of GUI
   if(getenv("ADAQACQUISITION_SMALL")!=NULL){
@@ -75,10 +76,29 @@ AAInterface::AAInterface()
   DisplaySlots = new AADisplaySlots(this);
   SubtabSlots = new AASubtabSlots(this);
   TabSlots = new AATabSlots(this);
+  
+  // Pass a pointer to this class instance to the acquisition manager
+  // so that the GUI can be accessed from there
+  AAAcquisitionManager::GetInstance()->SetInterfacePointer(this);
+
+  BuildPrimaryFrames();
+}
 
 
+AAInterface::~AAInterface()
+{
+  delete TabSlots;
+  delete SubtabSlots;
+  delete DisplaySlots;
+  delete ChannelSlots;
+  delete ColorManager;
+}
+
+
+void AAInterface::BuildPrimaryFrames()
+{
   // Create the top-level frames, which include the main frame and
-  // the major tabs for different applications
+  // the major tabs for different uses of the DAQ devices
   CreateTopLevelFrames();
 
   // Fill the connection frame, which contains GUI widgets for
@@ -105,22 +125,49 @@ AAInterface::AAInterface()
   // Map the GUIs onto the main window frame
   MapSubwindows();
   MapWindow();
-
-  ///////////////////////////////////////////
-  // Set manager pointers for later access //
-  ///////////////////////////////////////////
-
-  AAAcquisitionManager::GetInstance()->SetInterfacePointer(this);
 }
 
 
-AAInterface::~AAInterface()
+void AAInterface::BuildSecondaryFrames()
 {
-  delete TheSettings;
-  delete TabSlots;
-  delete SubtabSlots;
-  delete DisplaySlots;
-  delete ChannelSlots;
+  AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
+  AAAcquisitionManager *TheACQManager = AAAcquisitionManager::GetInstance();
+  AAGraphics *TheGRPManager = AAGraphics::GetInstance();
+
+  // Fill the secondary frames depending on the established links to
+  // the to the requested devices
+  
+  FillRegisterFrame();
+
+  if(TheVMEManager->GetBRLinkOpen())
+    FillPulserFrame();
+
+  if(TheVMEManager->GetHVLinkOpen())
+    FillVoltageFrame();
+
+  if(TheVMEManager->GetDGLinkOpen()){
+    FillAcquisitionFrame();
+
+    // Create a channel number-dependent AASettings object, which is
+    // used throughout the code to access GUI widget parameteres
+    const Int_t NumDGChannels = TheVMEManager->GetDGManager()->GetNumChannels();
+    TheSettings = new AASettings(NumDGChannels);
+
+    // Send critical pointers to the graphics manager
+    TheGRPManager->SetCanvasPointer(DisplayCanvas_EC->GetCanvas());
+  }
+  else{
+    // There are no DG channels if a DG device is not open
+    TheSettings = new AASettings(0);
+  }
+
+  // Pass the settings pointer to the managers
+  TheVMEManager->SetSettingsPointer(TheSettings);
+  TheACQManager->SetSettingsPointer(TheSettings);
+  TheGRPManager->SetSettingsPointer(TheSettings);
+
+  // Set the boolean to register that the GUI build is complete
+  InterfaceBuildComplete = true;
 }
 
 
@@ -183,6 +230,10 @@ void AAInterface::CreateTopLevelFrames()
 
 void AAInterface::FillConnectionFrame()
 {
+  // There is a maximum of 3 devices controlled by the code:
+  // (1) A VME bridge; (2) a digitizer; (3) a high voltage unit
+  const Int_t NumDevices = 3;
+  
   // The main VME connection button
   
   TGGroupFrame *Connection_GF = new TGGroupFrame(ConnectionFrame,"Initiate Connection", kVerticalFrame);
@@ -210,7 +261,7 @@ void AAInterface::FillConnectionFrame()
   Title += "VME-USB Bridge", "VME/Desktop Digitizer", "VME/Desktop High Voltage";
   
   vector<int> BoardEnableID, BoardAddressID, BoardLinkNumberID;
-  BoardEnableID += (int)V1718BoardEnable_TB_ID, (int)DGBoardEnable_TB_ID, (int)HVBoardEnable_TB_ID;
+  BoardEnableID += (int)BRBoardEnable_TB_ID, (int)DGBoardEnable_TB_ID, (int)HVBoardEnable_TB_ID;
   BoardAddressID += (int)0, (int)DGBoardAddress_ID, (int)HVBoardAddress_ID;
   BoardLinkNumberID += (int)0, (int)DGBoardLinkNumber_ID, (int)HVBoardLinkNumber_ID;
   
@@ -222,7 +273,7 @@ void AAInterface::FillConnectionFrame()
   ConnectionFrame->AddFrame(DeviceSettings_GF, new TGLayoutHints(kLHintsTop | kLHintsCenterX, 5,5,5,5));
   DeviceSettings_GF->SetTitlePos(TGGroupFrame::kCenter);
   
-  for(int board=0; board<NumVMEBoards; board++){
+  for(int board=0; board<NumDevices; board++){
     
     TGVerticalFrame *BoardOptions_VF = new TGVerticalFrame(DeviceSettings_GF);
     DeviceSettings_GF->AddFrame(BoardOptions_VF, 
@@ -349,6 +400,9 @@ void AAInterface::FillConnectionFrame()
 
 void AAInterface::FillRegisterFrame()
 {
+  if(InterfaceBuildComplete)
+    return;
+  
   // There will always be only 3 devices on the register frame: (1) A
   // VME bridge; (2) a digitizer; (3) a high voltage unit
   const Int_t NumDevices = 3;
@@ -509,6 +563,9 @@ void AAInterface::FillRegisterFrame()
 
 void AAInterface::FillPulserFrame()
 {
+  if(InterfaceBuildComplete)
+    return;
+  
   const int XSize = 125;
   const int YSize = 20;
   
@@ -640,6 +697,9 @@ void AAInterface::FillPulserFrame()
 // on. This may be updated in the future to enable real-time changes.
 void AAInterface::FillVoltageFrame()
 {
+  if(InterfaceBuildComplete)
+    return;
+  
   AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
   
   const int NumHVChannels = TheVMEManager->GetHVManager()->GetNumChannels();
@@ -753,6 +813,9 @@ void AAInterface::FillVoltageFrame()
  
 void AAInterface::FillAcquisitionFrame()
 {
+  if(InterfaceBuildComplete)
+    return;
+  
   AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
   
   const int NumDGChannels = TheVMEManager->GetHVManager()->GetNumChannels();
@@ -1946,16 +2009,6 @@ void AAInterface::FillAcquisitionFrame()
 
   MapSubwindows();
   MapWindow();
-
-  TheSettings = new AASettings(NumDGChannels);
-  TheVMEManager->SetSettingsPointer(TheSettings);
-  AAAcquisitionManager::GetInstance()->SetSettingsPointer(TheSettings);
-
-  AAGraphics::GetInstance()->SetCanvasPointer(DisplayCanvas_EC->GetCanvas());
-  if(TheVMEManager->GetDGEnable())
-    AAGraphics::GetInstance()->SetSettingsPointer(TheSettings);
-
-
 }
   
 
