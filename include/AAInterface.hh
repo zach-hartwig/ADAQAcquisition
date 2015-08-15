@@ -63,7 +63,6 @@ public:
   void BuildPrimaryFrames();
   void BuildSecondaryFrames();
   
-  // Create the GUI and populate with widgets
   void CreateTopLevelFrames();
   void FillConnectionFrame();
   void FillRegisterFrame();
@@ -211,23 +210,44 @@ private:
 
   // Channel-specific widgets (in the left columnar subframe)
 
+  // Firmware-agnostic widgets
+
   TGCheckButton *DGChEnable_CB[8];
   TGRadioButton *DGChPosPolarity_RB[8];
   TGRadioButton *DGChNegPolarity_RB[8];
   ADAQNumberEntryWithLabel *DGChDCOffset_NEL[8];
   ADAQNumberEntryWithLabel *DGChTriggerThreshold_NEL[8];
+
+  // CAEN Standard firmware widgets
+  
   ADAQNumberEntryWithLabel *DGChZLEThreshold_NEL[8];
   ADAQNumberEntryWithLabel *DGChZLESamples_NEL[8];
   ADAQNumberEntryWithLabel *DGChZLEForward_NEL[8];
   ADAQNumberEntryWithLabel *DGChZLEBackward_NEL[8];
   TGRadioButton *DGChZLEPosLogic_RB[8], *DGChZLENegLogic_RB[8];
-  
   ADAQNumberEntryWithLabel *DGChBaselineCalcMin_NEL[8];
   ADAQNumberEntryWithLabel *DGChBaselineCalcMax_NEL[8];
   ADAQNumberEntryWithLabel *DGChPSDTotalStart_NEL[8];
   ADAQNumberEntryWithLabel *DGChPSDTotalStop_NEL[8];
   ADAQNumberEntryWithLabel *DGChPSDTailStart_NEL[8];
   ADAQNumberEntryWithLabel *DGChPSDTailStop_NEL[8];
+
+  // CAEN DPP-PSD firmware widgets
+  
+  ADAQComboBoxWithLabel *DGChTrigConfig_CBL[8];
+  ADAQNumberEntryWithLabel *DGChTrigValidation_NEL[8];
+  
+  ADAQNumberEntryWithLabel *DGChRecordLength_NEL[8];
+  ADAQNumberEntryWithLabel *DGChShortGate_NEL[8];
+  ADAQNumberEntryWithLabel *DGChLongGate_NEL[8];
+  ADAQNumberEntryWithLabel *DGChGateOffset_NEL[8];
+  ADAQNumberEntryWithLabel *DGChPreGate_NEL[8];
+  ADAQNumberEntryWithLabel *DGChPSDCut_NEL[8];
+  ADAQNumberEntryWithLabel *DGChTrigValid_NEL[8];
+  ADAQComboBoxWithLabel *DGChBaselineCalc_CBL[8];
+  ADAQComboBoxWithLabel *DGChChargeSens_CBL[8];
+
+  
   
   // Display specific widgets (in the upper-right subframe)
 
@@ -250,6 +270,7 @@ private:
   ADAQComboBoxWithLabel *DGAcquisitionControl_CBL;
   ADAQNumberEntryWithLabel *DGRecordLength_NEL;
   ADAQNumberEntryWithLabel *DGPostTrigger_NEL;
+  ADAQComboBoxWithLabel *DGDPPPSDMode_CBL;
   ADAQNumberEntryWithLabel *AQTime_NEL;  
   ADAQNumberEntryFieldWithLabel *AQTimer_NEFL;
   TGTextButton *AQTimerStart_TB, *AQTimerAbort_TB;

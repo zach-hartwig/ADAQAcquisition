@@ -888,178 +888,338 @@ void AAInterface::FillAcquisitionFrame()
     DGChannelControls_VF->AddFrame(DGChannelControl_GF, new TGLayoutHints(kLHintsCenterX, 5, 5, 5, 0));
     DGChannelControl_GF->SetTitlePos(TGGroupFrame::kLeft);
     
-    DGChannelControl_GF->AddFrame(new TGLabel(DGChannelControl_GF, "Acquisition settings"),
-				  new TGLayoutHints(kLHintsLeft,0,0,5,0));
+
+    ////////////////////////////////////////////////////
+    // CAEN STD firmware GUI channel-specific widgets //
+    ////////////////////////////////////////////////////
+
+    if(DGStandardFW_RB->IsDown()){
+
+      DGChannelControl_GF->AddFrame(new TGLabel(DGChannelControl_GF, "Acquisition settings"),
+				    new TGLayoutHints(kLHintsLeft,0,0,5,0));
     
-    // Horizontal frame to hold the "enable" and "pulse polarity" buttons
-    TGHorizontalFrame *DGChannelControl_HF = new TGHorizontalFrame(DGChannelControl_GF);
-    DGChannelControl_GF->AddFrame(DGChannelControl_HF);
+      // Horizontal frame to hold the "enable" and "pulse polarity" buttons
+      TGHorizontalFrame *DGChannelControl_HF = new TGHorizontalFrame(DGChannelControl_GF);
+      DGChannelControl_GF->AddFrame(DGChannelControl_HF);
     
-    // ROOT check button to enable channel for digitization
-    DGChannelControl_HF->AddFrame(DGChEnable_CB[ch] = new TGCheckButton(DGChannelControl_HF, "Enable", DGChEnable_CB_ID_Vec[ch]),
-				  new TGLayoutHints(kLHintsCenterY,10,0,0,0));
-    if(ch == 0) 
-      DGChEnable_CB[ch]->SetState(kButtonDown);
+      // ROOT check button to enable channel for digitization
+      DGChannelControl_HF->AddFrame(DGChEnable_CB[ch] = new TGCheckButton(DGChannelControl_HF, "Enable", DGChEnable_CB_ID_Vec[ch]),
+				    new TGLayoutHints(kLHintsCenterY,10,0,0,0));
+      if(ch == 0) 
+	DGChEnable_CB[ch]->SetState(kButtonDown);
 
-    // TGLabel for the pulse polarity radio buttons
+      // TGLabel for the pulse polarity radio buttons
 
-    DGChannelControl_HF->AddFrame(new TGLabel(DGChannelControl_HF,"Polarity:"),
-				  new TGLayoutHints(kLHintsCenterY,25,0,5,0));
+      DGChannelControl_HF->AddFrame(new TGLabel(DGChannelControl_HF,"Polarity:"),
+				    new TGLayoutHints(kLHintsCenterY,25,0,5,0));
 
-    TGHButtonGroup *DGChPolarity_BG = new TGHButtonGroup(DGChannelControl_HF, "");
-    DGChPolarity_BG->SetTitlePos(TGButtonGroup::kCenter);
-    DGChPolarity_BG->SetBorderDrawn(false);
-    DGChannelControl_HF->AddFrame(DGChPolarity_BG, new TGLayoutHints(kLHintsNormal,-2,-15,-10,-10));
+      TGHButtonGroup *DGChPolarity_BG = new TGHButtonGroup(DGChannelControl_HF, "");
+      DGChPolarity_BG->SetTitlePos(TGButtonGroup::kCenter);
+      DGChPolarity_BG->SetBorderDrawn(false);
+      DGChannelControl_HF->AddFrame(DGChPolarity_BG, new TGLayoutHints(kLHintsNormal,-2,-15,-10,-10));
 
-    DGChPosPolarity_RB[ch] = new TGRadioButton(DGChPolarity_BG, "+  ", -1);
-    DGChNegPolarity_RB[ch] = new TGRadioButton(DGChPolarity_BG, "-", -1);
-    DGChNegPolarity_RB[ch]->SetState(kButtonDown);
-    DGChPolarity_BG->Show();
+      DGChPosPolarity_RB[ch] = new TGRadioButton(DGChPolarity_BG, "+  ", -1);
+      DGChNegPolarity_RB[ch] = new TGRadioButton(DGChPolarity_BG, "-", -1);
+      DGChNegPolarity_RB[ch]->SetState(kButtonDown);
+      DGChPolarity_BG->Show();
 
-
-
-
-    // ADAQ number entry to set channel's DAC offset 
-    DGChannelControl_GF->AddFrame(DGChDCOffset_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "DC offset (hex)", DGChDCOffset_NEL_ID_Vec[ch]),
-				  new TGLayoutHints(kLHintsNormal, 10,0,0,0));
-    DGChDCOffset_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESHex);
-    DGChDCOffset_NEL[ch]->GetEntry()->SetNumLimits(TGNumberFormat::kNELLimitMinMax);
-    DGChDCOffset_NEL[ch]->GetEntry()->SetLimitValues(0x0000,0xffff);
-    DGChDCOffset_NEL[ch]->GetEntry()->SetNumber(0x8000);
-    DGChDCOffset_NEL[ch]->GetEntry()->Resize(55,20);
+      // ADAQ number entry to set channel's DAC offset [hex : 0x0000 - 0xffff]]
+      DGChannelControl_GF->AddFrame(DGChDCOffset_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "DC offset (hex)", DGChDCOffset_NEL_ID_Vec[ch]),
+				    new TGLayoutHints(kLHintsNormal, 10,0,0,0));
+      DGChDCOffset_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESHex);
+      DGChDCOffset_NEL[ch]->GetEntry()->SetNumLimits(TGNumberFormat::kNELLimitMinMax);
+      DGChDCOffset_NEL[ch]->GetEntry()->SetLimitValues(0x0000,0xffff);
+      DGChDCOffset_NEL[ch]->GetEntry()->SetNumber(0x8000);
+      DGChDCOffset_NEL[ch]->GetEntry()->Resize(55,20);
+      
+      // ADAQ number entry to set channel's trigger threshold [ADC]
+      DGChannelControl_GF->AddFrame(DGChTriggerThreshold_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "Trigger (ADC)", DGChTriggerThreshold_NEL_ID_Vec[ch]),
+				    new TGLayoutHints(kLHintsNormal, 10,0,0,0));
+      DGChTriggerThreshold_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
+      DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+      DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumber(8000);
+      DGChTriggerThreshold_NEL[ch]->GetEntry()->Resize(55,20);
+      
+      DGChannelControl_GF->AddFrame(new TGLabel(DGChannelControl_GF, "Zero Length Encoding (ZLE)"),
+				    new TGLayoutHints(kLHintsLeft,0,0,10,0));
     
-    // ADAQ number entry to set channel's trigger threshold [ADC]
-    DGChannelControl_GF->AddFrame(DGChTriggerThreshold_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "Trigger (ADC)", DGChTriggerThreshold_NEL_ID_Vec[ch]),
-				  new TGLayoutHints(kLHintsNormal, 10,0,0,0));
-    DGChTriggerThreshold_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
-    DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-    DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumber(8000);
-    DGChTriggerThreshold_NEL[ch]->GetEntry()->Resize(55,20);
+      TGHorizontalFrame *ZLE_HF1 = new TGHorizontalFrame(DGChannelControl_GF);
+      DGChannelControl_GF->AddFrame(ZLE_HF1, new TGLayoutHints(kLHintsNormal, 10,0,0,0));
 
+      ZLE_HF1->AddFrame(new TGLabel(ZLE_HF1, "Logic: "),
+			new TGLayoutHints(kLHintsNormal, 0,0,5,0));
     
-    DGChannelControl_GF->AddFrame(new TGLabel(DGChannelControl_GF, "Zero Length Encoding (ZLE)"),
-				  new TGLayoutHints(kLHintsLeft,0,0,10,0));
+      TGHButtonGroup *ZLELogicButtons_BG = new TGHButtonGroup(ZLE_HF1,"");
+      ZLELogicButtons_BG->SetBorderDrawn(false);
+      ZLE_HF1->AddFrame(ZLELogicButtons_BG, new TGLayoutHints(kLHintsNormal, -1,-15,-10,-10));
     
-    TGHorizontalFrame *ZLE_HF1 = new TGHorizontalFrame(DGChannelControl_GF);
-    DGChannelControl_GF->AddFrame(ZLE_HF1, new TGLayoutHints(kLHintsNormal, 10,0,0,0));
-
-    ZLE_HF1->AddFrame(new TGLabel(ZLE_HF1, "Logic: "),
-		      new TGLayoutHints(kLHintsNormal, 0,0,5,0));
+      DGChZLEPosLogic_RB[ch] = new TGRadioButton(ZLELogicButtons_BG, "+  ", -1);
     
-    TGHButtonGroup *ZLELogicButtons_BG = new TGHButtonGroup(ZLE_HF1,"");
-    ZLELogicButtons_BG->SetBorderDrawn(false);
-    ZLE_HF1->AddFrame(ZLELogicButtons_BG, new TGLayoutHints(kLHintsNormal, -1,-15,-10,-10));
-    
-    DGChZLEPosLogic_RB[ch] = new TGRadioButton(ZLELogicButtons_BG, "+  ", -1);
-    
-    DGChZLENegLogic_RB[ch] = new TGRadioButton(ZLELogicButtons_BG, "-", -1);
-    DGChZLENegLogic_RB[ch]->SetState(kButtonDown);
-
-    
-    DGChannelControl_GF->AddFrame(DGChZLEThreshold_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "Threshold (ADC)", -1),
-				  new TGLayoutHints(kLHintsNormal, 10,0,0,0));
-    DGChZLEThreshold_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-    DGChZLEThreshold_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEANonNegative);
-    DGChZLEThreshold_NEL[ch]->GetEntry()->SetNumber(2100);
-    DGChZLEThreshold_NEL[ch]->GetEntry()->Resize(55,20);
-    
-
-    TGHorizontalFrame *ZLE_HF0 = new TGHorizontalFrame(DGChannelControl_GF);
-    DGChannelControl_GF->AddFrame(ZLE_HF0, new TGLayoutHints(kLHintsNormal, 10,0,0,0));
-    
-    ZLE_HF0->AddFrame(DGChZLEForward_NEL[ch] = new ADAQNumberEntryWithLabel(ZLE_HF0, "Frwd", -1),
-		     new TGLayoutHints(kLHintsNormal, 0,0,0,0));
-    DGChZLEForward_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-    DGChZLEForward_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
-    DGChZLEForward_NEL[ch]->GetEntry()->SetNumber(10);
-    DGChZLEForward_NEL[ch]->GetEntry()->Resize(55,20);
-
-    ZLE_HF0->AddFrame(DGChZLEBackward_NEL[ch] = new ADAQNumberEntryWithLabel(ZLE_HF0, "Back", -1),
-		     new TGLayoutHints(kLHintsNormal, 15,0,0,0));
-    DGChZLEBackward_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-    DGChZLEBackward_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
-    DGChZLEBackward_NEL[ch]->GetEntry()->SetNumber(10);
-    DGChZLEBackward_NEL[ch]->GetEntry()->Resize(55,20);
-
+      DGChZLENegLogic_RB[ch] = new TGRadioButton(ZLELogicButtons_BG, "-", -1);
+      DGChZLENegLogic_RB[ch]->SetState(kButtonDown);
 
     
-    ////////////////////////////////////////
-    // Channel-specific analysis settings //
-    ////////////////////////////////////////
-
-    DGChannelControl_GF->AddFrame(new TGLabel(DGChannelControl_GF, "Baseline analysis (abs. sample)"),
-				  new TGLayoutHints(kLHintsLeft,0,0,10,5));
+      DGChannelControl_GF->AddFrame(DGChZLEThreshold_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "Threshold (ADC)", -1),
+				    new TGLayoutHints(kLHintsNormal, 10,0,0,0));
+      DGChZLEThreshold_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+      DGChZLEThreshold_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEANonNegative);
+      DGChZLEThreshold_NEL[ch]->GetEntry()->SetNumber(2100);
+      DGChZLEThreshold_NEL[ch]->GetEntry()->Resize(55,20);
     
-    TGHorizontalFrame *DGBaseline_HF = new TGHorizontalFrame(DGChannelControl_GF);
-    DGChannelControl_GF->AddFrame(DGBaseline_HF, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
-    
-    // ADAQ number entry to set minimum sample for baseline calculation [sample]
-    DGBaseline_HF->AddFrame(DGChBaselineCalcMin_NEL[ch] = new ADAQNumberEntryWithLabel(DGBaseline_HF, "Min.", DGChBaselineCalcMin_NEL_ID_Vec[ch]),
-			    new TGLayoutHints(kLHintsNormal, 10,0,0,0));
-    DGChBaselineCalcMin_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
-    
-    DGChBaselineCalcMin_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-    DGChBaselineCalcMin_NEL[ch]->GetEntry()->SetNumber(0);
-    DGChBaselineCalcMin_NEL[ch]->GetEntry()->Resize(55,20);
 
-    // ADAQ number entry to set maximum sample for baseline calculation [sample]
-    DGBaseline_HF->AddFrame(DGChBaselineCalcMax_NEL[ch] = new ADAQNumberEntryWithLabel(DGBaseline_HF, "Max.", DGChBaselineCalcMax_NEL_ID_Vec[ch]),
-			    new TGLayoutHints(kLHintsNormal, 15,0.0,0));
-    DGChBaselineCalcMax_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-    DGChBaselineCalcMax_NEL[ch]->GetEntry()->SetNumber(30);
-    DGChBaselineCalcMax_NEL[ch]->GetEntry()->Resize(55,20);
-
-
-    DGChannelControl_GF->AddFrame(new TGLabel(DGChannelControl_GF, "PSD analysis (sample rel. to peak)"),
-				  new TGLayoutHints(kLHintsLeft,0,0,10,5));
+      TGHorizontalFrame *ZLE_HF0 = new TGHorizontalFrame(DGChannelControl_GF);
+      DGChannelControl_GF->AddFrame(ZLE_HF0, new TGLayoutHints(kLHintsNormal, 10,0,0,0));
     
-    TGHorizontalFrame *DGPSDTotal_HF = new TGHorizontalFrame(DGChannelControl_GF);
-    DGChannelControl_GF->AddFrame(DGPSDTotal_HF, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+      ZLE_HF0->AddFrame(DGChZLEForward_NEL[ch] = new ADAQNumberEntryWithLabel(ZLE_HF0, "Frwd", -1),
+			new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+      DGChZLEForward_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+      DGChZLEForward_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+      DGChZLEForward_NEL[ch]->GetEntry()->SetNumber(10);
+      DGChZLEForward_NEL[ch]->GetEntry()->Resize(55,20);
 
-    DGPSDTotal_HF->AddFrame(new TGLabel(DGPSDTotal_HF, "Total: "),
-			    new TGLayoutHints(kLHintsLeft,10,0,5,0));
+      ZLE_HF0->AddFrame(DGChZLEBackward_NEL[ch] = new ADAQNumberEntryWithLabel(ZLE_HF0, "Back", -1),
+			new TGLayoutHints(kLHintsNormal, 15,0,0,0));
+      DGChZLEBackward_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+      DGChZLEBackward_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+      DGChZLEBackward_NEL[ch]->GetEntry()->SetNumber(10);
+      DGChZLEBackward_NEL[ch]->GetEntry()->Resize(55,20);
+
+
     
-    DGPSDTotal_HF->AddFrame(DGChPSDTotalStart_NEL[ch] = new ADAQNumberEntryWithLabel(DGPSDTotal_HF,
+      ////////////////////////////////////////
+      // Channel-specific analysis settings //
+      ////////////////////////////////////////
+
+      DGChannelControl_GF->AddFrame(new TGLabel(DGChannelControl_GF, "Baseline analysis (abs. sample)"),
+				    new TGLayoutHints(kLHintsLeft,0,0,10,5));
+    
+      TGHorizontalFrame *DGBaseline_HF = new TGHorizontalFrame(DGChannelControl_GF);
+      DGChannelControl_GF->AddFrame(DGBaseline_HF, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+    
+      // ADAQ number entry to set minimum sample for baseline calculation [sample]
+      DGBaseline_HF->AddFrame(DGChBaselineCalcMin_NEL[ch] = new ADAQNumberEntryWithLabel(DGBaseline_HF, "Min.", DGChBaselineCalcMin_NEL_ID_Vec[ch]),
+			      new TGLayoutHints(kLHintsNormal, 10,0,0,0));
+      DGChBaselineCalcMin_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
+    
+      DGChBaselineCalcMin_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+      DGChBaselineCalcMin_NEL[ch]->GetEntry()->SetNumber(0);
+      DGChBaselineCalcMin_NEL[ch]->GetEntry()->Resize(55,20);
+
+      // ADAQ number entry to set maximum sample for baseline calculation [sample]
+      DGBaseline_HF->AddFrame(DGChBaselineCalcMax_NEL[ch] = new ADAQNumberEntryWithLabel(DGBaseline_HF, "Max.", DGChBaselineCalcMax_NEL_ID_Vec[ch]),
+			      new TGLayoutHints(kLHintsNormal, 15,0.0,0));
+      DGChBaselineCalcMax_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+      DGChBaselineCalcMax_NEL[ch]->GetEntry()->SetNumber(30);
+      DGChBaselineCalcMax_NEL[ch]->GetEntry()->Resize(55,20);
+
+
+      DGChannelControl_GF->AddFrame(new TGLabel(DGChannelControl_GF, "PSD analysis (sample rel. to peak)"),
+				    new TGLayoutHints(kLHintsLeft,0,0,10,5));
+    
+      TGHorizontalFrame *DGPSDTotal_HF = new TGHorizontalFrame(DGChannelControl_GF);
+      DGChannelControl_GF->AddFrame(DGPSDTotal_HF, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+
+      DGPSDTotal_HF->AddFrame(new TGLabel(DGPSDTotal_HF, "Total: "),
+			      new TGLayoutHints(kLHintsLeft,10,0,5,0));
+    
+      DGPSDTotal_HF->AddFrame(DGChPSDTotalStart_NEL[ch] = new ADAQNumberEntryWithLabel(DGPSDTotal_HF,
+										       "Start",
+										       -1),
+			      new TGLayoutHints(kLHintsNormal, 0,10,0,0));
+      DGChPSDTotalStart_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+      DGChPSDTotalStart_NEL[ch]->GetEntry()->SetNumber(-10);
+      DGChPSDTotalStart_NEL[ch]->GetEntry()->Resize(45,20);
+    
+    
+      DGPSDTotal_HF->AddFrame(DGChPSDTotalStop_NEL[ch] = new ADAQNumberEntryWithLabel(DGPSDTotal_HF,
+										      "Stop",
+										      -1),
+			      new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+      DGChPSDTotalStop_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+      DGChPSDTotalStop_NEL[ch]->GetEntry()->SetNumber(39);
+      DGChPSDTotalStop_NEL[ch]->GetEntry()->Resize(45,20);
+
+
+      TGHorizontalFrame *DGPSDTail_HF = new TGHorizontalFrame(DGChannelControl_GF);
+      DGChannelControl_GF->AddFrame(DGPSDTail_HF, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+    
+      DGPSDTail_HF->AddFrame(new TGLabel(DGPSDTail_HF, "Tail:  "),
+			     new TGLayoutHints(kLHintsLeft,10,0,5,0));
+   
+      DGPSDTail_HF->AddFrame(DGChPSDTailStart_NEL[ch] = new ADAQNumberEntryWithLabel(DGPSDTail_HF,
 										     "Start",
 										     -1),
-			    new TGLayoutHints(kLHintsNormal, 0,10,0,0));
-    DGChPSDTotalStart_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-    DGChPSDTotalStart_NEL[ch]->GetEntry()->SetNumber(-10);
-    DGChPSDTotalStart_NEL[ch]->GetEntry()->Resize(45,20);
+			     new TGLayoutHints(kLHintsNormal, 0,10,0,0));
+      DGChPSDTailStart_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+      DGChPSDTailStart_NEL[ch]->GetEntry()->SetNumber(7);
+      DGChPSDTailStart_NEL[ch]->GetEntry()->Resize(45,20);
     
     
-    DGPSDTotal_HF->AddFrame(DGChPSDTotalStop_NEL[ch] = new ADAQNumberEntryWithLabel(DGPSDTotal_HF,
+      DGPSDTail_HF->AddFrame(DGChPSDTailStop_NEL[ch] = new ADAQNumberEntryWithLabel(DGPSDTail_HF,
 										    "Stop",
 										    -1),
-			    new TGLayoutHints(kLHintsNormal, 0,0,0,0));
-    DGChPSDTotalStop_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-    DGChPSDTotalStop_NEL[ch]->GetEntry()->SetNumber(39);
-    DGChPSDTotalStop_NEL[ch]->GetEntry()->Resize(45,20);
+			     new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+      DGChPSDTailStop_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+      DGChPSDTailStop_NEL[ch]->GetEntry()->SetNumber(39);
+      DGChPSDTailStop_NEL[ch]->GetEntry()->Resize(45,20);
+    }
+    else if(DGDPPPSDFW_RB->IsDown()){
 
 
-    TGHorizontalFrame *DGPSDTail_HF = new TGHorizontalFrame(DGChannelControl_GF);
-    DGChannelControl_GF->AddFrame(DGPSDTail_HF, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+      DGChannelControl_GF->AddFrame(new TGLabel(DGChannelControl_GF, "Acquisition settings"),
+				    new TGLayoutHints(kLHintsLeft,0,0,5,0));
     
-    DGPSDTail_HF->AddFrame(new TGLabel(DGPSDTail_HF, "Tail:  "),
-			   new TGLayoutHints(kLHintsLeft,10,0,5,0));
-   
-    DGPSDTail_HF->AddFrame(DGChPSDTailStart_NEL[ch] = new ADAQNumberEntryWithLabel(DGPSDTail_HF,
-										   "Start",
-										   -1),
-			   new TGLayoutHints(kLHintsNormal, 0,10,0,0));
-    DGChPSDTailStart_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-    DGChPSDTailStart_NEL[ch]->GetEntry()->SetNumber(7);
-    DGChPSDTailStart_NEL[ch]->GetEntry()->Resize(45,20);
+      // Horizontal frame to hold the "enable" and "pulse polarity" buttons
+      TGHorizontalFrame *DGChannelControl_HF = new TGHorizontalFrame(DGChannelControl_GF);
+      DGChannelControl_GF->AddFrame(DGChannelControl_HF);
     
-    
-    DGPSDTail_HF->AddFrame(DGChPSDTailStop_NEL[ch] = new ADAQNumberEntryWithLabel(DGPSDTail_HF,
-										  "Stop",
-										  -1),
-			   new TGLayoutHints(kLHintsNormal, 0,0,0,0));
-    DGChPSDTailStop_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-    DGChPSDTailStop_NEL[ch]->GetEntry()->SetNumber(39);
-    DGChPSDTailStop_NEL[ch]->GetEntry()->Resize(45,20);
-    
+      // ROOT check button to enable channel for digitization
+      DGChannelControl_HF->AddFrame(DGChEnable_CB[ch] = new TGCheckButton(DGChannelControl_HF, "Enable", DGChEnable_CB_ID_Vec[ch]),
+				    new TGLayoutHints(kLHintsCenterY,10,0,0,0));
+      if(ch == 0) 
+	DGChEnable_CB[ch]->SetState(kButtonDown);
+
+      // TGLabel for the pulse polarity radio buttons
+
+      DGChannelControl_HF->AddFrame(new TGLabel(DGChannelControl_HF,"Polarity:"),
+				    new TGLayoutHints(kLHintsCenterY,25,0,5,0));
+
+      TGHButtonGroup *DGChPolarity_BG = new TGHButtonGroup(DGChannelControl_HF, "");
+      DGChPolarity_BG->SetTitlePos(TGButtonGroup::kCenter);
+      DGChPolarity_BG->SetBorderDrawn(false);
+      DGChannelControl_HF->AddFrame(DGChPolarity_BG, new TGLayoutHints(kLHintsNormal,-2,-15,-10,-10));
+
+      DGChPosPolarity_RB[ch] = new TGRadioButton(DGChPolarity_BG, "+  ", -1);
+      DGChNegPolarity_RB[ch] = new TGRadioButton(DGChPolarity_BG, "-", -1);
+      DGChNegPolarity_RB[ch]->SetState(kButtonDown);
+      DGChPolarity_BG->Show();
+
+      // ADAQ number entry to set channel's DAC offset [hex : 0x0000 - 0xffff]]
+      DGChannelControl_GF->AddFrame(DGChDCOffset_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "DC offset (hex)", DGChDCOffset_NEL_ID_Vec[ch]),
+				    new TGLayoutHints(kLHintsNormal, 10,0,0,0));
+      DGChDCOffset_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESHex);
+      DGChDCOffset_NEL[ch]->GetEntry()->SetNumLimits(TGNumberFormat::kNELLimitMinMax);
+      DGChDCOffset_NEL[ch]->GetEntry()->SetLimitValues(0x0000,0xffff);
+      DGChDCOffset_NEL[ch]->GetEntry()->SetNumber(0x8000);
+      DGChDCOffset_NEL[ch]->GetEntry()->Resize(55,20);
+      
+      DGChannelControl_GF->AddFrame(DGChRecordLength_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF,
+											    "Record length (samples)",
+											    -1),
+				    new TGLayoutHints(kLHintsLeft,10,0,0,0));
+      DGChRecordLength_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+      DGChRecordLength_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+      DGChRecordLength_NEL[ch]->GetEntry()->Resize(55,20);
+      DGChRecordLength_NEL[ch]->GetEntry()->SetNumber(200);
+
+      DGChannelControl_GF->AddFrame(DGChBaselineCalc_CBL[ch] = new ADAQComboBoxWithLabel(DGChannelControl_GF, "Baseline (samples)", -1),
+				    new TGLayoutHints(kLHintsLeft, 10,0,0,0));
+      for(Int_t i=0; i<8; i++){
+	stringstream SS;
+	SS << pow(2,i);
+	TString Entry = SS.str();
+		
+	DGChBaselineCalc_CBL[ch]->GetComboBox()->AddEntry(Entry,pow(2,i));
+      }
+      DGChBaselineCalc_CBL[ch]->GetComboBox()->Resize(57,20);
+      DGChBaselineCalc_CBL[ch]->GetComboBox()->Select(4);
+
+      DGChannelControl_GF->AddFrame(DGChChargeSens_CBL[ch] = new ADAQComboBoxWithLabel(DGChannelControl_GF, "Charge sensitivity", -1),
+				    new TGLayoutHints(kLHintsLeft, 10,0,0,0));
+      DGChChargeSens_CBL[ch]->GetComboBox()->AddEntry("Min",0);
+      DGChChargeSens_CBL[ch]->GetComboBox()->AddEntry("Low",1);
+      DGChChargeSens_CBL[ch]->GetComboBox()->AddEntry("High",2);
+      DGChChargeSens_CBL[ch]->GetComboBox()->AddEntry("Max",3);
+      DGChChargeSens_CBL[ch]->GetComboBox()->Resize(57,20);
+      DGChChargeSens_CBL[ch]->GetComboBox()->Select(0);
+
+      DGChannelControl_GF->AddFrame(DGChPSDCut_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF,
+										      "PSD readout cut",
+										      -1),
+				    new TGLayoutHints(kLHintsLeft,10,0,0,0));
+      DGChPSDCut_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+      DGChPSDCut_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+      DGChPSDCut_NEL[ch]->GetEntry()->Resize(55,20);
+      DGChPSDCut_NEL[ch]->GetEntry()->SetNumber(200);
+
+      
+      DGChannelControl_GF->AddFrame(new TGLabel(DGChannelControl_GF, "Trigger settings"),
+				    new TGLayoutHints(kLHintsLeft,0,0,10,5));
+      
+      TGHorizontalFrame *Trigger_HF0 = new TGHorizontalFrame(DGChannelControl_GF);
+      DGChannelControl_GF->AddFrame(Trigger_HF0, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+      
+      // ADAQ number entry to set channel's trigger threshold [ADC]
+      Trigger_HF0->AddFrame(DGChTriggerThreshold_NEL[ch] = new ADAQNumberEntryWithLabel(Trigger_HF0, "Level (ADC)", DGChTriggerThreshold_NEL_ID_Vec[ch]),
+			    new TGLayoutHints(kLHintsNormal, 10,0,0,0));
+      DGChTriggerThreshold_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
+      DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+      DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumber(8000);
+      DGChTriggerThreshold_NEL[ch]->GetEntry()->Resize(55,20);
+      
+      Trigger_HF0->AddFrame(DGChTrigConfig_CBL[ch] = new ADAQComboBoxWithLabel(Trigger_HF0, "Type", -1),
+			    new TGLayoutHints(kLHintsLeft, 5,0,0,0));
+      DGChTrigConfig_CBL[ch]->GetComboBox()->AddEntry("Peak",0);
+      DGChTrigConfig_CBL[ch]->GetComboBox()->AddEntry("Threshold",1);
+      DGChTrigConfig_CBL[ch]->GetComboBox()->Resize(80,20);
+      DGChTrigConfig_CBL[ch]->GetComboBox()->Select(1);
+
+
+      DGChannelControl_GF->AddFrame(DGChTrigValidation_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "Validation window (samples)", -1),
+			       new TGLayoutHints(kLHintsNormal, 10,0,0,0));
+      DGChTrigValidation_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
+      DGChTrigValidation_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+      DGChTrigValidation_NEL[ch]->GetEntry()->SetNumber(8000);
+      DGChTrigValidation_NEL[ch]->GetEntry()->Resize(55,20);
+      
+      // PSD integral (gate) settings
+
+      DGChannelControl_GF->AddFrame(new TGLabel(DGChannelControl_GF, "PSD integral settings (samples)"),
+				    new TGLayoutHints(kLHintsLeft,0,0,10,5));
+
+      TGHorizontalFrame *PSD_HF0 = new TGHorizontalFrame(DGChannelControl_GF);
+      DGChannelControl_GF->AddFrame(PSD_HF0, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+      
+      PSD_HF0->AddFrame(DGChShortGate_NEL[ch] = new ADAQNumberEntryWithLabel(PSD_HF0,
+									     "Short  ",
+									     -1),
+			new TGLayoutHints(kLHintsLeft,10,0,0,0));
+      DGChShortGate_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+      DGChShortGate_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+      DGChShortGate_NEL[ch]->GetEntry()->Resize(45,20);
+      DGChShortGate_NEL[ch]->GetEntry()->SetNumber(200);
+      
+      PSD_HF0->AddFrame(DGChLongGate_NEL[ch] = new ADAQNumberEntryWithLabel(PSD_HF0,
+									    "Long",
+									    -1),
+			new TGLayoutHints(kLHintsLeft,10,0,0,0));
+      DGChLongGate_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+      DGChLongGate_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+      DGChLongGate_NEL[ch]->GetEntry()->Resize(45,20);
+      DGChLongGate_NEL[ch]->GetEntry()->SetNumber(200);
+
+      TGHorizontalFrame *PSD_HF1 = new TGHorizontalFrame(DGChannelControl_GF);
+      DGChannelControl_GF->AddFrame(PSD_HF1, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+
+      PSD_HF1->AddFrame(DGChPreGate_NEL[ch] = new ADAQNumberEntryWithLabel(PSD_HF1,
+									   "Pregate",
+									   -1),
+			new TGLayoutHints(kLHintsLeft,10,0,0,0));
+      DGChPreGate_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+      DGChPreGate_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+      DGChPreGate_NEL[ch]->GetEntry()->Resize(45,20);
+      DGChPreGate_NEL[ch]->GetEntry()->SetNumber(200);
+      
+      
+      PSD_HF1->AddFrame(DGChGateOffset_NEL[ch] = new ADAQNumberEntryWithLabel(PSD_HF1,
+									      "Gate offset",
+									      -1),
+			new TGLayoutHints(kLHintsLeft,10,0,0,0));
+      DGChGateOffset_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+      DGChGateOffset_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+      DGChGateOffset_NEL[ch]->GetEntry()->Resize(45,20);
+      DGChGateOffset_NEL[ch]->GetEntry()->SetNumber(200);
+    }
   }
   
 
@@ -1275,22 +1435,33 @@ void AAInterface::FillAcquisitionFrame()
   DGAcquisitionControl_CBL->GetComboBox()->AddEntry("Gated (TTL)",2);
   DGAcquisitionControl_CBL->GetComboBox()->Select(0);
   
-  
-  // ADAQ number entry specifying number of samples
-  DGAcquisitionControl_GF->AddFrame(DGRecordLength_NEL = new ADAQNumberEntryWithLabel(DGAcquisitionControl_GF, "Record length (#)", DGRecordLength_NEL_ID),
-				    new TGLayoutHints(kLHintsNormal,5,5,5,0));
-  DGRecordLength_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-  DGRecordLength_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
-  DGRecordLength_NEL->GetEntry()->SetNumber(1000);
-  
-  // ADAQ number entry specifying the percentage of the acquisition
-  // window that is behind (or after) the triggern (all channels)
-  DGAcquisitionControl_GF->AddFrame(DGPostTrigger_NEL = new ADAQNumberEntryWithLabel(DGAcquisitionControl_GF, "Post trigger (%)", DGPostTriggerSize_NEL_ID),
-					  new TGLayoutHints(kLHintsNormal,5,5,0,5));
-  DGPostTrigger_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-  DGPostTrigger_NEL->GetEntry()->SetNumLimits(TGNumberFormat::kNELLimitMinMax);
-  DGPostTrigger_NEL->GetEntry()->SetLimitValues(0,100);
-  DGPostTrigger_NEL->GetEntry()->SetNumber(50);
+  if(DGStandardFW_RB->IsDown()){
+    
+    // ADAQ number entry specifying number of samples
+    DGAcquisitionControl_GF->AddFrame(DGRecordLength_NEL = new ADAQNumberEntryWithLabel(DGAcquisitionControl_GF, "Record length (#)", DGRecordLength_NEL_ID),
+				      new TGLayoutHints(kLHintsNormal,5,5,5,0));
+    DGRecordLength_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+    DGRecordLength_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+    DGRecordLength_NEL->GetEntry()->SetNumber(1000);
+    
+    // ADAQ number entry specifying the percentage of the acquisition
+    // window that is behind (or after) the triggern (all channels)
+    DGAcquisitionControl_GF->AddFrame(DGPostTrigger_NEL = new ADAQNumberEntryWithLabel(DGAcquisitionControl_GF, "Post trigger (%)", DGPostTriggerSize_NEL_ID),
+				      new TGLayoutHints(kLHintsNormal,5,5,0,5));
+    DGPostTrigger_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+    DGPostTrigger_NEL->GetEntry()->SetNumLimits(TGNumberFormat::kNELLimitMinMax);
+    DGPostTrigger_NEL->GetEntry()->SetLimitValues(0,100);
+    DGPostTrigger_NEL->GetEntry()->SetNumber(50);
+  }
+  else if(DGDPPPSDFW_RB->IsDown()){
+    
+    DGAcquisitionControl_GF->AddFrame(DGDPPPSDMode_CBL = new ADAQComboBoxWithLabel(DGAcquisitionControl_GF, "PSD Mode", -1),
+				      new TGLayoutHints(kLHintsNormal,5,5,5,5));
+    DGDPPPSDMode_CBL->GetComboBox()->AddEntry("Waveform", 0);
+    DGDPPPSDMode_CBL->GetComboBox()->AddEntry("List", 1);
+    DGDPPPSDMode_CBL->GetComboBox()->AddEntry("Mixed", 2);
+    DGDPPPSDMode_CBL->GetComboBox()->Select(0);
+  }
   
   DGAcquisitionControl_GF->AddFrame(AQTime_NEL = new ADAQNumberEntryWithLabel(DGAcquisitionControl_GF, "Acquisition time (s)", AQTime_NEL_ID),
 					  new TGLayoutHints(kLHintsNormal,5,5,5,0));
@@ -2063,17 +2234,21 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
     DGChNegPolarity_RB[ch]->SetState(ButtonState);
     DGChDCOffset_NEL[ch]->GetEntry()->SetState(WidgetState);
     DGChTriggerThreshold_NEL[ch]->GetEntry()->SetState(WidgetState);
-    DGChBaselineCalcMin_NEL[ch]->GetEntry()->SetState(WidgetState);
-    DGChBaselineCalcMax_NEL[ch]->GetEntry()->SetState(WidgetState);
-    DGChZLEThreshold_NEL[ch]->GetEntry()->SetState(WidgetState);
-    DGChZLEBackward_NEL[ch]->GetEntry()->SetState(WidgetState);
-    DGChZLEForward_NEL[ch]->GetEntry()->SetState(WidgetState);
-    DGChZLEPosLogic_RB[ch]->SetState(ButtonState);
-    DGChZLENegLogic_RB[ch]->SetState(ButtonState);
-    DGChPSDTotalStart_NEL[ch]->GetEntry()->SetState(WidgetState);
-    DGChPSDTotalStop_NEL[ch]->GetEntry()->SetState(WidgetState);
-    DGChPSDTailStart_NEL[ch]->GetEntry()->SetState(WidgetState);
-    DGChPSDTailStop_NEL[ch]->GetEntry()->SetState(WidgetState);
+    if(DGStandardFW_RB->IsDown()){
+      DGChZLEThreshold_NEL[ch]->GetEntry()->SetState(WidgetState);
+      DGChZLEBackward_NEL[ch]->GetEntry()->SetState(WidgetState);
+      DGChZLEForward_NEL[ch]->GetEntry()->SetState(WidgetState);
+      DGChZLEPosLogic_RB[ch]->SetState(ButtonState);
+      DGChZLENegLogic_RB[ch]->SetState(ButtonState);
+      DGChBaselineCalcMin_NEL[ch]->GetEntry()->SetState(WidgetState);
+      DGChBaselineCalcMax_NEL[ch]->GetEntry()->SetState(WidgetState);
+      DGChPSDTotalStart_NEL[ch]->GetEntry()->SetState(WidgetState);
+      DGChPSDTotalStop_NEL[ch]->GetEntry()->SetState(WidgetState);
+      DGChPSDTailStart_NEL[ch]->GetEntry()->SetState(WidgetState);
+      DGChPSDTailStop_NEL[ch]->GetEntry()->SetState(WidgetState);
+    }
+    else if(DGDPPPSDFW_RB->IsDown()){
+    }
   }
 
   AQWaveform_RB->SetEnabled(WidgetState);
@@ -2189,18 +2364,21 @@ void AAInterface::SaveSettings()
     TheSettings->ChNegPolarity[ch] = DGChNegPolarity_RB[ch]->IsDown();
     TheSettings->ChDCOffset[ch] = DGChDCOffset_NEL[ch]->GetEntry()->GetHexNumber();
     TheSettings->ChTriggerThreshold[ch] = DGChTriggerThreshold_NEL[ch]->GetEntry()->GetIntNumber();
-    TheSettings->ChZLEThreshold[ch] = DGChZLEThreshold_NEL[ch]->GetEntry()->GetIntNumber();
-    TheSettings->ChZLEForward[ch] = DGChZLEForward_NEL[ch]->GetEntry()->GetIntNumber();
-    TheSettings->ChZLEBackward[ch] = DGChZLEBackward_NEL[ch]->GetEntry()->GetIntNumber();
-    TheSettings->ChZLEPosLogic[ch] = DGChZLEPosLogic_RB[ch]->IsDown();
-    TheSettings->ChZLENegLogic[ch] = DGChZLENegLogic_RB[ch]->IsDown();
-
-    TheSettings->ChBaselineCalcMin[ch] = DGChBaselineCalcMin_NEL[ch]->GetEntry()->GetIntNumber();
-    TheSettings->ChBaselineCalcMax[ch] = DGChBaselineCalcMax_NEL[ch]->GetEntry()->GetIntNumber();
-    TheSettings->ChPSDTotalStart[ch] = DGChPSDTotalStart_NEL[ch]->GetEntry()->GetIntNumber();
-    TheSettings->ChPSDTotalStop[ch] = DGChPSDTotalStop_NEL[ch]->GetEntry()->GetIntNumber();
-    TheSettings->ChPSDTailStart[ch] = DGChPSDTailStart_NEL[ch]->GetEntry()->GetIntNumber();
-    TheSettings->ChPSDTailStop[ch] = DGChPSDTailStop_NEL[ch]->GetEntry()->GetIntNumber();
+    if(DGStandardFW_RB->IsDown()){
+      TheSettings->ChZLEThreshold[ch] = DGChZLEThreshold_NEL[ch]->GetEntry()->GetIntNumber();
+      TheSettings->ChZLEForward[ch] = DGChZLEForward_NEL[ch]->GetEntry()->GetIntNumber();
+      TheSettings->ChZLEBackward[ch] = DGChZLEBackward_NEL[ch]->GetEntry()->GetIntNumber();
+      TheSettings->ChZLEPosLogic[ch] = DGChZLEPosLogic_RB[ch]->IsDown();
+      TheSettings->ChZLENegLogic[ch] = DGChZLENegLogic_RB[ch]->IsDown();
+      TheSettings->ChBaselineCalcMin[ch] = DGChBaselineCalcMin_NEL[ch]->GetEntry()->GetIntNumber();
+      TheSettings->ChBaselineCalcMax[ch] = DGChBaselineCalcMax_NEL[ch]->GetEntry()->GetIntNumber();
+      TheSettings->ChPSDTotalStart[ch] = DGChPSDTotalStart_NEL[ch]->GetEntry()->GetIntNumber();
+      TheSettings->ChPSDTotalStop[ch] = DGChPSDTotalStop_NEL[ch]->GetEntry()->GetIntNumber();
+      TheSettings->ChPSDTailStart[ch] = DGChPSDTailStart_NEL[ch]->GetEntry()->GetIntNumber();
+      TheSettings->ChPSDTailStop[ch] = DGChPSDTailStop_NEL[ch]->GetEntry()->GetIntNumber();
+    }
+    else if(DGDPPPSDFW_RB->IsDown()){
+    }
   }
   
   TheSettings->HorizontalSliderPtr = DisplayHorizontalScale_THS->GetPointerPosition();
@@ -2348,8 +2526,12 @@ void AAInterface::SaveSettings()
       TheSettings->ChEnable[ch] = DGChEnable_CB[ch]->IsDisabledAndSelected();
       TheSettings->ChPosPolarity[ch] = DGChPosPolarity_RB[ch]->IsDisabledAndSelected();
       TheSettings->ChNegPolarity[ch] = DGChNegPolarity_RB[ch]->IsDisabledAndSelected();
-      TheSettings->ChZLEPosLogic[ch] = DGChZLEPosLogic_RB[ch]->IsDisabledAndSelected();
-      TheSettings->ChZLENegLogic[ch] = DGChZLENegLogic_RB[ch]->IsDisabledAndSelected();
+      if(DGStandardFW_RB->IsDown()){
+	TheSettings->ChZLEPosLogic[ch] = DGChZLEPosLogic_RB[ch]->IsDisabledAndSelected();
+	TheSettings->ChZLENegLogic[ch] = DGChZLENegLogic_RB[ch]->IsDisabledAndSelected();
+      }
+      else if(DGDPPPSDFW_RB->IsDown()){
+      }
     }
     
     TheSettings->WaveformMode = AQWaveform_RB->IsDisabledAndSelected();
