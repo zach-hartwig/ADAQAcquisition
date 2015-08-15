@@ -18,18 +18,6 @@
 
 #include "AAVMEManager.hh"
 
-typedef struct
-{
-  CAEN_DGTZ_ConnectionType LinkType;
-  uint32_t VMEBaseAddress;
-  uint32_t RecordLength;
-  uint32_t ChannelMask;
-  int EventAggr;
-  CAEN_DGTZ_PulsePolarity_t PulsePolarity;
-  CAEN_DGTZ_DPP_AcqMode_t AcqMode;
-  CAEN_DGTZ_IOLevel_t IOlev;
-} DigitizerParams_t;
-
 
 AAVMEManager *AAVMEManager::TheVMEManager = 0;
 

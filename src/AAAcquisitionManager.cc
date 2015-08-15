@@ -110,6 +110,24 @@ void AAAcquisitionManager::PrepareAcquisition()
   UseSTDFirmware = TheSettings->STDFirmware;
   UsePSDFirmware = TheSettings->PSDFirmware;
 
+  switch(TheSettings->PSDOperationMode){
+
+  case CAEN_DGTZ_DPP_ACQ_MODE_List:
+    UsePSDListMode = true;
+    UsePSDWaveformMode = false;
+    break;
+
+  case CAEN_DGTZ_DPP_ACQ_MODE_Oscilloscope:
+    UsePSDListMode = false;
+    UsePSDWaveformMode = true;
+    break;
+
+  case CAEN_DGTZ_DPP_ACQ_MODE_Mixed:
+    UsePSDListMode = true;
+    UsePSDWaveformMode = true;
+    break;
+  }
+
   ////////////////////////////////////////////////////
   // Initialize general member data for acquisition //
   ////////////////////////////////////////////////////
@@ -120,64 +138,72 @@ void AAAcquisitionManager::PrepareAcquisition()
   AcquisitionTimeNow = 0;
   AcquisitionTimePrev = 0;
 
-  if(UseSTDFirmware){
-    
-    ///////////////////////
-    // Baseline calculation
-    
-    for(Int_t ch=0; ch<NumDGChannels; ch++){
-      BaselineStart[ch] = TheSettings->ChBaselineCalcMin[ch];
-      BaselineStop[ch] = TheSettings->ChBaselineCalcMax[ch];
-      BaselineLength[ch] = BaselineStop[ch] - BaselineStart[ch];
-      BaselineValue[ch] = 0.;
-      
+  ///////////////////////
+  // Baseline calculation
+  
+  for(Int_t ch=0; ch<NumDGChannels; ch++){
+
+      if(UseSTDFirmware){
+	BaselineStart[ch] = TheSettings->ChBaselineCalcMin[ch];
+	BaselineStop[ch] = TheSettings->ChBaselineCalcMax[ch];
+	BaselineLength[ch] = BaselineStop[ch] - BaselineStart[ch];
+	BaselineValue[ch] = 0.;
+      }
+      else if(UsePSDFirmware){
+	BaselineStart[ch] = 0;
+	BaselineStop[ch] = 30;
+	BaselineLength[ch] = BaselineStop[ch] - BaselineStart[ch];
+	BaselineValue[ch] = 0.;
+      }
+
       if(TheSettings->ChPosPolarity[ch])
 	Polarity[ch] = 1.;
       else
 	Polarity[ch] = -1.;
-    }
-  
-    ///////////////////
-    // Waveform readout
-    
-    // Zero suppression waveforms: All channels (outer vector) are
-    // preallocated; the waveform vector (inner vector) memory is *not
-    // preallocated* since length of the waveform is unknown a priori
-    if(TheSettings->ZeroSuppressionEnable){
-      Waveforms.clear();
-      Waveforms.resize(NumDGChannels);
-    }
-    
-    // Raw and data reduction waveforms : All digitizer channels (outer
-    // vector) are preallocated; the waveform vector (inner vector)
-    // memory *is preallocated* since each channel has fixed size
-    else{
-      
-      WaveformLength = TheSettings->RecordLength;
-      
-      if(TheSettings->DataReductionEnable)
-	WaveformLength /= TheSettings->DataReductionFactor;
-      
-      Waveforms.clear();
-      Waveforms.resize(NumDGChannels);
-      
-      for(Int_t ch=0; ch<NumDGChannels; ch++){
-	if(TheSettings->ChEnable[ch])
-	  Waveforms[ch].resize(WaveformLength);
-	else
-	  Waveforms[ch].resize(0);
-      }
-    }
-    
-    WaveformData.clear();
-    for(Int_t ch=0; ch<NumDGChannels; ch++)
-      WaveformData.push_back(new ADAQWaveformData);
   }
-  else if(UsePSDFirmware){
+
+    
+  ///////////////////
+  // Waveform readout
+  
+  // Zero suppression waveforms: All channels (outer vector) are
+  // preallocated; the waveform vector (inner vector) memory is *not
+  // preallocated* since length of the waveform is unknown a priori
+  if(TheSettings->ZeroSuppressionEnable){
     Waveforms.clear();
     Waveforms.resize(NumDGChannels);
   }
+  
+  // Raw and data reduction waveforms : All digitizer channels (outer
+  // vector) are preallocated; the waveform vector (inner vector)
+  // memory *is preallocated* since each channel has fixed size
+  else{
 
+    Waveforms.clear();
+    Waveforms.resize(NumDGChannels);
+
+    if(UseSTDFirmware){
+      WaveformLength = TheSettings->RecordLength;
+      if(TheSettings->DataReductionEnable)
+	WaveformLength /= TheSettings->DataReductionFactor;
+    }
+    
+    for(Int_t ch=0; ch<NumDGChannels; ch++){
+      if(TheSettings->ChEnable[ch]){
+	if(UseSTDFirmware)
+	  Waveforms[ch].resize(WaveformLength);
+	else if(UsePSDFirmware)
+	  Waveforms[ch].resize(TheSettings->ChRecordLength[ch]);
+      }
+      else
+	Waveforms[ch].resize(0);
+    }
+  }
+  
+  WaveformData.clear();
+  for(Int_t ch=0; ch<NumDGChannels; ch++)
+    WaveformData.push_back(new ADAQWaveformData);
+  
   
   /////////////////////////
   // Pulse spectra creation
@@ -234,7 +260,7 @@ void AAAcquisitionManager::PrepareAcquisition()
   // called once from this pre-acquisition method
   
   if(TheSettings->WaveformMode)
-    AAGraphics::GetInstance()->SetupWaveformGraphics(WaveformLength);
+    AAGraphics::GetInstance()->SetupWaveformGraphics(512);//WaveformLength);
   else if(TheSettings->SpectrumMode)
     AAGraphics::GetInstance()->SetupSpectrumGraphics();
   else if(TheSettings->PSDMode)
@@ -299,7 +325,7 @@ void AAAcquisitionManager::StartAcquisition()
 
   // Prepare variables and the digitizer for data acquisition
   PrepareAcquisition();
-  
+
   // Start data acquisition
   AcquisitionEnable = true;
 
@@ -380,10 +406,12 @@ void AAAcquisitionManager::StartAcquisition()
       
       // Loop over the digitizer stored events in the PC buffer
       for(Int_t evt=0; evt<PCEvents; evt++){
-
+	
 	////////////////////////////
 	// Pre-event-readout actions
 
+
+		
 	// Reset event-level variables
 	BaselineValue[ch] = PulseHeight = PulseArea = 0.;
 	PSDTotal = PSDTail = 0.;
@@ -407,7 +435,7 @@ void AAAcquisitionManager::StartAcquisition()
 	    break;
 	  }
 	}
-	
+
 	/////////////////////////////
 	// Event and waveform readout
 	
@@ -482,15 +510,13 @@ void AAAcquisitionManager::StartAcquisition()
 	    // Store raw and data-reduction waveforms into the waveforms
 	    // data member; zero-suppression waveforms are already
 	    // stored at this point in the acquisition loop
-	    
+
 	    if(!TheSettings->ZeroSuppressionEnable){
 	      
 	      // Data reduction waveforms
-	      
 	      if(TheSettings->DataReductionEnable){
 		if(sample % TheSettings->DataReductionFactor == 0){
 		  Int_t Index = sample / TheSettings->DataReductionFactor;
-		  
 		  if(UseSTDFirmware)
 		    Waveforms[ch][Index] = EventWaveform->DataChannel[ch][sample];
 		  else if(UsePSDFirmware)
@@ -503,7 +529,7 @@ void AAAcquisitionManager::StartAcquisition()
 	      else{
 		if(UseSTDFirmware)
 		  Waveforms[ch][sample] = EventWaveform->DataChannel[ch][sample];
-		else
+		else if(UsePSDFirmware)
 		  Waveforms[ch][sample] = PSDWaveforms->Trace1[sample];
 	      }
 	    }
@@ -536,7 +562,7 @@ void AAAcquisitionManager::StartAcquisition()
 	      }
 	    }
 	  } // End sample loop
-	  
+
 	  // Because the PSD integrals are computed relative to the peak
 	  // position - which is found during the sample loop above - we
 	  // must take the PSD integrals AFTER the sample loop has
@@ -743,7 +769,9 @@ void AAAcquisitionManager::StartAcquisition()
 	  if(TheSettings->DisplayContinuous and evt == 0){
 	    
 	    // Draw the digitized waveform
-	    TheGraphicsManager->PlotWaveforms(Waveforms, WaveformLength);
+	    //TheGraphicsManager->PlotWaveforms(Waveforms, WaveformLength);
+
+	    TheGraphicsManager->PlotWaveforms(Waveforms, 512);
 	    
 	    // Draw graphical objects associated with the waveform
 	    TheGraphicsManager->DrawWaveformGraphics(BaselineValue,

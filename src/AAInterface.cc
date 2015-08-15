@@ -1110,7 +1110,7 @@ void AAInterface::FillAcquisitionFrame()
       DGChRecordLength_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
       DGChRecordLength_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
       DGChRecordLength_NEL[ch]->GetEntry()->Resize(55,20);
-      DGChRecordLength_NEL[ch]->GetEntry()->SetNumber(200);
+      DGChRecordLength_NEL[ch]->GetEntry()->SetNumber(512);
 
       DGChannelControl_GF->AddFrame(DGChBaselineSamples_CBL[ch] = new ADAQComboBoxWithLabel(DGChannelControl_GF, "Baseline (samples)", -1),
 				    new TGLayoutHints(kLHintsLeft, 10,0,0,0));
@@ -1388,7 +1388,7 @@ void AAInterface::FillAcquisitionFrame()
   DGTriggerType_CBL->GetComboBox()->AddEntry("External (TTL)",1);
   DGTriggerType_CBL->GetComboBox()->AddEntry("Automatic",2);
   DGTriggerType_CBL->GetComboBox()->AddEntry("Software",3);
-  DGTriggerType_CBL->GetComboBox()->Select(2);
+  DGTriggerType_CBL->GetComboBox()->Select(3);
   DGTriggerType_CBL->GetComboBox()->Resize(110,20);
   DGTriggerType_CBL->GetComboBox()->ChangeOptions(DGTriggerType_CBL->GetComboBox()->GetOptions() | kFixedSize);
 

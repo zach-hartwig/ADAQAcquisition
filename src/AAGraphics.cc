@@ -125,7 +125,7 @@ void AAGraphics::SetupWaveformGraphics(int WaveformLength)
   Time.clear();
   for(int t=0; t<WaveformLength; t++)
     Time.push_back(t);
-  
+
   if(TheSettings->DisplayTitlesEnable){
     Title = TheSettings->DisplayTitle;
     XTitle = TheSettings->DisplayXTitle;
@@ -186,7 +186,7 @@ void AAGraphics::SetupWaveformGraphics(int WaveformLength)
   delete WaveformGraphAxes_H;
   WaveformGraphAxes_H = new TH1F("WaveformGraphAxes_H",
 				 "A TH1F used to create X and Y axes for waveform plotting",
-				 100, 0, TheSettings->RecordLength);
+				 100, 0, 512);
   
   // Set the waveform title and axes properties
   WaveformGraphAxes_H->SetTitle(Title.c_str());
@@ -214,7 +214,7 @@ void AAGraphics::PlotWaveforms(vector<vector<uint16_t> > &Waveforms,
     
     if(!TheSettings->ChEnable[ch])
       continue;
- 
+    
     // Efficienctly allocate the channel voltage into a vector<int>
     vector<int> Voltage (Waveforms[ch].begin(), Waveforms[ch].end());
 
