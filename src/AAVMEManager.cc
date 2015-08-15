@@ -277,72 +277,67 @@ bool AAVMEManager::ProgramDigitizers()
   default:
     break;
   }
-  
-  DGMgr->SetRecordLength(TheSettings->RecordLength);
-  DGMgr->SetPostTriggerSize(TheSettings->PostTrigger);
+
+  if(TheSettings->STDFirmware){
+    DGMgr->SetRecordLength(TheSettings->RecordLength);
+    DGMgr->SetPostTriggerSize(TheSettings->PostTrigger);
+    
+    if(TheSettings->ZeroSuppressionEnable)
+      DGMgr->SetZSMode("ZLE");
+    else
+      DGMgr->SetZSMode("None");
+  }
   
   ///////////////////
   // Readout settings
   
   DGMgr->SetMaxNumEventsBLT(TheSettings->EventsBeforeReadout);
 
-  if(TheSettings->ZeroSuppressionEnable)
-    DGMgr->SetZSMode("ZLE");
-  else
-    DGMgr->SetZSMode("None");
   
   if(TheSettings->PSDFirmware){
     
-    DigitizerParams_t Params;
-
-    Params.LinkType = CAEN_DGTZ_USB;
-    Params.VMEBaseAddress = 0;
-    Params.IOlev = CAEN_DGTZ_IOLevel_TTL;
-    Params.AcqMode = CAEN_DGTZ_DPP_ACQ_MODE_Mixed;
-    Params.RecordLength = 5000;
-    Params.ChannelMask = 0x1;
-    Params.EventAggr = 10;
-    Params.PulsePolarity = CAEN_DGTZ_PulsePolarityNegative;
+    // Create the mandatory DPP-PSD parameter struct
+    CAEN_DGTZ_DPP_PSD_Params_t PSDParameters;
     
+    for(Int_t ch=0; ch<DGMgr->GetNumChannels(); ch++){
 
-    CAEN_DGTZ_DPP_PSD_Params_t PSDParams;
-    
-    for(Int_t ch=0; ch<4; ch++){
-      PSDParams.thr[ch]   = 50; // threshold [ADC]
-      PSDParams.nsbl[ch]  = 2;  // 2**nbsl blocks for baseline calc
-      PSDParams.lgate[ch] = 32; // long gate [samples]
-      PSDParams.sgate[ch] = 24; // short gate [samples]
-      PSDParams.pgate[ch] = 8;  // pregate [samples]
-      PSDParams.selft[ch] = 1;  // self trigger (0==disabled, 1==enabled)
-      PSDParams.tvaw[ch]  = 50; // trigger validation window
-      PSDParams.csens[ch] = 0;  // charge sensitivity (0==least, 3==most)
-      PSDParams.trgc[ch] = CAEN_DGTZ_DPP_TriggerConfig_Threshold; // trigger config
+      if(TheSettings->ChPosPolarity[ch])
+	DGMgr->SetChannelPulsePolarity(ch, CAEN_DGTZ_PulsePolarityPositive);
+      else if(TheSettings->ChNegPolarity[ch])
+	DGMgr->SetChannelPulsePolarity(ch, CAEN_DGTZ_PulsePolarityNegative);
+      
+      DGMgr->SetChannelDCOffset(ch, TheSettings->ChDCOffset[ch]);
+      DGMgr->SetRecordLength(TheSettings->ChRecordLength[ch], ch);
+      PSDParameters.nsbl[ch] = TheSettings->ChBaselineSamples[ch];
+      PSDParameters.csens[ch] = TheSettings->ChChargeSensitivity[ch];
+
+      DGMgr->SetDPPPreTriggerSize(ch, 100);
+      PSDParameters.selft[ch] = 1;
+      PSDParameters.thr[ch] = TheSettings->ChTriggerThreshold[ch];
+      PSDParameters.tvaw[ch] = TheSettings->ChTriggerValidation[ch];
+      PSDParameters.trgc[ch] = (CAEN_DGTZ_DPP_TriggerConfig_t)TheSettings->ChTriggerConfig[ch];
+
+      PSDParameters.sgate[ch] = TheSettings->ChShortGate[ch];
+      PSDParameters.lgate[ch] = TheSettings->ChLongGate[ch];
+      PSDParameters.pgate[ch] = TheSettings->ChPreGate[ch];
     }
-    PSDParams.purh = CAEN_DGTZ_DPP_PSD_PUR_DetectOnly;
-    PSDParams.purgap = 100;  // Purity Gap
-    PSDParams.blthr = 3;     // Baseline Threshold
-    PSDParams.bltmo = 100;   // Baseline Timeout
-    PSDParams.trgho = 8;     // Trigger HoldOff
+
+    PSDParameters.purh = CAEN_DGTZ_DPP_PSD_PUR_DetectOnly;
+    PSDParameters.purgap = 100;  // Purity Gap
+    PSDParameters.blthr = 3;     // Baseline Threshold
+    PSDParameters.bltmo = 100;   // Baseline Timeout
+    PSDParameters.trgho = 8;     // Trigger HoldOff
     
-    
-    DGMgr->SetDPPAcquisitionMode(Params.AcqMode,
+    DGMgr->SetDPPAcquisitionMode((CAEN_DGTZ_DPP_AcqMode_t)TheSettings->PSDOperationMode,
 				 CAEN_DGTZ_DPP_SAVE_PARAM_EnergyAndTime);
     
-    DGMgr->SetIOLevel(Params.IOlev);
+    DGMgr->SetIOLevel(CAEN_DGTZ_IOLevel_TTL);
     
-    DGMgr->SetDPPEventAggregation(Params.EventAggr,
-				  0);
+    DGMgr->SetDPPEventAggregation(TheSettings->EventsBeforeReadout, 0);
     
-    DGMgr->SetDPPParameters(DGChEnableMask,
-			    &PSDParams);
+    DGMgr->SetDPPParameters(DGChEnableMask, &PSDParameters);
     
-    for(Int_t ch=0; ch<4; ch++){
-      DGMgr->SetRecordLength(Params.RecordLength,ch);
-      DGMgr->SetChannelDCOffset(ch, 0x8000);
-      DGMgr->SetDPPPreTriggerSize(ch, 100);
-      DGMgr->SetChannelPulsePolarity(ch, Params.PulsePolarity);
-    }
-    cout << "Finished PSD programming...This hack needs desparate refactoring" << endl;
+    cout << "Finished PSD programming..." << endl;
   }
   
   return true;

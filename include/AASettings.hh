@@ -29,6 +29,9 @@ public:
     ChNegPolarity.resize(Channels);
     ChDCOffset.resize(Channels);
     ChTriggerThreshold.resize(Channels);
+
+    // CAEN Standard firmware specific settings
+    
     ChZLEThreshold.resize(Channels);
     ChZLEForward.resize(Channels);
     ChZLEBackward.resize(Channels);
@@ -40,6 +43,18 @@ public:
     ChPSDTotalStop.resize(Channels);
     ChPSDTailStart.resize(Channels);
     ChPSDTailStop.resize(Channels);
+
+    // CAEN DPP-PSD firwmare specific settings
+    ChRecordLength.resize(Channels);
+    ChBaselineSamples.resize(Channels);
+    ChChargeSensitivity.resize(Channels);
+    ChPSDCut.resize(Channels);
+    ChTriggerConfig.resize(Channels);
+    ChTriggerValidation.resize(Channels);
+    ChShortGate.resize(Channels);
+    ChLongGate.resize(Channels);
+    ChPreGate.resize(Channels);
+    ChGateOffset.resize(Channels);
   }
 
   /////////////////////////////////
@@ -55,12 +70,14 @@ public:
   vector<Bool_t>  ChNegPolarity;
   vector<Int_t>   ChDCOffset;
   vector<Int_t>   ChTriggerThreshold;
+
+  // CAEN Standard firmware specific settings
+
   vector<Int_t>   ChZLEThreshold;
   vector<Int_t>   ChZLEForward;
   vector<Int_t>   ChZLEBackward;
   vector<Bool_t>  ChZLEPosLogic;
   vector<Bool_t>  ChZLENegLogic;
-
   vector<Int_t>   ChBaselineCalcMin;
   vector<Int_t>   ChBaselineCalcMax;
   vector<Int_t>   ChPSDTotalStart;
@@ -68,6 +85,19 @@ public:
   vector<Int_t>   ChPSDTailStart;
   vector<Int_t>   ChPSDTailStop;
 
+  // CAEN DPP-PSD firmware specific settings
+
+  vector<Int_t> ChRecordLength;
+  vector<Int_t> ChBaselineSamples;
+  vector<Int_t> ChChargeSensitivity;
+  vector<Int_t> ChPSDCut;
+  vector<Int_t> ChTriggerConfig;
+  vector<Int_t> ChTriggerValidation;
+  vector<Int_t> ChShortGate;
+  vector<Int_t> ChLongGate;
+  vector<Int_t> ChPreGate;
+  vector<Int_t> ChGateOffset;
+  
 
   //////////////////////////
   // Display widget settings
@@ -96,6 +126,7 @@ public:
   string AcquisitionControlName;
   Int_t RecordLength;
   Int_t PostTrigger;
+  Int_t PSDOperationMode;
   Int_t AcquisitionTime;
 
   // Readout

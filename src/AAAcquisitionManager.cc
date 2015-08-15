@@ -103,7 +103,12 @@ void AAAcquisitionManager::PrepareAcquisition()
 {
   ADAQDigitizer *DGManager = AAVMEManager::GetInstance()->GetDGManager();
 
-  Int_t DGChannels = DGManager->GetNumChannels();
+  Int_t NumDGChannels = DGManager->GetNumChannels();
+
+  // Set CAEN firmware type class member booleans for easy use
+  
+  UseSTDFirmware = TheSettings->STDFirmware;
+  UsePSDFirmware = TheSettings->PSDFirmware;
 
   ////////////////////////////////////////////////////
   // Initialize general member data for acquisition //
@@ -114,61 +119,66 @@ void AAAcquisitionManager::PrepareAcquisition()
 
   AcquisitionTimeNow = 0;
   AcquisitionTimePrev = 0;
-  
 
-  ///////////////////////
-  // Baseline calculation
-
-  for(Int_t ch=0; ch<DGChannels; ch++){
-    BaselineStart[ch] = TheSettings->ChBaselineCalcMin[ch];
-    BaselineStop[ch] = TheSettings->ChBaselineCalcMax[ch];
-    BaselineLength[ch] = BaselineStop[ch] - BaselineStart[ch];
-    BaselineValue[ch] = 0.;
-
-    if(TheSettings->ChPosPolarity[ch])
-      Polarity[ch] = 1.;
-    else
-      Polarity[ch] = -1.;
-  }
-  
-  
-  ///////////////////
-  // Waveform readout
-
-  // Zero suppression waveforms: All channels (outer vector) are
-  // preallocated; the waveform vector (inner vector) memory is *not
-  // preallocated* since length of the waveform is unknown a priori
-  if(TheSettings->ZeroSuppressionEnable){
-    Waveforms.clear();
-    Waveforms.resize(DGChannels);
-  }
-
-  // Raw and data reduction waveforms : All digitizer channels (outer
-  // vector) are preallocated; the waveform vector (inner vector)
-  // memory *is preallocated* since each channel has fixed size
-  else{
+  if(UseSTDFirmware){
     
-    WaveformLength = TheSettings->RecordLength;
+    ///////////////////////
+    // Baseline calculation
     
-    if(TheSettings->DataReductionEnable)
-      WaveformLength /= TheSettings->DataReductionFactor;
-    
-    Waveforms.clear();
-    Waveforms.resize(DGChannels);
-    
-    for(Int_t ch=0; ch<DGChannels; ch++){
-      if(TheSettings->ChEnable[ch])
-	Waveforms[ch].resize(WaveformLength);
+    for(Int_t ch=0; ch<NumDGChannels; ch++){
+      BaselineStart[ch] = TheSettings->ChBaselineCalcMin[ch];
+      BaselineStop[ch] = TheSettings->ChBaselineCalcMax[ch];
+      BaselineLength[ch] = BaselineStop[ch] - BaselineStart[ch];
+      BaselineValue[ch] = 0.;
+      
+      if(TheSettings->ChPosPolarity[ch])
+	Polarity[ch] = 1.;
       else
-	Waveforms[ch].resize(0);
+	Polarity[ch] = -1.;
     }
+  
+    ///////////////////
+    // Waveform readout
+    
+    // Zero suppression waveforms: All channels (outer vector) are
+    // preallocated; the waveform vector (inner vector) memory is *not
+    // preallocated* since length of the waveform is unknown a priori
+    if(TheSettings->ZeroSuppressionEnable){
+      Waveforms.clear();
+      Waveforms.resize(NumDGChannels);
+    }
+    
+    // Raw and data reduction waveforms : All digitizer channels (outer
+    // vector) are preallocated; the waveform vector (inner vector)
+    // memory *is preallocated* since each channel has fixed size
+    else{
+      
+      WaveformLength = TheSettings->RecordLength;
+      
+      if(TheSettings->DataReductionEnable)
+	WaveformLength /= TheSettings->DataReductionFactor;
+      
+      Waveforms.clear();
+      Waveforms.resize(NumDGChannels);
+      
+      for(Int_t ch=0; ch<NumDGChannels; ch++){
+	if(TheSettings->ChEnable[ch])
+	  Waveforms[ch].resize(WaveformLength);
+	else
+	  Waveforms[ch].resize(0);
+      }
+    }
+    
+    WaveformData.clear();
+    for(Int_t ch=0; ch<NumDGChannels; ch++)
+      WaveformData.push_back(new ADAQWaveformData);
   }
-  
-  WaveformData.clear();
-  for(Int_t ch=0; ch<DGChannels; ch++)
-    WaveformData.push_back(new ADAQWaveformData);
-  
+  else if(UsePSDFirmware){
+    Waveforms.clear();
+    Waveforms.resize(NumDGChannels);
+  }
 
+  
   /////////////////////////
   // Pulse spectra creation
 
@@ -177,7 +187,7 @@ void AAAcquisitionManager::PrepareAcquisition()
 
   // Create pulse spectra and PSD histogram objects
 
-  for(Int_t ch=0; ch<DGChannels; ch++){
+  for(Int_t ch=0; ch<NumDGChannels; ch++){
     
     if(SpectrumExists[ch]){
       delete Spectrum_H[ch];
@@ -235,13 +245,8 @@ void AAAcquisitionManager::PrepareAcquisition()
   RawTimeStamp = 0;
   PrevTimeStamp = 0;
 
-  for(Int_t ch=0; ch<DGChannels; ch++)
+  for(Int_t ch=0; ch<NumDGChannels; ch++)
     NumPSDEvents[ch] = 0;
-
-
-  // Set class member firwmare booleans from the settings class
-  UseSTDFirmware = TheSettings->STDFirmware;
-  UsePSDFirmware = TheSettings->PSDFirmware;
 
   if(UseSTDFirmware){
     

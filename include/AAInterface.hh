@@ -233,21 +233,17 @@ private:
   ADAQNumberEntryWithLabel *DGChPSDTailStop_NEL[8];
 
   // CAEN DPP-PSD firmware widgets
-  
-  ADAQComboBoxWithLabel *DGChTrigConfig_CBL[8];
-  ADAQNumberEntryWithLabel *DGChTrigValidation_NEL[8];
-  
+
   ADAQNumberEntryWithLabel *DGChRecordLength_NEL[8];
+  ADAQComboBoxWithLabel *DGChBaselineSamples_CBL[8];
+  ADAQComboBoxWithLabel *DGChChargeSensitivity_CBL[8];
+  ADAQNumberEntryWithLabel *DGChPSDCut_NEL[8];  
+  ADAQComboBoxWithLabel *DGChTriggerConfig_CBL[8];
+  ADAQNumberEntryWithLabel *DGChTriggerValidation_NEL[8];
   ADAQNumberEntryWithLabel *DGChShortGate_NEL[8];
   ADAQNumberEntryWithLabel *DGChLongGate_NEL[8];
-  ADAQNumberEntryWithLabel *DGChGateOffset_NEL[8];
   ADAQNumberEntryWithLabel *DGChPreGate_NEL[8];
-  ADAQNumberEntryWithLabel *DGChPSDCut_NEL[8];
-  ADAQNumberEntryWithLabel *DGChTrigValid_NEL[8];
-  ADAQComboBoxWithLabel *DGChBaselineCalc_CBL[8];
-  ADAQComboBoxWithLabel *DGChChargeSens_CBL[8];
-
-  
+  ADAQNumberEntryWithLabel *DGChGateOffset_NEL[8];
   
   // Display specific widgets (in the upper-right subframe)
 

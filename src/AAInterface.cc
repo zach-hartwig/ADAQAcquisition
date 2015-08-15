@@ -1112,26 +1112,26 @@ void AAInterface::FillAcquisitionFrame()
       DGChRecordLength_NEL[ch]->GetEntry()->Resize(55,20);
       DGChRecordLength_NEL[ch]->GetEntry()->SetNumber(200);
 
-      DGChannelControl_GF->AddFrame(DGChBaselineCalc_CBL[ch] = new ADAQComboBoxWithLabel(DGChannelControl_GF, "Baseline (samples)", -1),
+      DGChannelControl_GF->AddFrame(DGChBaselineSamples_CBL[ch] = new ADAQComboBoxWithLabel(DGChannelControl_GF, "Baseline (samples)", -1),
 				    new TGLayoutHints(kLHintsLeft, 10,0,0,0));
       for(Int_t i=0; i<8; i++){
 	stringstream SS;
 	SS << pow(2,i);
 	TString Entry = SS.str();
-		
-	DGChBaselineCalc_CBL[ch]->GetComboBox()->AddEntry(Entry,pow(2,i));
+	
+	DGChBaselineSamples_CBL[ch]->GetComboBox()->AddEntry(Entry,pow(2,i));
       }
-      DGChBaselineCalc_CBL[ch]->GetComboBox()->Resize(57,20);
-      DGChBaselineCalc_CBL[ch]->GetComboBox()->Select(4);
+      DGChBaselineSamples_CBL[ch]->GetComboBox()->Resize(57,20);
+      DGChBaselineSamples_CBL[ch]->GetComboBox()->Select(4);
 
-      DGChannelControl_GF->AddFrame(DGChChargeSens_CBL[ch] = new ADAQComboBoxWithLabel(DGChannelControl_GF, "Charge sensitivity", -1),
+      DGChannelControl_GF->AddFrame(DGChChargeSensitivity_CBL[ch] = new ADAQComboBoxWithLabel(DGChannelControl_GF, "Charge sensitivity", -1),
 				    new TGLayoutHints(kLHintsLeft, 10,0,0,0));
-      DGChChargeSens_CBL[ch]->GetComboBox()->AddEntry("Min",0);
-      DGChChargeSens_CBL[ch]->GetComboBox()->AddEntry("Low",1);
-      DGChChargeSens_CBL[ch]->GetComboBox()->AddEntry("High",2);
-      DGChChargeSens_CBL[ch]->GetComboBox()->AddEntry("Max",3);
-      DGChChargeSens_CBL[ch]->GetComboBox()->Resize(57,20);
-      DGChChargeSens_CBL[ch]->GetComboBox()->Select(0);
+      DGChChargeSensitivity_CBL[ch]->GetComboBox()->AddEntry("Min",0);
+      DGChChargeSensitivity_CBL[ch]->GetComboBox()->AddEntry("Low",1);
+      DGChChargeSensitivity_CBL[ch]->GetComboBox()->AddEntry("High",2);
+      DGChChargeSensitivity_CBL[ch]->GetComboBox()->AddEntry("Max",3);
+      DGChChargeSensitivity_CBL[ch]->GetComboBox()->Resize(57,20);
+      DGChChargeSensitivity_CBL[ch]->GetComboBox()->Select(0);
 
       DGChannelControl_GF->AddFrame(DGChPSDCut_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF,
 										      "PSD readout cut",
@@ -1157,20 +1157,19 @@ void AAInterface::FillAcquisitionFrame()
       DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumber(8000);
       DGChTriggerThreshold_NEL[ch]->GetEntry()->Resize(55,20);
       
-      Trigger_HF0->AddFrame(DGChTrigConfig_CBL[ch] = new ADAQComboBoxWithLabel(Trigger_HF0, "Type", -1),
+      Trigger_HF0->AddFrame(DGChTriggerConfig_CBL[ch] = new ADAQComboBoxWithLabel(Trigger_HF0, "Type", -1),
 			    new TGLayoutHints(kLHintsLeft, 5,0,0,0));
-      DGChTrigConfig_CBL[ch]->GetComboBox()->AddEntry("Peak",0);
-      DGChTrigConfig_CBL[ch]->GetComboBox()->AddEntry("Threshold",1);
-      DGChTrigConfig_CBL[ch]->GetComboBox()->Resize(80,20);
-      DGChTrigConfig_CBL[ch]->GetComboBox()->Select(1);
+      DGChTriggerConfig_CBL[ch]->GetComboBox()->AddEntry("Peak",0);
+      DGChTriggerConfig_CBL[ch]->GetComboBox()->AddEntry("Threshold",1);
+      DGChTriggerConfig_CBL[ch]->GetComboBox()->Resize(80,20);
+      DGChTriggerConfig_CBL[ch]->GetComboBox()->Select(1);
 
-
-      DGChannelControl_GF->AddFrame(DGChTrigValidation_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "Validation window (samples)", -1),
+      DGChannelControl_GF->AddFrame(DGChTriggerValidation_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "Validation window (samples)", -1),
 			       new TGLayoutHints(kLHintsNormal, 10,0,0,0));
-      DGChTrigValidation_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
-      DGChTrigValidation_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-      DGChTrigValidation_NEL[ch]->GetEntry()->SetNumber(8000);
-      DGChTrigValidation_NEL[ch]->GetEntry()->Resize(55,20);
+      DGChTriggerValidation_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
+      DGChTriggerValidation_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+      DGChTriggerValidation_NEL[ch]->GetEntry()->SetNumber(8000);
+      DGChTriggerValidation_NEL[ch]->GetEntry()->Resize(55,20);
       
       // PSD integral (gate) settings
 
@@ -2248,6 +2247,16 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
       DGChPSDTailStop_NEL[ch]->GetEntry()->SetState(WidgetState);
     }
     else if(DGDPPPSDFW_RB->IsDown()){
+      DGChRecordLength_NEL[ch]->GetEntry()->SetState(WidgetState);
+      DGChBaselineSamples_CBL[ch]->GetComboBox()->SetEnabled(WidgetState);
+      DGChChargeSensitivity_CBL[ch]->GetComboBox()->SetEnabled(WidgetState);
+      DGChPSDCut_NEL[ch]->GetEntry()->SetState(WidgetState);
+      DGChTriggerConfig_CBL[ch]->GetComboBox()->SetEnabled(WidgetState);
+      DGChTriggerValidation_NEL[ch]->GetEntry()->SetState(WidgetState);
+      DGChShortGate_NEL[ch]->GetEntry()->SetState(WidgetState);
+      DGChLongGate_NEL[ch]->GetEntry()->SetState(WidgetState);
+      DGChPreGate_NEL[ch]->GetEntry()->SetState(WidgetState);
+      DGChGateOffset_NEL[ch]->GetEntry()->SetState(WidgetState);
     }
   }
 
@@ -2260,8 +2269,13 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
   DGTriggerCoincidenceEnable_CB->SetState(ButtonState);
 
   DGAcquisitionControl_CBL->GetComboBox()->SetEnabled(WidgetState);
-  DGRecordLength_NEL->GetEntry()->SetState(WidgetState);
-  DGPostTrigger_NEL->GetEntry()->SetState(WidgetState);
+  if(DGStandardFW_RB->IsDown()){
+    DGRecordLength_NEL->GetEntry()->SetState(WidgetState);
+    DGPostTrigger_NEL->GetEntry()->SetState(WidgetState);
+  }
+  else if(DGDPPPSDFW_RB->IsDown()){
+    DGDPPPSDMode_CBL->GetComboBox()->SetEnabled(WidgetState);
+  }
 
   DGEventsBeforeReadout_NEL->GetEntry()->SetState(WidgetState);
   AQDataReductionEnable_CB->SetState(ButtonState);
@@ -2378,6 +2392,16 @@ void AAInterface::SaveSettings()
       TheSettings->ChPSDTailStop[ch] = DGChPSDTailStop_NEL[ch]->GetEntry()->GetIntNumber();
     }
     else if(DGDPPPSDFW_RB->IsDown()){
+      TheSettings->ChRecordLength[ch] = DGChRecordLength_NEL[ch]->GetEntry()->GetIntNumber();
+      TheSettings->ChBaselineSamples[ch] = DGChBaselineSamples_CBL[ch]->GetComboBox()->GetSelected();
+      TheSettings->ChChargeSensitivity[ch] = DGChChargeSensitivity_CBL[ch]->GetComboBox()->GetSelected();
+      TheSettings->ChPSDCut[ch] = DGChPSDCut_NEL[ch]->GetEntry()->GetIntNumber();
+      TheSettings->ChTriggerConfig[ch] = DGChTriggerConfig_CBL[ch]->GetComboBox()->GetSelected();
+      TheSettings->ChTriggerValidation[ch] = DGChTriggerValidation_NEL[ch]->GetEntry()->GetIntNumber();
+      TheSettings->ChShortGate[ch] = DGChShortGate_NEL[ch]->GetEntry()->GetIntNumber();
+      TheSettings->ChLongGate[ch] = DGChLongGate_NEL[ch]->GetEntry()->GetIntNumber();
+      TheSettings->ChPreGate[ch] = DGChPreGate_NEL[ch]->GetEntry()->GetIntNumber();
+      TheSettings->ChGateOffset[ch] = DGChGateOffset_NEL[ch]->GetEntry()->GetIntNumber();
     }
   }
   
@@ -2414,8 +2438,14 @@ void AAInterface::SaveSettings()
   // Acquisition
   TheSettings->AcquisitionControl = DGAcquisitionControl_CBL->GetComboBox()->GetSelected();
   TheSettings->AcquisitionControlName = DGAcquisitionControl_CBL->GetComboBox()->GetSelectedEntry()->GetTitle();
-  TheSettings->RecordLength = DGRecordLength_NEL->GetEntry()->GetIntNumber();
-  TheSettings->PostTrigger = DGPostTrigger_NEL->GetEntry()->GetIntNumber();
+  if(DGStandardFW_RB->IsDown()){
+    TheSettings->RecordLength = DGRecordLength_NEL->GetEntry()->GetIntNumber();
+    TheSettings->PostTrigger = DGPostTrigger_NEL->GetEntry()->GetIntNumber();
+  }
+  else{
+    TheSettings->PSDOperationMode = DGDPPPSDMode_CBL->GetComboBox()->GetSelected();
+  }
+  
   TheSettings->AcquisitionTime = AQTime_NEL->GetEntry()->GetIntNumber();
 
   // Readout
