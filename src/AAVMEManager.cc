@@ -280,7 +280,6 @@ bool AAVMEManager::ProgramDigitizers()
   // Readout settings
   
   DGMgr->SetMaxNumEventsBLT(TheSettings->EventsBeforeReadout);
-
   
   if(TheSettings->PSDFirmware){
     
@@ -324,8 +323,6 @@ bool AAVMEManager::ProgramDigitizers()
     DGMgr->SetDPPEventAggregation(TheSettings->EventsBeforeReadout, 0);
     
     DGMgr->SetDPPParameters(DGChEnableMask, &PSDParameters);
-    
-    cout << "Finished PSD programming..." << endl;
   }
   
   return true;

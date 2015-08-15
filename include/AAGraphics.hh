@@ -43,11 +43,12 @@ public:
   void SetCanvasPointer(TCanvas *C) {TheCanvas_C = C;}
   void SetSettingsPointer(AASettings *TS) {TheSettings = TS;}
   
-  void SetupWaveformGraphics(int);
+  void SetupWaveformGraphics(vector<Int_t> &);
   
 #ifndef __CINT__
   //void PlotWaveforms(vector<vector<uint16_t> > &, int, vector<double> &;
-  void PlotWaveforms(vector<vector<uint16_t> > &, int);
+  void PlotWaveforms(vector<vector<uint16_t> > &,
+		     vector<Int_t> &);
 #endif
   void DrawWaveformGraphics(vector<Double_t> &, 
 			    vector<Int_t> &,

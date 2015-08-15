@@ -140,7 +140,7 @@ private:
   uint32_t ZLENumWordMask, ZLEControlMask;
 #endif
 
-  Int_t WaveformLength;
+  vector<Int_t> WaveformLength;
   vector<Int_t> BaselineStart, BaselineStop, BaselineLength;
   vector<Double_t > BaselineValue;
   vector<Int_t> PSDTotalAbsStart, PSDTotalAbsStop;

@@ -42,7 +42,7 @@ AAAcquisitionManager::AAAcquisitionManager()
     ZLEEventSizeMask(0x0fffffff), ZLEEventSize(0),
     ZLESampleAMask(0x0000ffff), ZLESampleBMask(0xffff0000), 
     ZLENumWordMask(0x000fffff), ZLEControlMask(0xc0000000),
-    WaveformLength(0), EventCounter(0),
+    EventCounter(0),
     LLD(0), ULD(0), SampleHeight(0.), TriggerHeight(0.),
     PulseHeight(0.), PulseArea(0.), PSDTotal(0.), PSDTail(0.),
     PeakPosition(0), RawTimeStamp(0), PrevTimeStamp(0),
@@ -76,6 +76,8 @@ void AAAcquisitionManager::Initialize()
     BaselineStop.push_back(0);
     BaselineLength.push_back(0);
     BaselineValue.push_back(0);
+
+    WaveformLength.push_back(0);
 
     PeakPosition.push_back(0);
     PSDTotalAbsStart.push_back(0);
@@ -181,19 +183,20 @@ void AAAcquisitionManager::PrepareAcquisition()
 
     Waveforms.clear();
     Waveforms.resize(NumDGChannels);
-
-    if(UseSTDFirmware){
-      WaveformLength = TheSettings->RecordLength;
-      if(TheSettings->DataReductionEnable)
-	WaveformLength /= TheSettings->DataReductionFactor;
-    }
     
     for(Int_t ch=0; ch<NumDGChannels; ch++){
+      
       if(TheSettings->ChEnable[ch]){
+      
 	if(UseSTDFirmware)
-	  Waveforms[ch].resize(WaveformLength);
+	  WaveformLength[ch] = TheSettings->RecordLength;
 	else if(UsePSDFirmware)
-	  Waveforms[ch].resize(TheSettings->ChRecordLength[ch]);
+	  WaveformLength[ch] = TheSettings->ChRecordLength[ch];
+	
+	if(TheSettings->DataReductionEnable)
+	  WaveformLength[ch] /= TheSettings->DataReductionFactor;
+	
+	Waveforms[ch].resize(WaveformLength[ch]);
       }
       else
 	Waveforms[ch].resize(0);
@@ -260,7 +263,7 @@ void AAAcquisitionManager::PrepareAcquisition()
   // called once from this pre-acquisition method
   
   if(TheSettings->WaveformMode)
-    AAGraphics::GetInstance()->SetupWaveformGraphics(512);//WaveformLength);
+    AAGraphics::GetInstance()->SetupWaveformGraphics(WaveformLength);
   else if(TheSettings->SpectrumMode)
     AAGraphics::GetInstance()->SetupSpectrumGraphics();
   else if(TheSettings->PSDMode)
@@ -410,8 +413,6 @@ void AAAcquisitionManager::StartAcquisition()
 	////////////////////////////
 	// Pre-event-readout actions
 
-
-		
 	// Reset event-level variables
 	BaselineValue[ch] = PulseHeight = PulseArea = 0.;
 	PSDTotal = PSDTail = 0.;
@@ -769,9 +770,7 @@ void AAAcquisitionManager::StartAcquisition()
 	  if(TheSettings->DisplayContinuous and evt == 0){
 	    
 	    // Draw the digitized waveform
-	    //TheGraphicsManager->PlotWaveforms(Waveforms, WaveformLength);
-
-	    TheGraphicsManager->PlotWaveforms(Waveforms, 512);
+	    TheGraphicsManager->PlotWaveforms(Waveforms, WaveformLength);
 	    
 	    // Draw graphical objects associated with the waveform
 	    TheGraphicsManager->DrawWaveformGraphics(BaselineValue,

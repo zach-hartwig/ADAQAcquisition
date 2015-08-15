@@ -120,10 +120,12 @@ AAGraphics::~AAGraphics()
 {;}
 
 
-void AAGraphics::SetupWaveformGraphics(int WaveformLength)
+void AAGraphics::SetupWaveformGraphics(vector<Int_t> &WaveformLength)
 {
+  Int_t Length = WaveformLength[0];
+  
   Time.clear();
-  for(int t=0; t<WaveformLength; t++)
+  for(int t=0; t<Length; t++)
     Time.push_back(t);
 
   if(TheSettings->DisplayTitlesEnable){
@@ -206,7 +208,7 @@ void AAGraphics::SetupWaveformGraphics(int WaveformLength)
 
 
 void AAGraphics::PlotWaveforms(vector<vector<uint16_t> > &Waveforms, 
-			       int WaveformLength)
+			       vector<Int_t> &WaveformLength)
 {
   Int_t NumGraphs = 0;
   
@@ -224,8 +226,8 @@ void AAGraphics::PlotWaveforms(vector<vector<uint16_t> > &Waveforms,
     // std::iota methods
 
     if(TheSettings->ZeroSuppressionEnable){
-      WaveformLength = Voltage.size();
-      Time.resize(WaveformLength);
+      WaveformLength[ch] = Voltage.size();
+      Time.resize(WaveformLength[ch]);
       iota(begin(Time), end(Time), 0);
     }
     
@@ -236,8 +238,8 @@ void AAGraphics::PlotWaveforms(vector<vector<uint16_t> > &Waveforms,
     // Set the horiz. and vert. min/max ranges of the waveform.  Note
     // the max value is the max digitizer bit value in units of ADC
 
-    XMin = WaveformLength * TheSettings->HorizontalSliderMin;
-    XMax = WaveformLength * TheSettings->HorizontalSliderMax;
+    XMin = WaveformLength[ch] * TheSettings->HorizontalSliderMin;
+    XMax = WaveformLength[ch] * TheSettings->HorizontalSliderMax;
     WaveformGraphs[ch]->GetXaxis()->SetRangeUser(XMin, XMax);
 
     (TheSettings->DisplayXAxisInLog) ? 
@@ -285,7 +287,7 @@ void AAGraphics::PlotWaveforms(vector<vector<uint16_t> > &Waveforms,
       DrawOptions += "PL";
 
     // Draw the graph with the new time/voltage values
-    WaveformGraphs[ch]->DrawGraph(WaveformLength, 
+    WaveformGraphs[ch]->DrawGraph(WaveformLength[ch], 
 				  &Time[0], 
 				  &Voltage[0],
 				  DrawOptions);
