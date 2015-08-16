@@ -53,7 +53,7 @@ public:
     ChTriggerValidation.resize(Channels);
     ChShortGate.resize(Channels);
     ChLongGate.resize(Channels);
-    ChPreGate.resize(Channels);
+    ChPreTrigger.resize(Channels);
     ChGateOffset.resize(Channels);
   }
 
@@ -95,7 +95,7 @@ public:
   vector<Int_t> ChTriggerValidation;
   vector<Int_t> ChShortGate;
   vector<Int_t> ChLongGate;
-  vector<Int_t> ChPreGate;
+  vector<Int_t> ChPreTrigger;
   vector<Int_t> ChGateOffset;
   
 

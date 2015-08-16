@@ -1114,7 +1114,7 @@ void AAInterface::FillAcquisitionFrame()
 
       DGChannelControl_GF->AddFrame(DGChBaselineSamples_CBL[ch] = new ADAQComboBoxWithLabel(DGChannelControl_GF, "Baseline (samples)", -1),
 				    new TGLayoutHints(kLHintsLeft, 10,0,0,0));
-      for(Int_t i=0; i<8; i++){
+      for(Int_t i=3; i<8; i++){
 	stringstream SS;
 	SS << pow(2,i);
 	TString Entry = SS.str();
@@ -1122,7 +1122,7 @@ void AAInterface::FillAcquisitionFrame()
 	DGChBaselineSamples_CBL[ch]->GetComboBox()->AddEntry(Entry,pow(2,i));
       }
       DGChBaselineSamples_CBL[ch]->GetComboBox()->Resize(57,20);
-      DGChBaselineSamples_CBL[ch]->GetComboBox()->Select(4);
+      DGChBaselineSamples_CBL[ch]->GetComboBox()->Select(16);
 
       DGChannelControl_GF->AddFrame(DGChChargeSensitivity_CBL[ch] = new ADAQComboBoxWithLabel(DGChannelControl_GF, "Charge sensitivity", -1),
 				    new TGLayoutHints(kLHintsLeft, 10,0,0,0));
@@ -1180,7 +1180,7 @@ void AAInterface::FillAcquisitionFrame()
       DGChannelControl_GF->AddFrame(PSD_HF0, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
       
       PSD_HF0->AddFrame(DGChShortGate_NEL[ch] = new ADAQNumberEntryWithLabel(PSD_HF0,
-									     "Short  ",
+									     "Short     ",
 									     -1),
 			new TGLayoutHints(kLHintsLeft,10,0,0,0));
       DGChShortGate_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
@@ -1200,14 +1200,14 @@ void AAInterface::FillAcquisitionFrame()
       TGHorizontalFrame *PSD_HF1 = new TGHorizontalFrame(DGChannelControl_GF);
       DGChannelControl_GF->AddFrame(PSD_HF1, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
 
-      PSD_HF1->AddFrame(DGChPreGate_NEL[ch] = new ADAQNumberEntryWithLabel(PSD_HF1,
-									   "Pregate",
-									   -1),
+      PSD_HF1->AddFrame(DGChPreTrigger_NEL[ch] = new ADAQNumberEntryWithLabel(PSD_HF1,
+									      "Pretrigger",
+									      -1),
 			new TGLayoutHints(kLHintsLeft,10,0,0,0));
-      DGChPreGate_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-      DGChPreGate_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
-      DGChPreGate_NEL[ch]->GetEntry()->Resize(45,20);
-      DGChPreGate_NEL[ch]->GetEntry()->SetNumber(10);
+      DGChPreTrigger_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+      DGChPreTrigger_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+      DGChPreTrigger_NEL[ch]->GetEntry()->Resize(45,20);
+      DGChPreTrigger_NEL[ch]->GetEntry()->SetNumber(30);
       
       
       PSD_HF1->AddFrame(DGChGateOffset_NEL[ch] = new ADAQNumberEntryWithLabel(PSD_HF1,
@@ -2255,7 +2255,7 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
       DGChTriggerValidation_NEL[ch]->GetEntry()->SetState(WidgetState);
       DGChShortGate_NEL[ch]->GetEntry()->SetState(WidgetState);
       DGChLongGate_NEL[ch]->GetEntry()->SetState(WidgetState);
-      DGChPreGate_NEL[ch]->GetEntry()->SetState(WidgetState);
+      DGChPreTrigger_NEL[ch]->GetEntry()->SetState(WidgetState);
       DGChGateOffset_NEL[ch]->GetEntry()->SetState(WidgetState);
     }
   }
@@ -2400,7 +2400,7 @@ void AAInterface::SaveSettings()
       TheSettings->ChTriggerValidation[ch] = DGChTriggerValidation_NEL[ch]->GetEntry()->GetIntNumber();
       TheSettings->ChShortGate[ch] = DGChShortGate_NEL[ch]->GetEntry()->GetIntNumber();
       TheSettings->ChLongGate[ch] = DGChLongGate_NEL[ch]->GetEntry()->GetIntNumber();
-      TheSettings->ChPreGate[ch] = DGChPreGate_NEL[ch]->GetEntry()->GetIntNumber();
+      TheSettings->ChPreTrigger[ch] = DGChPreTrigger_NEL[ch]->GetEntry()->GetIntNumber();
       TheSettings->ChGateOffset[ch] = DGChGateOffset_NEL[ch]->GetEntry()->GetIntNumber();
     }
   }

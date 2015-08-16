@@ -242,7 +242,7 @@ private:
   ADAQNumberEntryWithLabel *DGChTriggerValidation_NEL[8];
   ADAQNumberEntryWithLabel *DGChShortGate_NEL[8];
   ADAQNumberEntryWithLabel *DGChLongGate_NEL[8];
-  ADAQNumberEntryWithLabel *DGChPreGate_NEL[8];
+  ADAQNumberEntryWithLabel *DGChPreTrigger_NEL[8];
   ADAQNumberEntryWithLabel *DGChGateOffset_NEL[8];
   
   // Display specific widgets (in the upper-right subframe)

@@ -188,7 +188,7 @@ void AAGraphics::SetupWaveformGraphics(vector<Int_t> &WaveformLength)
   delete WaveformGraphAxes_H;
   WaveformGraphAxes_H = new TH1F("WaveformGraphAxes_H",
 				 "A TH1F used to create X and Y axes for waveform plotting",
-				 100, 0, 512);
+				 100, 0, WaveformLength[0]);
   
   // Set the waveform title and axes properties
   WaveformGraphAxes_H->SetTitle(Title.c_str());

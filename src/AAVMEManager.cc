@@ -306,14 +306,15 @@ bool AAVMEManager::ProgramDigitizers()
 
       PSDParameters.sgate[ch] = TheSettings->ChShortGate[ch];
       PSDParameters.lgate[ch] = TheSettings->ChLongGate[ch];
-      PSDParameters.pgate[ch] = TheSettings->ChPreGate[ch];
+      PSDParameters.pgate[ch] = TheSettings->ChPreTrigger[ch];
     }
 
     PSDParameters.purh = CAEN_DGTZ_DPP_PSD_PUR_DetectOnly;
     PSDParameters.purgap = 100;  // Purity Gap
     PSDParameters.blthr = 3;     // Baseline Threshold
     PSDParameters.bltmo = 100;   // Baseline Timeout
-    PSDParameters.trgho = 8;     // Trigger HoldOff
+    PSDParameters.trgho = 10;    // Trigger holdoff
+
     
     DGMgr->SetDPPAcquisitionMode((CAEN_DGTZ_DPP_AcqMode_t)TheSettings->PSDOperationMode,
 				 CAEN_DGTZ_DPP_SAVE_PARAM_EnergyAndTime);
