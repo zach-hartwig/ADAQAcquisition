@@ -1114,15 +1114,11 @@ void AAInterface::FillAcquisitionFrame()
 
       DGChannelControl_GF->AddFrame(DGChBaselineSamples_CBL[ch] = new ADAQComboBoxWithLabel(DGChannelControl_GF, "Baseline (samples)", -1),
 				    new TGLayoutHints(kLHintsLeft, 10,0,0,0));
-      for(Int_t i=3; i<8; i++){
-	stringstream SS;
-	SS << pow(2,i);
-	TString Entry = SS.str();
-	
-	DGChBaselineSamples_CBL[ch]->GetComboBox()->AddEntry(Entry,pow(2,i));
-      }
+      DGChBaselineSamples_CBL[ch]->GetComboBox()->AddEntry("8",2);
+      DGChBaselineSamples_CBL[ch]->GetComboBox()->AddEntry("32",4);
+      DGChBaselineSamples_CBL[ch]->GetComboBox()->AddEntry("128",6);
       DGChBaselineSamples_CBL[ch]->GetComboBox()->Resize(57,20);
-      DGChBaselineSamples_CBL[ch]->GetComboBox()->Select(16);
+      DGChBaselineSamples_CBL[ch]->GetComboBox()->Select(4);
 
       DGChannelControl_GF->AddFrame(DGChChargeSensitivity_CBL[ch] = new ADAQComboBoxWithLabel(DGChannelControl_GF, "Charge sensitivity", -1),
 				    new TGLayoutHints(kLHintsLeft, 10,0,0,0));
@@ -1131,7 +1127,7 @@ void AAInterface::FillAcquisitionFrame()
       DGChChargeSensitivity_CBL[ch]->GetComboBox()->AddEntry("High",2);
       DGChChargeSensitivity_CBL[ch]->GetComboBox()->AddEntry("Max",3);
       DGChChargeSensitivity_CBL[ch]->GetComboBox()->Resize(57,20);
-      DGChChargeSensitivity_CBL[ch]->GetComboBox()->Select(0);
+      DGChChargeSensitivity_CBL[ch]->GetComboBox()->Select(3);
 
       DGChannelControl_GF->AddFrame(DGChPSDCut_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF,
 										      "PSD readout cut",
@@ -1154,7 +1150,7 @@ void AAInterface::FillAcquisitionFrame()
 			    new TGLayoutHints(kLHintsNormal, 10,0,0,0));
       DGChTriggerThreshold_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
       DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-      DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumber(2000);
+      DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumber(100);
       DGChTriggerThreshold_NEL[ch]->GetEntry()->Resize(55,20);
       
       Trigger_HF0->AddFrame(DGChTriggerConfig_CBL[ch] = new ADAQComboBoxWithLabel(Trigger_HF0, "Type", -1),
@@ -1207,8 +1203,7 @@ void AAInterface::FillAcquisitionFrame()
       DGChPreTrigger_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
       DGChPreTrigger_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
       DGChPreTrigger_NEL[ch]->GetEntry()->Resize(45,20);
-      DGChPreTrigger_NEL[ch]->GetEntry()->SetNumber(30);
-      
+      DGChPreTrigger_NEL[ch]->GetEntry()->SetNumber(150);
       
       PSD_HF1->AddFrame(DGChGateOffset_NEL[ch] = new ADAQNumberEntryWithLabel(PSD_HF1,
 									      "Gate offset",
@@ -1217,7 +1212,7 @@ void AAInterface::FillAcquisitionFrame()
       DGChGateOffset_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
       DGChGateOffset_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
       DGChGateOffset_NEL[ch]->GetEntry()->Resize(45,20);
-      DGChGateOffset_NEL[ch]->GetEntry()->SetNumber(10);
+      DGChGateOffset_NEL[ch]->GetEntry()->SetNumber(20);
     }
   }
   
@@ -1388,7 +1383,7 @@ void AAInterface::FillAcquisitionFrame()
   DGTriggerType_CBL->GetComboBox()->AddEntry("External (TTL)",1);
   DGTriggerType_CBL->GetComboBox()->AddEntry("Automatic",2);
   DGTriggerType_CBL->GetComboBox()->AddEntry("Software",3);
-  DGTriggerType_CBL->GetComboBox()->Select(3);
+  DGTriggerType_CBL->GetComboBox()->Select(2);
   DGTriggerType_CBL->GetComboBox()->Resize(110,20);
   DGTriggerType_CBL->GetComboBox()->ChangeOptions(DGTriggerType_CBL->GetComboBox()->GetOptions() | kFixedSize);
 

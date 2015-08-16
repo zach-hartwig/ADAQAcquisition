@@ -282,12 +282,12 @@ bool AAVMEManager::ProgramDigitizers()
   DGMgr->SetMaxNumEventsBLT(TheSettings->EventsBeforeReadout);
   
   if(TheSettings->PSDFirmware){
-    
+
     // Create the mandatory DPP-PSD parameter struct
     CAEN_DGTZ_DPP_PSD_Params_t PSDParameters;
     
     for(Int_t ch=0; ch<DGMgr->GetNumChannels(); ch++){
-
+      
       if(TheSettings->ChPosPolarity[ch])
 	DGMgr->SetChannelPulsePolarity(ch, CAEN_DGTZ_PulsePolarityPositive);
       else if(TheSettings->ChNegPolarity[ch])
@@ -298,8 +298,14 @@ bool AAVMEManager::ProgramDigitizers()
       PSDParameters.nsbl[ch] = TheSettings->ChBaselineSamples[ch];
       PSDParameters.csens[ch] = TheSettings->ChChargeSensitivity[ch];
 
-      DGMgr->SetDPPPreTriggerSize(ch, 100);
-      PSDParameters.selft[ch] = 1;
+      // Channel self-triggering (automatic)
+      if(TheSettings->TriggerType == 2)
+	PSDParameters.selft[ch] = 1;
+      // Software or external triggering
+      else
+	PSDParameters.selft[ch] = 0;
+      
+      DGMgr->SetDPPPreTriggerSize(ch, TheSettings->ChPreTrigger[ch]);	
       PSDParameters.thr[ch] = TheSettings->ChTriggerThreshold[ch];
       PSDParameters.tvaw[ch] = TheSettings->ChTriggerValidation[ch];
       PSDParameters.trgc[ch] = (CAEN_DGTZ_DPP_TriggerConfig_t)TheSettings->ChTriggerConfig[ch];
@@ -311,19 +317,33 @@ bool AAVMEManager::ProgramDigitizers()
 
     PSDParameters.purh = CAEN_DGTZ_DPP_PSD_PUR_DetectOnly;
     PSDParameters.purgap = 100;  // Purity Gap
-    PSDParameters.blthr = 3;     // Baseline Threshold
-    PSDParameters.bltmo = 100;   // Baseline Timeout
-    PSDParameters.trgho = 10;    // Trigger holdoff
 
-    
+    // Should be channel-specific according to manual but it NOT an
+    // array in CAENDigitizerTypes.hh header file...?
+    PSDParameters.trgho = 10;    // Trigger holdoff (coincidence mode only)
+
+    // CAENDigitizer manual for 2.6.5 claims that the following
+    // parameters are depracated : ZSH 16 Aug 16
+    PSDParameters.blthr = 3;     // Baseline threshold 
+    PSDParameters.bltmo = 100;   // Baseline timeout 
+
+    DGMgr->SetDPPParameters(DGChEnableMask, &PSDParameters);
+
     DGMgr->SetDPPAcquisitionMode((CAEN_DGTZ_DPP_AcqMode_t)TheSettings->PSDOperationMode,
 				 CAEN_DGTZ_DPP_SAVE_PARAM_EnergyAndTime);
+
+    DGMgr->SetDPPTriggerMode(CAEN_DGTZ_DPP_TriggerMode_Normal);
     
     DGMgr->SetIOLevel(CAEN_DGTZ_IOLevel_TTL);
     
-    DGMgr->SetDPPEventAggregation(TheSettings->EventsBeforeReadout, 0);
+    DGMgr->SetRunSynchronizationMode(CAEN_DGTZ_RUN_SYNC_Disabled);
+
+    DGMgr->SetNumEventsPerAggregate(TheSettings->EventsBeforeReadout);
     
-    DGMgr->SetDPPParameters(DGChEnableMask, &PSDParameters);
+    DGMgr->SetDPPEventAggregation(TheSettings->EventsBeforeReadout, 0);
+
+
+    
   }
   
   return true;
