@@ -125,10 +125,10 @@ bool AAVMEManager::ProgramDigitizers()
   
   uint32_t DGNumChEnabled = 0;
   uint32_t DGChEnableMask = 0;
-
+  
   ////////////////////////////
   // Channel-specific settings
-
+  
   for(int ch=0; ch<DGMgr->GetNumChannels(); ch++){
     // Calculate the channel enable mask, where each hex digit
     // represents channel state as "0" == disabled, "1" == enabled

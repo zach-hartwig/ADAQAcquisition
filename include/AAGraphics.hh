@@ -79,18 +79,18 @@ private:
 
   TCanvas *TheCanvas_C;
 
-  vector<int> ChColor;
+  vector<Int_t> ChColor;
 
-  int WaveformWidth, SpectrumWidth;
+  Int_t MaxWaveformLength, WaveformWidth, SpectrumWidth;
 
   AASettings *TheSettings;
 
-  vector<int> Time;
+  vector<Int_t> Time;
 
   string Title, XTitle, YTitle;
-  double XSize, YSize, XOffset, YOffset;
+  Double_t XSize, YSize, XOffset, YOffset;
 
-  double XMin, XMax, YMin, YMax;
+  Double_t XMin, XMax, YMin, YMax;
   
   vector<TGraph *> WaveformGraphs;
   TH1F *WaveformGraphAxes_H;

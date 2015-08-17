@@ -39,7 +39,7 @@ AAGraphics *AAGraphics::GetInstance()
 
 
 AAGraphics::AAGraphics()
-  : WaveformWidth(2), SpectrumWidth(2),
+  : MaxWaveformLength(0), WaveformWidth(2), SpectrumWidth(2),
     XMin(0.), XMax(1.), YMin(0.), YMax(1.),
     WaveformGraphAxes_H(new TH1F)
 {
@@ -49,7 +49,7 @@ AAGraphics::AAGraphics()
 
   // Set the default palette used to color the PSDHistogram
   gStyle->SetPalette(55);
-
+  
   // Fill a vector with channel colors for plotting
   ChColor += kBlue, kViolet, kRed, kOrange, 
     kYellow+1, kGreen+2, kCyan+2, kAzure+7;
@@ -122,12 +122,18 @@ AAGraphics::~AAGraphics()
 
 void AAGraphics::SetupWaveformGraphics(vector<Int_t> &WaveformLength)
 {
-  Int_t Length = WaveformLength[0];
+  MaxWaveformLength = 0;
+
+  vector<Int_t>::iterator It = WaveformLength.begin();
+  for(; It!=WaveformLength.end(); It++){
+    if((*It) > MaxWaveformLength)
+      MaxWaveformLength = (*It);
+  }
   
   Time.clear();
-  for(int t=0; t<Length; t++)
+  for(int t=0; t<MaxWaveformLength; t++)
     Time.push_back(t);
-
+  
   if(TheSettings->DisplayTitlesEnable){
     Title = TheSettings->DisplayTitle;
     XTitle = TheSettings->DisplayXTitle;
@@ -188,7 +194,7 @@ void AAGraphics::SetupWaveformGraphics(vector<Int_t> &WaveformLength)
   delete WaveformGraphAxes_H;
   WaveformGraphAxes_H = new TH1F("WaveformGraphAxes_H",
 				 "A TH1F used to create X and Y axes for waveform plotting",
-				 100, 0, WaveformLength[0]);
+				 100, 0, MaxWaveformLength);
   
   // Set the waveform title and axes properties
   WaveformGraphAxes_H->SetTitle(Title.c_str());
@@ -197,6 +203,7 @@ void AAGraphics::SetupWaveformGraphics(vector<Int_t> &WaveformLength)
   WaveformGraphAxes_H->GetXaxis()->SetTitleSize(XSize);
   WaveformGraphAxes_H->GetXaxis()->SetTitleOffset(XOffset);
   WaveformGraphAxes_H->GetXaxis()->SetLabelSize(XSize);
+  WaveformGraphAxes_H->GetXaxis()->SetRangeUser(0, MaxWaveformLength);
   
   WaveformGraphAxes_H->GetYaxis()->SetTitle(YTitle.c_str());
   WaveformGraphAxes_H->GetYaxis()->SetTitleSize(YSize);
@@ -238,8 +245,8 @@ void AAGraphics::PlotWaveforms(vector<vector<uint16_t> > &Waveforms,
     // Set the horiz. and vert. min/max ranges of the waveform.  Note
     // the max value is the max digitizer bit value in units of ADC
 
-    XMin = WaveformLength[ch] * TheSettings->HorizontalSliderMin;
-    XMax = WaveformLength[ch] * TheSettings->HorizontalSliderMax;
+    XMin = MaxWaveformLength * TheSettings->HorizontalSliderMin;
+    XMax = MaxWaveformLength * TheSettings->HorizontalSliderMax;
     WaveformGraphs[ch]->GetXaxis()->SetRangeUser(XMin, XMax);
 
     (TheSettings->DisplayXAxisInLog) ? 
