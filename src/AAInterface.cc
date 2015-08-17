@@ -1182,7 +1182,7 @@ void AAInterface::FillAcquisitionFrame()
       DGChShortGate_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
       DGChShortGate_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
       DGChShortGate_NEL[ch]->GetEntry()->Resize(45,20);
-      DGChShortGate_NEL[ch]->GetEntry()->SetNumber(30);
+      DGChShortGate_NEL[ch]->GetEntry()->SetNumber(20);
       
       PSD_HF0->AddFrame(DGChLongGate_NEL[ch] = new ADAQNumberEntryWithLabel(PSD_HF0,
 									    "Long",
@@ -1191,7 +1191,7 @@ void AAInterface::FillAcquisitionFrame()
       DGChLongGate_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
       DGChLongGate_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
       DGChLongGate_NEL[ch]->GetEntry()->Resize(45,20);
-      DGChLongGate_NEL[ch]->GetEntry()->SetNumber(50);
+      DGChLongGate_NEL[ch]->GetEntry()->SetNumber(30);
 
       TGHorizontalFrame *PSD_HF1 = new TGHorizontalFrame(DGChannelControl_GF);
       DGChannelControl_GF->AddFrame(PSD_HF1, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
@@ -1202,6 +1202,8 @@ void AAInterface::FillAcquisitionFrame()
 			new TGLayoutHints(kLHintsLeft,10,0,0,0));
       DGChPreTrigger_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
       DGChPreTrigger_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+      //DGChPreTrigger_NEL[ch]->GetEntry()->SetNumLimits(TGNumberFormat::kNELLimitMinMax);
+      //DGChPreTrigger_NEL[ch]->GetEntry()->SetLimitValues(0, 149);
       DGChPreTrigger_NEL[ch]->GetEntry()->Resize(45,20);
       DGChPreTrigger_NEL[ch]->GetEntry()->SetNumber(150);
       
@@ -1212,7 +1214,7 @@ void AAInterface::FillAcquisitionFrame()
       DGChGateOffset_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
       DGChGateOffset_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
       DGChGateOffset_NEL[ch]->GetEntry()->Resize(45,20);
-      DGChGateOffset_NEL[ch]->GetEntry()->SetNumber(20);
+      DGChGateOffset_NEL[ch]->GetEntry()->SetNumber(35);
     }
   }
   
@@ -1451,10 +1453,10 @@ void AAInterface::FillAcquisitionFrame()
     
     DGAcquisitionControl_GF->AddFrame(DGDPPPSDMode_CBL = new ADAQComboBoxWithLabel(DGAcquisitionControl_GF, "PSD Mode", -1),
 				      new TGLayoutHints(kLHintsNormal,5,5,5,5));
-    DGDPPPSDMode_CBL->GetComboBox()->AddEntry("Waveform", 0);
+    //DGDPPPSDMode_CBL->GetComboBox()->AddEntry("Oscilloscope", 0);
     DGDPPPSDMode_CBL->GetComboBox()->AddEntry("List", 1);
     DGDPPPSDMode_CBL->GetComboBox()->AddEntry("Mixed", 2);
-    DGDPPPSDMode_CBL->GetComboBox()->Select(0);
+    DGDPPPSDMode_CBL->GetComboBox()->Select(2);
   }
   
   DGAcquisitionControl_GF->AddFrame(AQTime_NEL = new ADAQNumberEntryWithLabel(DGAcquisitionControl_GF, "Acquisition time (s)", AQTime_NEL_ID),

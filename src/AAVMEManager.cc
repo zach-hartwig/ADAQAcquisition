@@ -139,42 +139,44 @@ bool AAVMEManager::ProgramDigitizers()
     }
     else
       continue;
-    
-    DGMgr->SetChannelDCOffset(ch, TheSettings->ChDCOffset[ch]);
-    DGMgr->SetChannelTriggerThreshold(ch, TheSettings->ChTriggerThreshold[ch]);
-    
-    if(TheSettings->ChPosPolarity[ch])
-      DGMgr->SetChannelPulsePolarity(ch, CAEN_DGTZ_PulsePolarityPositive);
-    else
-      DGMgr->SetChannelPulsePolarity(ch, CAEN_DGTZ_PulsePolarityNegative);
-    
-    if(TheSettings->ZeroSuppressionEnable){
-      DGMgr->SetZSMode("ZLE");
-      
-      DGMgr->SetZLEChannelSettings(ch,
-				   TheSettings->ChZLEThreshold[ch],
-				   TheSettings->ChZLEBackward[ch],
-				   TheSettings->ChZLEForward[ch],
-				   TheSettings->ChZLEPosLogic[ch]);
 
-      // Testing for positive ZLE logic
-      if(TheSettings->ChZLEPosLogic[ch]){
-	if(TheSettings->ChZLEThreshold[ch] > TheSettings->ChTriggerThreshold[ch]){
-	  
-	  cout << "Error! For ZLE positive logic: ZLE Threshold < Ch Trigger!\n"
-	       << endl;
-	  
-	  return false;
+    if(TheSettings->PSDFirmware){
+      DGMgr->SetChannelDCOffset(ch, TheSettings->ChDCOffset[ch]);
+      DGMgr->SetChannelTriggerThreshold(ch, TheSettings->ChTriggerThreshold[ch]);
+    
+      if(TheSettings->ChPosPolarity[ch])
+	DGMgr->SetChannelPulsePolarity(ch, CAEN_DGTZ_PulsePolarityPositive);
+      else
+	DGMgr->SetChannelPulsePolarity(ch, CAEN_DGTZ_PulsePolarityNegative);
+    
+      if(TheSettings->ZeroSuppressionEnable){
+	DGMgr->SetZSMode("ZLE");
+	
+	DGMgr->SetZLEChannelSettings(ch,
+				     TheSettings->ChZLEThreshold[ch],
+				     TheSettings->ChZLEBackward[ch],
+				     TheSettings->ChZLEForward[ch],
+				     TheSettings->ChZLEPosLogic[ch]);
+	
+	// Testing for positive ZLE logic
+	if(TheSettings->ChZLEPosLogic[ch]){
+	  if(TheSettings->ChZLEThreshold[ch] > TheSettings->ChTriggerThreshold[ch]){
+	    
+	    cout << "Error! For ZLE positive logic: ZLE Threshold < Ch Trigger!\n"
+		 << endl;
+	    
+	    return false;
+	  }
 	}
-      }
-      
-      // Testing for negative ZLE logic
-      else if(TheSettings->ChZLENegLogic[ch]){
-	if(TheSettings->ChZLEThreshold[ch] < TheSettings->ChTriggerThreshold[ch]){
-	  
-	  cout << "Error! For ZLE negative logic: ZLE Threshold > Ch Trigger!\n"
-	       << endl;
-	  return false;
+	
+	// Testing for negative ZLE logic
+	else if(TheSettings->ChZLENegLogic[ch]){
+	  if(TheSettings->ChZLEThreshold[ch] < TheSettings->ChTriggerThreshold[ch]){
+	    
+	    cout << "Error! For ZLE negative logic: ZLE Threshold > Ch Trigger!\n"
+		 << endl;
+	    return false;
+	  }
 	}
       }
     }
@@ -283,18 +285,24 @@ bool AAVMEManager::ProgramDigitizers()
   
   if(TheSettings->PSDFirmware){
 
+    DGMgr->SetDPPAcquisitionMode((CAEN_DGTZ_DPP_AcqMode_t)TheSettings->PSDOperationMode,
+				 CAEN_DGTZ_DPP_SAVE_PARAM_EnergyAndTime);
+    
+    DGMgr->SetDPPTriggerMode(CAEN_DGTZ_DPP_TriggerMode_Normal);
+    
+    DGMgr->SetIOLevel(CAEN_DGTZ_IOLevel_TTL);
+
+    DGMgr->SetDPPEventAggregation(TheSettings->EventsBeforeReadout, 0);
+    
+    DGMgr->SetRunSynchronizationMode(CAEN_DGTZ_RUN_SYNC_Disabled);
+    
+    //DGMgr->SetNumEventsPerAggregate(TheSettings->EventsBeforeReadout);
+
     // Create the mandatory DPP-PSD parameter struct
     CAEN_DGTZ_DPP_PSD_Params_t PSDParameters;
     
     for(Int_t ch=0; ch<DGMgr->GetNumChannels(); ch++){
       
-      if(TheSettings->ChPosPolarity[ch])
-	DGMgr->SetChannelPulsePolarity(ch, CAEN_DGTZ_PulsePolarityPositive);
-      else if(TheSettings->ChNegPolarity[ch])
-	DGMgr->SetChannelPulsePolarity(ch, CAEN_DGTZ_PulsePolarityNegative);
-      
-      DGMgr->SetChannelDCOffset(ch, TheSettings->ChDCOffset[ch]);
-      DGMgr->SetRecordLength(TheSettings->ChRecordLength[ch], ch);
       PSDParameters.nsbl[ch] = TheSettings->ChBaselineSamples[ch];
       PSDParameters.csens[ch] = TheSettings->ChChargeSensitivity[ch];
 
@@ -305,45 +313,36 @@ bool AAVMEManager::ProgramDigitizers()
       else
 	PSDParameters.selft[ch] = 0;
       
-      DGMgr->SetDPPPreTriggerSize(ch, TheSettings->ChPreTrigger[ch]);	
       PSDParameters.thr[ch] = TheSettings->ChTriggerThreshold[ch];
       PSDParameters.tvaw[ch] = TheSettings->ChTriggerValidation[ch];
       PSDParameters.trgc[ch] = (CAEN_DGTZ_DPP_TriggerConfig_t)TheSettings->ChTriggerConfig[ch];
-
+      
       PSDParameters.sgate[ch] = TheSettings->ChShortGate[ch];
       PSDParameters.lgate[ch] = TheSettings->ChLongGate[ch];
-      PSDParameters.pgate[ch] = TheSettings->ChPreTrigger[ch];
+      PSDParameters.pgate[ch] = TheSettings->ChGateOffset[ch];
     }
 
     PSDParameters.purh = CAEN_DGTZ_DPP_PSD_PUR_DetectOnly;
     PSDParameters.purgap = 100;  // Purity Gap
-
-    // Should be channel-specific according to manual but it NOT an
-    // array in CAENDigitizerTypes.hh header file...?
-    PSDParameters.trgho = 10;    // Trigger holdoff (coincidence mode only)
-
-    // CAENDigitizer manual for 2.6.5 claims that the following
-    // parameters are depracated : ZSH 16 Aug 16
-    PSDParameters.blthr = 3;     // Baseline threshold 
-    PSDParameters.bltmo = 100;   // Baseline timeout 
+    PSDParameters.trgho = 10;    // Trigger holdoff
+    PSDParameters.blthr = 3;     // Baseline threshold  (Depracated?)
+    PSDParameters.bltmo = 100;   // Baseline timeout  (Depracated?)
 
     DGMgr->SetDPPParameters(DGChEnableMask, &PSDParameters);
 
-    DGMgr->SetDPPAcquisitionMode((CAEN_DGTZ_DPP_AcqMode_t)TheSettings->PSDOperationMode,
-				 CAEN_DGTZ_DPP_SAVE_PARAM_EnergyAndTime);
+    for(Int_t ch=0; ch<DGMgr->GetNumChannels(); ch++){
 
-    DGMgr->SetDPPTriggerMode(CAEN_DGTZ_DPP_TriggerMode_Normal);
-    
-    DGMgr->SetIOLevel(CAEN_DGTZ_IOLevel_TTL);
-    
-    DGMgr->SetRunSynchronizationMode(CAEN_DGTZ_RUN_SYNC_Disabled);
+      DGMgr->SetRecordLength(TheSettings->ChRecordLength[ch], ch);
 
-    DGMgr->SetNumEventsPerAggregate(TheSettings->EventsBeforeReadout);
-    
-    DGMgr->SetDPPEventAggregation(TheSettings->EventsBeforeReadout, 0);
+      DGMgr->SetChannelDCOffset(ch, TheSettings->ChDCOffset[ch]);
 
+      DGMgr->SetDPPPreTriggerSize(ch, TheSettings->ChPreTrigger[ch]);	
 
-    
+      if(TheSettings->ChPosPolarity[ch])
+	DGMgr->SetChannelPulsePolarity(ch, CAEN_DGTZ_PulsePolarityPositive);
+      else if(TheSettings->ChNegPolarity[ch])
+	DGMgr->SetChannelPulsePolarity(ch, CAEN_DGTZ_PulsePolarityNegative);
+    }
   }
   
   return true;

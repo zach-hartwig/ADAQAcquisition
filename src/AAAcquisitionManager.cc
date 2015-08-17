@@ -504,7 +504,7 @@ void AAAcquisitionManager::StartAcquisition()
 	  if(UseSTDFirmware)
 	    NumSamples = Waveforms[ch].size();
 	  else if(UsePSDFirmware)
-	    NumSamples = (Int_t)PSDWaveforms->Ns;
+	    NumSamples = PSDWaveforms->Ns;
 	  
 	  for(Int_t sample=0; sample<NumSamples; sample++){
 	    
