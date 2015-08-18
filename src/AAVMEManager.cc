@@ -343,8 +343,42 @@ bool AAVMEManager::ProgramDigitizers()
       else if(TheSettings->ChNegPolarity[ch])
 	DGMgr->SetChannelPulsePolarity(ch, CAEN_DGTZ_PulsePolarityNegative);
     }
+
+
+    DGMgr->SetDPPVirtualProbe(ANALOG_TRACE_1,
+			      CAEN_DGTZ_DPP_VIRTUALPROBE_Input);
+    
+    DGMgr->SetDPPVirtualProbe(ANALOG_TRACE_2,
+			      CAEN_DGTZ_DPP_VIRTUALPROBE_Baseline);
+
+    /* ZSH (17 Aug 15)
+       
+       Attempts to set the digital traces for the DT5790 unit fail
+       with CAEN error code '-33', which indicates that the specified
+       digital problem traces are not available for this unit. The
+       CAEN_DGTZ_SetDPPVirtualProbe() is the new recommended function
+       for this purpose so this may be a bug in the firmware for the
+       DT5790? Need to check with CAEN
+
+    Int_t Status = 42;
+    
+    Status = DGMgr->SetDPPVirtualProbe(DIGITAL_TRACE_1,
+				       CAEN_DGTZ_DPP_DIGITALPROBE_Gate);
+    
+    cout << Status << endl;
+    
+    Status = DGMgr->SetDPPVirtualProbe(DIGITAL_TRACE_2,
+				       CAEN_DGTZ_DPP_DIGITALPROBE_GateShort);
+    
+    cout << Status << endl;
+    
+    Status = DGMgr->SetDPPVirtualProbe(DIGITAL_TRACE_3,
+				       CAEN_DGTZ_DPP_DIGITALPROBE_Trigger);
+    
+    cout << Status << endl;
+    */
   }
-  
+    
   return true;
 }
 

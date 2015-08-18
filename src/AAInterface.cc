@@ -1458,7 +1458,7 @@ void AAInterface::FillAcquisitionFrame()
     DGAcquisitionControl_GF->AddFrame(DGDPPPSDMode_CBL = new ADAQComboBoxWithLabel(DGAcquisitionControl_GF, "PSD mode", -1),
 				      new TGLayoutHints(kLHintsNormal,5,5,5,5));
     DGDPPPSDMode_CBL->GetComboBox()->Resize(130, 20);
-    //DGDPPPSDMode_CBL->GetComboBox()->AddEntry("Oscilloscope", 0);
+    DGDPPPSDMode_CBL->GetComboBox()->AddEntry("Oscilloscope", 0);
     DGDPPPSDMode_CBL->GetComboBox()->AddEntry("List (PSD data)", 1);
     DGDPPPSDMode_CBL->GetComboBox()->AddEntry("List + Waveforms", 2);
     DGDPPPSDMode_CBL->GetComboBox()->Select(2);

@@ -541,10 +541,10 @@ void AAAcquisitionManager::StartAcquisition()
 	      // samples that fall within the baseline calculation region
 	      if(sample > BaselineStart[ch] and sample <= BaselineStop[ch])
 		BaselineValue[ch] += Waveforms[ch][sample] * 1.0 / BaselineLength[ch]; // [ADC]
-	      
+
 	      // Analyze the pulses to obtain pulse spectra
 	      else if(sample >= BaselineStop[ch]){
-		
+
 		// Calculate the waveform sample distance from the baseline
 		SampleHeight = Polarity[ch] * (Waveforms[ch][sample] - BaselineValue[ch]);
 		TriggerHeight = Polarity[ch] * (TheSettings->ChTriggerThreshold[ch] - BaselineValue[ch]);
@@ -562,7 +562,7 @@ void AAAcquisitionManager::StartAcquisition()
 		PulseArea += SampleHeight;
 	      }
 	    }
-	  } // End sample loop
+	  }// End sample loop
 
 	  // Because the PSD integrals are computed relative to the peak
 	  // position - which is found during the sample loop above - we
