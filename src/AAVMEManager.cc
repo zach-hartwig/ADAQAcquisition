@@ -350,8 +350,10 @@ bool AAVMEManager::ProgramDigitizers()
     
     DGMgr->SetDPPVirtualProbe(ANALOG_TRACE_2,
 			      CAEN_DGTZ_DPP_VIRTUALPROBE_Baseline);
+    
+    /*
 
-    /* ZSH (17 Aug 15)
+     ZSH (17 Aug 15)
        
        Attempts to set the digital traces for the DT5790 unit fail
        with CAEN error code '-33', which indicates that the specified

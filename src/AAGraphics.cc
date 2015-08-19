@@ -321,11 +321,17 @@ void AAGraphics::DrawWaveformGraphics(vector<double> &BaselineValue,
     if(!TheSettings->ChEnable[ch])
       continue;
     
-    if(TheSettings->DisplayTrigger)
-      Trigger_L[ch]->DrawLine(XMin,
-			      TheSettings->ChTriggerThreshold[ch],
-			      XMax,
-			      TheSettings->ChTriggerThreshold[ch]);
+    if(TheSettings->DisplayTrigger){
+
+      Double_t Trigger = 0.;
+      if(TheSettings->PSDFirmware)
+	if(TheSettings->ChPosPolarity[ch])
+	  Trigger = TheSettings->ChTriggerThreshold[ch] + BaselineValue[ch];
+	else if(TheSettings->ChNegPolarity[ch])
+	  Trigger = BaselineValue[ch] - TheSettings->ChTriggerThreshold[ch];
+      
+      Trigger_L[ch]->DrawLine(XMin, Trigger, XMax, Trigger);
+    }
     
     if(TheSettings->DisplayBaselineBox){
       double BaselineWidth = (YMax-YMin)*0.03;

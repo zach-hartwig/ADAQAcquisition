@@ -34,8 +34,8 @@ AAAcquisitionManager::AAAcquisitionManager()
   : AcquisitionEnable(false), AcquisitionTimerEnable(false),
     AcquisitionTimeStart(0), AcquisitionTimeStop(0), 
     AcquisitionTimeNow(0), AcquisitionTimePrev(0),
-    UseSTDFirmware(false), UsePSDFirmware(true),
-    UsePSDListMode(false), UsePSDWaveformMode(!UsePSDListMode),
+    UseSTDFirmware(true), UsePSDFirmware(false),
+    UsePSDWaveformMode(true), UsePSDListMode(false), UsePSDMixedMode(false),
     EventPointer(NULL), EventWaveform(NULL), Buffer(NULL),
     BufferSize(0), ReadSize(0), FPGAEvents(0), PCEvents(0),
     ReadoutType(0), ReadoutTypeBit(24), ReadoutTypeMask(0b1 << ReadoutTypeBit),
@@ -114,19 +114,23 @@ void AAAcquisitionManager::PrepareAcquisition()
 
   switch(TheSettings->PSDOperationMode){
 
-  case CAEN_DGTZ_DPP_ACQ_MODE_List:
-    UsePSDListMode = true;
-    UsePSDWaveformMode = false;
-    break;
-
   case CAEN_DGTZ_DPP_ACQ_MODE_Oscilloscope:
-    UsePSDListMode = false;
     UsePSDWaveformMode = true;
+    UsePSDListMode = false;
+    UsePSDMixedMode = false;
     break;
 
-  case CAEN_DGTZ_DPP_ACQ_MODE_Mixed:
+  case CAEN_DGTZ_DPP_ACQ_MODE_List:
+    UsePSDWaveformMode = false;
     UsePSDListMode = true;
-    UsePSDWaveformMode = true;
+    UsePSDMixedMode = false;
+    break;
+    
+  case CAEN_DGTZ_DPP_ACQ_MODE_Mixed:
+    UsePSDWaveformMode = false;
+    UsePSDListMode = false;
+    UsePSDMixedMode = true;
+    
     break;
   }
 
@@ -467,7 +471,7 @@ void AAAcquisitionManager::StartAcquisition()
 	  
 	  // Perform DPP-PSD firmware waveform readout
 	  
-	  else if(UsePSDFirmware and UsePSDWaveformMode){
+	  else if(UsePSDFirmware and !UsePSDListMode){
 	    DGManager->DecodeDPPWaveforms(&PSDEvents[ch][evt], PSDWaveforms);
 	  }
 	}
@@ -496,9 +500,11 @@ void AAAcquisitionManager::StartAcquisition()
 	
 	///////////////////////////////////
 	// Post-readout waveform processing
-
-	if(UseSTDFirmware or (UsePSDFirmware and UsePSDWaveformMode)){
-
+	
+	// Readout and process full waveforms for STD firwmare; do the
+	// same for PSD firmware in 'Oscilloscope' or 'Mixed' modes 
+	if(UseSTDFirmware or (UsePSDFirmware and !UsePSDListMode)){
+	  
 	  // Get  the total number of samples in the current waveform
 	  Int_t NumSamples = 0;
 	  if(UseSTDFirmware)
@@ -590,14 +596,16 @@ void AAAcquisitionManager::StartAcquisition()
 	  }
 	}
 	
-	else if(UsePSDFirmware and UsePSDListMode){
+	if(UsePSDFirmware and !UsePSDWaveformMode){
 	  
 	  // These options enable DPP-PSD firmware to provide basic
 	  // pulse baseline and area; pulse height is not available
-
+	  
 	  BaselineValue[ch] = PSDEvents[ch][evt].Baseline;
 	  PulseArea = PSDEvents[ch][evt].ChargeLong;
 	  PulseHeight = -42.42;
+
+	  cout << BaselineValue[ch] << endl;
 	  
 	  PSDTotal = PSDEvents[ch][evt].ChargeLong;
 	  PSDTail = PSDEvents[ch][evt].ChargeShort;
