@@ -1206,17 +1206,14 @@ void AAInterface::FillAcquisitionFrame()
 			new TGLayoutHints(kLHintsLeft,10,0,0,0));
       DGChPreTrigger_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
       DGChPreTrigger_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
-      //DGChPreTrigger_NEL[ch]->GetEntry()->SetNumLimits(TGNumberFormat::kNELLimitMinMax);
-      //DGChPreTrigger_NEL[ch]->GetEntry()->SetLimitValues(0, 149);
       DGChPreTrigger_NEL[ch]->GetEntry()->Resize(45,20);
-      DGChPreTrigger_NEL[ch]->GetEntry()->SetNumber(150);
+      DGChPreTrigger_NEL[ch]->GetEntry()->SetNumber(256);
       
       PSD_HF1->AddFrame(DGChGateOffset_NEL[ch] = new ADAQNumberEntryWithLabel(PSD_HF1,
 									      "Gate offset",
 									      -1),
 			new TGLayoutHints(kLHintsLeft,10,0,0,0));
       DGChGateOffset_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-      DGChGateOffset_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
       DGChGateOffset_NEL[ch]->GetEntry()->Resize(45,20);
       DGChGateOffset_NEL[ch]->GetEntry()->SetNumber(35);
     }

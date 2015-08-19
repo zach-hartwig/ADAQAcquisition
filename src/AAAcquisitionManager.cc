@@ -604,8 +604,6 @@ void AAAcquisitionManager::StartAcquisition()
 	  BaselineValue[ch] = PSDEvents[ch][evt].Baseline;
 	  PulseArea = PSDEvents[ch][evt].ChargeLong;
 	  PulseHeight = -42.42;
-
-	  cout << BaselineValue[ch] << endl;
 	  
 	  PSDTotal = PSDEvents[ch][evt].ChargeLong;
 	  PSDTail = PSDEvents[ch][evt].ChargeShort;

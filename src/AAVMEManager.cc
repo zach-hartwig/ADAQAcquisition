@@ -303,12 +303,16 @@ bool AAVMEManager::ProgramDigitizers()
     
     for(Int_t ch=0; ch<DGMgr->GetNumChannels(); ch++){
       
+      if(!TheSettings->ChEnable[ch])
+	continue;
+      
       PSDParameters.nsbl[ch] = TheSettings->ChBaselineSamples[ch];
       PSDParameters.csens[ch] = TheSettings->ChChargeSensitivity[ch];
 
       // Channel self-triggering (automatic)
       if(TheSettings->TriggerType == 2)
 	PSDParameters.selft[ch] = 1;
+
       // Software or external triggering
       else
 	PSDParameters.selft[ch] = 0;
@@ -331,20 +335,23 @@ bool AAVMEManager::ProgramDigitizers()
     DGMgr->SetDPPParameters(DGChEnableMask, &PSDParameters);
 
     for(Int_t ch=0; ch<DGMgr->GetNumChannels(); ch++){
-
+      
+      if(!TheSettings->ChEnable[ch])
+	continue;
+      
       DGMgr->SetRecordLength(TheSettings->ChRecordLength[ch], ch);
 
       DGMgr->SetChannelDCOffset(ch, TheSettings->ChDCOffset[ch]);
-
-      DGMgr->SetDPPPreTriggerSize(ch, TheSettings->ChPreTrigger[ch]);	
-
+      
+      DGMgr->SetDPPPreTriggerSize(ch, TheSettings->ChPreTrigger[ch]);
+      
       if(TheSettings->ChPosPolarity[ch])
 	DGMgr->SetChannelPulsePolarity(ch, CAEN_DGTZ_PulsePolarityPositive);
       else if(TheSettings->ChNegPolarity[ch])
 	DGMgr->SetChannelPulsePolarity(ch, CAEN_DGTZ_PulsePolarityNegative);
     }
-
-
+    
+    
     DGMgr->SetDPPVirtualProbe(ANALOG_TRACE_1,
 			      CAEN_DGTZ_DPP_VIRTUALPROBE_Input);
     
