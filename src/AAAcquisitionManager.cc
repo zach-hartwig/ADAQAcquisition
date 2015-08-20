@@ -169,7 +169,17 @@ void AAAcquisitionManager::PrepareAcquisition()
     else
       Polarity[ch] = -1.;
   }
-  
+
+
+  //////////////////////////
+  // PSD integral calculation
+  if(UsePSDFirmware)
+    for(Int_t ch=0; ch<NumDGChannels; ch++){
+      Int_t GateStart = TheSettings->ChPreTrigger[ch] - TheSettings->ChGateOffset[ch];
+      PSDTotalAbsStart[ch] = PSDTailAbsStart[ch] = GateStart;
+      PSDTotalAbsStop[ch] = GateStart + TheSettings->ChLongGate[ch];
+      PSDTailAbsStop[ch] = GateStart + TheSettings->ChShortGate[ch];
+    }
   
   ///////////////////
   // Waveform readout
@@ -573,13 +583,11 @@ void AAAcquisitionManager::StartAcquisition()
 
 	  // Computation of PSD integrals
 
-	  // In STD firwmare, the PSD integrals are taken relative to
+	  // In STD firmware, the PSD integrals are taken relative to
 	  // the peak position in time so the integrals must be taken
 	  // *after* the sample loop, in which the peak position is
-	  // determined, concludes.
-
-	  // In PSD firmware, the PSD integrals start at the gate
-	  // offset from the trigger position in time
+	  // determined, concludes. The PSD firmware values are fixed
+	  // and set in AAAcquisitionManager::PreAcquisition()
 
 	  // Set the PSD integral limits in units of absolute sample number
 	  if(UseSTDFirmware){
@@ -588,16 +596,10 @@ void AAAcquisitionManager::StartAcquisition()
 	    PSDTailAbsStart[ch] = PeakPosition[ch] + TheSettings->ChPSDTailStart[ch];
 	    PSDTailAbsStop[ch] = PeakPosition[ch] + TheSettings->ChPSDTailStop[ch];
 	  }
-	  else if(UsePSDFirmware){
-	    Int_t GateStart = TheSettings->ChPreTrigger[ch] - TheSettings->ChGateOffset[ch];
-	    PSDTotalAbsStart[ch] = PSDTailAbsStart[ch] = GateStart;
-	    PSDTotalAbsStop[ch] = GateStart + TheSettings->ChLongGate[ch];
-	    PSDTailAbsStop[ch] = GateStart + TheSettings->ChShortGate[ch];
-	  }
 	  
 	  // Only take the time to compute PSD integrals if necessary
 	  if(TheSettings->PSDMode or TheSettings->WaveformStorePSDData){	    
-
+	    
 	    // The total PSD integral
 	    Int_t sample = PSDTotalAbsStart[ch];
 	    for(; sample<PSDTotalAbsStop[ch]; sample++)
@@ -1129,7 +1131,7 @@ void AAAcquisitionManager::CreateADAQFile(string FileName)
 
   Int_t DGChannels = DGManager->GetNumChannels();
   for(Int_t ch=0; ch<DGChannels; ch++){
-
+    
     // For each digitizer channel, create the two mandatory TTree branches:
     // -A branch to store the channel's digitized waveform
     // -A branch to store analyzed waveform data in 
@@ -1176,6 +1178,7 @@ void AAAcquisitionManager::CreateADAQFile(string FileName)
   ADAQReadoutInformation *ARI = TheReadoutManager->GetReadoutInformation();
   
   // Set physical information about the digitizer device
+
   ARI->SetDGModelName      (DGManager->GetBoardModelName());
   ARI->SetDGSerialNumber   (DGManager->GetBoardSerialNumber());
   ARI->SetDGNumChannels    (DGManager->GetNumChannels());
@@ -1183,32 +1186,67 @@ void AAAcquisitionManager::CreateADAQFile(string FileName)
   ARI->SetDGSamplingRate   (DGManager->GetSamplingRate());
   ARI->SetDGROCFWRevision  (DGManager->GetBoardROCFirmwareRevision());
   ARI->SetDGAMCFWRevision  (DGManager->GetBoardAMCFirmwareRevision());
+  if(TheSettings->STDFirmware)
+    ARI->SetDGFWType       ("Standard");
+  else if(TheSettings->PSDFirmware)
+    ARI->SetDGFWType       ("DPP-PSD");
 
-  // Fill the global acquisition settings
-  ARI->SetRecordLength         (TheSettings->RecordLength);
-  ARI->SetPostTrigger          (TheSettings->PostTrigger);
-  ARI->SetCoincidenceLevel     (TheSettings->TriggerCoincidenceLevel);
-  ARI->SetDataReductionMode    (TheSettings->DataReductionEnable);
-  ARI->SetZeroSuppressionMode  (TheSettings->ZeroSuppressionEnable);
+  // Fill global acquisition settings
+
   ARI->SetTriggerType          (TheSettings->TriggerTypeName);
   ARI->SetTriggerEdge          (TheSettings->TriggerEdgeName);
   ARI->SetAcquisitionType      (TheSettings->AcquisitionControlName);
-  
-  // Fill the channel specific settings
-  ARI->SetTrigger          (TheSettings->ChTriggerThreshold);
-  ARI->SetBaselineCalcMin  (TheSettings->ChBaselineCalcMin);
-  ARI->SetBaselineCalcMax  (TheSettings->ChBaselineCalcMax);
+  ARI->SetDataReductionMode    (TheSettings->DataReductionEnable);
+  ARI->SetZeroSuppressionMode  (TheSettings->ZeroSuppressionEnable);
+  ARI->SetCoincidenceLevel     (TheSettings->TriggerCoincidenceLevel);
+
+  // Fill firmware-agnostic channel-specific settings
+
   ARI->SetChannelEnable    (TheSettings->ChEnable);
   ARI->SetDCOffset         (TheSettings->ChDCOffset);
-  ARI->SetZLEFwd           (TheSettings->ChZLEForward);
-  ARI->SetZLEBck           (TheSettings->ChZLEBackward);
-  ARI->SetZLEThreshold     (TheSettings->ChZLEThreshold);
-  ARI->SetPSDTotalStart    (TheSettings->ChPSDTotalStart);
-  ARI->SetPSDTotalStop     (TheSettings->ChPSDTotalStop);
-  ARI->SetPSDTailStart     (TheSettings->ChPSDTailStart);
-  ARI->SetPSDTailStop      (TheSettings->ChPSDTailStop);
+  ARI->SetTrigger          (TheSettings->ChTriggerThreshold);
+  ARI->SetBaselineCalcMin  (BaselineStart);
+  ARI->SetBaselineCalcMax  (BaselineStop);
+  if(TheSettings->STDFirmware){
+    ARI->SetPSDTotalStart    (TheSettings->ChPSDTotalStart);
+    ARI->SetPSDTotalStop     (TheSettings->ChPSDTotalStop);
+    ARI->SetPSDTailStart     (TheSettings->ChPSDTailStart);
+    ARI->SetPSDTailStop      (TheSettings->ChPSDTailStop);
+  }
+  else if(TheSettings->PSDFirmware){
+    ARI->SetPSDTotalStart    (PSDTotalAbsStart);
+    ARI->SetPSDTotalStop     (PSDTotalAbsStop);
+    ARI->SetPSDTailStart     (PSDTailAbsStart);
+    ARI->SetPSDTailStop      (PSDTailAbsStop);
+  }
   
+  // Fill CAEN standard firmware specific settings
+  
+  if(TheSettings->STDFirmware){
+    ARI->SetRecordLength     (TheSettings->RecordLength);
+    ARI->SetPostTrigger      (TheSettings->PostTrigger);
+    
+    ARI->SetZLEFwd           (TheSettings->ChZLEForward);
+    ARI->SetZLEBck           (TheSettings->ChZLEBackward);
+    ARI->SetZLEThreshold     (TheSettings->ChZLEThreshold);
+  }
+  
+  // Fill CAEN DPP-PSD firmware specific settings
+  
+  else if(TheSettings->PSDFirmware){
+    ARI->SetChRecordLength       (TheSettings->ChRecordLength);
+    ARI->SetChChargeSensitivity  (TheSettings->ChChargeSensitivity);
+    ARI->SetChPSDCut             (TheSettings->ChPSDCut);
+    ARI->SetChTriggerConfig      (TheSettings->ChTriggerConfig);
+    ARI->SetChTriggerValidation  (TheSettings->ChTriggerValidation);
+    ARI->SetChShortGate          (TheSettings->ChShortGate);
+    ARI->SetChLongGate           (TheSettings->ChLongGate);
+    ARI->SetChPreTrigger         (TheSettings->ChPreTrigger);
+    ARI->SetChGateOffset         (TheSettings->ChGateOffset);
+  }
+    
   // Fill information regarding waveform acquisition
+
   ARI->SetStoreRawWaveforms  (TheSettings->WaveformStoreRaw);
   ARI->SetStoreEnergyData    (TheSettings->WaveformStoreEnergyData);
   ARI->SetStorePSDData       (TheSettings->WaveformStorePSDData);
