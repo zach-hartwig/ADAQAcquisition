@@ -148,27 +148,29 @@ void AAAcquisitionManager::PrepareAcquisition()
   // Baseline calculation
   
   for(Int_t ch=0; ch<NumDGChannels; ch++){
-
-      if(UseSTDFirmware){
-	BaselineStart[ch] = TheSettings->ChBaselineCalcMin[ch];
-	BaselineStop[ch] = TheSettings->ChBaselineCalcMax[ch];
-	BaselineLength[ch] = BaselineStop[ch] - BaselineStart[ch];
-	BaselineValue[ch] = 0.;
-      }
-      else if(UsePSDFirmware){
-	BaselineStart[ch] = 0;
-	BaselineStop[ch] = 30;
-	BaselineLength[ch] = BaselineStop[ch] - BaselineStart[ch];
-	BaselineValue[ch] = 0.;
-      }
-
-      if(TheSettings->ChPosPolarity[ch])
-	Polarity[ch] = 1.;
-      else
-	Polarity[ch] = -1.;
-  }
-
     
+    if(UseSTDFirmware){
+      BaselineStart[ch] = TheSettings->ChBaselineCalcMin[ch];
+      BaselineStop[ch] = TheSettings->ChBaselineCalcMax[ch];
+      BaselineLength[ch] = BaselineStop[ch] - BaselineStart[ch];
+      BaselineValue[ch] = 0.;
+    }
+    else if(UsePSDFirmware){
+      Int_t BaselineSamples = pow(2,(TheSettings->ChBaselineSamples[ch]+1));
+      
+      BaselineStop[ch] = TheSettings->ChPreTrigger[ch] - TheSettings->ChGateOffset[ch] - 1;
+      BaselineStart[ch] = BaselineStop[ch] - BaselineSamples;
+      BaselineLength[ch] = pow(2,(TheSettings->ChBaselineSamples[ch]+1));
+      BaselineValue[ch] = 0.;
+    }
+    
+    if(TheSettings->ChPosPolarity[ch])
+      Polarity[ch] = 1.;
+    else
+      Polarity[ch] = -1.;
+  }
+  
+  
   ///////////////////
   // Waveform readout
   
@@ -547,13 +549,12 @@ void AAAcquisitionManager::StartAcquisition()
 	      // samples that fall within the baseline calculation region
 	      if(sample > BaselineStart[ch] and sample <= BaselineStop[ch])
 		BaselineValue[ch] += Waveforms[ch][sample] * 1.0 / BaselineLength[ch]; // [ADC]
-
+	      
 	      // Analyze the pulses to obtain pulse spectra
 	      else if(sample >= BaselineStop[ch]){
 		
 		// Calculate the waveform sample distance from the baseline
 		SampleHeight = Polarity[ch] * (Waveforms[ch][sample] - BaselineValue[ch]);
-		TriggerHeight = Polarity[ch] * (TheSettings->ChTriggerThreshold[ch] - BaselineValue[ch]);
 		
 		// Simple algorithm to determine the pulse height [ADC]
 		// and peak position [sample] by looping over all samples
@@ -608,16 +609,12 @@ void AAAcquisitionManager::StartAcquisition()
 	      PSDTail += Polarity[ch] * (Waveforms[ch][sample] - BaselineValue[ch]);
 	  }
 	}
+
+	// If PSD mixed or list mode is enabled then set the baseline
+	// and PSD integrals from the PSD firmware calculations
 	
 	if(UsePSDFirmware and !UsePSDWaveformMode){
-	  
-	  // These options enable DPP-PSD firmware to provide basic
-	  // pulse baseline and area; pulse height is not available
-	  
 	  BaselineValue[ch] = PSDEvents[ch][evt].Baseline;
-	  PulseArea = PSDEvents[ch][evt].ChargeLong;
-	  PulseHeight = -42.42;
-	  
 	  PSDTotal = PSDEvents[ch][evt].ChargeLong;
 	  PSDTail = PSDEvents[ch][evt].ChargeShort;
 	}
@@ -628,7 +625,7 @@ void AAAcquisitionManager::StartAcquisition()
 	  else
 	    PulseArea = CalibrationCurves[ch]->Eval(PulseArea);
 	}
-      
+	
 	
 	////////////////////////////
 	// Post-readout data storage 
@@ -737,7 +734,7 @@ void AAAcquisitionManager::StartAcquisition()
 		FillWaveformTree = true;
 	    }
 	  }
-
+	  
 	  else if(TheSettings->PSDMode){
 	    if(PSDTotal > TheSettings->PSDThreshold){
 	      
@@ -1136,7 +1133,7 @@ void AAAcquisitionManager::CreateADAQFile(string FileName)
     // For each digitizer channel, create the two mandatory TTree branches:
     // -A branch to store the channel's digitized waveform
     // -A branch to store analyzed waveform data in 
-
+    
     TheReadoutManager->CreateWaveformTreeBranches(ch, 
 						  &Waveforms[ch],
 						  WaveformData[ch]);

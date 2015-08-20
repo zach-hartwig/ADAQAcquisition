@@ -88,12 +88,12 @@ AAGraphics::AAGraphics()
 
     PSDTail_L0.push_back(new TLine);
     PSDTail_L0[ch]->SetLineColor(ChColor[ch]);
-    PSDTail_L0[ch]->SetLineStyle(7);
+    PSDTail_L0[ch]->SetLineStyle(1);
     PSDTail_L0[ch]->SetLineWidth(2);
     
     PSDTail_L1.push_back(new TLine);
     PSDTail_L1[ch]->SetLineColor(ChColor[ch]);
-    PSDTail_L1[ch]->SetLineStyle(7);
+    PSDTail_L1[ch]->SetLineStyle(1);
     PSDTail_L1[ch]->SetLineWidth(2);
   }
 
@@ -369,7 +369,7 @@ void AAGraphics::DrawWaveformGraphics(vector<double> &BaselineValue,
 
 	Int_t BaselineSamples = pow(2,(TheSettings->ChBaselineSamples[ch]+1));
 		
-	BaselineStop = TheSettings->ChPreTrigger[ch] - TheSettings->ChGateOffset[ch] -1;
+	BaselineStop = TheSettings->ChPreTrigger[ch] - TheSettings->ChGateOffset[ch] - 1;
 	BaselineStart = BaselineStop - BaselineSamples;
       }
       

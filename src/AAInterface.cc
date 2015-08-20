@@ -1114,7 +1114,7 @@ void AAInterface::FillAcquisitionFrame()
       DGChRecordLength_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
       DGChRecordLength_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
       DGChRecordLength_NEL[ch]->GetEntry()->Resize(55,20);
-      DGChRecordLength_NEL[ch]->GetEntry()->SetNumber(512);
+      DGChRecordLength_NEL[ch]->GetEntry()->SetNumber(256);
 
       DGChannelControl_GF->AddFrame(DGChBaselineSamples_CBL[ch] = new ADAQComboBoxWithLabel(DGChannelControl_GF, "Baseline (samples)", -1),
 				    new TGLayoutHints(kLHintsLeft, 10,0,0,0));
@@ -1186,7 +1186,7 @@ void AAInterface::FillAcquisitionFrame()
       DGChShortGate_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
       DGChShortGate_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
       DGChShortGate_NEL[ch]->GetEntry()->Resize(45,20);
-      DGChShortGate_NEL[ch]->GetEntry()->SetNumber(20);
+      DGChShortGate_NEL[ch]->GetEntry()->SetNumber(10);
       
       PSD_HF0->AddFrame(DGChLongGate_NEL[ch] = new ADAQNumberEntryWithLabel(PSD_HF0,
 									    "Long",
@@ -1195,7 +1195,7 @@ void AAInterface::FillAcquisitionFrame()
       DGChLongGate_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
       DGChLongGate_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
       DGChLongGate_NEL[ch]->GetEntry()->Resize(45,20);
-      DGChLongGate_NEL[ch]->GetEntry()->SetNumber(30);
+      DGChLongGate_NEL[ch]->GetEntry()->SetNumber(100);
 
       TGHorizontalFrame *PSD_HF1 = new TGHorizontalFrame(DGChannelControl_GF);
       DGChannelControl_GF->AddFrame(PSD_HF1, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
@@ -1207,7 +1207,7 @@ void AAInterface::FillAcquisitionFrame()
       DGChPreTrigger_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
       DGChPreTrigger_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
       DGChPreTrigger_NEL[ch]->GetEntry()->Resize(45,20);
-      DGChPreTrigger_NEL[ch]->GetEntry()->SetNumber(256);
+      DGChPreTrigger_NEL[ch]->GetEntry()->SetNumber(50);
       
       PSD_HF1->AddFrame(DGChGateOffset_NEL[ch] = new ADAQNumberEntryWithLabel(PSD_HF1,
 									      "Gate offset",
@@ -1215,7 +1215,7 @@ void AAInterface::FillAcquisitionFrame()
 			new TGLayoutHints(kLHintsLeft,10,0,0,0));
       DGChGateOffset_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
       DGChGateOffset_NEL[ch]->GetEntry()->Resize(45,20);
-      DGChGateOffset_NEL[ch]->GetEntry()->SetNumber(35);
+      DGChGateOffset_NEL[ch]->GetEntry()->SetNumber(5);
     }
   }
   
