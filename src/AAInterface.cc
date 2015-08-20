@@ -1456,7 +1456,7 @@ void AAInterface::FillAcquisitionFrame()
 				      new TGLayoutHints(kLHintsNormal,5,5,5,5));
     DGDPPPSDMode_CBL->GetComboBox()->Resize(130, 20);
     DGDPPPSDMode_CBL->GetComboBox()->AddEntry("Waveform only", 0);
-    DGDPPPSDMode_CBL->GetComboBox()->AddEntry("List (PSD data)", 1);
+    DGDPPPSDMode_CBL->GetComboBox()->AddEntry("List only", 1);
     DGDPPPSDMode_CBL->GetComboBox()->AddEntry("List + Waveform", 2);
     DGDPPPSDMode_CBL->GetComboBox()->Select(2);
   }

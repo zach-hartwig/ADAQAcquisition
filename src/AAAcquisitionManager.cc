@@ -550,7 +550,7 @@ void AAAcquisitionManager::StartAcquisition()
 
 	      // Analyze the pulses to obtain pulse spectra
 	      else if(sample >= BaselineStop[ch]){
-
+		
 		// Calculate the waveform sample distance from the baseline
 		SampleHeight = Polarity[ch] * (Waveforms[ch][sample] - BaselineValue[ch]);
 		TriggerHeight = Polarity[ch] * (TheSettings->ChTriggerThreshold[ch] - BaselineValue[ch]);
@@ -570,20 +570,33 @@ void AAAcquisitionManager::StartAcquisition()
 	    }
 	  }// End sample loop
 
-	  // Because the PSD integrals are computed relative to the peak
-	  // position - which is found during the sample loop above - we
-	  // must take the PSD integrals AFTER the sample loop has
-	  // concluded. We only do this if the user is either plotting
-	  // PSD histograms and/or storing PSD waveform data to maximize
-	  // the acquisition loop efficiency.
+	  // Computation of PSD integrals
 
-	  if(TheSettings->PSDMode or TheSettings->WaveformStorePSDData){
+	  // In STD firwmare, the PSD integrals are taken relative to
+	  // the peak position in time so the integrals must be taken
+	  // *after* the sample loop, in which the peak position is
+	  // determined, concludes.
 
+	  // In PSD firmware, the PSD integrals start at the gate
+	  // offset from the trigger position in time
+
+	  // Set the PSD integral limits in units of absolute sample number
+	  if(UseSTDFirmware){
 	    PSDTotalAbsStart[ch] = PeakPosition[ch] + TheSettings->ChPSDTotalStart[ch];
 	    PSDTotalAbsStop[ch] = PeakPosition[ch] + TheSettings->ChPSDTotalStop[ch];
 	    PSDTailAbsStart[ch] = PeakPosition[ch] + TheSettings->ChPSDTailStart[ch];
 	    PSDTailAbsStop[ch] = PeakPosition[ch] + TheSettings->ChPSDTailStop[ch];
-	    
+	  }
+	  else if(UsePSDFirmware){
+	    Int_t GateStart = TheSettings->ChPreTrigger[ch] - TheSettings->ChGateOffset[ch];
+	    PSDTotalAbsStart[ch] = PSDTailAbsStart[ch] = GateStart;
+	    PSDTotalAbsStop[ch] = GateStart + TheSettings->ChLongGate[ch];
+	    PSDTailAbsStop[ch] = GateStart + TheSettings->ChShortGate[ch];
+	  }
+	  
+	  // Only take the time to compute PSD integrals if necessary
+	  if(TheSettings->PSDMode or TheSettings->WaveformStorePSDData){	    
+
 	    // The total PSD integral
 	    Int_t sample = PSDTotalAbsStart[ch];
 	    for(; sample<PSDTotalAbsStop[ch]; sample++)

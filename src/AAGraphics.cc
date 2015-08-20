@@ -80,7 +80,12 @@ AAGraphics::AAGraphics()
     PSDPeak_L[ch]->SetLineColor(kRed);
     PSDPeak_L[ch]->SetLineStyle(7);
     PSDPeak_L[ch]->SetLineWidth(2);
-    
+
+    PSDTrigger_L.push_back(new TLine);
+    PSDTrigger_L[ch]->SetLineColor(ChColor[ch]);
+    PSDTrigger_L[ch]->SetLineStyle(7);
+    PSDTrigger_L[ch]->SetLineWidth(2);
+
     PSDTail_L0.push_back(new TLine);
     PSDTail_L0[ch]->SetLineColor(ChColor[ch]);
     PSDTail_L0[ch]->SetLineStyle(7);
@@ -323,35 +328,69 @@ void AAGraphics::DrawWaveformGraphics(vector<double> &BaselineValue,
     
     if(TheSettings->DisplayTrigger){
 
+      // STD firmware: trigger value is in absolute ADC units
+      // PSD firmware: trigger value relative to baseline in ADC units
+      
       Double_t Trigger = 0.;
-      if(TheSettings->PSDFirmware)
+      if(TheSettings->PSDFirmware){
 	if(TheSettings->ChPosPolarity[ch])
 	  Trigger = TheSettings->ChTriggerThreshold[ch] + BaselineValue[ch];
 	else if(TheSettings->ChNegPolarity[ch])
 	  Trigger = BaselineValue[ch] - TheSettings->ChTriggerThreshold[ch];
+      }
+      else
+	Trigger = TheSettings->ChTriggerThreshold[ch];
       
       Trigger_L[ch]->DrawLine(XMin, Trigger, XMax, Trigger);
+
+      if(TheSettings->PSDFirmware){
+	PSDTrigger_L[ch]->DrawLine(TheSettings->ChPreTrigger[ch]-1,
+				   YMin,
+				   TheSettings->ChPreTrigger[ch]-1,
+				   YMax);
+      }
     }
     
     if(TheSettings->DisplayBaselineBox){
       double BaselineWidth = (YMax-YMin)*0.03;
       
-      Baseline_B[ch]->DrawBox(TheSettings->ChBaselineCalcMin[ch],
+      // STD firmware: baseline width, position set in absolute sample numbes
+      // PSD firwmare: baseline width set by user in fixed samples; position in
+      //               time is relative to pregate setting
+
+      Int_t BaselineStart = 0; // [sample]
+      Int_t BaselineStop = 0;  // [sample]
+
+      if(TheSettings->STDFirmware){
+	BaselineStart = TheSettings->ChBaselineCalcMin[ch];
+	BaselineStop = TheSettings->ChBaselineCalcMax[ch];
+      }
+      else if(TheSettings->PSDFirmware){
+
+	Int_t BaselineSamples = pow(2,(TheSettings->ChBaselineSamples[ch]+1));
+		
+	BaselineStop = TheSettings->ChPreTrigger[ch] - TheSettings->ChGateOffset[ch] -1;
+	BaselineStart = BaselineStop - BaselineSamples;
+      }
+      
+      Baseline_B[ch]->DrawBox(BaselineStart,
 			      BaselineValue[ch] - BaselineWidth,
-			      TheSettings->ChBaselineCalcMax[ch],
+			      BaselineStop,
 			      BaselineValue[ch] + BaselineWidth);
     }
     
     if(TheSettings->DisplayPSDLimits){
+
       PSDTotal_B[ch]->DrawBox(PSDTotalAbsStart[ch],
 			      YMin,
 			      PSDTotalAbsStop[ch],
 			      YMax);
-      
-      PSDPeak_L[ch]->DrawLine(PeakPosition[ch],
-			      YMin,
-			      PeakPosition[ch],
-			      YMax);
+
+      if(TheSettings->STDFirmware)
+	PSDPeak_L[ch]->DrawLine(PeakPosition[ch],
+				YMin,
+				PeakPosition[ch],
+				YMax);
       
       PSDTail_L0[ch]->DrawLine(PSDTailAbsStart[ch],
 			       YMin,
