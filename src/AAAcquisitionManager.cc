@@ -173,6 +173,7 @@ void AAAcquisitionManager::PrepareAcquisition()
 
   //////////////////////////
   // PSD integral calculation
+
   if(UsePSDFirmware)
     for(Int_t ch=0; ch<NumDGChannels; ch++){
       Int_t GateStart = TheSettings->ChPreTrigger[ch] - TheSettings->ChGateOffset[ch];

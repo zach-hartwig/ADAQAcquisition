@@ -1124,14 +1124,14 @@ void AAInterface::FillAcquisitionFrame()
       DGChBaselineSamples_CBL[ch]->GetComboBox()->Resize(57,20);
       DGChBaselineSamples_CBL[ch]->GetComboBox()->Select(4);
 
-      DGChannelControl_GF->AddFrame(DGChChargeSensitivity_CBL[ch] = new ADAQComboBoxWithLabel(DGChannelControl_GF, "Charge sensitivity", -1),
+      DGChannelControl_GF->AddFrame(DGChChargeSensitivity_CBL[ch] = new ADAQComboBoxWithLabel(DGChannelControl_GF, "Q sensitivity (fC/LSB)", -1),
 				    new TGLayoutHints(kLHintsLeft, 10,0,0,0));
-      DGChChargeSensitivity_CBL[ch]->GetComboBox()->AddEntry("Min",0);
-      DGChChargeSensitivity_CBL[ch]->GetComboBox()->AddEntry("Low",1);
-      DGChChargeSensitivity_CBL[ch]->GetComboBox()->AddEntry("High",2);
-      DGChChargeSensitivity_CBL[ch]->GetComboBox()->AddEntry("Max",3);
+      DGChChargeSensitivity_CBL[ch]->GetComboBox()->AddEntry("40",0);
+      DGChChargeSensitivity_CBL[ch]->GetComboBox()->AddEntry("160",1);
+      DGChChargeSensitivity_CBL[ch]->GetComboBox()->AddEntry("640",2);
+      DGChChargeSensitivity_CBL[ch]->GetComboBox()->AddEntry("2500",3);
       DGChChargeSensitivity_CBL[ch]->GetComboBox()->Resize(57,20);
-      DGChChargeSensitivity_CBL[ch]->GetComboBox()->Select(3);
+      DGChChargeSensitivity_CBL[ch]->GetComboBox()->Select(0);
 
       DGChannelControl_GF->AddFrame(DGChPSDCut_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF,
 										      "PSD readout cut",
