@@ -618,7 +618,7 @@ void AAAcquisitionManager::StartAcquisition()
 	if(UsePSDFirmware and !UsePSDWaveformMode){
 	  BaselineValue[ch] = PSDEvents[ch][evt].Baseline;
 	  PSDTotal = PSDEvents[ch][evt].ChargeLong;
-	  PSDTail = PSDEvents[ch][evt].ChargeShort;
+	  PSDTail = PSDTotal - PSDEvents[ch][evt].ChargeShort;
 	}
 	
 	if(CalibrationEnable[ch]){
