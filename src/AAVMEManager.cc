@@ -357,37 +357,34 @@ bool AAVMEManager::ProgramDigitizers()
     
     DGMgr->SetDPPVirtualProbe(ANALOG_TRACE_2,
 			      CAEN_DGTZ_DPP_VIRTUALPROBE_Baseline);
-    
-    /*
 
-     ZSH (17 Aug 15)
-       
-       Attempts to set the digital traces for the DT5790 unit fail
-       with CAEN error code '-33', which indicates that the specified
-       digital problem traces are not available for this unit. The
-       CAEN_DGTZ_SetDPPVirtualProbe() is the new recommended function
-       for this purpose so this may be a bug in the firmware for the
-       DT5790? Need to check with CAEN
+    // DPP-PSD digital traces have the following configuration:
+    //  - Digital trace 1 is fixed to the channel self-trigger threshold
+    //  - Digital trace 2 is fixed to the PSD integration long gate
+    //  - Digital trace 3 has the following options:
+    //     CAEN_DGTZ_DPP_DIGITALPROBE_ExtTRG;
+    //     CAEN_DGTZ_DPP_DIGITALPROBE_OverThr;
+    //     CAEN_DGTZ_DPP_DIGITALPROBE_TRGOut;
+    //     CAEN_DGTZ_DPP_DIGITALPROBE_CoincWin;
+    //     CAEN_DGTZ_DPP_DIGITALPROBE_PileUp;
+    //     CAEN_DGTZ_DPP_DIGITALPROBE_Coincidence;
+    // - Digital trace 4 has the following options:
+    //     CAEN_DGTZ_DPP_DIGITALPROBE_GateShort;
+    //     CAEN_DGTZ_DPP_DIGITALPROBE_OverThr;
+    //     CAEN_DGTZ_DPP_DIGITALPROBE_TRGVal;
+    //     CAEN_DGTZ_DPP_DIGITALPROBE_TRGHoldoff;
+    //     CAEN_DGTZ_DPP_DIGITALPROBE_PileUp;
+    //     CAEN_DGTZ_DPP_DIGITALPROBE_Coincidence;
 
-    Int_t Status = 42;
-    
-    Status = DGMgr->SetDPPVirtualProbe(DIGITAL_TRACE_1,
-				       CAEN_DGTZ_DPP_DIGITALPROBE_Gate);
-    
-    cout << Status << endl;
-    
-    Status = DGMgr->SetDPPVirtualProbe(DIGITAL_TRACE_2,
-				       CAEN_DGTZ_DPP_DIGITALPROBE_GateShort);
-    
-    cout << Status << endl;
+    Int_t Status = -42;
     
     Status = DGMgr->SetDPPVirtualProbe(DIGITAL_TRACE_3,
-				       CAEN_DGTZ_DPP_DIGITALPROBE_Trigger);
+				       CAEN_DGTZ_DPP_DIGITALPROBE_PileUp);
     
-    cout << Status << endl;
-    */
+    Status = DGMgr->SetDPPVirtualProbe(DIGITAL_TRACE_4,
+				       CAEN_DGTZ_DPP_DIGITALPROBE_GateShort);
   }
-    
+  
   return true;
 }
 
