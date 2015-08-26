@@ -301,7 +301,7 @@ void AAInterface::FillConnectionFrame()
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790M", zDT5790M);
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790N", zDT5790N);
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790P", zDT5790P);
-      BoardType_CBL[board]->GetComboBox()->Select(zDT5790M);
+      BoardType_CBL[board]->GetComboBox()->Select(zDT5720);
     }
     else if(board == 2){
       BoardType_CBL[board]->GetComboBox()->AddEntry("V6533M", zV6533M);
@@ -399,6 +399,7 @@ void AAInterface::FillConnectionFrame()
   cout << "\nAAInterface::FillConnectionFrame() : Remove this DPP-PSD development hack! ZSH (17 Aug 15)\n"
        << endl;
   BoardEnable_TB[0]->Clicked();
+  BoardEnable_TB[2]->Clicked();
 }
 
 

@@ -140,7 +140,7 @@ bool AAVMEManager::ProgramDigitizers()
     else
       continue;
 
-    if(TheSettings->PSDFirmware){
+    if(TheSettings->STDFirmware){
       DGMgr->SetChannelDCOffset(ch, TheSettings->ChDCOffset[ch]);
       DGMgr->SetChannelTriggerThreshold(ch, TheSettings->ChTriggerThreshold[ch]);
     
@@ -181,7 +181,8 @@ bool AAVMEManager::ProgramDigitizers()
       }
     }
   }
-  
+
+  // Set the channel-enable mask
   DGMgr->SetChannelEnableMask(DGChEnableMask);
   
   // Ensure that at least one channel is enabled in the channel
