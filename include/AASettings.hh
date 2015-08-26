@@ -155,6 +155,7 @@ public:
   // Calibration
   Bool_t SpectrumCalibrationEnable;
   Bool_t SpectrumCalibrationUseSlider;
+  string SpectrumCalibrationUnit;
 
 
   //////////////////////////////

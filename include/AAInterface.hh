@@ -299,6 +299,7 @@ private:
   ADAQComboBoxWithLabel *SpectrumCalibrationPoint_CBL;
   ADAQNumberEntryWithLabel *SpectrumCalibrationEnergy_NEL;
   ADAQNumberEntryWithLabel *SpectrumCalibrationPulseUnit_NEL;
+  ADAQComboBoxWithLabel *SpectrumCalibrationUnit_CBL;
   TGTextButton *SpectrumCalibrationSetPoint_TB;
   TGTextButton *SpectrumCalibrationCalibrate_TB;
   TGTextButton *SpectrumCalibrationPlot_TB;

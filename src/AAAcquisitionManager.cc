@@ -17,6 +17,7 @@
 #include <fstream>
 #include <iomanip>
 #include <bitset>
+#include <algorithm>
 
 #include "AAAcquisitionManager.hh"
 #include "AAVMEManager.hh"
@@ -1000,9 +1001,18 @@ Bool_t AAAcquisitionManager::AddCalibrationPoint(Int_t Channel, Int_t SetPoint,
 						 Double_t Energy, Double_t PulseUnit)
 {
   if(SetPoint == CalibrationData[Channel].PointID.size()){
+
+    // Push data into the calibration data vectors
     CalibrationData[Channel].PointID.push_back(SetPoint);
     CalibrationData[Channel].Energy.push_back(Energy);
     CalibrationData[Channel].PulseUnit.push_back(PulseUnit);
+
+    // Automatically sort the vectors from lowest-to-highest
+    sort(CalibrationData[Channel].Energy.begin(),
+	 CalibrationData[Channel].Energy.end());
+
+    sort(CalibrationData[Channel].PulseUnit.begin(),
+	 CalibrationData[Channel].PulseUnit.end());
   }
   else{
     CalibrationData[Channel].Energy[SetPoint] = Energy;

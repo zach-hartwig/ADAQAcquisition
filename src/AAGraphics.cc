@@ -127,8 +127,13 @@ AAGraphics::~AAGraphics()
 
 void AAGraphics::SetupWaveformGraphics(vector<Int_t> &WaveformLength)
 {
-  MaxWaveformLength = 0;
+  // While CAEN STD firmware has fixed record lengths for all channels
+  // on a single digitizer, CAEN DPP-PSD firmware enables different
+  // record lengths for all channels. Therefore, if plotting multiple
+  // channels with DPP-PSD, we must account for this and ensure the
+  // X-axis spans the longest of the enabled channel record lengths
 
+  MaxWaveformLength = 0;
   vector<Int_t>::iterator It = WaveformLength.begin();
   for(; It!=WaveformLength.end(); It++){
     if((*It) > MaxWaveformLength)
@@ -430,7 +435,17 @@ void AAGraphics::SetupSpectrumGraphics()
   }
   else{
     Title = "Pulse spectrum";
-    XTitle = "Pulse value [ADC]";
+    
+    Int_t Channel = TheSettings->SpectrumChannel;
+    
+    Bool_t Calibrated = AAAcquisitionManager::GetInstance()->GetCalibrationEnable(Channel);
+
+    if(Calibrated){
+      string Unit = TheSettings->SpectrumCalibrationUnit;
+      XTitle = "Energy deposited [" + Unit + "]";
+    }
+    else
+      XTitle = "Pulse value [ADC]";
     YTitle = "Counts";
     
     XSize = YSize = 0.05;

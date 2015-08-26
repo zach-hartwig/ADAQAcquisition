@@ -194,6 +194,7 @@ enum{
   SpectrumUseCalibrationSlider_CB_ID,
   SpectrumCalibrationEnergy_NEL_ID,
   SpectrumCalibrationPulseUnit_NEL_ID,
+  SpectrumCalibrationUnit_CBL_ID,
   SpectrumCalibrationSetPoint_TB_ID,
   SpectrumCalibrationCalibrate_TB_ID,
   SpectrumCalibrationPlot_TB_ID,
