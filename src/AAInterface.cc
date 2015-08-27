@@ -114,9 +114,9 @@ void AAInterface::BuildPrimaryFrames()
   // Set the main window title
   string TitleString;
   if(VersionString == "Development")
-    TitleString = "AIMS Data Acquisition (Development version)               Fear is the mind-killer.";
+    TitleString = "ADAQAcquisition (Development version)               Fear is the mind-killer.";
   else
-    TitleString = "AIMS Data Acquisition (Production version " + VersionString + ")               Fear is the mind-killer.";
+    TitleString = "ADAQAcquisition (Production version " + VersionString + ")               Fear is the mind-killer.";
   SetWindowName(TitleString.c_str());
 
   // Set the ain window size
@@ -301,7 +301,7 @@ void AAInterface::FillConnectionFrame()
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790M", zDT5790M);
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790N", zDT5790N);
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790P", zDT5790P);
-      BoardType_CBL[board]->GetComboBox()->Select(zDT5720);
+      BoardType_CBL[board]->GetComboBox()->Select(zV1720);
     }
     else if(board == 2){
       BoardType_CBL[board]->GetComboBox()->AddEntry("V6533M", zV6533M);
@@ -313,7 +313,7 @@ void AAInterface::FillConnectionFrame()
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790M", zDT5790M);
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790N", zDT5790N);
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790P", zDT5790P);
-      BoardType_CBL[board]->GetComboBox()->Select(zDT5790M);
+      BoardType_CBL[board]->GetComboBox()->Select(zV6534M);
     }
 
     if(board == 1){

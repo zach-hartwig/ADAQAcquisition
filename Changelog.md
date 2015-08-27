@@ -1,9 +1,34 @@
 ## ADAQAcquisition Source Code Change Log
 
 name: Changelog.md  
-date: 10 Jul 15 (last updated)  
+date: 26 Aug 15 (last updated)  
 auth: Zach Hartwig  
 mail: hartwig@psfc.mit.edu  
+
+## Version 1.2 Series
+
+Major new developments in this series include:
+
+ - Implementation of digitizer control and data readout using CAEN
+   DPP-PSD firmware. The core functionality is fully implemented and
+   tested. Readout of data into ADAQ files is supported via the
+   ADAQReadoutManager class. Note that ADAQAcquisition now fully
+   supports both CAEN standard *and* DPP-PSD firwmare.
+
+ - The trigger time stamp is now correctly readout with rollover
+   correction for very long data acquisition. The correct time stamp
+   is stored within the ADAQ file.
+
+ - The VME connection tab widgets now fully specify how the remaining
+   four major tabs should be constructed, i.e. the interface now
+   dynamically builds itself depending on the exact hardware that the
+   user has specified. This ensures the correct firmware-specific
+   widgets, number of channels, default parameters, etc. are built at
+   run time.
+
+ - The acquisition loop in the AAAcquisitionManager class has been
+   restructured to accomodate DPP-PSD and optimized for readout
+   efficiency.
 
 
 ## Version 1.0 Series
