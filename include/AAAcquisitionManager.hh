@@ -121,10 +121,10 @@ private:
 
   // CAEN DPP-PSD firmware
   
-  CAEN_DGTZ_DPP_PSD_Params_t *PSDParams[4];
-  CAEN_DGTZ_DPP_PSD_Event_t *PSDEvents[4];
+  CAEN_DGTZ_DPP_PSD_Params_t *PSDParams[16];
+  CAEN_DGTZ_DPP_PSD_Event_t *PSDEvents[16];
   CAEN_DGTZ_DPP_PSD_Waveforms_t *PSDWaveforms;
-  uint32_t NumPSDEvents[4];
+  vector<uint32_t> NumPSDEvents;
   
   // Variables for PC buffer readout
   char *Buffer; 

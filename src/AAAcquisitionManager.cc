@@ -71,6 +71,8 @@ void AAAcquisitionManager::Initialize()
   
   for(Int_t ch=0; ch<DGChannels; ch++){
 
+    NumPSDEvents.push_back(0);
+
     BufferFull.push_back(true);
     
     BaselineStart.push_back(0);
@@ -313,6 +315,8 @@ void AAAcquisitionManager::PrepareAcquisition()
   // is preallocated for the buffer to receive readout events.
   Buffer = NULL;
   BufferSize = ReadSize = FPGAEvents = PCEvents = EventCounter = 0;
+  for(Int_t ch=0; ch<DGManager->GetNumChannels(); ch++)
+    NumPSDEvents[ch] = 0;
   
   // Allocate memory for the PC readout buffer only after the
   // digitizer been completely programmed
@@ -399,7 +403,7 @@ void AAAcquisitionManager::StartAcquisition()
       DGManager->ReadData(Buffer, &ReadSize);
       
       // Readout events from PC buffer to DPP-PSD event structure
-      DGManager->GetDPPEvents(Buffer, ReadSize, PSDEvents, NumPSDEvents);
+      DGManager->GetDPPEvents(Buffer, ReadSize, PSDEvents, &NumPSDEvents[0]);
     }
     
     //////////////////////////////
@@ -424,10 +428,10 @@ void AAAcquisitionManager::StartAcquisition()
       // If DPP-PSD, get number of events in present channel
       if(UsePSDFirmware)
 	PCEvents = NumPSDEvents[ch];
-      
+
       // Loop over the digitizer stored events in the PC buffer
       for(Int_t evt=0; evt<PCEvents; evt++){
-	
+
 	////////////////////////////
 	// Pre-event-readout actions
 

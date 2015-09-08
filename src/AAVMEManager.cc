@@ -285,7 +285,7 @@ bool AAVMEManager::ProgramDigitizers()
   DGMgr->SetMaxNumEventsBLT(TheSettings->EventsBeforeReadout);
   
   if(TheSettings->PSDFirmware){
-
+    
     DGMgr->SetDPPAcquisitionMode((CAEN_DGTZ_DPP_AcqMode_t)TheSettings->PSDOperationMode,
 				 CAEN_DGTZ_DPP_SAVE_PARAM_EnergyAndTime);
     
@@ -297,7 +297,7 @@ bool AAVMEManager::ProgramDigitizers()
     
     DGMgr->SetRunSynchronizationMode(CAEN_DGTZ_RUN_SYNC_Disabled);
     
-    //DGMgr->SetNumEventsPerAggregate(TheSettings->EventsBeforeReadout);
+    DGMgr->SetNumEventsPerAggregate(TheSettings->EventsBeforeReadout);
 
     // Create the mandatory DPP-PSD parameter struct
     CAEN_DGTZ_DPP_PSD_Params_t PSDParameters;
