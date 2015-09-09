@@ -32,7 +32,7 @@ enum{
   DGBoardLinkNumber_ID,
 
   DGStandardFW_RB_ID,
-  DGDPPPSDFW_RB_ID,
+  DGPSDFW_RB_ID,
 
   
   ///////////////////

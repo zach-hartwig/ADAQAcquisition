@@ -266,7 +266,7 @@ void AAInterface::FillConnectionFrame()
   BoardLinkNumberID += (int)0, (int)DGBoardLinkNumber_ID, (int)HVBoardLinkNumber_ID;
   
   vector<uint32_t> BoardAddress, BoardLinkNumber;
-  BoardAddress += 0, 0x00000000, 0x00000000;
+  BoardAddress += 0, 0x00420000, 0x42420000;
   BoardLinkNumber += 0, 0, 0;
 
   TGGroupFrame *DeviceSettings_GF = new TGGroupFrame(ConnectionFrame, "CAEN Device Settings", kHorizontalFrame);
@@ -324,12 +324,11 @@ void AAInterface::FillConnectionFrame()
 			  new TGLayoutHints(kLHintsNormal, 0,0,0,0));
       DGStandardFW_RB->Connect("Clicked()", "AATabSlots", TabSlots, "HandleRadioButtons()");
       
-      FWType_VF->AddFrame(DGDPPPSDFW_RB = new TGRadioButton(FWType_VF, "DPP-PSD firmware", DGDPPPSDFW_RB_ID),
+      FWType_VF->AddFrame(DGPSDFW_RB = new TGRadioButton(FWType_VF, "DPP-PSD firmware", DGPSDFW_RB_ID),
 			  new TGLayoutHints(kLHintsNormal, 0,0,0,0));
-      DGDPPPSDFW_RB->Connect("Clicked()", "AATabSlots", TabSlots, "HandleRadioButtons()");
+      DGPSDFW_RB->Connect("Clicked()", "AATabSlots", TabSlots, "HandleRadioButtons()");
       DGStandardFW_RB->SetState(kButtonDown);
-      //DGDPPPSDFW_RB->SetState(kButtonDown);
-	    
+      //DGPSDFW_RB->SetState(kButtonDown);
     }
     
     TGHorizontalFrame *BoardAddress_HF = new TGHorizontalFrame(BoardOptions_VF);
@@ -1069,7 +1068,7 @@ void AAInterface::FillAcquisitionFrame()
       DGChZLEBackward_NEL[ch]->GetEntry()->SetNumber(10);
       DGChZLEBackward_NEL[ch]->GetEntry()->Resize(55,20);
     }
-    else if(DGDPPPSDFW_RB->IsDown()){
+    else if(DGPSDFW_RB->IsDown()){
 
 
       DGChannelControl_GF->AddFrame(new TGLabel(DGChannelControl_GF, "Acquisition settings"),
@@ -1452,15 +1451,18 @@ void AAInterface::FillAcquisitionFrame()
     DGPostTrigger_NEL->GetEntry()->SetLimitValues(0,100);
     DGPostTrigger_NEL->GetEntry()->SetNumber(70);
   }
-  else if(DGDPPPSDFW_RB->IsDown()){
+  else if(DGPSDFW_RB->IsDown()){
     
-    DGAcquisitionControl_GF->AddFrame(DGDPPPSDMode_CBL = new ADAQComboBoxWithLabel(DGAcquisitionControl_GF, "PSD mode", -1),
+    DGAcquisitionControl_GF->AddFrame(DGPSDMode_CBL = new ADAQComboBoxWithLabel(DGAcquisitionControl_GF, "PSD mode", -1),
+				      new TGLayoutHints(kLHintsNormal,5,5,5,0));
+    DGPSDMode_CBL->GetComboBox()->Resize(130, 20);
+    DGPSDMode_CBL->GetComboBox()->AddEntry("Waveform only", 0);
+    DGPSDMode_CBL->GetComboBox()->AddEntry("List only", 1);
+    DGPSDMode_CBL->GetComboBox()->AddEntry("List + Waveform", 2);
+    DGPSDMode_CBL->GetComboBox()->Select(2);
+    
+    DGAcquisitionControl_GF->AddFrame(DGPSDLongGateAsArea_CB = new TGCheckButton(DGAcquisitionControl_GF, "PSD long integral as pulse area", -1),
 				      new TGLayoutHints(kLHintsNormal,5,5,5,5));
-    DGDPPPSDMode_CBL->GetComboBox()->Resize(130, 20);
-    DGDPPPSDMode_CBL->GetComboBox()->AddEntry("Waveform only", 0);
-    DGDPPPSDMode_CBL->GetComboBox()->AddEntry("List only", 1);
-    DGDPPPSDMode_CBL->GetComboBox()->AddEntry("List + Waveform", 2);
-    DGDPPPSDMode_CBL->GetComboBox()->Select(2);
   }
   
   DGAcquisitionControl_GF->AddFrame(AQTime_NEL = new ADAQNumberEntryWithLabel(DGAcquisitionControl_GF, "Acquisition time (s)", AQTime_NEL_ID),
@@ -2259,7 +2261,7 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
       DGChPSDTailStart_NEL[ch]->GetEntry()->SetState(WidgetState);
       DGChPSDTailStop_NEL[ch]->GetEntry()->SetState(WidgetState);
     }
-    else if(DGDPPPSDFW_RB->IsDown()){
+    else if(DGPSDFW_RB->IsDown()){
       DGChRecordLength_NEL[ch]->GetEntry()->SetState(WidgetState);
       DGChBaselineSamples_CBL[ch]->GetComboBox()->SetEnabled(WidgetState);
       DGChChargeSensitivity_CBL[ch]->GetComboBox()->SetEnabled(WidgetState);
@@ -2286,8 +2288,8 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
     DGRecordLength_NEL->GetEntry()->SetState(WidgetState);
     DGPostTrigger_NEL->GetEntry()->SetState(WidgetState);
   }
-  else if(DGDPPPSDFW_RB->IsDown()){
-    DGDPPPSDMode_CBL->GetComboBox()->SetEnabled(WidgetState);
+  else if(DGPSDFW_RB->IsDown()){
+    DGPSDMode_CBL->GetComboBox()->SetEnabled(WidgetState);
   }
 
   DGEventsBeforeReadout_NEL->GetEntry()->SetState(WidgetState);
@@ -2383,7 +2385,7 @@ void AAInterface::SaveSettings()
   const Int_t NumDGChannels = TheVMEManager->GetDGManager()->GetNumChannels();
   
   TheSettings->STDFirmware = DGStandardFW_RB->IsDown();
-  TheSettings->PSDFirmware = DGDPPPSDFW_RB->IsDown();
+  TheSettings->PSDFirmware = DGPSDFW_RB->IsDown();
   
   // Acquisition channel 
   for(Int_t ch=0; ch<NumDGChannels; ch++){
@@ -2405,7 +2407,7 @@ void AAInterface::SaveSettings()
       TheSettings->ChPSDTailStart[ch] = DGChPSDTailStart_NEL[ch]->GetEntry()->GetIntNumber();
       TheSettings->ChPSDTailStop[ch] = DGChPSDTailStop_NEL[ch]->GetEntry()->GetIntNumber();
     }
-    else if(DGDPPPSDFW_RB->IsDown()){
+    else if(DGPSDFW_RB->IsDown()){
       TheSettings->ChRecordLength[ch] = DGChRecordLength_NEL[ch]->GetEntry()->GetIntNumber();
       TheSettings->ChBaselineSamples[ch] = DGChBaselineSamples_CBL[ch]->GetComboBox()->GetSelected();
       TheSettings->ChChargeSensitivity[ch] = DGChChargeSensitivity_CBL[ch]->GetComboBox()->GetSelected();
@@ -2457,7 +2459,8 @@ void AAInterface::SaveSettings()
     TheSettings->PostTrigger = DGPostTrigger_NEL->GetEntry()->GetIntNumber();
   }
   else{
-    TheSettings->PSDOperationMode = DGDPPPSDMode_CBL->GetComboBox()->GetSelected();
+    TheSettings->PSDOperationMode = DGPSDMode_CBL->GetComboBox()->GetSelected();
+    TheSettings->PSDLongGateAsPulseArea = DGPSDLongGateAsArea_CB->IsDown();
   }
   
   TheSettings->AcquisitionTime = AQTime_NEL->GetEntry()->GetIntNumber();
@@ -2575,7 +2578,7 @@ void AAInterface::SaveSettings()
 	TheSettings->ChZLEPosLogic[ch] = DGChZLEPosLogic_RB[ch]->IsDisabledAndSelected();
 	TheSettings->ChZLENegLogic[ch] = DGChZLENegLogic_RB[ch]->IsDisabledAndSelected();
       }
-      else if(DGDPPPSDFW_RB->IsDown()){
+      else if(DGPSDFW_RB->IsDown()){
       }
     }
     

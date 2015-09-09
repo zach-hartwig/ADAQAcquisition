@@ -624,12 +624,23 @@ void AAAcquisitionManager::StartAcquisition()
 	}
 
 	// If PSD mixed or list mode is enabled then set the baseline
-	// and PSD integrals from the PSD firmware calculations
+	// and PSD integrals from the PSD firmware calculations.
 	
 	if(UsePSDFirmware and !UsePSDWaveformMode){
+
+	  // Baseline returned in "Mixed" mode, == 0 in "List" mode
 	  BaselineValue[ch] = PSDEvents[ch][evt].Baseline;
-	  PSDTotal = PSDEvents[ch][evt].ChargeLong;
+
+	  // The PSD short integral
 	  PSDTail = PSDTotal - PSDEvents[ch][evt].ChargeShort;
+	  
+	  // The PSD long integral
+	  PSDTotal = PSDEvents[ch][evt].ChargeLong;
+	  
+	  // If desired, set the pulse area (for spectra creation,
+	  // data readout, etc) as the PSD long integral
+	  if(TheSettings->PSDLongGateAsPulseArea)
+	    PulseArea = PSDTotal;
 	}
 	
 	if(CalibrationEnable[ch]){

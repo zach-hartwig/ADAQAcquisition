@@ -161,7 +161,7 @@ private:
   vector<ADAQNumberEntryFieldWithLabel *> BoardAddress_NEF;
   vector<ADAQNumberEntryWithLabel *> BoardLinkNumber_NEL;
   vector<TGTextButton *> BoardEnable_TB;
-  TGRadioButton *DGStandardFW_RB, *DGDPPPSDFW_RB;
+  TGRadioButton *DGStandardFW_RB, *DGPSDFW_RB;
 
 
   /////////////////
@@ -266,7 +266,8 @@ private:
   ADAQComboBoxWithLabel *DGAcquisitionControl_CBL;
   ADAQNumberEntryWithLabel *DGRecordLength_NEL;
   ADAQNumberEntryWithLabel *DGPostTrigger_NEL;
-  ADAQComboBoxWithLabel *DGDPPPSDMode_CBL;
+  ADAQComboBoxWithLabel *DGPSDMode_CBL;
+  TGCheckButton *DGPSDLongGateAsArea_CB;
   ADAQNumberEntryWithLabel *AQTime_NEL;  
   ADAQNumberEntryFieldWithLabel *AQTimer_NEFL;
   TGTextButton *AQTimerStart_TB, *AQTimerAbort_TB;

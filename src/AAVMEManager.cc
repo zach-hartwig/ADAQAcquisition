@@ -282,8 +282,7 @@ bool AAVMEManager::ProgramDigitizers()
   ///////////////////
   // Readout settings
   
-  Int_t status = DGMgr->SetMaxNumEventsBLT(50);//TheSettings->EventsBeforeReadout);
-  //cout << status << endl;
+  DGMgr->SetMaxNumEventsBLT(TheSettings->EventsBeforeReadout);
   
   if(TheSettings->PSDFirmware){
 

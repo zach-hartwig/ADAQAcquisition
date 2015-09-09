@@ -114,6 +114,7 @@ public:
   Bool_t WaveformMode;
   Bool_t SpectrumMode;
   Bool_t PSDMode;
+  Bool_t PSDLongGateAsPulseArea;
 
   // Trigger
   Bool_t TriggerCoincidenceEnable;
