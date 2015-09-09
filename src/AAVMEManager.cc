@@ -282,24 +282,14 @@ bool AAVMEManager::ProgramDigitizers()
   ///////////////////
   // Readout settings
   
-  DGMgr->SetMaxNumEventsBLT(TheSettings->EventsBeforeReadout);
+  Int_t status = DGMgr->SetMaxNumEventsBLT(50);//TheSettings->EventsBeforeReadout);
+  //cout << status << endl;
   
   if(TheSettings->PSDFirmware){
-    
-    DGMgr->SetDPPAcquisitionMode((CAEN_DGTZ_DPP_AcqMode_t)TheSettings->PSDOperationMode,
-				 CAEN_DGTZ_DPP_SAVE_PARAM_EnergyAndTime);
-    
-    DGMgr->SetDPPTriggerMode(CAEN_DGTZ_DPP_TriggerMode_Normal);
-    
-    DGMgr->SetIOLevel(CAEN_DGTZ_IOLevel_TTL);
 
-    DGMgr->SetDPPEventAggregation(TheSettings->EventsBeforeReadout, 0);
+    //////////////////////////////////////////////
+    // Create and fill the PSD parameter structure
     
-    DGMgr->SetRunSynchronizationMode(CAEN_DGTZ_RUN_SYNC_Disabled);
-    
-    DGMgr->SetNumEventsPerAggregate(TheSettings->EventsBeforeReadout);
-
-    // Create the mandatory DPP-PSD parameter struct
     CAEN_DGTZ_DPP_PSD_Params_t PSDParameters;
     
     for(Int_t ch=0; ch<DGMgr->GetNumChannels(); ch++){
@@ -335,6 +325,10 @@ bool AAVMEManager::ProgramDigitizers()
 
     DGMgr->SetDPPParameters(DGChEnableMask, &PSDParameters);
 
+
+    ///////////////////////////////////////////////////////
+    // Set channel-specific, non-PSD structure PSD settings
+    
     for(Int_t ch=0; ch<DGMgr->GetNumChannels(); ch++){
       
       if(!TheSettings->ChEnable[ch])
@@ -351,7 +345,27 @@ bool AAVMEManager::ProgramDigitizers()
       else if(TheSettings->ChNegPolarity[ch])
 	DGMgr->SetChannelPulsePolarity(ch, CAEN_DGTZ_PulsePolarityNegative);
     }
+
+
+    ////////////////////////////////////////////
+    // Set global non-PSD structure PSD settings
     
+    DGMgr->SetDPPAcquisitionMode((CAEN_DGTZ_DPP_AcqMode_t)TheSettings->PSDOperationMode,
+				 CAEN_DGTZ_DPP_SAVE_PARAM_EnergyAndTime);
+    
+    DGMgr->SetDPPTriggerMode(CAEN_DGTZ_DPP_TriggerMode_Normal);
+    
+    DGMgr->SetIOLevel(CAEN_DGTZ_IOLevel_TTL);
+    
+    DGMgr->SetDPPEventAggregation(TheSettings->EventsBeforeReadout, 0);
+
+    DGMgr->SetNumEventsPerAggregate(TheSettings->EventsBeforeReadout);
+    
+    DGMgr->SetRunSynchronizationMode(CAEN_DGTZ_RUN_SYNC_Disabled);
+
+    
+    ////////////////////////////////////
+    // Set PSD analog and virtual probes
     
     DGMgr->SetDPPVirtualProbe(ANALOG_TRACE_1,
 			      CAEN_DGTZ_DPP_VIRTUALPROBE_Input);

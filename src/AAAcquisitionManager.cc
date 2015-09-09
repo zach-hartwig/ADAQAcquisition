@@ -396,11 +396,16 @@ void AAAcquisitionManager::StartAcquisition()
     
     else if(UsePSDFirmware){
 
-      // There does not appear to be a way to check number of events
-      // in the FPGA buffer with DPP-PSD before complete readout
-      
       // Transfer data from FPGA buffer to PC buffer
       DGManager->ReadData(Buffer, &ReadSize);
+
+      // The returned value of ReadData indicates data transfer status:
+      //  = 0 : FPGA events < specified readout events; no transfer occured
+      //  > 0 : FPGA events >= specified events require; tranfser occured
+
+      // If no events were transferred then continue waiting for data
+      if(ReadSize == 0)
+      	continue;
       
       // Readout events from PC buffer to DPP-PSD event structure
       DGManager->GetDPPEvents(Buffer, ReadSize, PSDEvents, &NumPSDEvents[0]);
