@@ -357,9 +357,12 @@ void AATabSlots::HandleRegisterTextButtons()
       Data32 = Data16;
     }
 
+    // Update the dec widget with the register value
+    TI->ReadValueDec_NEF[Board]->SetIntNumber(Data32);
+    
     // Update the hex widget with the register value
     TI->ReadValueHex_NEF[Board]->SetHexNumber(Data32);
-
+    
     // Update the binary widget with the register value inserting
     // spaces every 4 characters for easier reading
     bitset<32> Value(Data32);

@@ -424,16 +424,17 @@ void AAInterface::FillRegisterFrame()
   const Int_t RWButtonY = 30;
   const Int_t RWFGColor = ColorManager->Number2Pixel(0);
   const Int_t RWBGColor = ColorManager->Number2Pixel(36);
-
+  
   AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
-
+  
   for(Int_t board=0; board<NumDevices; board++){
-
+    
     ////////////////////////////////////////////////////
     // Create the group frame to hold all the subwidgets
+
     TGGroupFrame *RegisterRW_GF = new TGGroupFrame(RegisterFrame, FrameTitle[board].c_str(), kHorizontalFrame);
     RegisterRW_GF->SetTitlePos(TGGroupFrame::kCenter);
-
+    
 
     /////////////////////////////////////////////////
     // The register read/write and display widgets //
@@ -442,56 +443,80 @@ void AAInterface::FillRegisterFrame()
     TGGroupFrame *ReadCycle_GF = new TGGroupFrame(RegisterRW_GF, "Read cycle", kVerticalFrame);
     
     TGHorizontalFrame *ReadCycleAddress_HF = new TGHorizontalFrame(ReadCycle_GF);
+    ReadCycle_GF->AddFrame(ReadCycleAddress_HF, new TGLayoutHints(kLHintsExpandY, 5,5,0,0));
+    
     TGLabel *ReadCycle_L1 = new TGLabel(ReadCycleAddress_HF, "Offset address  0x");
     ReadCycle_L1->Resize(130,20);
     ReadCycle_L1->SetTextJustify(kTextRight);
     ReadCycle_L1->ChangeOptions(ReadCycle_L1->GetOptions() | kFixedSize);
     
-    ReadCycleAddress_HF->AddFrame(ReadCycle_L1, new TGLayoutHints(kLHintsLeft, 5,0,5,5));
-
+    ReadCycleAddress_HF->AddFrame(ReadCycle_L1, new TGLayoutHints(kLHintsLeft, 5,0,0,0));
+    
     // ROOT number entry field for setting the V6534 register address to read from
     ReadAddress_NEF.push_back(new TGNumberEntryField(ReadCycleAddress_HF, ReadAddressID[board], 0, 
 						     TGNumberFormat::kNESHex,
 						     TGNumberFormat::kNEAPositive));
     ReadAddress_NEF[board]->Resize(80,20);
-    ReadCycleAddress_HF->AddFrame(ReadAddress_NEF[board], new TGLayoutHints(kLHintsExpandX, 5,5,5,5));
+    ReadCycleAddress_HF->AddFrame(ReadAddress_NEF[board], new TGLayoutHints(kLHintsExpandX, 5,5,0,0));
 
-    // Create two outputs (hex and binary) for the register values
 
-    TGHorizontalFrame *ReadCycleValue_HF1 = new TGHorizontalFrame(ReadCycle_GF);
+    //////////////////////////////////////////////////////////////////////////////////
+    // Create three output displays: decimal (dec), hexidecimal (hex),and binary (bin)
+
+    // Decimal readout display
+
+    TGHorizontalFrame *ReadCycleValue_HF0 = new TGHorizontalFrame(ReadCycle_GF);
+    ReadCycle_GF->AddFrame(ReadCycleValue_HF0, new TGLayoutHints(kLHintsExpandY, 5,5,5,0));
     
-    TGLabel *ReadCycle_L2 = new TGLabel(ReadCycleValue_HF1,"   Value  0x");
+    TGLabel *ReadCycle_L2 = new TGLabel(ReadCycleValue_HF0,"   Value  0d");
     ReadCycle_L2->Resize(130,20);
     ReadCycle_L2->SetTextJustify(kTextRight);
-    ReadCycle_L2->ChangeOptions(ReadCycle_L1->GetOptions() | kFixedSize);
-    ReadCycleValue_HF1->AddFrame(ReadCycle_L2, new TGLayoutHints(kLHintsLeft, 5,0,5,0));
+    ReadCycle_L2->ChangeOptions(ReadCycle_L2->GetOptions() | kFixedSize);
+    ReadCycleValue_HF0->AddFrame(ReadCycle_L2, new TGLayoutHints(kLHintsLeft, 5,0,5,0));
+
+    ReadValueDec_NEF.push_back(new TGNumberEntryField(ReadCycleValue_HF0, ReadValueID[board], 0, 
+						      TGNumberFormat::kNESInteger,
+						      TGNumberFormat::kNEAPositive));
+    ReadValueDec_NEF[board]->Resize(80,20);
+    ReadValueDec_NEF[board]->SetState(false);
+    ReadCycleValue_HF0->AddFrame(ReadValueDec_NEF[board], new TGLayoutHints(kLHintsExpandX, 5,5,5,0));
+
+    // Hexidecimal readout display
     
-    // ROOT number entry field for displaying the value from the read register address
+    TGHorizontalFrame *ReadCycleValue_HF1 = new TGHorizontalFrame(ReadCycle_GF);
+    ReadCycle_GF->AddFrame(ReadCycleValue_HF1, new TGLayoutHints(kLHintsExpandY, 5,5,5,0));
+    
+    TGLabel *ReadCycle_L3 = new TGLabel(ReadCycleValue_HF1,"          0x");
+    ReadCycle_L3->Resize(130,20);
+    ReadCycle_L3->SetTextJustify(kTextRight);
+    ReadCycle_L3->ChangeOptions(ReadCycle_L3->GetOptions() | kFixedSize);
+    ReadCycleValue_HF1->AddFrame(ReadCycle_L3, new TGLayoutHints(kLHintsLeft, 5,0,5,0));
+    
     ReadValueHex_NEF.push_back(new TGNumberEntryField(ReadCycleValue_HF1, ReadValueID[board], 0, 
 						      TGNumberFormat::kNESHex,
 						      TGNumberFormat::kNEAPositive));
     ReadValueHex_NEF[board]->Resize(80,20);
     ReadValueHex_NEF[board]->SetState(false);
-    ReadCycleValue_HF1->AddFrame(ReadValueHex_NEF[board], new TGLayoutHints(kLHintsExpandX, 5,5,5,0));
+    ReadCycleValue_HF1->AddFrame(ReadValueHex_NEF[board], new TGLayoutHints(kLHintsExpandX, 5,5,0,0));
 
+    // Binary readout display
 
     TGHorizontalFrame *ReadCycleValue_HF2 = new TGHorizontalFrame(ReadCycle_GF);
+    ReadCycle_GF->AddFrame(ReadCycleValue_HF2, new TGLayoutHints(kLHintsExpandY, 5,5,0,5));
     
-    TGLabel *ReadCycle_L3 = new TGLabel(ReadCycleValue_HF2,"          0b");
-    ReadCycle_L3->Resize(130,20);
-    ReadCycle_L3->SetTextJustify(kTextRight);
-    ReadCycle_L3->ChangeOptions(ReadCycle_L1->GetOptions() | kFixedSize);
-    ReadCycleValue_HF2->AddFrame(ReadCycle_L3, new TGLayoutHints(kLHintsLeft, 5,0,0,5));
+    TGLabel *ReadCycle_L4 = new TGLabel(ReadCycleValue_HF2,"          0b");
+    ReadCycle_L4->Resize(130,20);
+    ReadCycle_L4->SetTextJustify(kTextRight);
+    ReadCycle_L4->ChangeOptions(ReadCycle_L4->GetOptions() | kFixedSize);
+    ReadCycleValue_HF2->AddFrame(ReadCycle_L4, new TGLayoutHints(kLHintsLeft, 5,0,5,0));
     
-    // ROOT number entry field for displaying the value from the read register address
     ReadValueBinary_TE.push_back(new TGTextEntry(ReadCycleValue_HF2, "0000 0000 0000 0000 0000 0000 0000 0000"));
     ReadValueBinary_TE[board]->Resize(250,20);
     ReadValueBinary_TE[board]->SetBackgroundColor(ColorManager->Number2Pixel(18));
-    ReadCycleValue_HF2->AddFrame(ReadValueBinary_TE[board], new TGLayoutHints(kLHintsLeft, 5,5,0,5));
+    ReadCycleValue_HF2->AddFrame(ReadValueBinary_TE[board], new TGLayoutHints(kLHintsLeft, 5,5,0,0));
 
-    ReadCycle_GF->AddFrame(ReadCycleAddress_HF, new TGLayoutHints(kLHintsExpandY, 5,5,5,5));
-    ReadCycle_GF->AddFrame(ReadCycleValue_HF1, new TGLayoutHints(kLHintsExpandY, 5,5,5,0));
-    ReadCycle_GF->AddFrame(ReadCycleValue_HF2, new TGLayoutHints(kLHintsExpandY, 5,5,0,5));
+    ///////////////////////////
+    // The VME read text button
 
     Read_TB.push_back(new TGTextButton(ReadCycle_GF, "VME Read", ReadID[board]));
     Read_TB[board]->Connect("Clicked()", "AATabSlots", TabSlots, "HandleRegisterTextButtons()");
@@ -549,15 +574,19 @@ void AAInterface::FillRegisterFrame()
     Write_TB[board]->SetForegroundColor(RWFGColor);
     Write_TB[board]->SetBackgroundColor(RWBGColor);
     Write_TB[board]->ChangeOptions(Write_TB[board]->GetOptions() | kFixedSize);
-    WriteCycle_GF->AddFrame(Write_TB[board], new TGLayoutHints(kLHintsCenterX, 5,5,5,5));
+    WriteCycle_GF->AddFrame(Write_TB[board], new TGLayoutHints(kLHintsCenterX, 5,5,15,5));
 
     // Add the write cycle group frame to the hierarchy
     RegisterRW_GF->AddFrame(WriteCycle_GF, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 5,5,5,5));
     
     // Add the top-level group frame to the hierarchy
-    RegisterFrame->AddFrame(RegisterRW_GF, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 5,5,5,40));
+    Int_t BottomOffset = 30;
+    if(board == 2)
+      BottomOffset = 0;
+    
+    RegisterFrame->AddFrame(RegisterRW_GF, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 5,5,5,BottomOffset));
   }
-
+  
   MapSubwindows();
   MapWindow();
 }

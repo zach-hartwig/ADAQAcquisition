@@ -166,22 +166,11 @@ private:
 
   /////////////////
   // Register frame
-
-  vector<TGNumberEntryField *> ReadAddress_NEF, ReadValueHex_NEF;
+  
+  vector<TGNumberEntryField *> ReadAddress_NEF, ReadValueHex_NEF, ReadValueDec_NEF;
   vector<TGTextEntry *> ReadValueBinary_TE;
   vector<TGNumberEntryField *> WriteAddress_NEF, WriteValue_NEF;
   vector<TGTextButton *> Read_TB, Write_TB;
-
-  TGTextButton *HVBoardEnable_TB;
-  TGNumberEntryField *HVBoardAddress_NEF, *HVReadAddress_NEF, *HVReadValue_NEF;
-  TGNumberEntryField *HVWriteAddress_NEF, *HVWriteValue_NEF;
-  TGTextButton *HVRead_TB, *HVWrite_TB;
-
-  TGTextButton *DGBoardEnable_TB;
-  TGNumberEntryField *DGBoardAddress_NEF, *DGReadAddress_NEF, *DGReadValue_NEF;
-  TGNumberEntryField *DGWriteAddress_NEF, *DGWriteValue_NEF;
-  TGTextButton *DGRead_TB, *DGWrite_TB;
-
   
   ///////////////
   // Pulser frame 
