@@ -7,7 +7,24 @@ mail: hartwig@psfc.mit.edu
 
 ## Version 1.2 Series
 
-Major new developments in this series include:
+### 1.2.1
+
+ - Bug fixing and complete optimization for digitizer programming and
+   readout of waveforms when using DPP-PSD firmware.
+
+ - Implementation of decimal formated display (in addition to the hex
+   and binary) for device register readout
+
+ - Enabling the use of the PSD long integral as the pulse area for
+   spectroscopy, data, readout, etc
+
+ - Correctly set the maximum limits for HV voltage widgets based on
+   the maximum voltage values determined by ADAQHighVoltage class
+
+ - Enabling setting spectral bin limits in floats not just integers
+
+
+### 1.2.0
 
  - Implementation of digitizer control and data readout using CAEN
    DPP-PSD firmware. The core functionality is fully implemented and
@@ -32,8 +49,6 @@ Major new developments in this series include:
 
 
 ## Version 1.0 Series
-
-Major new developments in this series include:
 
 ### 1.0.1
 
