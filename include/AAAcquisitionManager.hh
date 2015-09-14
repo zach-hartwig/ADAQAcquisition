@@ -157,8 +157,8 @@ private:
 #ifndef __CINT__
   uint32_t RawTimeStamp, PrevTimeStamp;
   uint32_t TimeStampRollovers, TimeStampGap;
-  uint64_t TimeStamp;
 #endif
+  ULong64_t TimeStamp;
   
   vector<bool> CalibrationEnable;
   vector<TGraph *> CalibrationCurves;

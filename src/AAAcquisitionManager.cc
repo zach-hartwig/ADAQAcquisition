@@ -650,15 +650,8 @@ void AAAcquisitionManager::StartAcquisition()
 	    PulseArea = CalibrationCurves[ch]->Eval(PulseArea);
 	}
 	
-	
-	////////////////////////////
-	// Post-readout data storage 
-	
-	// First, we set the most basic information about the waveform
-	// that we want to ensure is always stored in the ADAQ file
-	// regardless of acquisition mode
-	WaveformData[ch]->SetChannelID(ch);
-	WaveformData[ch]->SetBoardID(DGManager->GetBoardID());
+	/////////////////////////////////////////
+	// Trigger time stamp rollover correction
 
 	// Correct the time stamp for rollover. Note the timestamp is
 	// stored in a bits [31:1] of a 32-bit unsigned integer. The
@@ -685,10 +678,19 @@ void AAAcquisitionManager::StartAcquisition()
 	else
 	  TimeStampGap = 0;
 	
-	TimeStamp = RawTimeStamp + TimeStampGap + TimeStampRollovers*pow(2,31);
+	TimeStamp = RawTimeStamp + TimeStampGap + TimeStampRollovers * pow(2,31);
 	
 	PrevTimeStamp = RawTimeStamp;
 
+
+	////////////////////////////
+	// Post-readout data storage 
+
+	// First, we set the most basic information about the waveform
+	// that we want to ensure is always stored in the ADAQ file
+	// regardless of acquisition mode
+	WaveformData[ch]->SetChannelID(ch);
+	WaveformData[ch]->SetBoardID(DGManager->GetBoardID());
 	WaveformData[ch]->SetTimeStamp(TimeStamp);
 
 	// Second, if the user has NOT selected the "nonupdatable
