@@ -18,6 +18,7 @@
 #include <iomanip>
 #include <bitset>
 #include <algorithm>
+#include <cmath>
 
 #include "AAAcquisitionManager.hh"
 #include "AAVMEManager.hh"

@@ -23,6 +23,7 @@ using namespace boost::assign;
 #include <iostream>
 #include <sstream>
 #include <numeric>
+#include <cmath>
 
 // ADAQAcquisition
 #include "AAGraphics.hh"
