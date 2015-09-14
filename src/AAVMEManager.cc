@@ -282,7 +282,8 @@ bool AAVMEManager::ProgramDigitizers()
   ///////////////////
   // Readout settings
   
-  DGMgr->SetMaxNumEventsBLT(TheSettings->EventsBeforeReadout);
+  if(TheSettings->STDFirmware)
+    DGMgr->SetMaxNumEventsBLT(TheSettings->EventsBeforeReadout);
   
   if(TheSettings->PSDFirmware){
 
@@ -345,7 +346,7 @@ bool AAVMEManager::ProgramDigitizers()
 	DGMgr->SetChannelPulsePolarity(ch, CAEN_DGTZ_PulsePolarityNegative);
     }
 
-
+    
     ////////////////////////////////////////////
     // Set global non-PSD structure PSD settings
     
@@ -357,8 +358,6 @@ bool AAVMEManager::ProgramDigitizers()
     DGMgr->SetIOLevel(CAEN_DGTZ_IOLevel_TTL);
     
     DGMgr->SetDPPEventAggregation(TheSettings->EventsBeforeReadout, 0);
-
-    DGMgr->SetNumEventsPerAggregate(TheSettings->EventsBeforeReadout);
     
     DGMgr->SetRunSynchronizationMode(CAEN_DGTZ_RUN_SYNC_Disabled);
 
