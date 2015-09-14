@@ -266,7 +266,7 @@ void AAInterface::FillConnectionFrame()
   BoardLinkNumberID += (int)0, (int)DGBoardLinkNumber_ID, (int)HVBoardLinkNumber_ID;
   
   vector<uint32_t> BoardAddress, BoardLinkNumber;
-  BoardAddress += 0, 0x0, 0x0;
+  BoardAddress += 0, 0x00420000, 0x42420000;
   BoardLinkNumber += 0, 0, 0;
 
   TGGroupFrame *DeviceSettings_GF = new TGGroupFrame(ConnectionFrame, "CAEN Device Settings", kHorizontalFrame);
@@ -301,7 +301,7 @@ void AAInterface::FillConnectionFrame()
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790M", zDT5790M);
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790N", zDT5790N);
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790P", zDT5790P);
-      BoardType_CBL[board]->GetComboBox()->Select(zDT5790M);
+      BoardType_CBL[board]->GetComboBox()->Select(zV1720);
     }
     else if(board == 2){
       BoardType_CBL[board]->GetComboBox()->AddEntry("V6533M", zV6533M);
@@ -313,7 +313,7 @@ void AAInterface::FillConnectionFrame()
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790M", zDT5790M);
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790N", zDT5790N);
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790P", zDT5790P);
-      BoardType_CBL[board]->GetComboBox()->Select(zDT5790M);
+      BoardType_CBL[board]->GetComboBox()->Select(zV6534M);
     }
 
     if(board == 1){
@@ -327,8 +327,8 @@ void AAInterface::FillConnectionFrame()
       FWType_VF->AddFrame(DGPSDFW_RB = new TGRadioButton(FWType_VF, "DPP-PSD firmware", DGPSDFW_RB_ID),
 			  new TGLayoutHints(kLHintsNormal, 0,0,0,0));
       DGPSDFW_RB->Connect("Clicked()", "AATabSlots", TabSlots, "HandleRadioButtons()");
-      //DGStandardFW_RB->SetState(kButtonDown);
-      DGPSDFW_RB->SetState(kButtonDown);
+      DGStandardFW_RB->SetState(kButtonDown);
+      //DGPSDFW_RB->SetState(kButtonDown);
     }
     
     TGHorizontalFrame *BoardAddress_HF = new TGHorizontalFrame(BoardOptions_VF);
@@ -395,8 +395,6 @@ void AAInterface::FillConnectionFrame()
     BoardEnable_TB[board]->SetForegroundColor(ColorManager->Number2Pixel(kWhite));
     BoardEnable_TB[board]->ChangeOptions(BoardEnable_TB[board]->GetOptions() | kFixedSize);
   }
-
-  BoardEnable_TB[0]->Clicked();
 }
 
 
