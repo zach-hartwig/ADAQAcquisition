@@ -631,9 +631,6 @@ void AAAcquisitionManager::StartAcquisition()
 	  // Baseline returned in "Mixed" mode, == 0 in "List" mode
 	  BaselineValue[ch] = PSDEvents[ch][evt].Baseline;
 
-	  // The PSD short integral
-	  PSDTail = PSDTotal - PSDEvents[ch][evt].ChargeShort;
-	  
 	  // The PSD long integral
 	  PSDTotal = PSDEvents[ch][evt].ChargeLong;
 	  
@@ -641,6 +638,9 @@ void AAAcquisitionManager::StartAcquisition()
 	  // data readout, etc) as the PSD long integral
 	  if(TheSettings->PSDLongGateAsPulseArea)
 	    PulseArea = PSDTotal;
+
+	  // The PSD short integral
+	  PSDTail = PSDTotal - PSDEvents[ch][evt].ChargeShort;
 	}
 	
 	if(CalibrationEnable[ch]){

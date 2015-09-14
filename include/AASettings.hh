@@ -143,9 +143,9 @@ public:
   // Histogram
   Int_t SpectrumChannel;
   Int_t SpectrumNumBins;
-  Int_t SpectrumMinBin;
-  Int_t SpectrumMaxBin;
-
+  Double_t SpectrumMinBin;
+  Double_t SpectrumMaxBin;
+  
   // Analysis
   Bool_t SpectrumPulseHeight, SpectrumPulseArea;
   Int_t SpectrumLLD, SpectrumULD;

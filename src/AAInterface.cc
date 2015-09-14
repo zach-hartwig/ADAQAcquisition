@@ -266,7 +266,7 @@ void AAInterface::FillConnectionFrame()
   BoardLinkNumberID += (int)0, (int)DGBoardLinkNumber_ID, (int)HVBoardLinkNumber_ID;
   
   vector<uint32_t> BoardAddress, BoardLinkNumber;
-  BoardAddress += 0, 0x00420000, 0x42420000;
+  BoardAddress += 0, 0x0, 0x0;
   BoardLinkNumber += 0, 0, 0;
 
   TGGroupFrame *DeviceSettings_GF = new TGGroupFrame(ConnectionFrame, "CAEN Device Settings", kHorizontalFrame);
@@ -301,7 +301,7 @@ void AAInterface::FillConnectionFrame()
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790M", zDT5790M);
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790N", zDT5790N);
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790P", zDT5790P);
-      BoardType_CBL[board]->GetComboBox()->Select(zV1720);
+      BoardType_CBL[board]->GetComboBox()->Select(zDT5790M);
     }
     else if(board == 2){
       BoardType_CBL[board]->GetComboBox()->AddEntry("V6533M", zV6533M);
@@ -313,7 +313,7 @@ void AAInterface::FillConnectionFrame()
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790M", zDT5790M);
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790N", zDT5790N);
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790P", zDT5790P);
-      BoardType_CBL[board]->GetComboBox()->Select(zV6534M);
+      BoardType_CBL[board]->GetComboBox()->Select(zDT5790M);
     }
 
     if(board == 1){
@@ -327,8 +327,8 @@ void AAInterface::FillConnectionFrame()
       FWType_VF->AddFrame(DGPSDFW_RB = new TGRadioButton(FWType_VF, "DPP-PSD firmware", DGPSDFW_RB_ID),
 			  new TGLayoutHints(kLHintsNormal, 0,0,0,0));
       DGPSDFW_RB->Connect("Clicked()", "AATabSlots", TabSlots, "HandleRadioButtons()");
-      DGStandardFW_RB->SetState(kButtonDown);
-      //DGPSDFW_RB->SetState(kButtonDown);
+      //DGStandardFW_RB->SetState(kButtonDown);
+      DGPSDFW_RB->SetState(kButtonDown);
     }
     
     TGHorizontalFrame *BoardAddress_HF = new TGHorizontalFrame(BoardOptions_VF);
@@ -395,6 +395,8 @@ void AAInterface::FillConnectionFrame()
     BoardEnable_TB[board]->SetForegroundColor(ColorManager->Number2Pixel(kWhite));
     BoardEnable_TB[board]->ChangeOptions(BoardEnable_TB[board]->GetOptions() | kFixedSize);
   }
+
+  BoardEnable_TB[0]->Clicked();
 }
 
 
@@ -749,7 +751,7 @@ void AAInterface::FillVoltageFrame()
 			      new TGLayoutHints(kLHintsTop | kLHintsLeft, 5,5,5,0));
     HVChVoltage_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
     HVChVoltage_NEL[ch]->GetEntry()->SetNumLimits(TGNumberFormat::kNELLimitMinMax);
-    HVChVoltage_NEL[ch]->GetEntry()->SetLimitValues(0, TheVMEManager->GetHVManager()->GetMaxVoltage());
+    HVChVoltage_NEL[ch]->GetEntry()->SetLimitValues(0, TheVMEManager->GetHVManager()->GetMaxVoltage(ch));
     HVChVoltage_NEL[ch]->GetEntry()->SetNumber(0);
     
     // ADAQ number entry for setting maximum channel current that can be drawn
@@ -1550,24 +1552,24 @@ void AAInterface::FillAcquisitionFrame()
   
   // ADAQ number entry to specify number of bins used in the spectra histogram
   SpectrumHistogram_GF->AddFrame(SpectrumNumBins_NEL = new ADAQNumberEntryWithLabel(SpectrumHistogram_GF, "Number of bins  ", SpectrumNumBins_NEL_ID),
-					new TGLayoutHints(kLHintsLeft,0,0,5,0));
+				 new TGLayoutHints(kLHintsLeft,0,0,5,0));
   SpectrumNumBins_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
   SpectrumNumBins_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
   SpectrumNumBins_NEL->GetEntry()->SetNumber(100);
-
+  
   // ADAQ number entry to specify the maximum bin in the spectra histogram
   SpectrumHistogram_GF->AddFrame(SpectrumMinBin_NEL = new ADAQNumberEntryWithLabel(SpectrumHistogram_GF, "Minimum bin", SpectrumMinBin_NEL_ID),
-					new TGLayoutHints(kLHintsLeft,0,0,0,0));
+				 new TGLayoutHints(kLHintsLeft,0,0,0,0));
   SpectrumMinBin_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
   SpectrumMinBin_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEANonNegative);
   SpectrumMinBin_NEL->GetEntry()->SetNumber(0.);
 
   SpectrumHistogram_GF->AddFrame(SpectrumMaxBin_NEL = new ADAQNumberEntryWithLabel(SpectrumHistogram_GF, "Maximum bin", SpectrumMaxBin_NEL_ID),
-					new TGLayoutHints(kLHintsLeft,0,0,0,5));
-  SpectrumMaxBin_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+				 new TGLayoutHints(kLHintsLeft,0,0,0,5));
+  SpectrumMaxBin_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
   SpectrumMaxBin_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEANonNegative);
   SpectrumMaxBin_NEL->GetEntry()->SetNumber(30000.);
-
+  
   TGHorizontalFrame *SpectrumAxis_HF = new TGHorizontalFrame(SpectrumHistogram_GF);
   SpectrumHistogram_GF->AddFrame(SpectrumAxis_HF, new TGLayoutHints(kLHintsNormal,0,0,0,0));
 
@@ -2477,8 +2479,8 @@ void AAInterface::SaveSettings()
 
   TheSettings->SpectrumChannel = SpectrumChannel_CBL->GetComboBox()->GetSelected();
   TheSettings->SpectrumNumBins = SpectrumNumBins_NEL->GetEntry()->GetIntNumber();
-  TheSettings->SpectrumMinBin = SpectrumMinBin_NEL->GetEntry()->GetIntNumber();
-  TheSettings->SpectrumMaxBin = SpectrumMaxBin_NEL->GetEntry()->GetIntNumber();
+  TheSettings->SpectrumMinBin = SpectrumMinBin_NEL->GetEntry()->GetNumber();
+  TheSettings->SpectrumMaxBin = SpectrumMaxBin_NEL->GetEntry()->GetNumber();
 
   TheSettings->SpectrumPulseHeight = SpectrumPulseHeight_RB->IsDown();
   TheSettings->SpectrumPulseArea = SpectrumPulseArea_RB->IsDown();
