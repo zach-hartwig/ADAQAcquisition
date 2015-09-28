@@ -225,21 +225,24 @@ bool AAVMEManager::ProgramDigitizers()
   }
 
   // Trigger edge (channel-specific but treated as group setting)
-  
-  for(int ch=0; ch<DGMgr->GetNumChannels(); ch++){
 
-    switch(TheSettings->TriggerEdge){
+  if(TheSettings->STDFirmware){
+  
+    for(int ch=0; ch<DGMgr->GetNumChannels(); ch++){
       
-    case 0: // Rising edge
-      DGMgr->SetTriggerEdge(ch, "Rising");
-      break;
-      
-    case 1: // Falling edge
-      DGMgr->SetTriggerEdge(ch, "Falling");
-      break;
-      
-    default:
-      break;
+      switch(TheSettings->TriggerEdge){
+	
+      case 0: // Rising edge
+	DGMgr->SetTriggerEdge(ch, "Rising");
+	break;
+	
+      case 1: // Falling edge
+	DGMgr->SetTriggerEdge(ch, "Falling");
+	break;
+	
+      default:
+	break;
+      }
     }
   }
   
@@ -296,7 +299,7 @@ bool AAVMEManager::ProgramDigitizers()
       
       if(!TheSettings->ChEnable[ch])
 	continue;
-      
+
       PSDParameters.nsbl[ch] = TheSettings->ChBaselineSamples[ch];
       PSDParameters.csens[ch] = TheSettings->ChChargeSensitivity[ch];
 
@@ -313,15 +316,28 @@ bool AAVMEManager::ProgramDigitizers()
       PSDParameters.trgc[ch] = (CAEN_DGTZ_DPP_TriggerConfig_t)TheSettings->ChTriggerConfig[ch];
       
       PSDParameters.sgate[ch] = TheSettings->ChShortGate[ch];
-      PSDParameters.lgate[ch] = TheSettings->ChLongGate[ch];
+      PSDParameters.lgate[ch] = TheSettings->ChLongGate[ch]; 
       PSDParameters.pgate[ch] = TheSettings->ChGateOffset[ch];
     }
 
-    PSDParameters.purh = CAEN_DGTZ_DPP_PSD_PUR_DetectOnly;
-    PSDParameters.purgap = 100;  // Purity Gap
-    PSDParameters.trgho = 10;    // Trigger holdoff
-    PSDParameters.blthr = 3;     // Baseline threshold  (Depracated?)
-    PSDParameters.bltmo = 100;   // Baseline timeout  (Depracated?)
+    // The trigger holdoff setting *should* be channel-specific (and,
+    // indeed, CAEN claims it is in the CAENDigitizer user manual),
+    // but it is in fact an int16 defined in CAENDigitizerType.h from
+    // the CAENDigitzer-2.6.7 library. ZSH (28 Sep 15)
+    PSDParameters.trgho = TheSettings->PSDTriggerHoldoff; // Trigger holdoff
+
+    // Pileup rejection settings. These settings are Unimplemented at
+    // present but may be used in the future. ZSH (28 Sep 15)
+    //
+    // PSDParameters.purh = CAEN_DGTZ_DPP_PSD_PUR_DetectOnly;
+    // PSDParameters.purgap = 100; 
+
+    // It is unclear from CAEN documentation whether or not these
+    // parameters are still in use. I have asked for
+    // clarification. ZSH (28 Sep 15)
+    //
+    // PSDParameters.blthr = 3;     // Baseline threshold  (Depracated?)
+    // PSDParameters.bltmo = 100;   // Baseline timeout  (Depracated?)
 
     DGMgr->SetDPPParameters(DGChEnableMask, &PSDParameters);
 

@@ -228,6 +228,7 @@ private:
   ADAQComboBoxWithLabel *DGChChargeSensitivity_CBL[8];
   ADAQNumberEntryWithLabel *DGChPSDCut_NEL[8];  
   ADAQComboBoxWithLabel *DGChTriggerConfig_CBL[8];
+  //ADAQNumberEntryWithLabel *DGChTriggerHoldoff_NEL[8];
   ADAQNumberEntryWithLabel *DGChTriggerValidation_NEL[8];
   ADAQNumberEntryWithLabel *DGChShortGate_NEL[8];
   ADAQNumberEntryWithLabel *DGChLongGate_NEL[8];
@@ -249,6 +250,7 @@ private:
 
   ADAQComboBoxWithLabel *DGTriggerType_CBL;
   ADAQComboBoxWithLabel *DGTriggerEdge_CBL;
+  ADAQNumberEntryWithLabel *DGPSDTriggerHoldoff_NEL;
   TGCheckButton *DGTriggerCoincidenceEnable_CB;
   ADAQComboBoxWithLabel *DGTriggerCoincidenceLevel_CBL;
   

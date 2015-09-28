@@ -75,7 +75,9 @@ private:
 
   vector<TLine *> PSDPeak_L, PSDTrigger_L;
   vector<TLine *> PSDTail_L0, PSDTail_L1;
+  vector<TLine *> PSDTriggerHoldoff_L;
   vector<TBox *> Baseline_B, PSDTotal_B;
+
   
   TLine *Spectrum_L, *SpectrumCalibration_L;
 

@@ -266,7 +266,7 @@ void AAInterface::FillConnectionFrame()
   BoardLinkNumberID += (int)0, (int)DGBoardLinkNumber_ID, (int)HVBoardLinkNumber_ID;
   
   vector<uint32_t> BoardAddress, BoardLinkNumber;
-  BoardAddress += 0, 0x00420000, 0x42420000;
+  BoardAddress += 0, 0x0, 0x0;
   BoardLinkNumber += 0, 0, 0;
 
   TGGroupFrame *DeviceSettings_GF = new TGGroupFrame(ConnectionFrame, "CAEN Device Settings", kHorizontalFrame);
@@ -301,7 +301,7 @@ void AAInterface::FillConnectionFrame()
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790M", zDT5790M);
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790N", zDT5790N);
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790P", zDT5790P);
-      BoardType_CBL[board]->GetComboBox()->Select(zV1720);
+      BoardType_CBL[board]->GetComboBox()->Select(zDT5790M);
     }
     else if(board == 2){
       BoardType_CBL[board]->GetComboBox()->AddEntry("V6533M", zV6533M);
@@ -313,7 +313,7 @@ void AAInterface::FillConnectionFrame()
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790M", zDT5790M);
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790N", zDT5790N);
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790P", zDT5790P);
-      BoardType_CBL[board]->GetComboBox()->Select(zV6534M);
+      BoardType_CBL[board]->GetComboBox()->Select(zDT5790M);
     }
 
     if(board == 1){
@@ -327,8 +327,8 @@ void AAInterface::FillConnectionFrame()
       FWType_VF->AddFrame(DGPSDFW_RB = new TGRadioButton(FWType_VF, "DPP-PSD firmware", DGPSDFW_RB_ID),
 			  new TGLayoutHints(kLHintsNormal, 0,0,0,0));
       DGPSDFW_RB->Connect("Clicked()", "AATabSlots", TabSlots, "HandleRadioButtons()");
-      DGStandardFW_RB->SetState(kButtonDown);
-      //DGPSDFW_RB->SetState(kButtonDown);
+      //DGStandardFW_RB->SetState(kButtonDown);
+      DGPSDFW_RB->SetState(kButtonDown);
     }
     
     TGHorizontalFrame *BoardAddress_HF = new TGHorizontalFrame(BoardOptions_VF);
@@ -395,6 +395,8 @@ void AAInterface::FillConnectionFrame()
     BoardEnable_TB[board]->SetForegroundColor(ColorManager->Number2Pixel(kWhite));
     BoardEnable_TB[board]->ChangeOptions(BoardEnable_TB[board]->GetOptions() | kFixedSize);
   }
+
+  BoardEnable_TB[0]->Clicked();
 }
 
 
@@ -1144,7 +1146,7 @@ void AAInterface::FillAcquisitionFrame()
       DGChRecordLength_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
       DGChRecordLength_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
       DGChRecordLength_NEL[ch]->GetEntry()->Resize(55,20);
-      DGChRecordLength_NEL[ch]->GetEntry()->SetNumber(256);
+      DGChRecordLength_NEL[ch]->GetEntry()->SetNumber(512);
 
       DGChannelControl_GF->AddFrame(DGChBaselineSamples_CBL[ch] = new ADAQComboBoxWithLabel(DGChannelControl_GF, "Baseline (samples)", -1),
 				    new TGLayoutHints(kLHintsLeft, 10,0,0,0));
@@ -1184,7 +1186,7 @@ void AAInterface::FillAcquisitionFrame()
 			    new TGLayoutHints(kLHintsNormal, 10,0,0,0));
       DGChTriggerThreshold_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
       DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-      DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumber(100);
+      DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumber(1500);
       DGChTriggerThreshold_NEL[ch]->GetEntry()->Resize(55,20);
       
       Trigger_HF0->AddFrame(DGChTriggerConfig_CBL[ch] = new ADAQComboBoxWithLabel(Trigger_HF0, "Type", -1),
@@ -1194,7 +1196,21 @@ void AAInterface::FillAcquisitionFrame()
       DGChTriggerConfig_CBL[ch]->GetComboBox()->Resize(80,20);
       DGChTriggerConfig_CBL[ch]->GetComboBox()->Select(1);
 
-      DGChannelControl_GF->AddFrame(DGChTriggerValidation_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "Validation window (samples)", -1),
+      /* Trigger holdoff should be channel-specific but it is NOT as
+	 of CAENDigitizer-2.6.7. I have asked CAEN for
+	 clarification. At present, the trigger holdoff settings is
+	 handled as a global parameters below in the 'Trigger Control'
+	 section. ZSH (28 Sep 15)
+
+	 DGChannelControl_GF->AddFrame(DGChTriggerHoldoff_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "Holdoff (samples)", -1),
+                                       new TGLayoutHints(kLHintsNormal, 10,0,0,0));
+	 DGChTriggerHoldoff_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
+	 DGChTriggerHoldoff_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+	 DGChTriggerHoldoff_NEL[ch]->GetEntry()->SetNumber(50);
+	 DGChTriggerHoldoff_NEL[ch]->GetEntry()->Resize(55,20);
+      */
+
+      DGChannelControl_GF->AddFrame(DGChTriggerValidation_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "Validation (samples)", -1),
 			       new TGLayoutHints(kLHintsNormal, 10,0,0,0));
       DGChTriggerValidation_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
       DGChTriggerValidation_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
@@ -1216,7 +1232,7 @@ void AAInterface::FillAcquisitionFrame()
       DGChShortGate_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
       DGChShortGate_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
       DGChShortGate_NEL[ch]->GetEntry()->Resize(45,20);
-      DGChShortGate_NEL[ch]->GetEntry()->SetNumber(10);
+      DGChShortGate_NEL[ch]->GetEntry()->SetNumber(100);
       
       PSD_HF0->AddFrame(DGChLongGate_NEL[ch] = new ADAQNumberEntryWithLabel(PSD_HF0,
 									    "Long",
@@ -1225,7 +1241,7 @@ void AAInterface::FillAcquisitionFrame()
       DGChLongGate_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
       DGChLongGate_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
       DGChLongGate_NEL[ch]->GetEntry()->Resize(45,20);
-      DGChLongGate_NEL[ch]->GetEntry()->SetNumber(100);
+      DGChLongGate_NEL[ch]->GetEntry()->SetNumber(450);
 
       TGHorizontalFrame *PSD_HF1 = new TGHorizontalFrame(DGChannelControl_GF);
       DGChannelControl_GF->AddFrame(PSD_HF1, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
@@ -1237,7 +1253,7 @@ void AAInterface::FillAcquisitionFrame()
       DGChPreTrigger_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
       DGChPreTrigger_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
       DGChPreTrigger_NEL[ch]->GetEntry()->Resize(45,20);
-      DGChPreTrigger_NEL[ch]->GetEntry()->SetNumber(50);
+      DGChPreTrigger_NEL[ch]->GetEntry()->SetNumber(100);
       
       PSD_HF1->AddFrame(DGChGateOffset_NEL[ch] = new ADAQNumberEntryWithLabel(PSD_HF1,
 									      "Gate offset",
@@ -1245,7 +1261,7 @@ void AAInterface::FillAcquisitionFrame()
 			new TGLayoutHints(kLHintsLeft,10,0,0,0));
       DGChGateOffset_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
       DGChGateOffset_NEL[ch]->GetEntry()->Resize(45,20);
-      DGChGateOffset_NEL[ch]->GetEntry()->SetNumber(5);
+      DGChGateOffset_NEL[ch]->GetEntry()->SetNumber(50);
     }
   }
   
@@ -1404,7 +1420,7 @@ void AAInterface::FillAcquisitionFrame()
   ///////////////////
   // Trigger controls
   
-  TGGroupFrame *DGTriggerControls_GF = new TGGroupFrame(DGScopeModeAndTrigger_VF, "Trigger Control", kVerticalFrame);
+  TGGroupFrame *DGTriggerControls_GF = new TGGroupFrame(DGScopeModeAndTrigger_VF, "Trigger control", kVerticalFrame);
   DGTriggerControls_GF->SetTitlePos(TGGroupFrame::kCenter);
   DGScopeModeAndTrigger_VF->AddFrame(DGTriggerControls_GF, new TGLayoutHints(kLHintsCenterX,5,5,0,0));
 
@@ -1421,13 +1437,23 @@ void AAInterface::FillAcquisitionFrame()
   DGTriggerType_CBL->GetComboBox()->ChangeOptions(DGTriggerType_CBL->GetComboBox()->GetOptions() | kFixedSize);
 
   // ADAQ combo box to enable specification of trigger type
-  DGTriggerControls_GF->AddFrame(DGTriggerEdge_CBL = new ADAQComboBoxWithLabel(DGTriggerControls_GF, "Edge", DGTriggerEdge_CBL_ID),
-				 new TGLayoutHints(kLHintsNormal,5,5,0,5));
-  DGTriggerEdge_CBL->GetComboBox()->AddEntry("Rising",0);
-  DGTriggerEdge_CBL->GetComboBox()->AddEntry("Falling",1);
-  DGTriggerEdge_CBL->GetComboBox()->Select(1);
-  DGTriggerEdge_CBL->GetComboBox()->Resize(110,20);
-  DGTriggerEdge_CBL->GetComboBox()->ChangeOptions(DGTriggerEdge_CBL->GetComboBox()->GetOptions() | kFixedSize);
+  if(DGStandardFW_RB->IsDown()){
+    DGTriggerControls_GF->AddFrame(DGTriggerEdge_CBL = new ADAQComboBoxWithLabel(DGTriggerControls_GF, "Edge", DGTriggerEdge_CBL_ID),
+				   new TGLayoutHints(kLHintsNormal,5,5,0,5));
+    DGTriggerEdge_CBL->GetComboBox()->AddEntry("Rising",0);
+    DGTriggerEdge_CBL->GetComboBox()->AddEntry("Falling",1);
+    DGTriggerEdge_CBL->GetComboBox()->Select(1);
+    DGTriggerEdge_CBL->GetComboBox()->Resize(110,20);
+    DGTriggerEdge_CBL->GetComboBox()->ChangeOptions(DGTriggerEdge_CBL->GetComboBox()->GetOptions() | kFixedSize);
+  }
+  else if(DGPSDFW_RB->IsDown()){
+    DGTriggerControls_GF->AddFrame(DGPSDTriggerHoldoff_NEL = new ADAQNumberEntryWithLabel(DGTriggerControls_GF, "Holdoff (samples)", DGPSDTriggerHoldoff_NEL_ID),
+				   new TGLayoutHints(kLHintsNormal,5,0,0,5));
+    DGPSDTriggerHoldoff_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+    DGPSDTriggerHoldoff_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+    DGPSDTriggerHoldoff_NEL->GetEntry()->Resize(60,20);
+    DGPSDTriggerHoldoff_NEL->GetEntry()->SetNumber(10);
+  }
   
   DGTriggerControls_GF->AddFrame(DGTriggerCoincidenceEnable_CB = new TGCheckButton(DGTriggerControls_GF, "Coincidence triggering", DGTriggerCoincidenceEnable_CB_ID),
 				 new TGLayoutHints(kLHintsNormal,5,5,0,0));
@@ -2309,7 +2335,12 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
   AQPSDHistogram_RB->SetEnabled(WidgetState);
 
   DGTriggerType_CBL->GetComboBox()->SetEnabled(WidgetState);
-  DGTriggerEdge_CBL->GetComboBox()->SetEnabled(WidgetState);
+  if(DGStandardFW_RB->IsDown()){
+     DGTriggerEdge_CBL->GetComboBox()->SetEnabled(WidgetState);
+  }
+  else if(DGPSDFW_RB->IsDown()){
+    DGPSDTriggerHoldoff_NEL->GetEntry()->SetState(WidgetState);
+  }
   DGTriggerCoincidenceEnable_CB->SetState(ButtonState);
 
   DGAcquisitionControl_CBL->GetComboBox()->SetEnabled(WidgetState);
@@ -2472,13 +2503,19 @@ void AAInterface::SaveSettings()
   TheSettings->PSDMode = AQPSDHistogram_RB->IsDown();
     
   // Trigger control settings
-  TheSettings->TriggerCoincidenceEnable = DGTriggerCoincidenceEnable_CB->IsDown();
-    
-  TheSettings->TriggerCoincidenceLevel = DGTriggerCoincidenceLevel_CBL->GetComboBox()->GetSelected();
   TheSettings->TriggerType = DGTriggerType_CBL->GetComboBox()->GetSelected();
   TheSettings->TriggerTypeName = DGTriggerType_CBL->GetComboBox()->GetSelectedEntry()->GetTitle();
-  TheSettings->TriggerEdge = DGTriggerEdge_CBL->GetComboBox()->GetSelected();
-  TheSettings->TriggerEdgeName = DGTriggerEdge_CBL->GetComboBox()->GetSelectedEntry()->GetTitle();
+
+  if(DGStandardFW_RB->IsDown()){
+    TheSettings->TriggerEdge = DGTriggerEdge_CBL->GetComboBox()->GetSelected();
+    TheSettings->TriggerEdgeName = DGTriggerEdge_CBL->GetComboBox()->GetSelectedEntry()->GetTitle();
+  }
+  else if(DGPSDFW_RB->IsDown()){
+    TheSettings->PSDTriggerHoldoff = DGPSDTriggerHoldoff_NEL->GetEntry()->GetIntNumber();
+  }
+  
+  TheSettings->TriggerCoincidenceEnable = DGTriggerCoincidenceEnable_CB->IsDown();
+  TheSettings->TriggerCoincidenceLevel = DGTriggerCoincidenceLevel_CBL->GetComboBox()->GetSelected();
 
   // Acquisition
   TheSettings->AcquisitionControl = DGAcquisitionControl_CBL->GetComboBox()->GetSelected();

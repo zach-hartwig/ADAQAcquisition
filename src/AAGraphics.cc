@@ -83,7 +83,7 @@ AAGraphics::AAGraphics()
     PSDPeak_L[ch]->SetLineWidth(2);
 
     PSDTrigger_L.push_back(new TLine);
-    PSDTrigger_L[ch]->SetLineColor(ChColor[ch]);
+    PSDTrigger_L[ch]->SetLineColor(kRed);
     PSDTrigger_L[ch]->SetLineStyle(7);
     PSDTrigger_L[ch]->SetLineWidth(2);
 
@@ -96,6 +96,12 @@ AAGraphics::AAGraphics()
     PSDTail_L1[ch]->SetLineColor(ChColor[ch]);
     PSDTail_L1[ch]->SetLineStyle(1);
     PSDTail_L1[ch]->SetLineWidth(2);
+
+    PSDTriggerHoldoff_L.push_back(new TLine);
+    PSDTriggerHoldoff_L[ch]->SetLineColor(ChColor[ch]);
+    PSDTriggerHoldoff_L[ch]->SetLineStyle(7);
+    PSDTriggerHoldoff_L[ch]->SetLineWidth(2);
+    
   }
 
   SpectrumCalibration_L = new TLine;
@@ -407,6 +413,11 @@ void AAGraphics::DrawWaveformGraphics(vector<double> &BaselineValue,
 			       YMin,
 			       PSDTailAbsStop[ch],
 			       YMax);
+
+      PSDTriggerHoldoff_L[ch]->DrawLine(PSDTotalAbsStop[ch]+TheSettings->PSDTriggerHoldoff,
+					YMin,
+					PSDTotalAbsStop[ch]+TheSettings->PSDTriggerHoldoff,
+					YMax);
     }
 
     if(TheSettings->DisplayZLEThreshold)

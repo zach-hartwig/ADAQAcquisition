@@ -117,10 +117,12 @@ public:
   Bool_t PSDLongGateAsPulseArea;
 
   // Trigger
-  Bool_t TriggerCoincidenceEnable;
-  Int_t TriggerCoincidenceLevel;
   Int_t TriggerType, TriggerEdge;
   string TriggerTypeName, TriggerEdgeName;
+  Int_t PSDTriggerHoldoff;
+  Bool_t TriggerCoincidenceEnable;
+  Int_t TriggerCoincidenceLevel;
+
   
   // Acquisition
   Int_t AcquisitionControl;
