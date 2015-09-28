@@ -46,9 +46,8 @@ AAAcquisitionManager::AAAcquisitionManager()
     ZLENumWordMask(0x000fffff), ZLEControlMask(0xc0000000),
     EventCounter(0),
     LLD(0), ULD(0), SampleHeight(0.), TriggerHeight(0.),
-    PulseHeight(0.), PulseArea(0.), PSDTotal(0.), PSDTail(0.),
-    PeakPosition(0), RawTimeStamp(0), PrevTimeStamp(0),
-    TimeStampRollovers(0), TimeStampGap(0), TimeStamp(0),
+    PulseHeight(0.), PulseArea(0.), PSDTotal(0.), PSDTail(0.), PeakPosition(0),
+    TimeStamp(0), TimeStampGap(0),
     FillWaveformTree(false), TheReadoutManager(new ADAQReadoutManager)
 {
   if(TheAcquisitionManager)
@@ -76,12 +75,12 @@ void AAAcquisitionManager::Initialize()
 
     BufferFull.push_back(true);
     
+    WaveformLength.push_back(0);
+
     BaselineStart.push_back(0);
     BaselineStop.push_back(0);
     BaselineLength.push_back(0);
     BaselineValue.push_back(0);
-
-    WaveformLength.push_back(0);
 
     PeakPosition.push_back(0);
     PSDTotalAbsStart.push_back(0);
@@ -90,6 +89,10 @@ void AAAcquisitionManager::Initialize()
     PSDTailAbsStop.push_back(0);
     
     Polarity.push_back(0.);
+
+    CorrectedTimeStamp.push_back(0);
+    PrevTimeStamp.push_back(0);
+    TimeStampRollovers.push_back(0);
     
     CalibrationDataStruct DataStruct;
     CalibrationData.push_back(DataStruct);
@@ -290,13 +293,14 @@ void AAAcquisitionManager::PrepareAcquisition()
   else if(TheSettings->PSDMode)
     AAGraphics::GetInstance()->SetupPSDHistogramGraphics();
 
-  // Reset time stamp variables 
-  TimeStampRollovers = 0;
-  RawTimeStamp = 0;
-  PrevTimeStamp = 0;
-
-  for(Int_t ch=0; ch<NumDGChannels; ch++)
+  for(Int_t ch=0; ch<NumDGChannels; ch++){
     NumPSDEvents[ch] = 0;
+    
+    // Reset time stamp variables 
+    TimeStampRollovers[ch] = 0;
+    PrevTimeStamp[ch] = 0;
+    CorrectedTimeStamp[ch] = 0;
+  }
 
   if(UseSTDFirmware){
     
@@ -425,8 +429,7 @@ void AAAcquisitionManager::StartAcquisition()
     //       for(waveform samples) {only if settings require}
     
     // Loop over the digitizer readout channels
-    for(Int_t ch=0; ch<DGManager->GetNumChannels(); ch++){
-      
+    for(Int_t ch=0; ch<DGManager->GetNumChannels(); ch++){      
       // Skip channels that are not enabled for efficiency
       if(!TheSettings->ChEnable[ch])
 	continue;
@@ -434,6 +437,10 @@ void AAAcquisitionManager::StartAcquisition()
       // If DPP-PSD, get number of events in present channel
       if(UsePSDFirmware)
 	PCEvents = NumPSDEvents[ch];
+
+      // Reset all channel's corrected time stamp values to -42 to
+      // ensure time stamps only register for the triggered channel
+      CorrectedTimeStamp[ch] = 0;
 
       // Loop over the digitizer stored events in the PC buffer
       for(Int_t evt=0; evt<PCEvents; evt++){
@@ -658,30 +665,30 @@ void AAAcquisitionManager::StartAcquisition()
 	// stored in a bits [31:1] of a 32-bit unsigned integer. The
 	// formula to compute the absolute time stamp is:
 	//
-	//   Time = Raw + Gap + n*2^31
+	//   Corrected = Time + Gap + n*2^31
 	//
 	// where:
-	//  - 'Time' is the absolute non-rollover time stamp
-	//  - 'Raw' is the unmodified 31-bit time stamp
+	//  - 'Corrected' is the 64-bit rollover-corrected time stamp
+	//  - 'Time' is the unmodified 31-bit time stamp
 	//  - 'Gap' is skipped time : (2^31-Prev) @ rollover; 0 @ otherwise
-	//  - 'Prev' is final raw time stamp before rollover
+	//  - 'Prev' is previous unmodified 31-bit time stamp (no rollover)
 	//  - 'n' is the number of rollovers that have occured
-	
+
 	if(UseSTDFirmware)
-	  RawTimeStamp = (EventInfo.TriggerTimeTag >> 1);
+	  TimeStamp = (EventInfo.TriggerTimeTag >> 1);
 	else if(UsePSDFirmware)
-	  RawTimeStamp = (PSDEvents[ch][evt].TimeTag >> 1);
+	  TimeStamp = (PSDEvents[ch][evt].TimeTag >> 1);
 	
-	if(RawTimeStamp < PrevTimeStamp){
-	  TimeStampRollovers++;
-	  TimeStampGap = pow(2,31) - PrevTimeStamp;
+	if(TimeStamp < PrevTimeStamp[ch]){
+	  TimeStampRollovers[ch]++;
+	  TimeStampGap = pow(2,31) - PrevTimeStamp[ch];
 	}
 	else
 	  TimeStampGap = 0;
 	
-	TimeStamp = RawTimeStamp + TimeStampGap + TimeStampRollovers * pow(2,31);
-	
-	PrevTimeStamp = RawTimeStamp;
+	CorrectedTimeStamp[ch] = TimeStamp + TimeStampGap + TimeStampRollovers[ch] * pow(2,31);
+
+	PrevTimeStamp[ch] = TimeStamp;
 
 
 	////////////////////////////
@@ -692,7 +699,7 @@ void AAAcquisitionManager::StartAcquisition()
 	// regardless of acquisition mode
 	WaveformData[ch]->SetChannelID(ch);
 	WaveformData[ch]->SetBoardID(DGManager->GetBoardID());
-	WaveformData[ch]->SetTimeStamp(TimeStamp);
+	WaveformData[ch]->SetTimeStamp(CorrectedTimeStamp[ch]);
 
 	// Second, if the user has NOT selected the "nonupdatable
 	// (ultra rate)" mode, we perform a number of digital pulse
