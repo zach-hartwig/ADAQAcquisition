@@ -818,17 +818,20 @@ void AAAcquisitionManager::StartAcquisition()
 	if(TheSettings->WaveformMode){
 	  
 	  if(TheSettings->DisplayContinuous and evt == 0){
-	    
-	    // Draw the digitized waveform
-	    TheGraphicsManager->PlotWaveforms(Waveforms, WaveformLength);
-	    
-	    // Draw graphical objects associated with the waveform
-	    TheGraphicsManager->DrawWaveformGraphics(BaselineValue,
-						     PeakPosition,
-						     PSDTotalAbsStart,
-						     PSDTotalAbsStop,
-						     PSDTailAbsStart,
-						     PSDTailAbsStop);
+
+	    if(UseSTDFirmware or (UsePSDFirmware and !UsePSDListMode)){
+
+	      // Draw the digitized waveform
+	      TheGraphicsManager->PlotWaveforms(Waveforms, WaveformLength);
+	      
+	      // Draw graphical objects associated with the waveform
+	      TheGraphicsManager->DrawWaveformGraphics(BaselineValue,
+						       PeakPosition,
+						       PSDTotalAbsStart,
+						       PSDTotalAbsStop,
+						       PSDTailAbsStart,
+						       PSDTailAbsStop);
+	    }
 	  }
 	}
       

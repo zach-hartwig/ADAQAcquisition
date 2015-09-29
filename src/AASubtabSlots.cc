@@ -27,7 +27,7 @@
 
 AASubtabSlots::AASubtabSlots(AAInterface *TheInterface)
   : TI(TheInterface),
-    WaveformFileName("DefaultWaveforms.adaq.root"),
+    WaveformFileName("Defauldata.adaq.root"),
     ObjectFileName("DefaultObject.root"),
     CanvasFileName("DefaultCanvas.eps")
 {;}
@@ -657,6 +657,16 @@ void AASubtabSlots::HandleRadioButtons()
   TI->SaveSettings();
   
   switch(ActiveID){
+
+  case AQWaveform_RB_ID:
+  case AQSpectrum_RB_ID:
+  case AQPSDHistogram_RB_ID:
+
+    // Reset the horizontal and vertical sliders to restore the
+    // default view when switching between display types
+    TI->DisplayHorizontalScale_THS->SetPosition(0,1);
+    TI->DisplayVerticalScale_DVS->SetPosition(0,1);
+    break;
     
   case SpectrumPulseHeight_RB_ID:
   case SpectrumPulseArea_RB_ID:

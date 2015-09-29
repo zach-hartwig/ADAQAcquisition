@@ -1173,6 +1173,7 @@ void AAInterface::FillAcquisitionFrame()
       DGChPSDCut_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
       DGChPSDCut_NEL[ch]->GetEntry()->Resize(55,20);
       DGChPSDCut_NEL[ch]->GetEntry()->SetNumber(200);
+      DGChPSDCut_NEL[ch]->GetEntry()->SetState(false);
 
       
       DGChannelControl_GF->AddFrame(new TGLabel(DGChannelControl_GF, "Trigger settings"),
@@ -1186,7 +1187,7 @@ void AAInterface::FillAcquisitionFrame()
 			    new TGLayoutHints(kLHintsNormal, 10,0,0,0));
       DGChTriggerThreshold_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
       DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-      DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumber(1500);
+      DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumber(100);
       DGChTriggerThreshold_NEL[ch]->GetEntry()->Resize(55,20);
       
       Trigger_HF0->AddFrame(DGChTriggerConfig_CBL[ch] = new ADAQComboBoxWithLabel(Trigger_HF0, "Type", -1),
@@ -1408,12 +1409,15 @@ void AAInterface::FillAcquisitionFrame()
   DGScopeModeAndTrigger_VF->AddFrame(DGScopeMode_BG, new TGLayoutHints(kLHintsExpandX,5,5,5,5));
   
   AQWaveform_RB = new TGRadioButton(DGScopeMode_BG, "Digitized waveform", AQWaveform_RB_ID);
+  AQWaveform_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
   AQWaveform_RB->SetState(kButtonDown);
-
+  
   AQSpectrum_RB = new TGRadioButton(DGScopeMode_BG, "Pulse spectrum", AQSpectrum_RB_ID);
-
+  AQSpectrum_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
+  
   AQPSDHistogram_RB = new TGRadioButton(DGScopeMode_BG, "PSD Histogram", AQPSDHistogram_RB_ID);
-
+  AQPSDHistogram_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
+  
   DGScopeMode_BG->Show();
 
 
@@ -1901,7 +1905,7 @@ void AAInterface::FillAcquisitionFrame()
   // Data storage //
   //////////////////
 
-  TGGroupFrame *WaveformStorage_GF = new TGGroupFrame(DataSubframe, "Waveform storage", kVerticalFrame);
+  TGGroupFrame *WaveformStorage_GF = new TGGroupFrame(DataSubframe, "Data storage", kVerticalFrame);
   WaveformStorage_GF->SetTitlePos(TGGroupFrame::kCenter);
   DataSubframe->AddFrame(WaveformStorage_GF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
 
@@ -1916,7 +1920,7 @@ void AAInterface::FillAcquisitionFrame()
   WaveformFileName_TEL->GetEntry()->Resize(220, 25);
   WaveformFileName_TEL->GetEntry()->ChangeOptions(WaveformFileName_TEL->GetOptions() | kFixedSize | kSunkenFrame);
   WaveformFileName_TEL->GetEntry()->SetState(false);
-  WaveformFileName_TEL->GetEntry()->SetText("DefaultWaveforms.adaq.root");
+  WaveformFileName_TEL->GetEntry()->SetText("DefaultData.adaq.root");
   
  
   WaveformStorage_GF->AddFrame(WaveformStoreRaw_CB = new TGCheckButton(WaveformStorage_GF,"Store raw waveforms",WaveformStoreRaw_CB_ID),
@@ -2013,7 +2017,7 @@ void AAInterface::FillAcquisitionFrame()
   ObjectOutputFileName_TEL->GetEntry()->Resize(175, 25);
   ObjectOutputFileName_TEL->GetEntry()->ChangeOptions(ObjectOutputFileName_TEL->GetOptions() | kFixedSize | kSunkenFrame);
   ObjectOutputFileName_TEL->GetEntry()->SetState(false);
-  ObjectOutputFileName_TEL->GetEntry()->SetText("ObjectOutput.root");
+  ObjectOutputFileName_TEL->GetEntry()->SetText("DefaultObject.root");
   
   DGScopeObjectStorage_GF->AddFrame(ObjectSaveWithTimeExtension_CB = new TGCheckButton(DGScopeObjectStorage_GF, "Add time to file name", ObjectSaveWithTimeExtension_CB_ID),
 				    new TGLayoutHints(kLHintsNormal, 5,5,5,5));
@@ -2027,7 +2031,7 @@ void AAInterface::FillAcquisitionFrame()
 
   // Widgets for saving the canvas graphics to file
   
-  TGGroupFrame *DGScopeCanvasStorage_GF = new TGGroupFrame(DataSubframe, "Canvas output", kVerticalFrame);
+  TGGroupFrame *DGScopeCanvasStorage_GF = new TGGroupFrame(DataSubframe, "Canvas outpu", kVerticalFrame);
   DGScopeCanvasStorage_GF->SetTitlePos(TGGroupFrame::kCenter);
   DataSubframe->AddFrame(DGScopeCanvasStorage_GF, new TGLayoutHints(kLHintsNormal,0,0,5,5));
 
