@@ -1,11 +1,29 @@
 ## ADAQAcquisition Source Code Change Log
 
 name: Changelog.md  
-date: 26 Aug 15 (last updated)  
+date: 29 Sep 15 (last updated)
 auth: Zach Hartwig  
 mail: hartwig@psfc.mit.edu  
 
 ## Version 1.2 Series
+
+### 1.2.2
+
+ - Bug fix to ensure that non-triggered but enabled channels register
+   a timestamp of '0'; addresses concern about having repeated time
+   stamps stored in ADAQ file
+
+ - Implentation of user-setting for DPP-PSD trigger holdoff global
+
+ - Adding C++ <cmath> include where necessary for compilation on
+   Ubuntu systems
+
+ - Prevention of waveform plotting in PSD list mode
+
+ - Reset canvas viewing sliders when switching display types
+
+ - Updating default settins
+ 
 
 ### 1.2.1
 
