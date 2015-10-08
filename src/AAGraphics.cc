@@ -53,11 +53,15 @@ AAGraphics::AAGraphics()
   
   // Fill a vector with channel colors for plotting
   ChColor += kBlue, kViolet, kRed, kOrange, 
-    kYellow+1, kGreen+2, kCyan+2, kAzure+7;
+    kYellow-3, kGreen+2, kCyan+2, kAzure+7,
+    kBlue-7, kViolet-7, kRed-7, kOrange-7,
+    kYellow-6, kGreen-7, kCyan-7, kAzure-7;
   
   // Initialize lines and boxes for plotting
 
-  for(int ch=0; ch<8; ch++){
+  const Int_t NumDGChannels = 16;
+
+  for(int ch=0; ch<NumDGChannels; ch++){
     Trigger_L.push_back(new TLine);
     Trigger_L[ch]->SetLineColor(ChColor[ch]);
     Trigger_L[ch]->SetLineStyle(7);
@@ -111,10 +115,10 @@ AAGraphics::AAGraphics()
 
   // Create a legend for the waveforms
 
-  Waveform_LG = new TLegend(0.85, 0.5, 0.95, 0.92);
-  Waveform_LG->SetTextSize(0.05);
+  Waveform_LG = new TLegend(0.85, 0.4, 0.95, 0.92);
+  Waveform_LG->SetTextSize(0.04);
 
-  for(int ch=0; ch<8; ch++){
+  for(int ch=0; ch<NumDGChannels; ch++){
     TLine *Line = new TLine;
     Line->SetLineColor(ChColor[ch]);
     Line->SetLineWidth(4);

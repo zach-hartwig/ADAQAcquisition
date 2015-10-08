@@ -98,6 +98,14 @@ enum{
   DGCh5Enable_CB_ID,
   DGCh6Enable_CB_ID,
   DGCh7Enable_CB_ID,
+  DGCh8Enable_CB_ID,
+  DGCh9Enable_CB_ID,
+  DGCh10Enable_CB_ID,
+  DGCh11Enable_CB_ID,
+  DGCh12Enable_CB_ID,
+  DGCh13Enable_CB_ID,
+  DGCh14Enable_CB_ID,
+  DGCh15Enable_CB_ID,
 
   DGCh0DCOffset_NEL_ID,
   DGCh1DCOffset_NEL_ID,
@@ -107,7 +115,15 @@ enum{
   DGCh5DCOffset_NEL_ID,
   DGCh6DCOffset_NEL_ID,
   DGCh7DCOffset_NEL_ID,
-
+  DGCh8DCOffset_NEL_ID,
+  DGCh9DCOffset_NEL_ID,
+  DGCh10DCOffset_NEL_ID,
+  DGCh11DCOffset_NEL_ID,
+  DGCh12DCOffset_NEL_ID,
+  DGCh13DCOffset_NEL_ID,
+  DGCh14DCOffset_NEL_ID,
+  DGCh15DCOffset_NEL_ID,
+  
   DGCh0TriggerThreshold_NEL_ID,
   DGCh1TriggerThreshold_NEL_ID,
   DGCh2TriggerThreshold_NEL_ID,
@@ -116,6 +132,14 @@ enum{
   DGCh5TriggerThreshold_NEL_ID,
   DGCh6TriggerThreshold_NEL_ID,
   DGCh7TriggerThreshold_NEL_ID,
+  DGCh8TriggerThreshold_NEL_ID,
+  DGCh9TriggerThreshold_NEL_ID,
+  DGCh10TriggerThreshold_NEL_ID,
+  DGCh11TriggerThreshold_NEL_ID,
+  DGCh12TriggerThreshold_NEL_ID,
+  DGCh13TriggerThreshold_NEL_ID,
+  DGCh14TriggerThreshold_NEL_ID,
+  DGCh15TriggerThreshold_NEL_ID,
 
   DGCh0BaselineCalcMin_NEL_ID,
   DGCh1BaselineCalcMin_NEL_ID,
@@ -125,6 +149,14 @@ enum{
   DGCh5BaselineCalcMin_NEL_ID,
   DGCh6BaselineCalcMin_NEL_ID,
   DGCh7BaselineCalcMin_NEL_ID,
+  DGCh8BaselineCalcMin_NEL_ID,
+  DGCh9BaselineCalcMin_NEL_ID,
+  DGCh10BaselineCalcMin_NEL_ID,
+  DGCh11BaselineCalcMin_NEL_ID,
+  DGCh12BaselineCalcMin_NEL_ID,
+  DGCh13BaselineCalcMin_NEL_ID,
+  DGCh14BaselineCalcMin_NEL_ID,
+  DGCh15BaselineCalcMin_NEL_ID,
 
   DGCh0BaselineCalcMax_NEL_ID,
   DGCh1BaselineCalcMax_NEL_ID,
@@ -134,8 +166,15 @@ enum{
   DGCh5BaselineCalcMax_NEL_ID,
   DGCh6BaselineCalcMax_NEL_ID,
   DGCh7BaselineCalcMax_NEL_ID,
-
-
+  DGCh8BaselineCalcMax_NEL_ID,
+  DGCh9BaselineCalcMax_NEL_ID,
+  DGCh10BaselineCalcMax_NEL_ID,
+  DGCh11BaselineCalcMax_NEL_ID,
+  DGCh12BaselineCalcMax_NEL_ID,
+  DGCh13BaselineCalcMax_NEL_ID,
+  DGCh14BaselineCalcMax_NEL_ID,
+  DGCh15BaselineCalcMax_NEL_ID,
+  
   ///////////////////////////////////////////////////////////////////////
   // Widget IDs for the display subframe (top-right of acquisition frame)
   

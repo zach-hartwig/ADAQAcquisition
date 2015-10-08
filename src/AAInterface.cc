@@ -296,12 +296,13 @@ void AAInterface::FillConnectionFrame()
     if(board == 1){
       BoardType_CBL[board]->GetComboBox()->AddEntry("V1720", zV1720);
       BoardType_CBL[board]->GetComboBox()->AddEntry("V1724", zV1724);
+      BoardType_CBL[board]->GetComboBox()->AddEntry("V1725", zV1725);
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5720", zDT5720);
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5730", zDT5730);
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790M", zDT5790M);
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790N", zDT5790N);
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790P", zDT5790P);
-      BoardType_CBL[board]->GetComboBox()->Select(zV1720);
+      BoardType_CBL[board]->GetComboBox()->Select(zV1725);
     }
     else if(board == 2){
       BoardType_CBL[board]->GetComboBox()->AddEntry("V6533M", zV6533M);
@@ -395,6 +396,8 @@ void AAInterface::FillConnectionFrame()
     BoardEnable_TB[board]->SetForegroundColor(ColorManager->Number2Pixel(kWhite));
     BoardEnable_TB[board]->ChangeOptions(BoardEnable_TB[board]->GetOptions() | kFixedSize);
   }
+
+  BoardEnable_TB[2]->Clicked();
 }
 
 
@@ -853,39 +856,61 @@ void AAInterface::FillAcquisitionFrame()
   // Initialize DG variables //
   /////////////////////////////
 
-  DGChannelLabels += 
-    "Channel 0", "Channel 1", "Channel 2", "Channel 3", 
-    "Channel 4", "Channel 5", "Channel 6", "Channel 7";
+  stringstream SS;
+  
+  for(Int_t ch=0; ch<NumDGChannels; ch++){
+    SS.str("");
+    SS << "Channel " << ch;
+    DGChannelLabels.push_back(SS.str());
+  }
 
   DGChEnable_CB_ID_Vec += 
-    (int)DGCh0Enable_CB_ID, (int)DGCh1Enable_CB_ID, (int)DGCh2Enable_CB_ID, 
-    (int)DGCh3Enable_CB_ID, (int)DGCh4Enable_CB_ID, (int)DGCh5Enable_CB_ID, 
-    (int)DGCh6Enable_CB_ID, (int)DGCh7Enable_CB_ID;
+    (int)DGCh0Enable_CB_ID,  (int)DGCh1Enable_CB_ID,  (int)DGCh2Enable_CB_ID, 
+    (int)DGCh3Enable_CB_ID,  (int)DGCh4Enable_CB_ID,  (int)DGCh5Enable_CB_ID, 
+    (int)DGCh6Enable_CB_ID,  (int)DGCh7Enable_CB_ID,  (int)DGCh8Enable_CB_ID,
+    (int)DGCh9Enable_CB_ID,  (int)DGCh10Enable_CB_ID, (int)DGCh11Enable_CB_ID,
+    (int)DGCh12Enable_CB_ID, (int)DGCh13Enable_CB_ID, (int)DGCh14Enable_CB_ID,
+    (int)DGCh15Enable_CB_ID;
   
   DGChDCOffset_NEL_ID_Vec += 
-    (int)DGCh0DCOffset_NEL_ID, (int)DGCh1DCOffset_NEL_ID, (int)DGCh2DCOffset_NEL_ID, 
-    (int)DGCh3DCOffset_NEL_ID, (int)DGCh4DCOffset_NEL_ID, (int)DGCh5DCOffset_NEL_ID, 
-    (int)DGCh6DCOffset_NEL_ID, (int)DGCh7DCOffset_NEL_ID;
+    (int)DGCh0DCOffset_NEL_ID,  (int)DGCh1DCOffset_NEL_ID,  (int)DGCh2DCOffset_NEL_ID, 
+    (int)DGCh3DCOffset_NEL_ID,  (int)DGCh4DCOffset_NEL_ID,  (int)DGCh5DCOffset_NEL_ID, 
+    (int)DGCh6DCOffset_NEL_ID,  (int)DGCh7DCOffset_NEL_ID,  (int)DGCh8DCOffset_NEL_ID,
+    (int)DGCh9DCOffset_NEL_ID,  (int)DGCh10DCOffset_NEL_ID, (int)DGCh11DCOffset_NEL_ID,
+    (int)DGCh12DCOffset_NEL_ID, (int)DGCh13DCOffset_NEL_ID, (int)DGCh14DCOffset_NEL_ID,
+    (int)DGCh15DCOffset_NEL_ID;
 
   DGChTriggerThreshold_NEL_ID_Vec += 
-    (int)DGCh0TriggerThreshold_NEL_ID, (int)DGCh1TriggerThreshold_NEL_ID, (int)DGCh2TriggerThreshold_NEL_ID, 
-    (int)DGCh3TriggerThreshold_NEL_ID, (int)DGCh4TriggerThreshold_NEL_ID, (int)DGCh5TriggerThreshold_NEL_ID, 
-    (int)DGCh6TriggerThreshold_NEL_ID, (int)DGCh7TriggerThreshold_NEL_ID;
+    (int)DGCh0TriggerThreshold_NEL_ID,  (int)DGCh1TriggerThreshold_NEL_ID,  (int)DGCh2TriggerThreshold_NEL_ID, 
+    (int)DGCh3TriggerThreshold_NEL_ID,  (int)DGCh4TriggerThreshold_NEL_ID,  (int)DGCh5TriggerThreshold_NEL_ID, 
+    (int)DGCh6TriggerThreshold_NEL_ID,  (int)DGCh7TriggerThreshold_NEL_ID,  (int)DGCh8TriggerThreshold_NEL_ID,
+    (int)DGCh9TriggerThreshold_NEL_ID,  (int)DGCh10TriggerThreshold_NEL_ID, (int)DGCh11TriggerThreshold_NEL_ID,
+    (int)DGCh12TriggerThreshold_NEL_ID, (int)DGCh13TriggerThreshold_NEL_ID, (int)DGCh14TriggerThreshold_NEL_ID,
+    (int)DGCh15TriggerThreshold_NEL_ID;
 
   insert(DGChTriggerThreshold_NEL_ID_Map)
-    ((int)DGCh0TriggerThreshold_NEL_ID,0) ((int)DGCh1TriggerThreshold_NEL_ID,1) ((int)DGCh2TriggerThreshold_NEL_ID,2) 
-    ((int)DGCh3TriggerThreshold_NEL_ID,3) ((int)DGCh4TriggerThreshold_NEL_ID,4) ((int)DGCh5TriggerThreshold_NEL_ID,5)
-    ((int)DGCh6TriggerThreshold_NEL_ID,6) ((int)DGCh7TriggerThreshold_NEL_ID,7);
+    ((int)DGCh0TriggerThreshold_NEL_ID,0)   ((int)DGCh1TriggerThreshold_NEL_ID,1)   ((int)DGCh2TriggerThreshold_NEL_ID,2) 
+    ((int)DGCh3TriggerThreshold_NEL_ID,3)   ((int)DGCh4TriggerThreshold_NEL_ID,4)   ((int)DGCh5TriggerThreshold_NEL_ID,5)
+    ((int)DGCh6TriggerThreshold_NEL_ID,6)   ((int)DGCh7TriggerThreshold_NEL_ID,7)   ((int)DGCh8TriggerThreshold_NEL_ID,8)
+    ((int)DGCh9TriggerThreshold_NEL_ID,9)   ((int)DGCh10TriggerThreshold_NEL_ID,10) ((int)DGCh11TriggerThreshold_NEL_ID,11)
+    ((int)DGCh12TriggerThreshold_NEL_ID,12) ((int)DGCh13TriggerThreshold_NEL_ID,13) ((int)DGCh14TriggerThreshold_NEL_ID,14)
+    ((int)DGCh15TriggerThreshold_NEL_ID,15);
 
   DGChBaselineCalcMin_NEL_ID_Vec += 
-    (int)DGCh0BaselineCalcMin_NEL_ID, (int)DGCh1BaselineCalcMin_NEL_ID, (int)DGCh2BaselineCalcMin_NEL_ID, 
-    (int)DGCh3BaselineCalcMin_NEL_ID, (int)DGCh4BaselineCalcMin_NEL_ID, (int)DGCh5BaselineCalcMin_NEL_ID,
-    (int)DGCh6BaselineCalcMin_NEL_ID, (int)DGCh7BaselineCalcMin_NEL_ID;
+    (int)DGCh0BaselineCalcMin_NEL_ID,  (int)DGCh1BaselineCalcMin_NEL_ID,  (int)DGCh2BaselineCalcMin_NEL_ID, 
+    (int)DGCh3BaselineCalcMin_NEL_ID,  (int)DGCh4BaselineCalcMin_NEL_ID,  (int)DGCh5BaselineCalcMin_NEL_ID,
+    (int)DGCh6BaselineCalcMin_NEL_ID,  (int)DGCh7BaselineCalcMin_NEL_ID,  (int)DGCh8BaselineCalcMin_NEL_ID,
+    (int)DGCh9BaselineCalcMin_NEL_ID,  (int)DGCh10BaselineCalcMin_NEL_ID, (int)DGCh11BaselineCalcMin_NEL_ID,
+    (int)DGCh12BaselineCalcMin_NEL_ID, (int)DGCh13BaselineCalcMin_NEL_ID, (int)DGCh14BaselineCalcMin_NEL_ID,
+    (int)DGCh15BaselineCalcMin_NEL_ID;
 
   DGChBaselineCalcMax_NEL_ID_Vec += 
-    (int)DGCh0BaselineCalcMax_NEL_ID, (int)DGCh1BaselineCalcMax_NEL_ID, (int)DGCh2BaselineCalcMax_NEL_ID,
-    (int)DGCh3BaselineCalcMax_NEL_ID, (int)DGCh4BaselineCalcMax_NEL_ID, (int)DGCh5BaselineCalcMax_NEL_ID, 
-    (int)DGCh6BaselineCalcMax_NEL_ID, (int)DGCh7BaselineCalcMax_NEL_ID;
+    (int)DGCh0BaselineCalcMax_NEL_ID,  (int)DGCh1BaselineCalcMax_NEL_ID,  (int)DGCh2BaselineCalcMax_NEL_ID,
+    (int)DGCh3BaselineCalcMax_NEL_ID,  (int)DGCh4BaselineCalcMax_NEL_ID,  (int)DGCh5BaselineCalcMax_NEL_ID, 
+    (int)DGCh6BaselineCalcMax_NEL_ID,  (int)DGCh7BaselineCalcMax_NEL_ID,  (int)DGCh7BaselineCalcMax_NEL_ID,
+    (int)DGCh9BaselineCalcMax_NEL_ID,  (int)DGCh10BaselineCalcMax_NEL_ID, (int)DGCh11BaselineCalcMax_NEL_ID,
+    (int)DGCh12BaselineCalcMax_NEL_ID, (int)DGCh13BaselineCalcMax_NEL_ID, (int)DGCh14BaselineCalcMax_NEL_ID,
+    (int)DGCh15BaselineCalcMax_NEL_ID;
 
   
   //////////////////////////////
@@ -971,10 +996,7 @@ void AAInterface::FillAcquisitionFrame()
       Int_t BitDepth = AAVMEManager::GetInstance()->GetDGManager()->GetNumADCBits();
       Int_t Trigger = pow(2,(BitDepth-1));
       DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumber(Trigger);
-      
-      
 
-      
     
       ////////////////////////////////////////
       // Channel-specific analysis settings //
@@ -1600,7 +1622,7 @@ void AAInterface::FillAcquisitionFrame()
   // ADAQ combo box for selecting the channel for display spectrum
   SpectrumHistogram_GF->AddFrame(SpectrumChannel_CBL = new ADAQComboBoxWithLabel(SpectrumHistogram_GF, "", SpectrumChannel_CBL_ID),
 				 new TGLayoutHints(kLHintsNormal,0,0,5,5));
-  for(uint32_t ch=0; ch<8; ch++)
+  for(uint32_t ch=0; ch<NumDGChannels; ch++)
     SpectrumChannel_CBL->GetComboBox()->AddEntry(DGChannelLabels[ch].c_str(),ch);
   SpectrumChannel_CBL->GetComboBox()->Select(0);
   SpectrumChannel_CBL->GetComboBox()->Connect("Selected(int,int)", "AASubtabSlots", SubtabSlots, "HandleComboBoxes(int,int)");
@@ -1669,7 +1691,7 @@ void AAInterface::FillAcquisitionFrame()
   SpectrumAnalysis_GF->AddFrame(SpectrumLDTriggerChannel_CBL = new ADAQComboBoxWithLabel(SpectrumAnalysis_GF, "LD Channel", SpectrumLDTriggerChannel_CBL_ID),
 				new TGLayoutHints(kLHintsNormal,0,0,0,5));
   
-  for(uint32_t ch=0; ch<8; ch++)
+  for(uint32_t ch=0; ch<NumDGChannels; ch++)
     SpectrumLDTriggerChannel_CBL->GetComboBox()->AddEntry(DGChannelLabels[ch].c_str(),ch);
   SpectrumLDTriggerChannel_CBL->GetComboBox()->Select(0);
 
@@ -1826,7 +1848,7 @@ void AAInterface::FillAcquisitionFrame()
   // ADAQ combo box for selecting the channel for display spectrum
   PSDOptions_HF->AddFrame(PSDChannel_CBL = new ADAQComboBoxWithLabel(PSDOptions_HF, "", PSDChannel_CBL_ID),
 			  new TGLayoutHints(kLHintsNormal,0,0,10,0));
-  for(uint32_t ch=0; ch<8; ch++)
+  for(uint32_t ch=0; ch<NumDGChannels; ch++)
     PSDChannel_CBL->GetComboBox()->AddEntry(DGChannelLabels[ch].c_str(),ch);
   PSDChannel_CBL->GetComboBox()->Select(0);
   PSDChannel_CBL->GetComboBox()->Resize(80,20);
@@ -1997,7 +2019,7 @@ void AAInterface::FillAcquisitionFrame()
   
   ObjectType_HF->AddFrame(ObjectOutputChannel_CBL = new ADAQComboBoxWithLabel(ObjectType_HF, "", ObjectOutputType_CBL_ID),
 			  new TGLayoutHints(kLHintsNormal,0,0,15,0));
-  for(uint32_t ch=0; ch<8; ch++)
+  for(uint32_t ch=0; ch<NumDGChannels; ch++)
     ObjectOutputChannel_CBL->GetComboBox()->AddEntry(DGChannelLabels[ch].c_str(),ch);
   ObjectOutputChannel_CBL->GetComboBox()->Select(0);
   ObjectOutputChannel_CBL->GetComboBox()->Resize(80,20);

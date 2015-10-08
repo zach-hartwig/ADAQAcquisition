@@ -47,6 +47,10 @@ class AATabSlots;
 class AAVMEManager;
 class AAAcquisitionManager;
 
+// Define the maximum number of digitizer channels supported by the
+// ADAQ framework
+#define MAX_DG_CHANNELS 16
+
 
 class AAInterface : public TGMainFrame
 {
@@ -201,39 +205,39 @@ private:
 
   // Firmware-agnostic widgets
 
-  TGCheckButton *DGChEnable_CB[8];
-  TGRadioButton *DGChPosPolarity_RB[8];
-  TGRadioButton *DGChNegPolarity_RB[8];
-  ADAQNumberEntryWithLabel *DGChDCOffset_NEL[8];
-  ADAQNumberEntryWithLabel *DGChTriggerThreshold_NEL[8];
+  TGCheckButton *DGChEnable_CB[MAX_DG_CHANNELS];
+  TGRadioButton *DGChPosPolarity_RB[MAX_DG_CHANNELS];
+  TGRadioButton *DGChNegPolarity_RB[MAX_DG_CHANNELS];
+  ADAQNumberEntryWithLabel *DGChDCOffset_NEL[MAX_DG_CHANNELS];
+  ADAQNumberEntryWithLabel *DGChTriggerThreshold_NEL[MAX_DG_CHANNELS];
 
   // CAEN Standard firmware widgets
   
-  ADAQNumberEntryWithLabel *DGChZLEThreshold_NEL[8];
-  ADAQNumberEntryWithLabel *DGChZLESamples_NEL[8];
-  ADAQNumberEntryWithLabel *DGChZLEForward_NEL[8];
-  ADAQNumberEntryWithLabel *DGChZLEBackward_NEL[8];
-  TGRadioButton *DGChZLEPosLogic_RB[8], *DGChZLENegLogic_RB[8];
-  ADAQNumberEntryWithLabel *DGChBaselineCalcMin_NEL[8];
-  ADAQNumberEntryWithLabel *DGChBaselineCalcMax_NEL[8];
-  ADAQNumberEntryWithLabel *DGChPSDTotalStart_NEL[8];
-  ADAQNumberEntryWithLabel *DGChPSDTotalStop_NEL[8];
-  ADAQNumberEntryWithLabel *DGChPSDTailStart_NEL[8];
-  ADAQNumberEntryWithLabel *DGChPSDTailStop_NEL[8];
+  ADAQNumberEntryWithLabel *DGChZLEThreshold_NEL[MAX_DG_CHANNELS];
+  ADAQNumberEntryWithLabel *DGChZLESamples_NEL[MAX_DG_CHANNELS];
+  ADAQNumberEntryWithLabel *DGChZLEForward_NEL[MAX_DG_CHANNELS];
+  ADAQNumberEntryWithLabel *DGChZLEBackward_NEL[MAX_DG_CHANNELS];
+  TGRadioButton *DGChZLEPosLogic_RB[MAX_DG_CHANNELS], *DGChZLENegLogic_RB[MAX_DG_CHANNELS];
+  ADAQNumberEntryWithLabel *DGChBaselineCalcMin_NEL[MAX_DG_CHANNELS];
+  ADAQNumberEntryWithLabel *DGChBaselineCalcMax_NEL[MAX_DG_CHANNELS];
+  ADAQNumberEntryWithLabel *DGChPSDTotalStart_NEL[MAX_DG_CHANNELS];
+  ADAQNumberEntryWithLabel *DGChPSDTotalStop_NEL[MAX_DG_CHANNELS];
+  ADAQNumberEntryWithLabel *DGChPSDTailStart_NEL[MAX_DG_CHANNELS];
+  ADAQNumberEntryWithLabel *DGChPSDTailStop_NEL[MAX_DG_CHANNELS];
 
   // CAEN DPP-PSD firmware widgets
 
-  ADAQNumberEntryWithLabel *DGChRecordLength_NEL[8];
-  ADAQComboBoxWithLabel *DGChBaselineSamples_CBL[8];
-  ADAQComboBoxWithLabel *DGChChargeSensitivity_CBL[8];
-  ADAQNumberEntryWithLabel *DGChPSDCut_NEL[8];  
-  ADAQComboBoxWithLabel *DGChTriggerConfig_CBL[8];
-  //ADAQNumberEntryWithLabel *DGChTriggerHoldoff_NEL[8];
-  ADAQNumberEntryWithLabel *DGChTriggerValidation_NEL[8];
-  ADAQNumberEntryWithLabel *DGChShortGate_NEL[8];
-  ADAQNumberEntryWithLabel *DGChLongGate_NEL[8];
-  ADAQNumberEntryWithLabel *DGChPreTrigger_NEL[8];
-  ADAQNumberEntryWithLabel *DGChGateOffset_NEL[8];
+  ADAQNumberEntryWithLabel *DGChRecordLength_NEL[MAX_DG_CHANNELS];
+  ADAQComboBoxWithLabel *DGChBaselineSamples_CBL[MAX_DG_CHANNELS];
+  ADAQComboBoxWithLabel *DGChChargeSensitivity_CBL[MAX_DG_CHANNELS];
+  ADAQNumberEntryWithLabel *DGChPSDCut_NEL[MAX_DG_CHANNELS];  
+  ADAQComboBoxWithLabel *DGChTriggerConfig_CBL[MAX_DG_CHANNELS];
+  //ADAQNumberEntryWithLabel *DGChTriggerHoldoff_NEL[MAX_DG_CHANNELS];
+  ADAQNumberEntryWithLabel *DGChTriggerValidation_NEL[MAX_DG_CHANNELS];
+  ADAQNumberEntryWithLabel *DGChShortGate_NEL[MAX_DG_CHANNELS];
+  ADAQNumberEntryWithLabel *DGChLongGate_NEL[MAX_DG_CHANNELS];
+  ADAQNumberEntryWithLabel *DGChPreTrigger_NEL[MAX_DG_CHANNELS];
+  ADAQNumberEntryWithLabel *DGChGateOffset_NEL[MAX_DG_CHANNELS];
   
   // Display specific widgets (in the upper-right subframe)
 
