@@ -1,11 +1,17 @@
 ## ADAQAcquisition Source Code Change Log
 
 name: Changelog.md  
-date: 29 Sep 15 (last updated)
+date: 21 Oct 15 (last updated)
 auth: Zach Hartwig  
 mail: hartwig@psfc.mit.edu  
 
 ## Version 1.2 Series
+
+### 1.2.3
+
+ - Enabled initial support for the CAEN V1725 digitizer board,
+   including both the 8 and 16 channel versions.
+
 
 ### 1.2.2
 
