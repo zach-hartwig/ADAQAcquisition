@@ -1531,11 +1531,23 @@ void AAInterface::FillAcquisitionFrame()
     DGPostTrigger_NEL->GetEntry()->SetNumber(70);
   }
   else if(DGPSDFW_RB->IsDown()){
+
+    // The DPP-PSD "Oscilloscope" mode - called "Waveform only" mode
+    // here - has been discontinued for x725 and x730 but will remain
+    // implemented on x720/x790 digitizers. Enable user to use this
+    // mode only for appropriate boards
+
+    ZBoardType DGType = TheVMEManager->GetDGManager()->GetBoardType();
+    Bool_t EnableOscilloscopeMode = false;
+    if(DGType == zV1720 or DGType == zDT5720 or
+       DGType == zDT5790M or DGType == zDT5790N or DGType == zDT5790P)
+      EnableOscilloscopeMode = true;
     
     DGAcquisitionControl_GF->AddFrame(DGPSDMode_CBL = new ADAQComboBoxWithLabel(DGAcquisitionControl_GF, "PSD mode", -1),
 				      new TGLayoutHints(kLHintsNormal,5,5,5,0));
     DGPSDMode_CBL->GetComboBox()->Resize(130, 20);
-    DGPSDMode_CBL->GetComboBox()->AddEntry("Waveform only", 0);
+    if(EnableOscilloscopeMode)
+      DGPSDMode_CBL->GetComboBox()->AddEntry("Waveform only", 0);
     DGPSDMode_CBL->GetComboBox()->AddEntry("List only", 1);
     DGPSDMode_CBL->GetComboBox()->AddEntry("List + Waveform", 2);
     DGPSDMode_CBL->GetComboBox()->Select(2);
