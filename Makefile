@@ -28,6 +28,9 @@ ROOTSYS:=$(shell $(RC) --prefix)
 ROOTMAKE:=$(ROOTSYS)/etc/Makefile.arch
 include $(ROOTMAKE)
 
+# Enable C++11 features
+CXXFLAGS += -std=c++11
+
 # Specify the the binary, build, and source directories
 BUILDDIR = build
 BINDIR = bin
@@ -49,7 +52,7 @@ OBJS = $(subst src/,build/,$(TMP))
 OBJS += $(BUILDDIR)/ADAQAcquisitionDict.o
 
 # Add various compiler flags
-CXXFLAGS += -w -I$(INCLDIR) -I$(ADAQHOME)/include -std=c++0x
+CXXFLAGS += -w -I$(INCLDIR) -I$(ADAQHOME)/include
 
 # Add linker flags for the ADAQ libraries
 LDFLAGS+=-L$(ADAQHOME)/lib/$(HOSTTYPE) -lADAQControl -lADAQReadout
