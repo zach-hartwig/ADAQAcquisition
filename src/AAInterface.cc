@@ -328,8 +328,8 @@ void AAInterface::FillConnectionFrame()
       FWType_VF->AddFrame(DGPSDFW_RB = new TGRadioButton(FWType_VF, "DPP-PSD firmware", DGPSDFW_RB_ID),
 			  new TGLayoutHints(kLHintsNormal, 0,0,0,0));
       DGPSDFW_RB->Connect("Clicked()", "AATabSlots", TabSlots, "HandleRadioButtons()");
-      DGStandardFW_RB->SetState(kButtonDown);
-      //DGPSDFW_RB->SetState(kButtonDown);
+      //DGStandardFW_RB->SetState(kButtonDown);
+      DGPSDFW_RB->SetState(kButtonDown);
     }
     
     TGHorizontalFrame *BoardAddress_HF = new TGHorizontalFrame(BoardOptions_VF);
@@ -1210,7 +1210,7 @@ void AAInterface::FillAcquisitionFrame()
       DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumber(100);
       DGChTriggerThreshold_NEL[ch]->GetEntry()->Resize(55,20);
       
-      Trigger_HF0->AddFrame(DGChTriggerConfig_CBL[ch] = new ADAQComboBoxWithLabel(Trigger_HF0, "Type", -1),
+      Trigger_HF0->AddFrame(DGChTriggerConfig_CBL[ch] = new ADAQComboBoxWithLabel(Trigger_HF0, "", -1),
 			    new TGLayoutHints(kLHintsLeft, 5,0,0,0));
       DGChTriggerConfig_CBL[ch]->GetComboBox()->AddEntry("Peak",0);
       DGChTriggerConfig_CBL[ch]->GetComboBox()->AddEntry("Threshold",1);
@@ -1247,7 +1247,7 @@ void AAInterface::FillAcquisitionFrame()
       DGChannelControl_GF->AddFrame(PSD_HF0, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
       
       PSD_HF0->AddFrame(DGChShortGate_NEL[ch] = new ADAQNumberEntryWithLabel(PSD_HF0,
-									     "Short     ",
+									     "Short   ",
 									     -1),
 			new TGLayoutHints(kLHintsLeft,10,0,0,0));
       DGChShortGate_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
@@ -1258,7 +1258,7 @@ void AAInterface::FillAcquisitionFrame()
       PSD_HF0->AddFrame(DGChLongGate_NEL[ch] = new ADAQNumberEntryWithLabel(PSD_HF0,
 									    "Long",
 									    -1),
-			new TGLayoutHints(kLHintsLeft,10,0,0,0));
+			new TGLayoutHints(kLHintsLeft,5,0,0,0));
       DGChLongGate_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
       DGChLongGate_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
       DGChLongGate_NEL[ch]->GetEntry()->Resize(45,20);
@@ -1268,7 +1268,7 @@ void AAInterface::FillAcquisitionFrame()
       DGChannelControl_GF->AddFrame(PSD_HF1, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
 
       PSD_HF1->AddFrame(DGChPreTrigger_NEL[ch] = new ADAQNumberEntryWithLabel(PSD_HF1,
-									      "Pretrigger",
+									      "Pre-trig",
 									      -1),
 			new TGLayoutHints(kLHintsLeft,10,0,0,0));
       DGChPreTrigger_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
@@ -1279,7 +1279,7 @@ void AAInterface::FillAcquisitionFrame()
       PSD_HF1->AddFrame(DGChGateOffset_NEL[ch] = new ADAQNumberEntryWithLabel(PSD_HF1,
 									      "Gate offset",
 									      -1),
-			new TGLayoutHints(kLHintsLeft,10,0,0,0));
+			new TGLayoutHints(kLHintsLeft,5,0,0,0));
       DGChGateOffset_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
       DGChGateOffset_NEL[ch]->GetEntry()->Resize(45,20);
       DGChGateOffset_NEL[ch]->GetEntry()->SetNumber(50);
@@ -1543,7 +1543,7 @@ void AAInterface::FillAcquisitionFrame()
        DGType == zDT5790M or DGType == zDT5790N or DGType == zDT5790P)
       EnableOscilloscopeMode = true;
     
-    DGAcquisitionControl_GF->AddFrame(DGPSDMode_CBL = new ADAQComboBoxWithLabel(DGAcquisitionControl_GF, "PSD mode", -1),
+    DGAcquisitionControl_GF->AddFrame(DGPSDMode_CBL = new ADAQComboBoxWithLabel(DGAcquisitionControl_GF, "PSD mode", DGPSDMode_CBL_ID),
 				      new TGLayoutHints(kLHintsNormal,5,5,5,0));
     DGPSDMode_CBL->GetComboBox()->Resize(130, 20);
     if(EnableOscilloscopeMode)
@@ -1551,9 +1551,26 @@ void AAInterface::FillAcquisitionFrame()
     DGPSDMode_CBL->GetComboBox()->AddEntry("List only", 1);
     DGPSDMode_CBL->GetComboBox()->AddEntry("List + Waveform", 2);
     DGPSDMode_CBL->GetComboBox()->Select(2);
+    DGPSDMode_CBL->GetComboBox()->Connect("Selected(int,int)", "AASubtabSlots", SubtabSlots, "HandleComboBoxes(int,int)");
+
+    // Set which acquired DPP-PSD data is used in analysis (spectra
+    // and PSD histograms): the list data or the full waveform
+
+    TGHorizontalFrame *DGPSDAnalysis_HF = new TGHorizontalFrame(DGAcquisitionControl_GF);
+    DGAcquisitionControl_GF->AddFrame(DGPSDAnalysis_HF,
+				      new TGLayoutHints(kLHintsNormal,0,0,0,0));
+
+    DGPSDAnalysis_HF->AddFrame(new TGLabel(DGPSDAnalysis_HF,"Data analysis: "),
+			       new TGLayoutHints(kLHintsNormal,5,0,5,5));
+
+    DGPSDAnalysis_HF->AddFrame(DGPSDListAnalysis_RB = new TGRadioButton(DGPSDAnalysis_HF, "List", DGPSDListAnalysis_RB_ID),
+			       new TGLayoutHints(kLHintsNormal,5,0,5,5));
+    DGPSDListAnalysis_RB->Connect("Clicked()","AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
+    DGPSDListAnalysis_RB->SetState(kButtonDown);
     
-    DGAcquisitionControl_GF->AddFrame(DGPSDLongGateAsArea_CB = new TGCheckButton(DGAcquisitionControl_GF, "PSD long integral as pulse area", -1),
-				      new TGLayoutHints(kLHintsNormal,5,5,5,5));
+    DGPSDAnalysis_HF->AddFrame(DGPSDWaveformAnalysis_RB = new TGRadioButton(DGPSDAnalysis_HF, "Waveform", DGPSDWaveformAnalysis_RB_ID),
+			       new TGLayoutHints(kLHintsNormal,5,0,5,5));
+    DGPSDWaveformAnalysis_RB->Connect("Clicked()","AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
   }
   
   DGAcquisitionControl_GF->AddFrame(AQTime_NEL = new ADAQNumberEntryWithLabel(DGAcquisitionControl_GF, "Acquisition time (s)", AQTime_NEL_ID),
@@ -2562,7 +2579,8 @@ void AAInterface::SaveSettings()
   }
   else{
     TheSettings->PSDOperationMode = DGPSDMode_CBL->GetComboBox()->GetSelected();
-    TheSettings->PSDLongGateAsPulseArea = DGPSDLongGateAsArea_CB->IsDown();
+    TheSettings->PSDListAnalysis = DGPSDListAnalysis_RB->IsDown();
+    TheSettings->PSDWaveformAnalysis = DGPSDWaveformAnalysis_RB->IsDown();
   }
   
   TheSettings->AcquisitionTime = AQTime_NEL->GetEntry()->GetIntNumber();

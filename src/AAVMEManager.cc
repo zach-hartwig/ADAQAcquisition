@@ -365,7 +365,7 @@ bool AAVMEManager::ProgramDigitizers()
     
     ////////////////////////////////////////////
     // Set global non-PSD structure PSD settings
-    
+
     DGMgr->SetDPPAcquisitionMode((CAEN_DGTZ_DPP_AcqMode_t)TheSettings->PSDOperationMode,
 				 CAEN_DGTZ_DPP_SAVE_PARAM_EnergyAndTime);
     

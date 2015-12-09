@@ -262,7 +262,7 @@ private:
   ADAQNumberEntryWithLabel *DGRecordLength_NEL;
   ADAQNumberEntryWithLabel *DGPostTrigger_NEL;
   ADAQComboBoxWithLabel *DGPSDMode_CBL;
-  TGCheckButton *DGPSDLongGateAsArea_CB;
+  TGRadioButton *DGPSDListAnalysis_RB, *DGPSDWaveformAnalysis_RB;
   ADAQNumberEntryWithLabel *AQTime_NEL;  
   ADAQNumberEntryFieldWithLabel *AQTimer_NEFL;
   TGTextButton *AQTimerStart_TB, *AQTimerAbort_TB;

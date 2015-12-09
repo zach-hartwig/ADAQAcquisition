@@ -93,6 +93,29 @@ void AASubtabSlots::HandleComboBoxes(int ActiveID, int SelectedID)
   
   switch(ActiveID){
     
+  case DGPSDMode_CBL_ID:
+    
+    switch(SelectedID){
+      
+    case 0: // PSD waveform only mode
+      TI->DGPSDWaveformAnalysis_RB->SetState(kButtonDown);
+      TI->DGPSDListAnalysis_RB->SetState(kButtonUp);
+      TI->DGPSDListAnalysis_RB->SetState(kButtonDisabled);
+      break;
+
+    case 1: // PSD list only mode
+      TI->DGPSDListAnalysis_RB->SetState(kButtonDown);
+      TI->DGPSDWaveformAnalysis_RB->SetState(kButtonUp);
+      TI->DGPSDWaveformAnalysis_RB->SetState(kButtonDisabled);
+      break;
+      
+    case 2: // PSD list+waveform mode
+      TI->DGPSDListAnalysis_RB->SetState(kButtonDown);
+      TI->DGPSDWaveformAnalysis_RB->SetState(kButtonUp);
+      break;
+    }
+    break;
+    
   case SpectrumChannel_CBL_ID:{
 
     // In order to ensure that the calibration set point combo box
@@ -646,7 +669,6 @@ void AASubtabSlots::HandleTextButtons()
   }
   }
 }
-
   
 
 void AASubtabSlots::HandleRadioButtons()
@@ -666,6 +688,16 @@ void AASubtabSlots::HandleRadioButtons()
     // default view when switching between display types
     TI->DisplayHorizontalScale_THS->SetPosition(0,1);
     TI->DisplayVerticalScale_DVS->SetPosition(0,1);
+    break;
+
+  case DGPSDListAnalysis_RB_ID:
+    if(TI->DGPSDListAnalysis_RB->IsDown())
+      TI->DGPSDWaveformAnalysis_RB->SetState(kButtonUp);
+    break;
+
+  case DGPSDWaveformAnalysis_RB_ID:
+    if(TI->DGPSDWaveformAnalysis_RB->IsDown())
+      TI->DGPSDListAnalysis_RB->SetState(kButtonUp);
     break;
     
   case SpectrumPulseHeight_RB_ID:

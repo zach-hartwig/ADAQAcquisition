@@ -37,7 +37,7 @@ AAAcquisitionManager::AAAcquisitionManager()
     AcquisitionTimeStart(0), AcquisitionTimeStop(0), 
     AcquisitionTimeNow(0), AcquisitionTimePrev(0),
     UseSTDFirmware(true), UsePSDFirmware(false),
-    UsePSDWaveformMode(true), UsePSDListMode(false), UsePSDMixedMode(false),
+    AnalyzePSDList(true), AnalyzePSDWaveform(false),
     EventPointer(NULL), EventWaveform(NULL), Buffer(NULL),
     BufferSize(0), ReadSize(0), FPGAEvents(0), PCEvents(0),
     ReadoutType(0), ReadoutTypeBit(24), ReadoutTypeMask(0b1 << ReadoutTypeBit),
@@ -115,32 +115,13 @@ void AAAcquisitionManager::PrepareAcquisition()
   Int_t NumDGChannels = DGManager->GetNumChannels();
 
   // Set CAEN firmware type class member booleans for easy use
-  
   UseSTDFirmware = TheSettings->STDFirmware;
   UsePSDFirmware = TheSettings->PSDFirmware;
 
-  switch(TheSettings->PSDOperationMode){
-
-  case CAEN_DGTZ_DPP_ACQ_MODE_Oscilloscope:
-    UsePSDWaveformMode = true;
-    UsePSDListMode = false;
-    UsePSDMixedMode = false;
-    break;
-
-  case CAEN_DGTZ_DPP_ACQ_MODE_List:
-    UsePSDWaveformMode = false;
-    UsePSDListMode = true;
-    UsePSDMixedMode = false;
-    break;
-    
-  case CAEN_DGTZ_DPP_ACQ_MODE_Mixed:
-    UsePSDWaveformMode = false;
-    UsePSDListMode = false;
-    UsePSDMixedMode = true;
-    
-    break;
-  }
-
+  // Set user-preference to analyze PSD list data or waveforms
+  AnalyzePSDList = TheSettings->PSDListAnalysis;
+  AnalyzePSDWaveform = TheSettings->PSDWaveformAnalysis;
+  
   ////////////////////////////////////////////////////
   // Initialize general member data for acquisition //
   ////////////////////////////////////////////////////
@@ -180,7 +161,7 @@ void AAAcquisitionManager::PrepareAcquisition()
 
   //////////////////////////
   // PSD integral calculation
-
+  
   if(UsePSDFirmware)
     for(Int_t ch=0; ch<NumDGChannels; ch++){
       Int_t GateStart = TheSettings->ChPreTrigger[ch] - TheSettings->ChGateOffset[ch];
@@ -364,7 +345,7 @@ void AAAcquisitionManager::StartAcquisition()
   ///////////////////////////////
   
   while(AcquisitionEnable){
-    
+
     // Handle the acquisition loop in a separate ROOT thread
     gSystem->ProcessEvents();
 
@@ -400,14 +381,14 @@ void AAAcquisitionManager::StartAcquisition()
     // DPP-PSD firmware readout
     
     else if(UsePSDFirmware){
-
+      
       // Transfer data from FPGA buffer to PC buffer
       DGManager->ReadData(Buffer, &ReadSize);
-
+      
       // The returned value of ReadData indicates data transfer status:
       //  = 0 : FPGA events < specified readout events; no transfer occured
       //  > 0 : FPGA events >= specified events require; tranfser occured
-
+      
       // If no events were transferred then continue waiting for data
       if(ReadSize == 0)
       	continue;
@@ -415,7 +396,7 @@ void AAAcquisitionManager::StartAcquisition()
       // Readout events from PC buffer to DPP-PSD event structure
       DGManager->GetDPPEvents(Buffer, ReadSize, PSDEvents, &NumPSDEvents[0]);
     }
-    
+
     //////////////////////////////
     // Event data readout loops //
     //////////////////////////////
@@ -502,7 +483,7 @@ void AAAcquisitionManager::StartAcquisition()
 	  
 	  // Perform DPP-PSD firmware waveform readout
 	  
-	  else if(UsePSDFirmware and !UsePSDListMode){
+	  else if(UsePSDFirmware and AnalyzePSDWaveform){
 	    DGManager->DecodeDPPWaveforms(&PSDEvents[ch][evt], PSDWaveforms);
 	  }
 	}
@@ -534,8 +515,10 @@ void AAAcquisitionManager::StartAcquisition()
 	
 	// Readout and process full waveforms for STD firwmare; do the
 	// same for PSD firmware in 'Oscilloscope' or 'Mixed' modes 
-	if(UseSTDFirmware or (UsePSDFirmware and !UsePSDListMode)){
-	  
+	//if(UseSTDFirmware or (UsePSDFirmware and !UsePSDListMode)){
+	
+	if(UseSTDFirmware or (UsePSDFirmware and AnalyzePSDWaveform)){
+
 	  // Get  the total number of samples in the current waveform
 	  Int_t NumSamples = 0;
 	  if(UseSTDFirmware)
@@ -563,7 +546,6 @@ void AAAcquisitionManager::StartAcquisition()
 	      }
 	      
 	      // Raw waveforms
-	      
 	      else{
 		if(UseSTDFirmware)
 		  Waveforms[ch][sample] = EventWaveform->DataChannel[ch][sample];
@@ -601,7 +583,7 @@ void AAAcquisitionManager::StartAcquisition()
 	  }// End sample loop
 
 	  // Computation of PSD integrals
-
+	  
 	  // In STD firmware, the PSD integrals are taken relative to
 	  // the peak position in time so the integrals must be taken
 	  // *after* the sample loop, in which the peak position is
@@ -629,24 +611,21 @@ void AAAcquisitionManager::StartAcquisition()
 	    for(; sample<PSDTailAbsStop[ch]; sample++)
 	      PSDTail += Polarity[ch] * (Waveforms[ch][sample] - BaselineValue[ch]);
 	  }
-	}
-
-	// If PSD mixed or list mode is enabled then set the baseline
-	// and PSD integrals from the PSD firmware calculations.
+	} // End STD or PSD waveform analysis
 	
-	if(UsePSDFirmware and !UsePSDWaveformMode){
-
+	// Analyze PSD list mode data
+	
+	if(UsePSDFirmware and AnalyzePSDList){
+	  
 	  // Baseline returned in "Mixed" mode, == 0 in "List" mode
 	  BaselineValue[ch] = PSDEvents[ch][evt].Baseline;
-
+	  
 	  // The PSD long integral
 	  PSDTotal = PSDEvents[ch][evt].ChargeLong;
 	  
-	  // If desired, set the pulse area (for spectra creation,
-	  // data readout, etc) as the PSD long integral
-	  if(TheSettings->PSDLongGateAsPulseArea)
-	    PulseArea = PSDTotal;
-
+	  // Set the PSD long integral to the pulse area
+	  PulseArea = PSDTotal;
+	  
 	  // The PSD short integral
 	  PSDTail = PSDTotal - PSDEvents[ch][evt].ChargeShort;
 	}
@@ -819,8 +798,8 @@ void AAAcquisitionManager::StartAcquisition()
 	  
 	  if(TheSettings->DisplayContinuous and evt == 0){
 
-	    if(UseSTDFirmware or (UsePSDFirmware and !UsePSDListMode)){
-
+	    if(UseSTDFirmware or (UsePSDFirmware and AnalyzePSDWaveform)){
+	      
 	      // Draw the digitized waveform
 	      TheGraphicsManager->PlotWaveforms(Waveforms, WaveformLength);
 	      
@@ -834,7 +813,7 @@ void AAAcquisitionManager::StartAcquisition()
 	    }
 	  }
 	}
-      
+	
 	EventCounter++;
 
       } // End of the data readout loop over events

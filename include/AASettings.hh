@@ -114,8 +114,8 @@ public:
   Bool_t WaveformMode;
   Bool_t SpectrumMode;
   Bool_t PSDMode;
-  Bool_t PSDLongGateAsPulseArea;
-
+  Bool_t PSDListAnalysis, PSDWaveformAnalysis;
+  
   // Trigger
   Int_t TriggerType, TriggerEdge;
   string TriggerTypeName, TriggerEdgeName;

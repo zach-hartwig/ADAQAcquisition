@@ -107,7 +107,7 @@ private:
   time_t AcquisitionTimeNow, AcquisitionTimePrev;
 
   Bool_t UseSTDFirmware, UsePSDFirmware;
-  Bool_t UsePSDWaveformMode, UsePSDListMode, UsePSDMixedMode;
+  Bool_t AnalyzePSDList, AnalyzePSDWaveform;
 
 #ifndef __CINT__
 
