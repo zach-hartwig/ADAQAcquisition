@@ -328,8 +328,8 @@ void AAInterface::FillConnectionFrame()
       FWType_VF->AddFrame(DGPSDFW_RB = new TGRadioButton(FWType_VF, "DPP-PSD firmware", DGPSDFW_RB_ID),
 			  new TGLayoutHints(kLHintsNormal, 0,0,0,0));
       DGPSDFW_RB->Connect("Clicked()", "AATabSlots", TabSlots, "HandleRadioButtons()");
-      //DGStandardFW_RB->SetState(kButtonDown);
-      DGPSDFW_RB->SetState(kButtonDown);
+      DGStandardFW_RB->SetState(kButtonDown);
+      //DGPSDFW_RB->SetState(kButtonDown);
     }
     
     TGHorizontalFrame *BoardAddress_HF = new TGHorizontalFrame(BoardOptions_VF);
@@ -396,8 +396,6 @@ void AAInterface::FillConnectionFrame()
     BoardEnable_TB[board]->SetForegroundColor(ColorManager->Number2Pixel(kWhite));
     BoardEnable_TB[board]->ChangeOptions(BoardEnable_TB[board]->GetOptions() | kFixedSize);
   }
-
-  BoardEnable_TB[2]->Clicked();
 }
 
 
@@ -1207,7 +1205,7 @@ void AAInterface::FillAcquisitionFrame()
 			    new TGLayoutHints(kLHintsNormal, 10,0,0,0));
       DGChTriggerThreshold_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
       DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-      DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumber(100);
+      DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumber(500);
       DGChTriggerThreshold_NEL[ch]->GetEntry()->Resize(55,20);
       
       Trigger_HF0->AddFrame(DGChTriggerConfig_CBL[ch] = new ADAQComboBoxWithLabel(Trigger_HF0, "", -1),
@@ -1247,12 +1245,12 @@ void AAInterface::FillAcquisitionFrame()
       DGChannelControl_GF->AddFrame(PSD_HF0, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
       
       PSD_HF0->AddFrame(DGChShortGate_NEL[ch] = new ADAQNumberEntryWithLabel(PSD_HF0,
-									     "Short   ",
+									     "Short  ",
 									     -1),
 			new TGLayoutHints(kLHintsLeft,10,0,0,0));
       DGChShortGate_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
       DGChShortGate_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
-      DGChShortGate_NEL[ch]->GetEntry()->Resize(45,20);
+      DGChShortGate_NEL[ch]->GetEntry()->Resize(49,20);
       DGChShortGate_NEL[ch]->GetEntry()->SetNumber(100);
       
       PSD_HF0->AddFrame(DGChLongGate_NEL[ch] = new ADAQNumberEntryWithLabel(PSD_HF0,
@@ -1261,19 +1259,19 @@ void AAInterface::FillAcquisitionFrame()
 			new TGLayoutHints(kLHintsLeft,5,0,0,0));
       DGChLongGate_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
       DGChLongGate_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
-      DGChLongGate_NEL[ch]->GetEntry()->Resize(45,20);
+      DGChLongGate_NEL[ch]->GetEntry()->Resize(49,20);
       DGChLongGate_NEL[ch]->GetEntry()->SetNumber(450);
 
       TGHorizontalFrame *PSD_HF1 = new TGHorizontalFrame(DGChannelControl_GF);
       DGChannelControl_GF->AddFrame(PSD_HF1, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
 
       PSD_HF1->AddFrame(DGChPreTrigger_NEL[ch] = new ADAQNumberEntryWithLabel(PSD_HF1,
-									      "Pre-trig",
+									      "PreTrig",
 									      -1),
 			new TGLayoutHints(kLHintsLeft,10,0,0,0));
       DGChPreTrigger_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
       DGChPreTrigger_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
-      DGChPreTrigger_NEL[ch]->GetEntry()->Resize(45,20);
+      DGChPreTrigger_NEL[ch]->GetEntry()->Resize(49,20);
       DGChPreTrigger_NEL[ch]->GetEntry()->SetNumber(100);
       
       PSD_HF1->AddFrame(DGChGateOffset_NEL[ch] = new ADAQNumberEntryWithLabel(PSD_HF1,
@@ -1281,7 +1279,7 @@ void AAInterface::FillAcquisitionFrame()
 									      -1),
 			new TGLayoutHints(kLHintsLeft,5,0,0,0));
       DGChGateOffset_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-      DGChGateOffset_NEL[ch]->GetEntry()->Resize(45,20);
+      DGChGateOffset_NEL[ch]->GetEntry()->Resize(49,20);
       DGChGateOffset_NEL[ch]->GetEntry()->SetNumber(50);
     }
   }
@@ -1566,11 +1564,12 @@ void AAInterface::FillAcquisitionFrame()
     DGPSDAnalysis_HF->AddFrame(DGPSDListAnalysis_RB = new TGRadioButton(DGPSDAnalysis_HF, "List", DGPSDListAnalysis_RB_ID),
 			       new TGLayoutHints(kLHintsNormal,5,0,5,5));
     DGPSDListAnalysis_RB->Connect("Clicked()","AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
-    DGPSDListAnalysis_RB->SetState(kButtonDown);
+    //DGPSDListAnalysis_RB->SetState(kButtonDown);
     
     DGPSDAnalysis_HF->AddFrame(DGPSDWaveformAnalysis_RB = new TGRadioButton(DGPSDAnalysis_HF, "Waveform", DGPSDWaveformAnalysis_RB_ID),
 			       new TGLayoutHints(kLHintsNormal,5,0,5,5));
     DGPSDWaveformAnalysis_RB->Connect("Clicked()","AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
+    DGPSDWaveformAnalysis_RB->SetState(kButtonDown);
   }
   
   DGAcquisitionControl_GF->AddFrame(AQTime_NEL = new ADAQNumberEntryWithLabel(DGAcquisitionControl_GF, "Acquisition time (s)", AQTime_NEL_ID),
