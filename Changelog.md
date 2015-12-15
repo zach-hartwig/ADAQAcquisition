@@ -1,11 +1,17 @@
 ## ADAQAcquisition Source Code Change Log
 
 name: Changelog.md  
-date: 21 Oct 15 (last updated)
+date: 15 Dec 15 (last updated)
 auth: Zach Hartwig  
 mail: hartwig@psfc.mit.edu  
 
 ## Version 1.2 Series
+
+### 1.2.4
+
+ - New settings, acquisition corrections to properly handle DPP-PSD on
+   x725/x730 boards, which do not support 'Oscilloscope' mode.
+
 
 ### 1.2.3
 
