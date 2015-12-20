@@ -14,9 +14,10 @@ if [ ! "$#" -eq 0 ]; then
     echo -e "\nADAQAcquisition : Error! This setup script accepts zero arguments!\n"
 else
     
-    SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )" 
+    SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+    export ADAQACQUISITION_HOME=${SCRIPTDIR///scripts}
     export PATH=${SCRIPTDIR///scripts/}/bin:$PATH
-    export LD_LIBRARY_PATH=$ADAQHOME/lib/$HOSTTYPE:$LD_LIBRARY_PATH
+    export LD_LIBRARY_PATH=$ADAQHOME/lib/$HOSTTYPE:$ADAQACQUISITION_HOME/bin:$$LD_LIBRARY_PATH
     export PYTHONPATH=$ADAQHOME/lib/$HOSTTYPE:$PYTHONPATH
     
     echo -e "\nADAQAcquisition : The environment has been successfully configured!\n"
