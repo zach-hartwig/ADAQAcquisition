@@ -619,15 +619,31 @@ void AAAcquisitionManager::StartAcquisition()
 	  
 	  // Baseline returned in "Mixed" mode, == 0 in "List" mode
 	  BaselineValue[ch] = PSDEvents[ch][evt].Baseline;
+
+	  // Readout the DPP-PSD computed on the digitizer FPGA. Two
+	  // deails are important to note:
+	  //
+	  // (1) The PSD integrals are recast from signed 16-bit
+	  // integers (a maximum useable value of 2**15 == 32768) into
+	  // unsigned 16-bit integers (a maximum value of 2**16 ==
+	  // 65536) to maximize the energy resolution by maximizing
+	  // the available channels that can accomodate the dynamic
+	  // range of the digitizer input
+	  //
+	  // (2) CAEN's "short" integral covers the peak of the
+	  // waveform. The standard in PSD with liquid organic
+	  // scintillators is to examine the tail. To be consistent
+	  // with naming conventions and user expectations, the tail
+	  // integral is computed from the "short" integral
 	  
 	  // The PSD long integral
-	  PSDTotal = PSDEvents[ch][evt].ChargeLong;
-	  
-	  // Set the PSD long integral to the pulse area
-	  PulseArea = PSDTotal;
+	  PSDTotal = (UShort_t)PSDEvents[ch][evt].ChargeLong;
 	  
 	  // The PSD short integral
-	  PSDTail = PSDTotal - PSDEvents[ch][evt].ChargeShort;
+	  PSDTail = (UShort_t)PSDTotal - PSDEvents[ch][evt].ChargeShort;
+
+	  // Set the PSD long integral to the pulse area
+	  PulseArea = PSDTotal;
 	}
 	
 	if(CalibrationEnable[ch]){
