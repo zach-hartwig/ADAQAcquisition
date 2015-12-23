@@ -1,9 +1,24 @@
 ## ADAQAcquisition Source Code Change Log
 
 name: Changelog.md  
-date: 15 Dec 15 (last updated)
+date: 23 Dec 15 (last updated)
 auth: Zach Hartwig  
-mail: hartwig@psfc.mit.edu  
+mail: hartwig@psfc.mit.edu
+
+## Version 1.4 Series
+
+### 1.4.0
+
+ - Upgraded for compatibility with ROOT6 (v6.06.00); ADAQAcquisition
+   tagged version 1.2.4 is last compatible with ROOT5 (v5.34.30)
+
+ - Increased readout bit depth from 2**15 to 2**16 for FPGA-processed
+   data readout using DPP-PSD
+
+ - Corrected state setting of widgets under various use cases
+
+ - Corrected default ADAQ file name to be "DefaultData.adaq.root"
+
 
 ## Version 1.2 Series
 
