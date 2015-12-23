@@ -83,7 +83,11 @@ public:
 
   void HandleDisconnectAndTerminate(bool = true);
 
+  // Method to save all widget states
   void SaveSettings();
+
+  // Method to save widget states that are active during acquisition
+  void SaveActiveSettings();
 
   // Enable/disable widgets
   void SetVoltageChannelWidgetState(int, bool);

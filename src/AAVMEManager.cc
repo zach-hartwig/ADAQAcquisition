@@ -143,7 +143,7 @@ bool AAVMEManager::ProgramDigitizers()
     if(TheSettings->STDFirmware){
       DGMgr->SetChannelDCOffset(ch, TheSettings->ChDCOffset[ch]);
       DGMgr->SetChannelTriggerThreshold(ch, TheSettings->ChTriggerThreshold[ch]);
-    
+      
       if(TheSettings->ChPosPolarity[ch])
 	DGMgr->SetChannelPulsePolarity(ch, CAEN_DGTZ_PulsePolarityPositive);
       else

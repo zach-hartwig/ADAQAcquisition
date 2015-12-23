@@ -91,7 +91,7 @@ $(BUILDDIR)/ADAQAcquisitionDict.o : $(BUILDDIR)/ADAQAcquisitionDict.cc
 # Generate the necessary ROOT dictionaries
 $(BUILDDIR)/ADAQAcquisitionDict.cc : $(INCLS) $(INCLDIR)/RootLinkDef.h
 	@echo -e "\nGenerating ROOT dictionary '$@' ..."
-	@rootcint -f $@ -c -I$(ADAQHOME)/include $^
+	rootcling -f $@ -c -I$(ADAQHOME)/include $^
 	@cp $(BUILDDIR)/*.pcm $(BINDIR)
 
 # Clean the directory of all build files and binaries

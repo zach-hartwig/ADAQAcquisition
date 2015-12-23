@@ -27,7 +27,7 @@
 
 AASubtabSlots::AASubtabSlots(AAInterface *TheInterface)
   : TI(TheInterface),
-    WaveformFileName("Defauldata.adaq.root"),
+    WaveformFileName("DefaultData.adaq.root"),
     ObjectFileName("DefaultObject.root"),
     CanvasFileName("DefaultCanvas.eps")
 {;}
@@ -487,10 +487,23 @@ void AASubtabSlots::HandleTextButtons()
     
   case WaveformCreateFile_TB_ID:{
     
-    TheACQManager->CreateADAQFile(WaveformFileName);
-    
-    // Set widget states appropriately
+    // First call a "special" save of widget settings to account for
+    // those widgets that can remain active during acquisition to
+    // account for settings that may have changed since acquisition
+    // started but before the ADAQ files has been created
 
+    TI->SaveActiveSettings();
+
+    // Second create the ADAQ file now that widget states have been
+    // saved correctly
+    
+    TheACQManager->CreateADAQFile(WaveformFileName);
+
+    
+    // Finally set the widget states appropriately for the time that
+    // data is being readout into the ADAQ file
+
+    TI->AQTime_NEL->GetEntry()->SetState(false);
     TI->WaveformFileName_TB->SetState(kButtonDisabled);
     TI->WaveformCreateFile_TB->SetState(kButtonDisabled);
     TI->WaveformCreateFile_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOn));
@@ -535,6 +548,7 @@ void AASubtabSlots::HandleTextButtons()
     TheACQManager->CloseADAQFile();
     
     if(!TheACQManager->GetADAQFileIsOpen()){
+      TI->AQTime_NEL->GetEntry()->SetState(true);
       TI->WaveformFileName_TB->SetState(kButtonUp);
       TI->WaveformCreateFile_TB->SetState(kButtonUp);
       TI->WaveformCreateFile_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(18));

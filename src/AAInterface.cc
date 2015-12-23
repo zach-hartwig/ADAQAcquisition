@@ -328,8 +328,8 @@ void AAInterface::FillConnectionFrame()
       FWType_VF->AddFrame(DGPSDFW_RB = new TGRadioButton(FWType_VF, "DPP-PSD firmware", DGPSDFW_RB_ID),
 			  new TGLayoutHints(kLHintsNormal, 0,0,0,0));
       DGPSDFW_RB->Connect("Clicked()", "AATabSlots", TabSlots, "HandleRadioButtons()");
-      DGStandardFW_RB->SetState(kButtonDown);
-      //DGPSDFW_RB->SetState(kButtonDown);
+      //DGStandardFW_RB->SetState(kButtonDown);
+      DGPSDFW_RB->SetState(kButtonDown);
     }
     
     TGHorizontalFrame *BoardAddress_HF = new TGHorizontalFrame(BoardOptions_VF);
@@ -396,6 +396,7 @@ void AAInterface::FillConnectionFrame()
     BoardEnable_TB[board]->SetForegroundColor(ColorManager->Number2Pixel(kWhite));
     BoardEnable_TB[board]->ChangeOptions(BoardEnable_TB[board]->GetOptions() | kFixedSize);
   }
+  BoardEnable_TB[2]->Clicked();
 }
 
 
@@ -2402,6 +2403,8 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
   }
   else if(DGPSDFW_RB->IsDown()){
     DGPSDMode_CBL->GetComboBox()->SetEnabled(WidgetState);
+    DGPSDListAnalysis_RB->SetState(ButtonState);
+    DGPSDWaveformAnalysis_RB->SetState(ButtonState);
   }
 
   DGEventsBeforeReadout_NEL->GetEntry()->SetState(WidgetState);
@@ -2676,7 +2679,6 @@ void AAInterface::SaveSettings()
   TheSettings->WaveformStoreEnergyData = WaveformStoreEnergyData_CB->IsDown();
   TheSettings->WaveformStorePSDData= WaveformStorePSDData_CB->IsDown();
 
-
   TheSettings->ObjectSaveWithTimeExtension = ObjectSaveWithTimeExtension_CB->IsDown();
   TheSettings->CanvasSaveWithTimeExtension = CanvasSaveWithTimeExtension_CB->IsDown();
 
@@ -2686,10 +2688,10 @@ void AAInterface::SaveSettings()
   // readout buttons that are disabled AND selected. Do this all in
   // one place to minimize code overhead
   
-  bool AcquisitionOn = AAAcquisitionManager::GetInstance()->GetAcquisitionEnable();
+  Bool_t AcquisitionOn = AAAcquisitionManager::GetInstance()->GetAcquisitionEnable();
 
   if(AcquisitionOn){
-    for(int ch=0; ch<NumDGChannels; ch++){
+    for(Int_t ch=0; ch<NumDGChannels; ch++){
       TheSettings->ChEnable[ch] = DGChEnable_CB[ch]->IsDisabledAndSelected();
       TheSettings->ChPosPolarity[ch] = DGChPosPolarity_RB[ch]->IsDisabledAndSelected();
       TheSettings->ChNegPolarity[ch] = DGChNegPolarity_RB[ch]->IsDisabledAndSelected();
@@ -2704,6 +2706,8 @@ void AAInterface::SaveSettings()
     TheSettings->WaveformMode = AQWaveform_RB->IsDisabledAndSelected();
     TheSettings->SpectrumMode = AQSpectrum_RB->IsDisabledAndSelected();
     TheSettings->PSDMode = AQPSDHistogram_RB->IsDisabledAndSelected();
+    TheSettings->PSDListAnalysis = DGPSDListAnalysis_RB->IsDisabledAndSelected();
+    TheSettings->PSDWaveformAnalysis = DGPSDWaveformAnalysis_RB->IsDisabledAndSelected();
 
     TheSettings->TriggerCoincidenceEnable = DGTriggerCoincidenceEnable_CB->IsDisabledAndSelected();
 
@@ -2722,11 +2726,10 @@ void AAInterface::SaveSettings()
     TheSettings->PSDYAxisTail = PSDYAxisTail_RB->IsDisabledAndSelected();
     TheSettings->PSDYAxisTailTotal = PSDYAxisTailTotal_RB->IsDisabledAndSelected();
 
-    TheSettings->WaveformStorageEnable = WaveformStorageEnable_CB->IsDisabledAndSelected();
     TheSettings->WaveformStoreRaw = WaveformStoreRaw_CB->IsDisabledAndSelected();
     TheSettings->WaveformStoreEnergyData = WaveformStoreEnergyData_CB->IsDisabledAndSelected();
     TheSettings->WaveformStorePSDData = WaveformStorePSDData_CB->IsDisabledAndSelected();
-    
+
     TheSettings->ObjectSaveWithTimeExtension = ObjectSaveWithTimeExtension_CB->IsDisabledAndSelected();
     TheSettings->CanvasSaveWithTimeExtension = CanvasSaveWithTimeExtension_CB->IsDisabledAndSelected();
 
@@ -2734,6 +2737,16 @@ void AAInterface::SaveSettings()
     TheSettings->DisplayUpdateable = DisplayUpdateable_RB->IsDisabledAndSelected();
     TheSettings->DisplayNonUpdateable = DisplayNonUpdateable_RB->IsDisabledAndSelected();
   }
+}
+
+
+void AAInterface::SaveActiveSettings()
+{
+  TheSettings->AcquisitionTime = AQTime_NEL->GetEntry()->GetIntNumber();
+  
+  TheSettings->WaveformStoreRaw = WaveformStoreRaw_CB->IsDown();
+  TheSettings->WaveformStoreEnergyData = WaveformStoreEnergyData_CB->IsDown();
+  TheSettings->WaveformStorePSDData= WaveformStorePSDData_CB->IsDown();
 }
 
 
