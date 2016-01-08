@@ -2547,7 +2547,6 @@ void AAInterface::SaveSettings()
   TheSettings->VerticalSliderMin = Min;
   TheSettings->VerticalSliderMax = Max;
 
-
   //////////////////////////
   // Data acquisition subtab
 
@@ -2592,7 +2591,7 @@ void AAInterface::SaveSettings()
   TheSettings->DataReductionFactor = AQDataReductionFactor_NEL->GetEntry()->GetIntNumber();
   TheSettings->ZeroSuppressionEnable = DGZLEEnable_CB->IsDown();
 
-  
+
   ///////////////////////
   // Pulse spectra subtab
 
@@ -2681,7 +2680,6 @@ void AAInterface::SaveSettings()
   TheSettings->ObjectSaveWithTimeExtension = ObjectSaveWithTimeExtension_CB->IsDown();
   TheSettings->CanvasSaveWithTimeExtension = CanvasSaveWithTimeExtension_CB->IsDown();
 
-
   // Because of the (in my frank opinion) pain in the ass way that
   // ROOT specifies button widget states, it is necessary to specially
   // readout buttons that are disabled AND selected. Do this all in
@@ -2701,13 +2699,16 @@ void AAInterface::SaveSettings()
       else if(DGPSDFW_RB->IsDown()){
       }
     }
-    
+
     TheSettings->WaveformMode = AQWaveform_RB->IsDisabledAndSelected();
     TheSettings->SpectrumMode = AQSpectrum_RB->IsDisabledAndSelected();
-    TheSettings->PSDMode = AQPSDHistogram_RB->IsDisabledAndSelected();
-    TheSettings->PSDListAnalysis = DGPSDListAnalysis_RB->IsDisabledAndSelected();
-    TheSettings->PSDWaveformAnalysis = DGPSDWaveformAnalysis_RB->IsDisabledAndSelected();
 
+    if(DGPSDFW_RB->IsDown()){
+      TheSettings->PSDMode = AQPSDHistogram_RB->IsDisabledAndSelected();
+      TheSettings->PSDListAnalysis = DGPSDListAnalysis_RB->IsDisabledAndSelected();
+      TheSettings->PSDWaveformAnalysis = DGPSDWaveformAnalysis_RB->IsDisabledAndSelected();
+    }
+    
     TheSettings->TriggerCoincidenceEnable = DGTriggerCoincidenceEnable_CB->IsDisabledAndSelected();
 
     TheSettings->DataReductionEnable = AQDataReductionEnable_CB->IsDisabledAndSelected();
