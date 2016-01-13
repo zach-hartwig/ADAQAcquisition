@@ -118,7 +118,7 @@ AAGraphics::AAGraphics()
   Waveform_LG = new TLegend(0.85, 0.4, 0.95, 0.92);
   Waveform_LG->SetTextSize(0.04);
 
-  for(int ch=0; ch<NumDGChannels; ch++){
+  for(Int_t ch=0; ch<NumDGChannels; ch++){
     TLine *Line = new TLine;
     Line->SetLineColor(ChColor[ch]);
     Line->SetLineWidth(4);
@@ -246,7 +246,7 @@ void AAGraphics::PlotWaveforms(vector<vector<uint16_t> > &Waveforms,
       continue;
     
     // Efficienctly allocate the channel voltage into a vector<int>
-    vector<int> Voltage (Waveforms[ch].begin(), Waveforms[ch].end());
+    vector<Int_t> Voltage (Waveforms[ch].begin(), Waveforms[ch].end());
 
     // Zero length encoding waveform: a vector representing time (the
     // X-axis) must be created dynamically to account for the variable
@@ -273,7 +273,7 @@ void AAGraphics::PlotWaveforms(vector<vector<uint16_t> > &Waveforms,
     (TheSettings->DisplayXAxisInLog) ? 
       gPad->SetLogx(true) : gPad->SetLogx(false);
     
-    int AbsoluteMax = AAVMEManager::GetInstance()->GetDGManager()->GetMaxADCBit();
+    Int_t AbsoluteMax = AAVMEManager::GetInstance()->GetDGManager()->GetMaxADCBit();
     YMin = AbsoluteMax * TheSettings->VerticalSliderMin;
     YMax = AbsoluteMax * TheSettings->VerticalSliderMax;
     
@@ -368,7 +368,7 @@ void AAGraphics::DrawWaveformGraphics(vector<double> &BaselineValue,
     }
     
     if(TheSettings->DisplayBaselineBox){
-      double BaselineWidth = (YMax-YMin)*0.03;
+      Double_t BaselineWidth = (YMax-YMin)*0.03;
       
       // STD firmware: baseline width, position set in absolute sample numbes
       // PSD firwmare: baseline width set by user in fixed samples; position in
@@ -473,7 +473,7 @@ void AAGraphics::SetupSpectrumGraphics()
 
 void AAGraphics::PlotSpectrum(TH1F *Spectrum_H)
 {
-  int Channel = TheSettings->SpectrumChannel;
+  Int_t Channel = TheSettings->SpectrumChannel;
 
   Spectrum_H->SetLineColor(ChColor[Channel]);
   Spectrum_H->SetLineWidth(SpectrumWidth);
@@ -500,7 +500,7 @@ void AAGraphics::PlotSpectrum(TH1F *Spectrum_H)
   (TheSettings->DisplayXAxisInLog) ? 
     gPad->SetLogx(true) : gPad->SetLogx(false);
   
-  int AbsoluteMax = Spectrum_H->GetBinContent(Spectrum_H->GetMaximumBin()) * 1.05;
+  Int_t AbsoluteMax = Spectrum_H->GetBinContent(Spectrum_H->GetMaximumBin()) * 1.05;
   YMin = AbsoluteMax * TheSettings->VerticalSliderMin;
   YMax = AbsoluteMax * TheSettings->VerticalSliderMax;
   
@@ -533,8 +533,9 @@ void AAGraphics::PlotSpectrum(TH1F *Spectrum_H)
   
   // If calibration is enabled the draw a vertical line corresponding
   // to the current pulse value selected by the triple slider pointer
+
   if(TheSettings->SpectrumCalibrationEnable){
-    double PulseValue = TheSettings->SpectrumMaxBin *
+    Double_t PulseValue = TheSettings->SpectrumMaxBin *
       TheSettings->HorizontalSliderPtr;
     
     SpectrumCalibration_L->DrawLine(PulseValue,
@@ -575,7 +576,7 @@ void AAGraphics::SetupPSDHistogramGraphics()
 
 void AAGraphics::PlotPSDHistogram(TH2F *PSDHistogram_H)
 {
-  int Channel = TheSettings->PSDChannel;
+  Int_t Channel = TheSettings->PSDChannel;
   
   PSDHistogram_H->Draw("COLZ");
   
@@ -647,35 +648,3 @@ void AAGraphics::PlotCalibration(int Channel)
   
   CalibrationCanvas_C->Update();
 }
-
-
-
-
-      /*
-
-	    // At minimum, a single channel's waveform is graphed. The
-	    // "lowest enabled channel", ie, the channel closest to 0
-	    // that is plotted, must set the graphical attributes of the
-	    // plot, including defining the X and Y axies; subsequent
-	    // channel waveform graphs will then be plotted on top.
-	    
-	    if(ch==LowestEnabledChannel){
-	      DGScopeWaveform_G[ch]->SetLineWidth(2);
-	      DGScopeWaveform_G[ch]->SetLineColor(ch+1);
-	      DGScopeWaveform_G[ch]->SetTitle(DGScopeDisplayTitle_TEL->GetEntry()->GetText());
-	      DGScopeWaveform_G[ch]->GetXaxis()->SetTitle(DGScopeDisplayXTitle_TEL->GetEntry()->GetText());
-	      DGScopeWaveform_G[ch]->GetXaxis()->SetTitleOffset(DGScopeDisplayXTitleOffset_NEL->GetEntry()->GetNumber());
-	      DGScopeWaveform_G[ch]->GetXaxis()->CenterTitle();
-	      DGScopeWaveform_G[ch]->GetXaxis()->SetRangeUser(xMin, xMax);
-	      DGScopeWaveform_G[ch]->GetYaxis()->SetTitle(DGScopeDisplayYTitle_TEL->GetEntry()->GetText());
-	      DGScopeWaveform_G[ch]->GetYaxis()->CenterTitle();
-	      DGScopeWaveform_G[ch]->GetYaxis()->SetTitleOffset(DGScopeDisplayYTitleOffset_NEL->GetEntry()->GetNumber());
-	      DGScopeWaveform_G[ch]->GetYaxis()->SetRangeUser(yMin,yMax);
-	      DGScopeWaveform_G[ch]->Draw("AL");
-	    }
-	    else{
-	      DGScopeWaveform_G[ch]->SetLineWidth(2);
-	      DGScopeWaveform_G[ch]->SetLineColor(ch+1);
-	      DGScopeWaveform_G[ch]->Draw("L");
-	    }
-*/

@@ -100,7 +100,4 @@ private:
   TH1F *WaveformGraphAxes_H;
 };
 
-
-
-
 #endif

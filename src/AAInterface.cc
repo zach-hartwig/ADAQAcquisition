@@ -328,8 +328,8 @@ void AAInterface::FillConnectionFrame()
       FWType_VF->AddFrame(DGPSDFW_RB = new TGRadioButton(FWType_VF, "DPP-PSD firmware", DGPSDFW_RB_ID),
 			  new TGLayoutHints(kLHintsNormal, 0,0,0,0));
       DGPSDFW_RB->Connect("Clicked()", "AATabSlots", TabSlots, "HandleRadioButtons()");
-      DGStandardFW_RB->SetState(kButtonDown);
-      //DGPSDFW_RB->SetState(kButtonDown);
+      // DGStandardFW_RB->SetState(kButtonDown);
+      DGPSDFW_RB->SetState(kButtonDown);
     }
     
     TGHorizontalFrame *BoardAddress_HF = new TGHorizontalFrame(BoardOptions_VF);
@@ -2680,11 +2680,20 @@ void AAInterface::SaveSettings()
   TheSettings->ObjectSaveWithTimeExtension = ObjectSaveWithTimeExtension_CB->IsDown();
   TheSettings->CanvasSaveWithTimeExtension = CanvasSaveWithTimeExtension_CB->IsDown();
 
-  // Because of the (in my frank opinion) pain in the ass way that
-  // ROOT specifies button widget states, it is necessary to specially
-  // readout buttons that are disabled AND selected. Do this all in
-  // one place to minimize code overhead
-  
+  ///////////////////////////////
+  // Acquisition disabled widgets
+
+  // Because of the frustrating way ROOT implements button behavior,
+  // buttons that are intentionally disabled while acquisition is on
+  // (to prevent the user from changing settings during acquisition)
+  // must be tested for the special disabled-and-selected
+  // enumerator. This is necessary since widgets that are activated
+  // during acquisition will call this method and, unless the
+  // following value readouts are performed, the settings for the
+  // disabled will be wrong. This results in bad and unexpected
+  // behavior. Thus, we must ensure that all of the following buttons
+  // are disabled during acquisition!
+
   Bool_t AcquisitionOn = AAAcquisitionManager::GetInstance()->GetAcquisitionEnable();
 
   if(AcquisitionOn){
@@ -2702,26 +2711,23 @@ void AAInterface::SaveSettings()
 
     TheSettings->WaveformMode = AQWaveform_RB->IsDisabledAndSelected();
     TheSettings->SpectrumMode = AQSpectrum_RB->IsDisabledAndSelected();
+    TheSettings->PSDMode = AQPSDHistogram_RB->IsDisabledAndSelected();
+
+    TheSettings->TriggerCoincidenceEnable = DGTriggerCoincidenceEnable_CB->IsDisabledAndSelected();
 
     if(DGPSDFW_RB->IsDown()){
       TheSettings->PSDMode = AQPSDHistogram_RB->IsDisabledAndSelected();
       TheSettings->PSDListAnalysis = DGPSDListAnalysis_RB->IsDisabledAndSelected();
       TheSettings->PSDWaveformAnalysis = DGPSDWaveformAnalysis_RB->IsDisabledAndSelected();
     }
-    
-    TheSettings->TriggerCoincidenceEnable = DGTriggerCoincidenceEnable_CB->IsDisabledAndSelected();
 
     TheSettings->DataReductionEnable = AQDataReductionEnable_CB->IsDisabledAndSelected();
     TheSettings->ZeroSuppressionEnable = DGZLEEnable_CB->IsDisabledAndSelected();
 
     TheSettings->SpectrumPulseHeight = SpectrumPulseHeight_RB->IsDisabledAndSelected();
     TheSettings->SpectrumPulseArea = SpectrumPulseArea_RB->IsDisabledAndSelected();
-
     TheSettings->LDEnable = SpectrumLDEnable_CB->IsDown();
     TheSettings->LDTrigger = SpectrumLDTrigger_CB->IsDisabledAndSelected();
-
-    TheSettings->SpectrumCalibrationEnable = SpectrumCalibration_CB->IsDisabledAndSelected();
-    TheSettings->SpectrumCalibrationUseSlider = SpectrumUseCalibrationSlider_CB->IsDisabledAndSelected();
 
     TheSettings->PSDYAxisTail = PSDYAxisTail_RB->IsDisabledAndSelected();
     TheSettings->PSDYAxisTailTotal = PSDYAxisTailTotal_RB->IsDisabledAndSelected();
@@ -2729,9 +2735,6 @@ void AAInterface::SaveSettings()
     TheSettings->WaveformStoreRaw = WaveformStoreRaw_CB->IsDisabledAndSelected();
     TheSettings->WaveformStoreEnergyData = WaveformStoreEnergyData_CB->IsDisabledAndSelected();
     TheSettings->WaveformStorePSDData = WaveformStorePSDData_CB->IsDisabledAndSelected();
-
-    TheSettings->ObjectSaveWithTimeExtension = ObjectSaveWithTimeExtension_CB->IsDisabledAndSelected();
-    TheSettings->CanvasSaveWithTimeExtension = CanvasSaveWithTimeExtension_CB->IsDisabledAndSelected();
 
     TheSettings->DisplayContinuous = DisplayContinuous_RB->IsDisabledAndSelected();
     TheSettings->DisplayUpdateable = DisplayUpdateable_RB->IsDisabledAndSelected();

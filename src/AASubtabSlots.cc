@@ -47,36 +47,27 @@ void AASubtabSlots::HandleCheckButtons()
   switch(ActiveID){
 
   case DGTriggerCoincidenceEnable_CB_ID:
-    
     if(ActiveButton->IsDown())
       TI->DGTriggerCoincidenceLevel_CBL->GetComboBox()->SetEnabled(true);
     else
       TI->DGTriggerCoincidenceLevel_CBL->GetComboBox()->SetEnabled(false);
-
     break;
 
-
   case SpectrumCalibration_CB_ID:
-    
     if(ActiveButton->IsDown())
       TI->SetCalibrationWidgetState(true, kButtonUp);
     else
       TI->SetCalibrationWidgetState(false, kButtonDisabled);
-    
     break;
-
-
+    
   case WaveformStorageEnable_CB_ID:
     break;
     
-    
   case DisplayTitlesEnable_CB_ID:
-    
     if(ActiveButton->IsDown())
       TI->SetTitlesWidgetState(true, kButtonUp);
     else
       TI->SetTitlesWidgetState(false, kButtonDisabled);
-    
     break;
   }
 }
