@@ -401,7 +401,7 @@ void AASubtabSlots::HandleTextButtons()
 
     
   case SpectrumCalibrationLoad_TB_ID:{
-
+    
     int Channel = TI->SpectrumChannel_CBL->GetComboBox()->GetSelected();
     
     const char *FileTypes[] = {"ADAQ calibration file", "*.acal",
@@ -535,6 +535,13 @@ void AASubtabSlots::HandleTextButtons()
     
     
   case WaveformCloseFile_TB_ID:{
+
+    // Do not let the use close/write the ADAQ file if data is still
+    // be actively acquired. This forces the user to stop taking data
+    // and then properly close/write the ADAQ file.
+    
+    if(TI->WaveformStorageEnable_CB->IsDown())
+      break;
     
     TheACQManager->CloseADAQFile();
     
