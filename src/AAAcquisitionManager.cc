@@ -911,7 +911,7 @@ void AAAcquisitionManager::StopAcquisition()
     AcquisitionTimerEnable = false;
     TheInterface->UpdateAfterAQTimerStopped(TheReadoutManager->GetADAQFileOpen());
   }
-  
+
   if(TheReadoutManager->GetADAQFileOpen())
     CloseADAQFile();
 }

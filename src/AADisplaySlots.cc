@@ -49,6 +49,10 @@ void AADisplaySlots::HandleTextButtons()
     
     // If acquisition is presently running ...
     if(TheACQManager->GetAcquisitionEnable()){
+
+      // Ensure the waveform storage has ceased 
+      if(TI->WaveformStorageEnable_CB->IsDown())
+	TI->WaveformStorageEnable_CB->Clicked();
       
       // Stop data acquisition first
       TheACQManager->StopAcquisition();

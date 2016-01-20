@@ -2773,13 +2773,15 @@ void AAInterface::UpdateAfterAQTimerStopped(bool ROOTFileOpen)
   Bool_t ADAQFileIsOpen = AAAcquisitionManager::GetInstance()->GetADAQFileIsOpen();
 
   // If an ADAQ file is open then the storage widget check boxes
-  // (waveform, energy data, PSD data) are disabled. We want to
-  // reenable them but ensure that those that were checked remain
-  // checked. If an ADAQ file is not open then these widgets do not
-  // need to have their status updated
-    
+  // (waveform, energy data, PSD data) and the waveform file name
+  // setting button are disabled. We want to reenable them but ensure
+  // that those that were checked remain checked. If an ADAQ file is
+  // not open then these widgets do not need to be updated
+  
   if(ADAQFileIsOpen){
-
+    if(WaveformFileName_TB->GetState() == kButtonDisabled)
+      WaveformFileName_TB->SetState(kButtonUp);
+    
     if(WaveformStoreRaw_CB->IsDisabledAndSelected())
       WaveformStoreRaw_CB->SetState(kButtonDown);
     else
