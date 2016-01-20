@@ -1,11 +1,23 @@
 ## ADAQAcquisition Source Code Change Log
 
 name: Changelog.md  
-date: 23 Dec 15 (last updated)
+date: 20 Jan 16 (last updated)
 auth: Zach Hartwig  
 mail: hartwig@psfc.mit.edu
 
 ## Version 1.4 Series
+
+### 1.4.1
+
+ - Fixing a number of seg. fault issues for correct storage of button
+   settings under ROOT6 behavior
+
+ - Preventing user from closing ADAQ file while data is being stored
+   to prevent seg. fault and file corruption
+
+ - Correctly reenabling the data storage file set button after a data
+   acquisition run finishes when using the acquisition timer
+
 
 ### 1.4.0
 
