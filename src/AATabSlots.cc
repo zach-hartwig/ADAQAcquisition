@@ -39,6 +39,25 @@ AATabSlots::~AATabSlots()
 {;}
 
 
+void AATabSlots::HandleSettingsTextButtons()
+{
+  TGTextButton *TextButton = (TGTextButton *) gTQSender;
+  int TextButtonID = TextButton->WidgetId();
+
+  switch(TextButtonID){
+
+  case SetSettingsFileName_TB_ID:
+    break;
+
+  case SaveSettingsToFile_TB_ID:
+    break;
+
+  default:
+    break;
+    
+  }
+}
+
 void AATabSlots::HandleConnectionTextButtons()
 {
   TGTextButton *TextButton = (TGTextButton *) gTQSender;

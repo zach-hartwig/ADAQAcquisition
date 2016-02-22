@@ -68,12 +68,13 @@ public:
   void BuildSecondaryFrames();
   
   void CreateTopLevelFrames();
+  void FillSettingsFrame();
   void FillConnectionFrame();
   void FillRegisterFrame();
   void FillPulserFrame();
   void FillVoltageFrame();
   void FillAcquisitionFrame();
-
+  
   void UpdateAQTimer(int);
   void UpdateAfterAQTimerStopped(bool);
   void UpdateAfterCalibrationPointAdded(int);
@@ -147,7 +148,7 @@ private:
   /////////////////////////////
   // ROOT GUI widget objects //
   /////////////////////////////
-  
+
   ////////////
   // Tab frame
 
@@ -158,7 +159,15 @@ private:
   TGCompositeFrame *PulserTab, *PulserFrame;
   TGCompositeFrame *VoltageTab, *VoltageFrame;
   TGCompositeFrame *AcquisitionTab, *AcquisitionFrame;
+  TGCompositeFrame *SettingsTab, *SettingsFrame;
 
+  /////////////////
+  // Settings frame
+
+  TGTextButton *SetSettingsFileName_TB, *SaveSettingsToFile_TB;
+  ADAQTextEntryWithLabel *SettingsFileName_TEL;
+  TGCheckButton *AutoSaveSettings_CB, *AutoLoadSettings_CB;
+  
 
   /////////////////////////
   // VME connection widgets

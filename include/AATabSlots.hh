@@ -23,6 +23,7 @@ public:
   AATabSlots(AAInterface *);
   ~AATabSlots();
 
+  void HandleSettingsTextButtons();
   void HandleConnectionTextButtons();
   void HandlePulserTextButtons();
   void HandleRegisterTextButtons();

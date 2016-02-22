@@ -100,7 +100,11 @@ void AAInterface::BuildPrimaryFrames()
   // Create the top-level frames, which include the main frame and
   // the major tabs for different uses of the DAQ devices
   CreateTopLevelFrames();
-
+  
+  // Fill the settings frame, which contains GUI widets that control
+  // global settings for ADAQAcquisition behavior
+  FillSettingsFrame();
+  
   // Fill the connection frame, which contains GUI widgets for
   // establishing connection to the DAQ devices
   FillConnectionFrame();
@@ -178,10 +182,10 @@ void AAInterface::CreateTopLevelFrames()
 
   TopFrame = new TGVerticalFrame(TopFrame_C->GetViewPort(), DisplayWidth, DisplayHeight);
   TopFrame->SetBackgroundColor(ColorManager->Number2Pixel(22));
-
+  
   TopFrame_C->SetContainer(TopFrame);
-
-
+  
+  
   ///////////////
   // Tab frame //
   ///////////////
@@ -190,6 +194,10 @@ void AAInterface::CreateTopLevelFrames()
   TabFrame->SetBackgroundColor(ColorManager->Number2Pixel(22));
   
   TopLevelTabs = new TGTab(TabFrame);
+  
+  SettingsTab = TopLevelTabs->AddTab(" Settings ");
+  SettingsFrame = new TGCompositeFrame(SettingsTab, 60, 20, kHorizontalFrame);
+  SettingsTab->AddFrame(SettingsFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 5,5,5,5));
   
   ConnectionTab = TopLevelTabs->AddTab(" VME Connection ");
   ConnectionFrame = new TGCompositeFrame(ConnectionTab, 60, 20, kVerticalFrame);
@@ -212,9 +220,13 @@ void AAInterface::CreateTopLevelFrames()
   AcquisitionFrame = new TGCompositeFrame(AcquisitionTab, 60, 20, kHorizontalFrame);
   AcquisitionFrame->SetBackgroundColor(ColorManager->Number2Pixel(22));
   AcquisitionTab->AddFrame(AcquisitionFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 5,5,5,5));
-
+  
+  // Set the default tab
+  TopLevelTabs->SetTab(" VME Connection ");
+  
+  // Add the tabs to the frame
   TabFrame->AddFrame(TopLevelTabs, new TGLayoutHints(kLHintsTop, 5,5,5,5));
-
+  
 
   ////////////////////////////////////////////
   // Add top level frames to the main frame //
@@ -225,6 +237,53 @@ void AAInterface::CreateTopLevelFrames()
   AddFrame(TopFrame, new TGLayoutHints(kLHintsExpandX, 0,0,0,0));
 
   SetBackgroundColor(ColorManager->Number2Pixel(22));
+}
+
+
+void AAInterface::FillSettingsFrame()
+{
+  TGGroupFrame *SettingsFile_GF = new TGGroupFrame(SettingsFrame, "Settings storage file", kVerticalFrame);
+  SettingsFile_GF->SetTitlePos(TGGroupFrame::kCenter);
+  SettingsFrame->AddFrame(SettingsFile_GF, new TGLayoutHints(kLHintsLeft, 5,5,5,5));
+  
+  TGHorizontalFrame *SettingsButtons_HF = new TGHorizontalFrame(SettingsFile_GF);
+  SettingsFile_GF->AddFrame(SettingsButtons_HF, new TGLayoutHints(kLHintsNormal, 5,5,5,5));
+  
+  SettingsButtons_HF->AddFrame(SetSettingsFileName_TB = new TGTextButton(SettingsButtons_HF,
+									 "Set file name",
+									 SetSettingsFileName_TB_ID),
+			       new TGLayoutHints(kLHintsNormal, 5,5,5,0));
+  SetSettingsFileName_TB->Resize(100, 30);
+  SetSettingsFileName_TB->ChangeOptions(SetSettingsFileName_TB->GetOptions() | kFixedSize);
+  SetSettingsFileName_TB->Connect("Clicked()", "AATabSlots", SubtabSlots, "HandleSettingsTextButtons()");
+  
+  SettingsButtons_HF->AddFrame(SaveSettingsToFile_TB = new TGTextButton(SettingsButtons_HF,
+									"Save settings",
+									SaveSettingsToFile_TB_ID),
+			       new TGLayoutHints(kLHintsNormal, 5,5,5,0));
+  SaveSettingsToFile_TB->Resize(100, 30);
+  SaveSettingsToFile_TB->ChangeOptions(SaveSettingsToFile_TB->GetOptions() | kFixedSize);
+  SaveSettingsToFile_TB->Connect("Clicked()", "AATabSlots", SubtabSlots, "HandleSettingsTextButtons()");
+  
+  SettingsFile_GF->AddFrame(SettingsFileName_TEL = new ADAQTextEntryWithLabel(SettingsFile_GF,
+									      "",
+									      SettingsFileName_TEL_ID),
+			    new TGLayoutHints(kLHintsNormal, 10,5,5,0));
+  SettingsFileName_TEL->GetEntry()->Resize(210, 25);
+  SettingsFileName_TEL->GetEntry()->ChangeOptions(SettingsFileName_TEL->GetOptions() | kFixedSize | kSunkenFrame);
+  SettingsFileName_TEL->GetEntry()->SetState(false);
+  SettingsFileName_TEL->GetEntry()->SetText("ADAQAcquisition.settings.root");
+  
+  SettingsFile_GF->AddFrame(AutoSaveSettings_CB = new TGCheckButton(SettingsFile_GF,
+								    "Auto save settings during session",
+								    AutoSaveSettings_CB_ID),
+			    new TGLayoutHints(kLHintsNormal, 10,5,5,0));
+  
+  SettingsFile_GF->AddFrame(AutoLoadSettings_CB = new TGCheckButton(SettingsFile_GF,
+								    "Auto load settings on start up",
+								    AutoLoadSettings_CB_ID),
+			    new TGLayoutHints(kLHintsNormal, 10,5,5,5));
+  
 }
 
 

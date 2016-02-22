@@ -14,6 +14,17 @@
 #define __ADAQTypes_hh__ 1
 
 enum{
+  //////////////////
+  // Settings tab //
+  //////////////////
+
+  SetSettingsFileName_TB_ID,
+  SaveSettingsToFile_TB_ID,
+  SettingsFileName_TEL_ID,
+  AutoSaveSettings_CB_ID,
+  AutoLoadSettings_CB_ID,
+  
+  
   ////////////////////
   // Connection tab //
   ////////////////////
