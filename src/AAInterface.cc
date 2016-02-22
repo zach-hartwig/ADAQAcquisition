@@ -2893,7 +2893,7 @@ void AAInterface::LoadSettingsFromFile()
 {
   // Open the ROOT file containing an ADAQAcquisition AASettings object
   TFile *SettingsFile = new TFile(SettingsFileName.c_str(), "read");
-
+  
   // Load the settings object that will be used for readout into the
   // widgets; note that a new AASettings object named 'TheSettings' is
   // used here to prevent overwriting the class data member
@@ -2919,9 +2919,12 @@ void AAInterface::LoadSettingsFromFile()
 
   for(Int_t board=0; board<3; board++){
     BoardType_CBL[board]->GetComboBox()->Select(TheSettings->BoardType[board]);
+
     if(board != 0)
       BoardAddress_NEF[board]->GetEntry()->SetHexNumber(TheSettings->BoardAddress[board]);
+    
     BoardLinkNumber_NEL[board]->GetEntry()->SetIntNumber(TheSettings->BoardType[board]);
+    
     if(TheSettings->BoardEnable[board]){
       BoardEnable_TB[board]->SetText("Board enabled");
       BoardEnable_TB[board]->SetBackgroundColor(ColorManager->Number2Pixel(ButtonBackColorOn));
@@ -2944,7 +2947,7 @@ void AAInterface::LoadSettingsFromFile()
     DGStandardFW_RB->SetState(kButtonUp);
     DGPSDFW_RB->SetState(kButtonDown);
   }
-
+  
   if(!InterfaceBuildComplete)
     return;
   
