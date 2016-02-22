@@ -28,45 +28,78 @@ public:
   /////////////////////
   // Acquisition tab //
   /////////////////////
-  
-  AASettings(int Channels){
-    ChEnable.resize(Channels);
-    ChPosPolarity.resize(Channels);
-    ChNegPolarity.resize(Channels);
-    ChDCOffset.resize(Channels);
-    ChTriggerThreshold.resize(Channels);
+
+  AASettings(Int_t HVChannels, Int_t DGChannels){
+
+    // VME connection settings
+
+    const Int_t NumBoards = 3;
+    BoardType.resize(NumBoards);
+    BoardAddress.resize(NumBoards);
+    BoardLinkNumber.resize(NumBoards);
+    BoardEnable.resize(NumBoards);
+    
+    // High voltage channel settings
+    
+    HVChVoltage.resize(HVChannels);
+    HVChCurrent.resize(DGChannels);
+    
+    // Digitizer channel settings
+
+    ChEnable.resize(DGChannels);
+    ChPosPolarity.resize(DGChannels);
+    ChNegPolarity.resize(DGChannels);
+    ChDCOffset.resize(DGChannels);
+    ChTriggerThreshold.resize(DGChannels);
 
     // CAEN Standard firmware specific settings
     
-    ChZLEThreshold.resize(Channels);
-    ChZLEForward.resize(Channels);
-    ChZLEBackward.resize(Channels);
-    ChZLEPosLogic.resize(Channels);
-    ChZLENegLogic.resize(Channels);
-    ChBaselineCalcMin.resize(Channels);
-    ChBaselineCalcMax.resize(Channels);
-    ChPSDTotalStart.resize(Channels);
-    ChPSDTotalStop.resize(Channels);
-    ChPSDTailStart.resize(Channels);
-    ChPSDTailStop.resize(Channels);
+    ChZLEThreshold.resize(DGChannels);
+    ChZLEForward.resize(DGChannels);
+    ChZLEBackward.resize(DGChannels);
+    ChZLEPosLogic.resize(DGChannels);
+    ChZLENegLogic.resize(DGChannels);
+    ChBaselineCalcMin.resize(DGChannels);
+    ChBaselineCalcMax.resize(DGChannels);
+    ChPSDTotalStart.resize(DGChannels);
+    ChPSDTotalStop.resize(DGChannels);
+    ChPSDTailStart.resize(DGChannels);
+    ChPSDTailStop.resize(DGChannels);
 
     // CAEN DPP-PSD firwmare specific settings
-    ChRecordLength.resize(Channels);
-    ChBaselineSamples.resize(Channels);
-    ChChargeSensitivity.resize(Channels);
-    ChPSDCut.resize(Channels);
-    ChTriggerConfig.resize(Channels);
-    ChTriggerValidation.resize(Channels);
-    ChShortGate.resize(Channels);
-    ChLongGate.resize(Channels);
-    ChPreTrigger.resize(Channels);
-    ChGateOffset.resize(Channels);
+    ChRecordLength.resize(DGChannels);
+    ChBaselineSamples.resize(DGChannels);
+    ChChargeSensitivity.resize(DGChannels);
+    ChPSDCut.resize(DGChannels);
+    ChTriggerConfig.resize(DGChannels);
+    ChTriggerValidation.resize(DGChannels);
+    ChShortGate.resize(DGChannels);
+    ChLongGate.resize(DGChannels);
+    ChPreTrigger.resize(DGChannels);
+    ChGateOffset.resize(DGChannels);
   }
 
+  //////////////////////////////////////////////
+  // ADAQAcquisition interface settings settings
+  
+  string SettingsFileName;
+  Bool_t AutoSaveSettings;
+  Bool_t AutoLoadSettings;
+  
   /////////////////////////////////
   // VME connection widget settings
-
+  
+  vector<Int_t> BoardType;
+  vector<Int_t> BoardAddress;
+  vector<Int_t> BoardLinkNumber;
+  vector<Bool_t> BoardEnable;
   Bool_t STDFirmware, PSDFirmware;
+
+  ////////////////////////
+  // High voltage settings
+
+  vector<Int_t> HVChVoltage;
+  vector<Int_t> HVChCurrent;
   
   //////////////////////////
   // Channel widget settings

@@ -138,9 +138,6 @@ private:
     // IDs for each module
   enum{V1718, V1720, V6534};
 
-  AAVMEManager *TheVMEManager;
-  AAAcquisitionManager *TheACQManager;
-
   AASettings *TheSettings;
 
   AAChannelSlots *ChannelSlots;
@@ -171,7 +168,6 @@ private:
   ADAQTextEntryWithLabel *SettingsFileName_TEL;
   TGTextButton *SaveSettingsToFile_TB, *LoadSettingsFromFile_TB;
   TGCheckButton *AutoSaveSettings_CB, *AutoLoadSettings_CB;
-  
 
   /////////////////////////
   // VME connection widgets
@@ -183,7 +179,6 @@ private:
   vector<ADAQNumberEntryWithLabel *> BoardLinkNumber_NEL;
   vector<TGTextButton *> BoardEnable_TB;
   TGRadioButton *DGStandardFW_RB, *DGPSDFW_RB;
-
 
   /////////////////
   // Register frame

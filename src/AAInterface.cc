@@ -144,27 +144,30 @@ void AAInterface::BuildSecondaryFrames()
   
   FillRegisterFrame();
 
+  Int_t NumHVChannels = 0, NumDGChannels = 0;
+  
   if(TheVMEManager->GetBRLinkOpen())
     FillPulserFrame();
 
-  if(TheVMEManager->GetHVLinkOpen())
+  if(TheVMEManager->GetHVLinkOpen()){
+    NumHVChannels = TheVMEManager->GetHVManager()->GetNumChannels();
     FillVoltageFrame();
-
+  }
+  
   if(TheVMEManager->GetDGLinkOpen()){
     FillAcquisitionFrame();
-
-    // Create a channel number-dependent AASettings object, which is
-    // used throughout the code to access GUI widget parameteres
-    const Int_t NumDGChannels = TheVMEManager->GetDGManager()->GetNumChannels();
-    TheSettings = new AASettings(NumDGChannels);
-
+    NumDGChannels = TheVMEManager->GetDGManager()->GetNumChannels();
+    
     // Send critical pointers to the graphics manager
     TheGRPManager->SetCanvasPointer(DisplayCanvas_EC->GetCanvas());
   }
-  else{
-    // There are no DG channels if a DG device is not open
-    TheSettings = new AASettings(0);
-  }
+  
+  // Create a high voltage and channel number-dependent AASettings
+  // object. This object is used throughout the code to access
+  // widget values and to save/load widget values from disk
+  
+  TheSettings = new AASettings(NumHVChannels, NumDGChannels);
+  
 
   // Pass the settings pointer to the managers
   TheVMEManager->SetSettingsPointer(TheSettings);
@@ -262,7 +265,7 @@ void AAInterface::FillSettingsFrame()
   SettingsFileName_TEL->GetEntry()->Resize(210, 25);
   SettingsFileName_TEL->GetEntry()->ChangeOptions(SettingsFileName_TEL->GetOptions() | kFixedSize | kSunkenFrame);
   SettingsFileName_TEL->GetEntry()->SetState(false);
-  SettingsFileName_TEL->GetEntry()->SetText("ADAQAcquisition.settings.root");
+  SettingsFileName_TEL->GetEntry()->SetText(SettingsFileName.c_str());
 
   
   TGHorizontalFrame *SaveLoadSettings_HF = new TGHorizontalFrame(SettingsFile_GF);
@@ -2565,19 +2568,56 @@ void AAInterface::SetTitlesWidgetState(bool WidgetState, EButtonState ButtonStat
 void AAInterface::SaveSettings()
 {
   AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
-  const Int_t NumDGChannels = TheVMEManager->GetDGManager()->GetNumChannels();
   
-  TheSettings->STDFirmware = DGStandardFW_RB->IsDown();
-  TheSettings->PSDFirmware = DGPSDFW_RB->IsDown();
-
   //////////////////
   // Settings tab //
   //////////////////
+  
+  TheSettings->SettingsFileName = SettingsFileName_TEL->GetEntry()->GetText();
+  TheSettings->AutoSaveSettings = AutoSaveSettings_CB->IsDown();
+  TheSettings->AutoLoadSettings = AutoLoadSettings_CB->IsDown();
+  
+  ////////////////////////
+  // VME connection tab //
+  ////////////////////////
+  
+  for(Int_t board=0; board<3; board++){
+    TheSettings->BoardType[board] = BoardType_CBL[board]->GetComboBox()->GetSelected();
+    if(board != 0)
+      TheSettings->BoardAddress[board] = BoardAddress_NEF[board]->GetEntry()->GetIntNumber();
+    TheSettings->BoardLinkNumber[board] = BoardLinkNumber_NEL[board]->GetEntry()->GetIntNumber();
+    
+    if(BoardEnable_TB[board]->GetString() == "Board enabled")
+      TheSettings->BoardEnable[board] = true;
+    else if(BoardEnable_TB[board]->GetString() == "Board disabled")
+      TheSettings->BoardEnable[board] = false;
+  }
+  
+  TheSettings->STDFirmware = DGStandardFW_RB->IsDown();
+  TheSettings->PSDFirmware = DGPSDFW_RB->IsDown();
+  
 
+  //////////////////////
+  // High voltage tab //
+  //////////////////////
+
+  if(TheSettings->BoardEnable[2]){
+    
+    const Int_t NumHVChannels = TheVMEManager->GetHVManager()->GetNumChannels();
+    
+    for(Int_t ch=0; ch<NumHVChannels; ch++){
+      TheSettings->HVChVoltage[ch] = HVChVoltage_NEL[ch]->GetEntry()->GetIntNumber();
+      TheSettings->HVChCurrent[ch] = HVChCurrent_NEL[ch]->GetEntry()->GetIntNumber();
+    }
+  }
+
+  
   /////////////////////
   // Acquisition tab //
   /////////////////////
-    
+  
+  const Int_t NumDGChannels = TheVMEManager->GetDGManager()->GetNumChannels();
+  
   // Acquisition channel 
   for(Int_t ch=0; ch<NumDGChannels; ch++){
     TheSettings->ChEnable[ch] = DGChEnable_CB[ch]->IsDown();
@@ -2614,7 +2654,7 @@ void AAInterface::SaveSettings()
   
   TheSettings->HorizontalSliderPtr = DisplayHorizontalScale_THS->GetPointerPosition();
   
-  float Min, Max;
+  Float_t Min = 0., Max = 0.;
   
   DisplayHorizontalScale_THS->GetPosition(Min, Max);
   TheSettings->HorizontalSliderMin = Min;
@@ -2650,6 +2690,7 @@ void AAInterface::SaveSettings()
   // Acquisition
   TheSettings->AcquisitionControl = DGAcquisitionControl_CBL->GetComboBox()->GetSelected();
   TheSettings->AcquisitionControlName = DGAcquisitionControl_CBL->GetComboBox()->GetSelectedEntry()->GetTitle();
+
   if(DGStandardFW_RB->IsDown()){
     TheSettings->RecordLength = DGRecordLength_NEL->GetEntry()->GetIntNumber();
     TheSettings->PostTrigger = DGPostTrigger_NEL->GetEntry()->GetIntNumber();
@@ -2840,6 +2881,9 @@ void AAInterface::SaveSettingsToFile()
   
   // Write the AASettings object to the settings ROOT file
   TFile *SettingsFile = new TFile(SettingsFileName.c_str(), "recreate");
+
+  //AASettings *InterfaceSettings = (AASettings *)TheSettings->Clone("InterfaceSettings");
+
   TheSettings->Write("TheSettings");
   SettingsFile->Close();
 }
@@ -2847,11 +2891,299 @@ void AAInterface::SaveSettingsToFile()
 
 void AAInterface::LoadSettingsFromFile()
 {
+  // Open the ROOT file containing an ADAQAcquisition AASettings object
+  TFile *SettingsFile = new TFile(SettingsFileName.c_str(), "read");
+
+  // Load the settings object that will be used for readout into the
+  // widgets; note that a new AASettings object named 'TheSettings' is
+  // used here to prevent overwriting the class data member
+  AASettings *TheSettings = (AASettings *)SettingsFile->Get("TheSettings");
+  
+  //////////////////
+  // Settings tab //
+  //////////////////
+
+  if(TheSettings->AutoSaveSettings)
+    AutoSaveSettings_CB->SetState(kButtonDown);
+  else
+    AutoSaveSettings_CB->SetState(kButtonUp);
+
+  if(TheSettings->AutoLoadSettings)
+    AutoLoadSettings_CB->SetState(kButtonDown);
+  else
+    AutoLoadSettings_CB->SetState(kButtonUp);
+  
+  ////////////////////
+  // Connection tab //
+  ////////////////////
+
+  for(Int_t board=0; board<3; board++){
+    BoardType_CBL[board]->GetComboBox()->Select(TheSettings->BoardType[board]);
+    if(board != 0)
+      BoardAddress_NEF[board]->GetEntry()->SetHexNumber(TheSettings->BoardAddress[board]);
+    BoardLinkNumber_NEL[board]->GetEntry()->SetIntNumber(TheSettings->BoardType[board]);
+    if(TheSettings->BoardEnable[board]){
+      BoardEnable_TB[board]->SetText("Board enabled");
+      BoardEnable_TB[board]->SetBackgroundColor(ColorManager->Number2Pixel(ButtonBackColorOn));
+      BoardEnable_TB[board]->SetForegroundColor(ColorManager->Number2Pixel(kWhite));
+      BoardEnable_TB[board]->ChangeOptions(BoardEnable_TB[board]->GetOptions() | kFixedSize);
+    }
+    else{
+      BoardEnable_TB[board]->SetText("Board disabled");
+      BoardEnable_TB[board]->SetBackgroundColor(ColorManager->Number2Pixel(ButtonBackColorOff));
+      BoardEnable_TB[board]->SetForegroundColor(ColorManager->Number2Pixel(kBlack));
+      BoardEnable_TB[board]->ChangeOptions(BoardEnable_TB[board]->GetOptions() | kFixedSize);
+    }
+  }
+  
+  if(TheSettings->STDFirmware){
+    DGStandardFW_RB->SetState(kButtonDown);
+    DGPSDFW_RB->SetState(kButtonUp);
+  }
+  else if(TheSettings->PSDFirmware){
+    DGStandardFW_RB->SetState(kButtonUp);
+    DGPSDFW_RB->SetState(kButtonDown);
+  }
+
   if(!InterfaceBuildComplete)
     return;
+  
+  /////////////////////
+  // Acquisition tab //
+  /////////////////////
+  
+  // Channel-specific settings
+  
+  const Int_t NumDGChannels = AAVMEManager::GetInstance()->GetDGManager()->GetNumChannels();
+  
+  for(Int_t ch=0; ch<NumDGChannels; ch++){
+    
+    if(TheSettings->ChEnable[ch])
+      DGChEnable_CB[ch]->SetState(kButtonDown);
+    else
+      DGChEnable_CB[ch]->SetState(kButtonUp);
+    
+    if(TheSettings->ChPosPolarity[ch])
+      DGChPosPolarity_RB[ch]->SetState(kButtonDown);
+    else
+      DGChPosPolarity_RB[ch]->SetState(kButtonUp);
+    
+    if(TheSettings->ChNegPolarity[ch])
+      DGChNegPolarity_RB[ch]->SetState(kButtonDown);
+    else
+      DGChNegPolarity_RB[ch]->SetState(kButtonUp);
 
-  TFile *SettingsFile = new TFile(SettingsFileName.c_str(), "read");
-  TheSettings = (AASettings *)SettingsFile->Get("TheSettings");
+    DGChDCOffset_NEL[ch]->GetEntry()->SetHexNumber(TheSettings->ChDCOffset[ch]);
+    DGChTriggerThreshold_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChTriggerThreshold[ch]);
+
+    if(TheSettings->STDFirmware){
+      DGChZLEThreshold_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChZLEThreshold[ch]);
+      DGChZLEForward_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChZLEForward[ch]);
+      DGChZLEBackward_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChZLEBackward[ch]);
+
+      if(TheSettings->ChZLEPosLogic[ch])
+	DGChZLEPosLogic_RB[ch]->SetState(kButtonDown);
+      else
+	DGChZLEPosLogic_RB[ch]->SetState(kButtonUp);
+      
+      if(TheSettings->ChZLENegLogic[ch])
+	DGChZLENegLogic_RB[ch]->SetState(kButtonDown);
+      else
+	DGChZLENegLogic_RB[ch]->SetState(kButtonUp);
+
+      DGChBaselineCalcMin_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChBaselineCalcMin[ch]);
+      DGChBaselineCalcMax_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChBaselineCalcMax[ch]);
+      DGChPSDTotalStart_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChPSDTotalStart[ch]);
+      DGChPSDTotalStop_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChPSDTotalStop[ch]);
+      DGChPSDTailStart_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChPSDTailStart[ch]);
+      DGChPSDTailStop_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChPSDTotalStop[ch]);
+    }
+    else if(TheSettings->PSDFirmware){
+      DGChRecordLength_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChRecordLength[ch]);
+      DGChBaselineSamples_CBL[ch]->GetComboBox()->Select(TheSettings->ChBaselineSamples[ch]);
+      DGChChargeSensitivity_CBL[ch]->GetComboBox()->Select(TheSettings->ChChargeSensitivity[ch]);
+      DGChPSDCut_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChPSDCut[ch]);
+      DGChTriggerConfig_CBL[ch]->GetComboBox()->Select(TheSettings->ChTriggerConfig[ch]);
+      DGChTriggerValidation_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChTriggerValidation[ch]);
+      DGChShortGate_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChShortGate[ch]);
+      DGChLongGate_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChLongGate[ch]);
+      DGChPreTrigger_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChPreTrigger[ch]);
+      DGChGateOffset_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChGateOffset[ch]);
+    }
+  }
+
+  // Acquisition display type
+
+  if(TheSettings->WaveformMode){
+    AQWaveform_RB->SetState(kButtonDown);
+    AQSpectrum_RB->SetState(kButtonUp);
+    AQPSDHistogram_RB->SetState(kButtonUp);
+  }
+  else if(TheSettings->SpectrumMode){
+    AQWaveform_RB->SetState(kButtonUp);
+    AQSpectrum_RB->SetState(kButtonDown);
+    AQPSDHistogram_RB->SetState(kButtonUp);
+  }
+  else if(TheSettings->PSDMode){
+    AQWaveform_RB->SetState(kButtonUp);
+    AQSpectrum_RB->SetState(kButtonUp);
+    AQPSDHistogram_RB->SetState(kButtonDown);
+  }
+
+  // Trigger control
+
+  DGTriggerType_CBL->GetComboBox()->Select(TheSettings->TriggerType);
+
+  if(TheSettings->STDFirmware)
+    DGTriggerEdge_CBL->GetComboBox()->Select(TheSettings->TriggerEdge);
+  else if(TheSettings->PSDFirmware)
+    DGPSDTriggerHoldoff_NEL->GetEntry()->SetIntNumber(TheSettings->PSDTriggerHoldoff);
+
+  if(TheSettings->TriggerCoincidenceEnable)
+    DGTriggerCoincidenceEnable_CB->SetState(kButtonDown);
+  else
+    DGTriggerCoincidenceEnable_CB->SetState(kButtonUp);
+
+  DGTriggerCoincidenceLevel_CBL->GetComboBox()->Select(TheSettings->TriggerCoincidenceLevel);
+
+  // Acquisition
+
+  DGAcquisitionControl_CBL->GetComboBox()->Select(TheSettings->AcquisitionControl);
+  
+  if(TheSettings->STDFirmware){
+    DGRecordLength_NEL->GetEntry()->SetIntNumber(TheSettings->RecordLength);
+    DGPostTrigger_NEL->GetEntry()->SetIntNumber(TheSettings->PostTrigger);
+  }
+  else if(TheSettings->PSDFirmware){
+    DGPSDMode_CBL->GetComboBox()->Select(TheSettings->PSDOperationMode);
+    
+    if(TheSettings->PSDListAnalysis){
+      DGPSDListAnalysis_RB->SetState(kButtonDown);
+      DGPSDWaveformAnalysis_RB->SetState(kButtonUp);
+    }
+    else{
+      DGPSDWaveformAnalysis_RB->SetState(kButtonUp);
+      DGPSDWaveformAnalysis_RB->SetState(kButtonDown);
+    }
+  }
+  
+  AQTime_NEL->GetEntry()->SetIntNumber(TheSettings->AcquisitionTime);
+
+  // Readout
+
+  DGEventsBeforeReadout_NEL->GetEntry()->SetIntNumber(TheSettings->EventsBeforeReadout);
+
+  if(TheSettings->DataReductionEnable)
+    AQDataReductionEnable_CB->SetState(kButtonDown);
+  else
+    AQDataReductionEnable_CB->SetState(kButtonUp);
+    
+  AQDataReductionFactor_NEL->GetEntry()->SetIntNumber(TheSettings->DataReductionFactor);
+
+  if(TheSettings->ZeroSuppressionEnable)
+    DGZLEEnable_CB->SetState(kButtonDown);
+  else
+    DGZLEEnable_CB->SetState(kButtonUp);
+  
+
+  ////////////////
+  // Pulse spectra
+
+  SpectrumChannel_CBL->GetComboBox()->Select(TheSettings->SpectrumChannel);
+  SpectrumNumBins_NEL->GetEntry()->SetIntNumber(TheSettings->SpectrumNumBins);
+  SpectrumMinBin_NEL->GetEntry()->SetNumber(TheSettings->SpectrumMinBin);
+  SpectrumMaxBin_NEL->GetEntry()->SetNumber(TheSettings->SpectrumMaxBin);
+
+  if(TheSettings->SpectrumPulseHeight){
+    SpectrumPulseHeight_RB->SetState(kButtonDown);
+    SpectrumPulseArea_RB->SetState(kButtonUp);
+  }
+  else{
+    SpectrumPulseHeight_RB->SetState(kButtonUp);
+    SpectrumPulseArea_RB->SetState(kButtonDown);
+  }
+  
+  if(TheSettings->LDEnable)
+    SpectrumLDEnable_CB->SetState(kButtonDown);
+  else
+    SpectrumLDEnable_CB->SetState(kButtonUp);
+  
+  SpectrumLLD_NEL->GetEntry()->SetIntNumber(TheSettings->SpectrumLLD);
+  SpectrumULD_NEL->GetEntry()->SetIntNumber(TheSettings->SpectrumULD);
+
+  if(TheSettings->LDTrigger)
+    SpectrumLDTrigger_CB->SetState(kButtonDown);
+  else
+    SpectrumLDTrigger_CB->SetState(kButtonUp);
+      
+  SpectrumLDTriggerChannel_CBL->GetComboBox()->Select(TheSettings->LDChannel);
+  
+  if(TheSettings->SpectrumCalibrationEnable)
+    SpectrumCalibration_CB->SetState(kButtonDown);
+  else
+    SpectrumCalibration_CB->SetState(kButtonUp);
+
+  if(TheSettings->SpectrumCalibrationUseSlider)
+    SpectrumUseCalibrationSlider_CB->SetState(kButtonDown);
+  else
+    SpectrumUseCalibrationSlider_CB->SetState(kButtonUp);
+
+  // TheSettings->SpectrumCalibrationUnit = SpectrumCalibrationUnit_CBL->GetComboBox()->GetSelectedEntry()->GetTitle();
+
+  ///////////////////////
+  // Pulse discrimination
+
+  PSDChannel_CBL->GetComboBox()->Select(TheSettings->PSDChannel);
+
+  if(TheSettings->PSDYAxisTail){
+    PSDYAxisTail_RB->SetState(kButtonDown);
+    PSDYAxisTailTotal_RB->SetState(kButtonUp);
+  }
+  else{
+    PSDYAxisTail_RB->SetState(kButtonUp);
+    PSDYAxisTailTotal_RB->SetState(kButtonDown);
+  }
+
+  PSDThreshold_NEL->GetEntry()->SetNumber(TheSettings->PSDThreshold);
+  PSDTotalBins_NEL->GetEntry()->SetNumber(TheSettings->PSDTotalBins);
+  PSDTotalMinBin_NEL->GetEntry()->SetNumber(TheSettings->PSDTotalMinBin);
+  PSDTotalMaxBin_NEL->GetEntry()->SetNumber(TheSettings->PSDTotalMaxBin);
+  PSDTailBins_NEL->GetEntry()->SetNumber(TheSettings->PSDTailBins);
+  PSDTailMinBin_NEL->GetEntry()->SetNumber(TheSettings->PSDTailMinBin);
+  PSDTailMaxBin_NEL->GetEntry()->SetNumber(TheSettings->PSDTailMaxBin);
+
+  /////////////////////
+  // Persistent storage
+  
+  if(TheSettings->WaveformStorageEnable)
+    WaveformStorageEnable_CB->SetState(kButtonDown);
+  else
+    WaveformStorageEnable_CB->SetState(kButtonUp);
+  
+  if(TheSettings->WaveformStoreRaw)
+    WaveformStoreRaw_CB->SetState(kButtonDown);
+  else
+    WaveformStoreRaw_CB->SetState(kButtonUp);
+
+  if(TheSettings->WaveformStoreEnergyData)
+    WaveformStoreEnergyData_CB->SetState(kButtonDown);
+  else
+    WaveformStoreEnergyData_CB->SetState(kButtonUp);
+
+  if(TheSettings->WaveformStorePSDData)
+    WaveformStorePSDData_CB->SetState(kButtonDown);
+  else
+    WaveformStorePSDData_CB->SetState(kButtonUp);
+
+  if(TheSettings->ObjectSaveWithTimeExtension)
+    ObjectSaveWithTimeExtension_CB->SetState(kButtonDown);
+  else
+    ObjectSaveWithTimeExtension_CB->SetState(kButtonUp);
+
+  if(TheSettings->CanvasSaveWithTimeExtension)
+    CanvasSaveWithTimeExtension_CB->SetState(kButtonDown);
+  else
+    CanvasSaveWithTimeExtension_CB->SetState(kButtonUp);
   
   SettingsFile->Close();
 }
