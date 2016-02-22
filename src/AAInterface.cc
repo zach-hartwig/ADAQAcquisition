@@ -62,6 +62,7 @@ AAInterface::AAInterface()
     InterfaceBuildComplete(false),
     DisplayWidth(1121), DisplayHeight(833), 
     ButtonForeColor(kWhite), ButtonBackColorOn(kGreen-5), ButtonBackColorOff(kRed-3),
+    SettingsFileName("ADAQAcquisition.cfg.root"),
     ColorManager(new TColor)
 {
   // Allow environmental variable to control small version of GUI
@@ -246,24 +247,13 @@ void AAInterface::FillSettingsFrame()
   SettingsFile_GF->SetTitlePos(TGGroupFrame::kCenter);
   SettingsFrame->AddFrame(SettingsFile_GF, new TGLayoutHints(kLHintsLeft, 5,5,5,5));
   
-  TGHorizontalFrame *SettingsButtons_HF = new TGHorizontalFrame(SettingsFile_GF);
-  SettingsFile_GF->AddFrame(SettingsButtons_HF, new TGLayoutHints(kLHintsNormal, 5,5,5,5));
-  
-  SettingsButtons_HF->AddFrame(SetSettingsFileName_TB = new TGTextButton(SettingsButtons_HF,
-									 "Set file name",
-									 SetSettingsFileName_TB_ID),
-			       new TGLayoutHints(kLHintsNormal, 5,5,5,0));
-  SetSettingsFileName_TB->Resize(100, 30);
+  SettingsFile_GF->AddFrame(SetSettingsFileName_TB = new TGTextButton(SettingsFile_GF,
+								      "Set file name",
+								      SetSettingsFileName_TB_ID),
+			    new TGLayoutHints(kLHintsNormal, 5,5,5,0));
+  SetSettingsFileName_TB->Resize(210, 30);
   SetSettingsFileName_TB->ChangeOptions(SetSettingsFileName_TB->GetOptions() | kFixedSize);
   SetSettingsFileName_TB->Connect("Clicked()", "AATabSlots", SubtabSlots, "HandleSettingsTextButtons()");
-  
-  SettingsButtons_HF->AddFrame(SaveSettingsToFile_TB = new TGTextButton(SettingsButtons_HF,
-									"Save settings",
-									SaveSettingsToFile_TB_ID),
-			       new TGLayoutHints(kLHintsNormal, 5,5,5,0));
-  SaveSettingsToFile_TB->Resize(100, 30);
-  SaveSettingsToFile_TB->ChangeOptions(SaveSettingsToFile_TB->GetOptions() | kFixedSize);
-  SaveSettingsToFile_TB->Connect("Clicked()", "AATabSlots", SubtabSlots, "HandleSettingsTextButtons()");
   
   SettingsFile_GF->AddFrame(SettingsFileName_TEL = new ADAQTextEntryWithLabel(SettingsFile_GF,
 									      "",
@@ -273,6 +263,26 @@ void AAInterface::FillSettingsFrame()
   SettingsFileName_TEL->GetEntry()->ChangeOptions(SettingsFileName_TEL->GetOptions() | kFixedSize | kSunkenFrame);
   SettingsFileName_TEL->GetEntry()->SetState(false);
   SettingsFileName_TEL->GetEntry()->SetText("ADAQAcquisition.settings.root");
+
+  
+  TGHorizontalFrame *SaveLoadSettings_HF = new TGHorizontalFrame(SettingsFile_GF);
+  SettingsFile_GF->AddFrame(SaveLoadSettings_HF, new TGLayoutHints(kLHintsNormal, 5,5,5,5));
+  
+  SaveLoadSettings_HF->AddFrame(SaveSettingsToFile_TB = new TGTextButton(SaveLoadSettings_HF,
+									 "Save",
+									 SaveSettingsToFile_TB_ID),
+				new TGLayoutHints(kLHintsNormal, 5,5,5,0));
+  SaveSettingsToFile_TB->Resize(100, 30);
+  SaveSettingsToFile_TB->ChangeOptions(SaveSettingsToFile_TB->GetOptions() | kFixedSize);
+  SaveSettingsToFile_TB->Connect("Clicked()", "AATabSlots", SubtabSlots, "HandleSettingsTextButtons()");
+
+  SaveLoadSettings_HF->AddFrame(LoadSettingsFromFile_TB = new TGTextButton(SaveLoadSettings_HF,
+									   "Load",
+									   LoadSettingsFromFile_TB_ID),
+				new TGLayoutHints(kLHintsNormal, 5,5,5,0));
+  LoadSettingsFromFile_TB->Resize(100, 30);
+  LoadSettingsFromFile_TB->ChangeOptions(SaveSettingsToFile_TB->GetOptions() | kFixedSize);
+  LoadSettingsFromFile_TB->Connect("Clicked()", "AATabSlots", SubtabSlots, "HandleSettingsTextButtons()");
   
   SettingsFile_GF->AddFrame(AutoSaveSettings_CB = new TGCheckButton(SettingsFile_GF,
 								    "Auto save settings during session",
@@ -2559,7 +2569,15 @@ void AAInterface::SaveSettings()
   
   TheSettings->STDFirmware = DGStandardFW_RB->IsDown();
   TheSettings->PSDFirmware = DGPSDFW_RB->IsDown();
-  
+
+  //////////////////
+  // Settings tab //
+  //////////////////
+
+  /////////////////////
+  // Acquisition tab //
+  /////////////////////
+    
   // Acquisition channel 
   for(Int_t ch=0; ch<NumDGChannels; ch++){
     TheSettings->ChEnable[ch] = DGChEnable_CB[ch]->IsDown();
@@ -2812,6 +2830,33 @@ void AAInterface::SaveActiveSettings()
 }
 
 
+void AAInterface::SaveSettingsToFile()
+{
+  if(!InterfaceBuildComplete)
+    return;
+  
+  // Save all interface settings to the AASettings object
+  SaveSettings();
+  
+  // Write the AASettings object to the settings ROOT file
+  TFile *SettingsFile = new TFile(SettingsFileName.c_str(), "recreate");
+  TheSettings->Write("TheSettings");
+  SettingsFile->Close();
+}
+
+
+void AAInterface::LoadSettingsFromFile()
+{
+  if(!InterfaceBuildComplete)
+    return;
+
+  TFile *SettingsFile = new TFile(SettingsFileName.c_str(), "read");
+  TheSettings = (AASettings *)SettingsFile->Get("TheSettings");
+  
+  SettingsFile->Close();
+}
+
+
 void AAInterface::UpdateAQTimer(int TimeRemaining)
 { AQTimer_NEFL->GetEntry()->SetNumber(TimeRemaining); }
 
@@ -2924,21 +2969,25 @@ string AAInterface::CreateFileDialog(const char *FileTypes[],
       FileExt = FileInformation.fFileTypes[FileInformation.fFileTypeIdx+1];
       FileExt = FileExt.erase(0,1);
 
-
       FileName = FileInformation.fFilename;
 
-      // If the file name string terminates with '.adaq.root' (the \0
-      // character indicates a string termination) then do nothing
-      size_t Found = FileName.find(".adaq.root\0");
-      if(Found != string::npos){
+      // Search for the file name extensions '.adaq.root' (data
+      // output) and 'cfg.root' (interface configuration). Note that
+      // the '\0' character indicates a string termination)
+      size_t ADAQFilePos = FileName.find(".adaq.root\0");
+      size_t SettingsFilePos = FileName.find(".cfg.root\0");
+      
+      // If the extension was entered then do nothing...
+      if(ADAQFilePos != string::npos or SettingsFilePos != string::npos){
       }
-
-      // Otherwise ...
+      
+      // 
       else{
 	
 	// If the user has entered a file extension, strip it and
-	// force the '.adaq.root' file extensions...
-	Found = FileName.find_last_of(".");
+	// re-add the proper extension to force correctness
+
+	size_t Found = FileName.find_last_of(".");
 	if(Found != string::npos)
 	  FileName = FileName.substr(0, Found) + FileExt;
 	

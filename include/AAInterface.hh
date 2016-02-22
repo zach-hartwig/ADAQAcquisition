@@ -84,13 +84,13 @@ public:
 
   void HandleDisconnectAndTerminate(bool = true);
 
-  // Method to save all widget states
+  // Methods for handling widget settings
   void SaveSettings();
-
-  // Method to save widget states that are active during acquisition
   void SaveActiveSettings();
-
-  // Enable/disable widgets
+  void SaveSettingsToFile();
+  void LoadSettingsFromFile();
+  
+  // Methods to handle widget states
   void SetVoltageChannelWidgetState(int, bool);
   void SetVoltageWidgetState(bool, EButtonState);
   void SetAcquisitionWidgetState(bool, EButtonState);
@@ -108,6 +108,9 @@ private:
   // Dimensions for interface window
   int DisplayWidth, DisplayHeight;
   int ButtonForeColor, ButtonBackColorOn, ButtonBackColorOff;
+
+  // File name for settings storage
+  string SettingsFileName;
   
   // Variables for use with high voltage widgets
   vector<string> HVChLabels;
@@ -164,8 +167,9 @@ private:
   /////////////////
   // Settings frame
 
-  TGTextButton *SetSettingsFileName_TB, *SaveSettingsToFile_TB;
+  TGTextButton *SetSettingsFileName_TB;
   ADAQTextEntryWithLabel *SettingsFileName_TEL;
+  TGTextButton *SaveSettingsToFile_TB, *LoadSettingsFromFile_TB;
   TGCheckButton *AutoSaveSettings_CB, *AutoLoadSettings_CB;
   
 

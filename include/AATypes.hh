@@ -20,6 +20,7 @@ enum{
 
   SetSettingsFileName_TB_ID,
   SaveSettingsToFile_TB_ID,
+  LoadSettingsFromFile_TB_ID,
   SettingsFileName_TEL_ID,
   AutoSaveSettings_CB_ID,
   AutoLoadSettings_CB_ID,

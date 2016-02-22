@@ -46,12 +46,35 @@ void AATabSlots::HandleSettingsTextButtons()
 
   switch(TextButtonID){
 
-  case SetSettingsFileName_TB_ID:
-    break;
+  case SetSettingsFileName_TB_ID:{
 
+    const char *FileTypes[] = {"Settings file", "*.cfg.root",
+			       0, 0};
+    
+    string SettingsFileName = TI->CreateFileDialog(FileTypes, kFDOpen);
+
+    if(SettingsFileName == "NULL"){
+    }
+    else{
+      string FileNameNoPath = SettingsFileName;
+      
+      size_t Found = FileNameNoPath.find_last_of("/");
+      if(Found != string::npos)
+	FileNameNoPath = FileNameNoPath.substr(Found+1, FileNameNoPath.size());
+      
+      TI->SettingsFileName_TEL->GetEntry()->SetText(FileNameNoPath.c_str());
+    }
+  }
+    break;
+    
   case SaveSettingsToFile_TB_ID:
+    TI->SaveSettingsToFile();
     break;
 
+  case LoadSettingsFromFile_TB_ID:
+    TI->LoadSettingsFromFile();
+    break;
+    
   default:
     break;
     

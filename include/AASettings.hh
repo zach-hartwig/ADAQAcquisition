@@ -22,6 +22,12 @@ using namespace std;
 class AASettings : public TObject
 {
 public:
+  AASettings(){;}
+  ~AASettings(){;}
+  
+  /////////////////////
+  // Acquisition tab //
+  /////////////////////
   
   AASettings(int Channels){
     ChEnable.resize(Channels);
