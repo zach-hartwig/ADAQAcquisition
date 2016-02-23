@@ -61,7 +61,7 @@ class AAInterface : public TGMainFrame
 
 public:
 
-  AAInterface();
+  AAInterface(Bool_t, string);
   ~AAInterface();
 
   void BuildPrimaryFrames();
@@ -109,7 +109,7 @@ private:
   Int_t DisplayWidth, DisplayHeight;
   Int_t ButtonForeColor, ButtonBackColorOn, ButtonBackColorOff;
   
-  // File name for settings storage
+  // File name for interface settings storage
   string SettingsFileName;
   Bool_t AutoSaveSettings, AutoLoadSettings;
   

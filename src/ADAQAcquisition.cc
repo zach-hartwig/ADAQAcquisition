@@ -37,8 +37,17 @@ using namespace std;
 #include "AAInterface.hh"
 
 
-int main(int argc, char **argv)
+Int_t main(Int_t argc, char **argv)
 {
+  // Parse cmd line options
+
+  Bool_t AutoLoadSettings = false;
+  string SettingsFileName = "";
+  if(argc == 2){
+    AutoLoadSettings = true;
+    SettingsFileName = (string)argv[1];
+  }
+  
   // Run ROOT in standalone mode
   TApplication *TheApplication = new TApplication("ADAQAcquisition", &argc, argv);
 
@@ -51,7 +60,8 @@ int main(int argc, char **argv)
   AAGraphics *TheGraphicsManager = new AAGraphics;
   
   // Create the graphical user interface
-  AAInterface *TheInterface = new AAInterface;
+  AAInterface *TheInterface = new AAInterface(AutoLoadSettings,
+					      SettingsFileName);
   
   // Run the standalone application
   TheApplication->Run();

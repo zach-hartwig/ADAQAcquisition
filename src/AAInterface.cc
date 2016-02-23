@@ -57,12 +57,12 @@ using namespace boost::assign;
 #include "AAGraphics.hh"
 
 
-AAInterface::AAInterface()
+AAInterface::AAInterface(Bool_t ALS, string SFN)
   : TGMainFrame(gClient->GetRoot()),
     InterfaceBuildComplete(false),
     DisplayWidth(1121), DisplayHeight(833), 
     ButtonForeColor(kWhite), ButtonBackColorOn(kGreen-5), ButtonBackColorOff(kRed-3),
-    SettingsFileName("ADAQAcquisition.cfg.root"),
+    SettingsFileName("Default.acq.root"),
     AutoSaveSettings(false), AutoLoadSettings(false),
     NumBoards(3),
     ColorManager(new TColor)
@@ -85,6 +85,25 @@ AAInterface::AAInterface()
   AAAcquisitionManager::GetInstance()->SetInterfacePointer(this);
 
   BuildPrimaryFrames();
+
+  // If the user has specified an ADAQAcquisition settings file as the
+  // first cmd line arg then enable auto load and set the file name
+  
+  if(ALS){
+    // Set the auto-load boolean. This ensures that the settings
+    // contained in the file will be automatically loaded when the
+    // user establishes a connection to the device(s)
+    AutoLoadSettings = true;
+    
+    // Set the class member string containg the file name
+    SettingsFileName = SFN;
+    
+    // Update the text entry widget with the file name
+    SettingsFileName_TEL->GetEntry()->SetText(SettingsFileName.c_str());
+    
+    // Load the settings
+    LoadSettingsFromFile();
+  }
 }
 
 
@@ -178,6 +197,11 @@ void AAInterface::BuildSecondaryFrames()
 
   // Set the boolean to register that the GUI build is complete
   InterfaceBuildComplete = true;
+  
+  // If the user specified an ADAQAcquisition settings file at startup
+  // then configure all interface widgets now that they are built
+  if(AutoLoadSettings)
+    LoadSettingsFromFile();
 }
 
 
@@ -293,12 +317,6 @@ void AAInterface::FillSettingsFrame()
 								    "Auto save settings during session",
 								    AutoSaveSettings_CB_ID),
 			    new TGLayoutHints(kLHintsNormal, 10,5,5,0));
-  
-  SettingsFile_GF->AddFrame(AutoLoadSettings_CB = new TGCheckButton(SettingsFile_GF,
-								    "Auto load settings on start up",
-								    AutoLoadSettings_CB_ID),
-			    new TGLayoutHints(kLHintsNormal, 10,5,5,5));
-  
 }
 
 
@@ -2579,7 +2597,6 @@ void AAInterface::SaveSettings()
   
   TheSettings->SettingsFileName = SettingsFileName_TEL->GetEntry()->GetText();
   TheSettings->AutoSaveSettings = AutoSaveSettings_CB->IsDown();
-  TheSettings->AutoLoadSettings = AutoLoadSettings_CB->IsDown();
   
   ////////////////////////
   // VME connection tab //
@@ -2925,10 +2942,6 @@ void AAInterface::LoadSettingsFromFile()
   else
     AutoSaveSettings_CB->SetState(kButtonUp);
 
-  if(TheSettings->AutoLoadSettings)
-    AutoLoadSettings_CB->SetState(kButtonDown);
-  else
-    AutoLoadSettings_CB->SetState(kButtonUp);
   
   ////////////////////
   // Connection tab //
@@ -3327,7 +3340,7 @@ string AAInterface::CreateFileDialog(const char *FileTypes[],
       // output) and 'cfg.root' (interface configuration). Note that
       // the '\0' character indicates a string termination)
       size_t ADAQFilePos = FileName.find(".adaq.root\0");
-      size_t SettingsFilePos = FileName.find(".cfg.root\0");
+      size_t SettingsFilePos = FileName.find(".acq.root\0");
       
       // If the extension was entered then do nothing...
       if(ADAQFilePos != string::npos or SettingsFilePos != string::npos){

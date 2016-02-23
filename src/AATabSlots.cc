@@ -48,7 +48,7 @@ void AATabSlots::HandleSettingsTextButtons()
 
   case SetSettingsFileName_TB_ID:{
 
-    const char *FileTypes[] = {"Settings file", "*.cfg.root",
+    const char *FileTypes[] = {"Settings file", "*.acq.root",
 			       0, 0};
     
     string SettingsFileName = TI->CreateFileDialog(FileTypes, kFDOpen);
