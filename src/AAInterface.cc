@@ -63,6 +63,7 @@ AAInterface::AAInterface()
     DisplayWidth(1121), DisplayHeight(833), 
     ButtonForeColor(kWhite), ButtonBackColorOn(kGreen-5), ButtonBackColorOff(kRed-3),
     SettingsFileName("ADAQAcquisition.cfg.root"),
+    NumBoards(3),
     ColorManager(new TColor)
 {
   // Allow environmental variable to control small version of GUI
@@ -302,10 +303,6 @@ void AAInterface::FillSettingsFrame()
 
 void AAInterface::FillConnectionFrame()
 {
-  // There is a maximum of 3 devices controlled by the code:
-  // (1) A VME bridge; (2) a digitizer; (3) a high voltage unit
-  const Int_t NumDevices = 3;
-  
   // The main VME connection button
   
   TGGroupFrame *Connection_GF = new TGGroupFrame(ConnectionFrame,"Initiate Connection", kVerticalFrame);
@@ -345,7 +342,7 @@ void AAInterface::FillConnectionFrame()
   ConnectionFrame->AddFrame(DeviceSettings_GF, new TGLayoutHints(kLHintsTop | kLHintsCenterX, 5,5,5,5));
   DeviceSettings_GF->SetTitlePos(TGGroupFrame::kCenter);
   
-  for(int board=0; board<NumDevices; board++){
+  for(int board=0; board<NumBoards; board++){
     
     TGVerticalFrame *BoardOptions_VF = new TGVerticalFrame(DeviceSettings_GF);
     DeviceSettings_GF->AddFrame(BoardOptions_VF, 
@@ -476,20 +473,16 @@ void AAInterface::FillRegisterFrame()
   if(InterfaceBuildComplete)
     return;
   
-  // There will always be only 3 devices on the register frame: (1) A
-  // VME bridge; (2) a digitizer; (3) a high voltage unit
-  const Int_t NumDevices = 3;
+  string FrameTitle[NumBoards] = {"CAEN VME Bridge Module", "CAEN Digitizer Module", "CAEN High Voltage Module"};
 
-  string FrameTitle[NumDevices] = {"CAEN VME Bridge Module", "CAEN Digitizer Module", "CAEN High Voltage Module"};
+  Int_t ReadAddressID[NumBoards] = {BRReadAddress_ID, DGReadAddress_ID, HVReadAddress_ID};
+  Int_t ReadValueID[NumBoards] = {BRReadValue_ID, DGReadValue_ID, HVReadValue_ID};
 
-  Int_t ReadAddressID[NumDevices] = {BRReadAddress_ID, DGReadAddress_ID, HVReadAddress_ID};
-  Int_t ReadValueID[NumDevices] = {BRReadValue_ID, DGReadValue_ID, HVReadValue_ID};
+  Int_t WriteAddressID[NumBoards] = {BRWriteAddress_ID, DGWriteAddress_ID, HVWriteAddress_ID};
+  Int_t WriteValueID[NumBoards] = {BRWriteValue_ID, DGWriteValue_ID, HVWriteValue_ID};
 
-  Int_t WriteAddressID[NumDevices] = {BRWriteAddress_ID, DGWriteAddress_ID, HVWriteAddress_ID};
-  Int_t WriteValueID[NumDevices] = {BRWriteValue_ID, DGWriteValue_ID, HVWriteValue_ID};
-
-  Int_t ReadID[NumDevices] = {BRRead_ID, DGRead_ID, HVRead_ID};
-  Int_t WriteID[NumDevices] = {BRWrite_ID, DGWrite_ID, HVWrite_ID};
+  Int_t ReadID[NumBoards] = {BRRead_ID, DGRead_ID, HVRead_ID};
+  Int_t WriteID[NumBoards] = {BRWrite_ID, DGWrite_ID, HVWrite_ID};
 
   const Int_t RWButtonX = 250;
   const Int_t RWButtonY = 30;
@@ -498,7 +491,7 @@ void AAInterface::FillRegisterFrame()
   
   AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
   
-  for(Int_t board=0; board<NumDevices; board++){
+  for(Int_t board=0; board<NumBoards; board++){
     
     ////////////////////////////////////////////////////
     // Create the group frame to hold all the subwidgets
@@ -2568,6 +2561,16 @@ void AAInterface::SetTitlesWidgetState(bool WidgetState, EButtonState ButtonStat
 void AAInterface::SaveSettings()
 {
   AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
+
+  // The "Settings" and "VMEConnection" widgets are built regardless
+  // of program state so we can always save their state; however, the
+  // AASettings object is DG and HV channel dependent, which is not
+  // known until _after_ the VME connection has been made. Thus, if
+  // the connection has not occured we will create a temporary
+  // AASettings object to hold the settings for accessible widgets.
+  
+  if(!InterfaceBuildComplete)
+    TheSettings = new AASettings(0, 0);
   
   //////////////////
   // Settings tab //
@@ -2581,9 +2584,9 @@ void AAInterface::SaveSettings()
   // VME connection tab //
   ////////////////////////
   
-  for(Int_t board=0; board<3; board++){
+  for(Int_t board=0; board<NumBoards; board++){
     TheSettings->BoardType[board] = BoardType_CBL[board]->GetComboBox()->GetSelected();
-    if(board != 0)
+    if(board != zBR)
       TheSettings->BoardAddress[board] = BoardAddress_NEF[board]->GetEntry()->GetIntNumber();
     TheSettings->BoardLinkNumber[board] = BoardLinkNumber_NEL[board]->GetEntry()->GetIntNumber();
     
@@ -2595,13 +2598,20 @@ void AAInterface::SaveSettings()
   
   TheSettings->STDFirmware = DGStandardFW_RB->IsDown();
   TheSettings->PSDFirmware = DGPSDFW_RB->IsDown();
-  
 
+
+  // The following widgets are built after a connection has been
+  // established; test to ensure this has occured before attempting to
+  // access the objects
+  
+  if(!InterfaceBuildComplete)
+    return;
+  
   //////////////////////
   // High voltage tab //
   //////////////////////
-
-  if(TheSettings->BoardEnable[2]){
+  
+  if(TheSettings->BoardEnable[zHV]){
     
     const Int_t NumHVChannels = TheVMEManager->GetHVManager()->GetNumChannels();
     
@@ -2615,248 +2625,251 @@ void AAInterface::SaveSettings()
   /////////////////////
   // Acquisition tab //
   /////////////////////
+
+  if(TheSettings->BoardEnable[zDG]){
   
-  const Int_t NumDGChannels = TheVMEManager->GetDGManager()->GetNumChannels();
+    const Int_t NumDGChannels = TheVMEManager->GetDGManager()->GetNumChannels();
   
-  // Acquisition channel 
-  for(Int_t ch=0; ch<NumDGChannels; ch++){
-    TheSettings->ChEnable[ch] = DGChEnable_CB[ch]->IsDown();
-    TheSettings->ChPosPolarity[ch] = DGChPosPolarity_RB[ch]->IsDown();
-    TheSettings->ChNegPolarity[ch] = DGChNegPolarity_RB[ch]->IsDown();
-    TheSettings->ChDCOffset[ch] = DGChDCOffset_NEL[ch]->GetEntry()->GetHexNumber();
-    TheSettings->ChTriggerThreshold[ch] = DGChTriggerThreshold_NEL[ch]->GetEntry()->GetIntNumber();
-    if(DGStandardFW_RB->IsDown()){
-      TheSettings->ChZLEThreshold[ch] = DGChZLEThreshold_NEL[ch]->GetEntry()->GetIntNumber();
-      TheSettings->ChZLEForward[ch] = DGChZLEForward_NEL[ch]->GetEntry()->GetIntNumber();
-      TheSettings->ChZLEBackward[ch] = DGChZLEBackward_NEL[ch]->GetEntry()->GetIntNumber();
-      TheSettings->ChZLEPosLogic[ch] = DGChZLEPosLogic_RB[ch]->IsDown();
-      TheSettings->ChZLENegLogic[ch] = DGChZLENegLogic_RB[ch]->IsDown();
-      TheSettings->ChBaselineCalcMin[ch] = DGChBaselineCalcMin_NEL[ch]->GetEntry()->GetIntNumber();
-      TheSettings->ChBaselineCalcMax[ch] = DGChBaselineCalcMax_NEL[ch]->GetEntry()->GetIntNumber();
-      TheSettings->ChPSDTotalStart[ch] = DGChPSDTotalStart_NEL[ch]->GetEntry()->GetIntNumber();
-      TheSettings->ChPSDTotalStop[ch] = DGChPSDTotalStop_NEL[ch]->GetEntry()->GetIntNumber();
-      TheSettings->ChPSDTailStart[ch] = DGChPSDTailStart_NEL[ch]->GetEntry()->GetIntNumber();
-      TheSettings->ChPSDTailStop[ch] = DGChPSDTailStop_NEL[ch]->GetEntry()->GetIntNumber();
-    }
-    else if(DGPSDFW_RB->IsDown()){
-      TheSettings->ChRecordLength[ch] = DGChRecordLength_NEL[ch]->GetEntry()->GetIntNumber();
-      TheSettings->ChBaselineSamples[ch] = DGChBaselineSamples_CBL[ch]->GetComboBox()->GetSelected();
-      TheSettings->ChChargeSensitivity[ch] = DGChChargeSensitivity_CBL[ch]->GetComboBox()->GetSelected();
-      TheSettings->ChPSDCut[ch] = DGChPSDCut_NEL[ch]->GetEntry()->GetIntNumber();
-      TheSettings->ChTriggerConfig[ch] = DGChTriggerConfig_CBL[ch]->GetComboBox()->GetSelected();
-      TheSettings->ChTriggerValidation[ch] = DGChTriggerValidation_NEL[ch]->GetEntry()->GetIntNumber();
-      TheSettings->ChShortGate[ch] = DGChShortGate_NEL[ch]->GetEntry()->GetIntNumber();
-      TheSettings->ChLongGate[ch] = DGChLongGate_NEL[ch]->GetEntry()->GetIntNumber();
-      TheSettings->ChPreTrigger[ch] = DGChPreTrigger_NEL[ch]->GetEntry()->GetIntNumber();
-      TheSettings->ChGateOffset[ch] = DGChGateOffset_NEL[ch]->GetEntry()->GetIntNumber();
-    }
-  }
-  
-  TheSettings->HorizontalSliderPtr = DisplayHorizontalScale_THS->GetPointerPosition();
-  
-  Float_t Min = 0., Max = 0.;
-  
-  DisplayHorizontalScale_THS->GetPosition(Min, Max);
-  TheSettings->HorizontalSliderMin = Min;
-  TheSettings->HorizontalSliderMax = Max;
-  
-  DisplayVerticalScale_DVS->GetPosition(Min, Max);
-  TheSettings->VerticalSliderMin = Min;
-  TheSettings->VerticalSliderMax = Max;
-
-  //////////////////////////
-  // Data acquisition subtab
-
-  // Scope display
-  TheSettings->WaveformMode = AQWaveform_RB->IsDown();
-  TheSettings->SpectrumMode = AQSpectrum_RB->IsDown();
-  TheSettings->PSDMode = AQPSDHistogram_RB->IsDown();
-    
-  // Trigger control settings
-  TheSettings->TriggerType = DGTriggerType_CBL->GetComboBox()->GetSelected();
-  TheSettings->TriggerTypeName = DGTriggerType_CBL->GetComboBox()->GetSelectedEntry()->GetTitle();
-
-  if(DGStandardFW_RB->IsDown()){
-    TheSettings->TriggerEdge = DGTriggerEdge_CBL->GetComboBox()->GetSelected();
-    TheSettings->TriggerEdgeName = DGTriggerEdge_CBL->GetComboBox()->GetSelectedEntry()->GetTitle();
-  }
-  else if(DGPSDFW_RB->IsDown()){
-    TheSettings->PSDTriggerHoldoff = DGPSDTriggerHoldoff_NEL->GetEntry()->GetIntNumber();
-  }
-  
-  TheSettings->TriggerCoincidenceEnable = DGTriggerCoincidenceEnable_CB->IsDown();
-  TheSettings->TriggerCoincidenceLevel = DGTriggerCoincidenceLevel_CBL->GetComboBox()->GetSelected();
-
-  // Acquisition
-  TheSettings->AcquisitionControl = DGAcquisitionControl_CBL->GetComboBox()->GetSelected();
-  TheSettings->AcquisitionControlName = DGAcquisitionControl_CBL->GetComboBox()->GetSelectedEntry()->GetTitle();
-
-  if(DGStandardFW_RB->IsDown()){
-    TheSettings->RecordLength = DGRecordLength_NEL->GetEntry()->GetIntNumber();
-    TheSettings->PostTrigger = DGPostTrigger_NEL->GetEntry()->GetIntNumber();
-  }
-  else{
-    TheSettings->PSDOperationMode = DGPSDMode_CBL->GetComboBox()->GetSelected();
-    TheSettings->PSDListAnalysis = DGPSDListAnalysis_RB->IsDown();
-    TheSettings->PSDWaveformAnalysis = DGPSDWaveformAnalysis_RB->IsDown();
-  }
-  
-  TheSettings->AcquisitionTime = AQTime_NEL->GetEntry()->GetIntNumber();
-
-  // Readout
-  TheSettings->EventsBeforeReadout = DGEventsBeforeReadout_NEL->GetEntry()->GetIntNumber();
-  TheSettings->DataReductionEnable = AQDataReductionEnable_CB->IsDown();
-  TheSettings->DataReductionFactor = AQDataReductionFactor_NEL->GetEntry()->GetIntNumber();
-  TheSettings->ZeroSuppressionEnable = DGZLEEnable_CB->IsDown();
-
-
-  ///////////////////////
-  // Pulse spectra subtab
-
-  TheSettings->SpectrumChannel = SpectrumChannel_CBL->GetComboBox()->GetSelected();
-  TheSettings->SpectrumNumBins = SpectrumNumBins_NEL->GetEntry()->GetIntNumber();
-  TheSettings->SpectrumMinBin = SpectrumMinBin_NEL->GetEntry()->GetNumber();
-  TheSettings->SpectrumMaxBin = SpectrumMaxBin_NEL->GetEntry()->GetNumber();
-
-  TheSettings->SpectrumPulseHeight = SpectrumPulseHeight_RB->IsDown();
-  TheSettings->SpectrumPulseArea = SpectrumPulseArea_RB->IsDown();
-
-  TheSettings->LDEnable = SpectrumLDEnable_CB->IsDown();
-  TheSettings->SpectrumLLD = SpectrumLLD_NEL->GetEntry()->GetIntNumber();
-  TheSettings->SpectrumULD = SpectrumULD_NEL->GetEntry()->GetIntNumber();
-  TheSettings->LDTrigger = SpectrumLDTrigger_CB->IsDown();
-
-  TheSettings->LDChannel = SpectrumLDTriggerChannel_CBL->GetComboBox()->GetSelected();
-  
-  TheSettings->SpectrumCalibrationEnable = SpectrumCalibration_CB->IsDown();
-  TheSettings->SpectrumCalibrationUseSlider = SpectrumUseCalibrationSlider_CB->IsDown();
-  TheSettings->SpectrumCalibrationUnit = SpectrumCalibrationUnit_CBL->GetComboBox()->GetSelectedEntry()->GetTitle();
-
-
-  //////////////////////////////
-  // Pulse discrimination subtab 
-
-  TheSettings->PSDChannel = PSDChannel_CBL->GetComboBox()->GetSelected();
-  TheSettings->PSDYAxisTail = PSDYAxisTail_RB->IsDown();
-  TheSettings->PSDYAxisTailTotal = PSDYAxisTailTotal_RB->IsDown();
-  TheSettings->PSDThreshold = PSDThreshold_NEL->GetEntry()->GetNumber();
-  TheSettings->PSDTotalBins = PSDTotalBins_NEL->GetEntry()->GetNumber();
-  TheSettings->PSDTotalMinBin = PSDTotalMinBin_NEL->GetEntry()->GetNumber();
-  TheSettings->PSDTotalMaxBin = PSDTotalMaxBin_NEL->GetEntry()->GetNumber();
-  TheSettings->PSDTailBins = PSDTailBins_NEL->GetEntry()->GetNumber();
-  TheSettings->PSDTailMinBin = PSDTailMinBin_NEL->GetEntry()->GetNumber();
-  TheSettings->PSDTailMaxBin = PSDTailMaxBin_NEL->GetEntry()->GetNumber();
-
-
-  //////////////////////////
-  // Display graphics subtab
-
-  TheSettings->DisplayTitlesEnable = DisplayTitlesEnable_CB->IsDown();
-
-  TheSettings->DisplayTitle = DisplayTitle_TEL->GetEntry()->GetText();
-
-  TheSettings->DisplayXTitle = DisplayXTitle_TEL->GetEntry()->GetText();
-  TheSettings->DisplayXTitleSize = DisplayXTitleSize_NEL->GetEntry()->GetNumber();
-  TheSettings->DisplayXTitleOffset = DisplayXTitleOffset_NEL->GetEntry()->GetNumber();
-
-  TheSettings->DisplayYTitle = DisplayYTitle_TEL->GetEntry()->GetText();
-  TheSettings->DisplayYTitleSize = DisplayYTitleSize_NEL->GetEntry()->GetNumber();
-  TheSettings->DisplayYTitleOffset = DisplayYTitleOffset_NEL->GetEntry()->GetNumber();
-	
-  TheSettings->DisplayTrigger = DisplayTrigger_CB->IsDown();
-  TheSettings->DisplayBaselineBox = DisplayBaselineBox_CB->IsDown();
-  TheSettings->DisplayPSDLimits = DisplayPSDLimits_CB->IsDown();
-  TheSettings->DisplayZLEThreshold = DisplayZLEThreshold_CB->IsDown();
-  TheSettings->DisplayLegend = DisplayLegend_CB->IsDown();
-  TheSettings->DisplayGrid = DisplayGrid_CB->IsDown();
-  TheSettings->DisplayXAxisInLog = DisplayXAxisLog_CB->IsDown();
-  TheSettings->DisplayYAxisInLog = DisplayYAxisLog_CB->IsDown();
-  
-  TheSettings->WaveformWithLine = DrawWaveformWithLine_RB->IsDown();
-  TheSettings->WaveformWithMarkers = DrawWaveformWithMarkers_RB->IsDown();
-  TheSettings->WaveformWithBoth = DrawWaveformWithBoth_RB->IsDown();
-  
-  TheSettings->SpectrumWithLine = DrawSpectrumWithLine_RB->IsDown();
-  TheSettings->SpectrumWithMarkers = DrawSpectrumWithMarkers_RB->IsDown();
-  TheSettings->SpectrumWithBars = DrawSpectrumWithBars_RB->IsDown();
-  
-  TheSettings->SpectrumRefreshRate = SpectrumRefreshRate_NEL->GetEntry()->GetIntNumber();
-
-  TheSettings->DisplayContinuous = DisplayContinuous_RB->IsDown();
-  TheSettings->DisplayUpdateable = DisplayUpdateable_RB->IsDown();
-  TheSettings->DisplayNonUpdateable = DisplayNonUpdateable_RB->IsDown();
-  
-
-  ////////////////////////////
-  // Persistent storage subtab
-
-  TheSettings->WaveformStorageEnable = WaveformStorageEnable_CB->IsDown();
-  TheSettings->WaveformStoreRaw = WaveformStoreRaw_CB->IsDown();
-  TheSettings->WaveformStoreEnergyData = WaveformStoreEnergyData_CB->IsDown();
-  TheSettings->WaveformStorePSDData= WaveformStorePSDData_CB->IsDown();
-
-  TheSettings->ObjectSaveWithTimeExtension = ObjectSaveWithTimeExtension_CB->IsDown();
-  TheSettings->CanvasSaveWithTimeExtension = CanvasSaveWithTimeExtension_CB->IsDown();
-
-  ///////////////////////////////
-  // Acquisition disabled widgets
-
-  // Because of the frustrating way ROOT implements button behavior,
-  // buttons that are intentionally disabled while acquisition is on
-  // (to prevent the user from changing settings during acquisition)
-  // must be tested for the special disabled-and-selected
-  // enumerator. This is necessary since widgets that are activated
-  // during acquisition will call this method and, unless the
-  // following value readouts are performed, the settings for the
-  // disabled will be wrong. This results in bad and unexpected
-  // behavior. Thus, we must ensure that all of the following buttons
-  // are disabled during acquisition!
-
-  Bool_t AcquisitionOn = AAAcquisitionManager::GetInstance()->GetAcquisitionEnable();
-
-  if(AcquisitionOn){
+    // Acquisition channel 
     for(Int_t ch=0; ch<NumDGChannels; ch++){
-      TheSettings->ChEnable[ch] = DGChEnable_CB[ch]->IsDisabledAndSelected();
-      TheSettings->ChPosPolarity[ch] = DGChPosPolarity_RB[ch]->IsDisabledAndSelected();
-      TheSettings->ChNegPolarity[ch] = DGChNegPolarity_RB[ch]->IsDisabledAndSelected();
+      TheSettings->ChEnable[ch] = DGChEnable_CB[ch]->IsDown();
+      TheSettings->ChPosPolarity[ch] = DGChPosPolarity_RB[ch]->IsDown();
+      TheSettings->ChNegPolarity[ch] = DGChNegPolarity_RB[ch]->IsDown();
+      TheSettings->ChDCOffset[ch] = DGChDCOffset_NEL[ch]->GetEntry()->GetHexNumber();
+      TheSettings->ChTriggerThreshold[ch] = DGChTriggerThreshold_NEL[ch]->GetEntry()->GetIntNumber();
       if(DGStandardFW_RB->IsDown()){
-	TheSettings->ChZLEPosLogic[ch] = DGChZLEPosLogic_RB[ch]->IsDisabledAndSelected();
-	TheSettings->ChZLENegLogic[ch] = DGChZLENegLogic_RB[ch]->IsDisabledAndSelected();
+	TheSettings->ChZLEThreshold[ch] = DGChZLEThreshold_NEL[ch]->GetEntry()->GetIntNumber();
+	TheSettings->ChZLEForward[ch] = DGChZLEForward_NEL[ch]->GetEntry()->GetIntNumber();
+	TheSettings->ChZLEBackward[ch] = DGChZLEBackward_NEL[ch]->GetEntry()->GetIntNumber();
+	TheSettings->ChZLEPosLogic[ch] = DGChZLEPosLogic_RB[ch]->IsDown();
+	TheSettings->ChZLENegLogic[ch] = DGChZLENegLogic_RB[ch]->IsDown();
+	TheSettings->ChBaselineCalcMin[ch] = DGChBaselineCalcMin_NEL[ch]->GetEntry()->GetIntNumber();
+	TheSettings->ChBaselineCalcMax[ch] = DGChBaselineCalcMax_NEL[ch]->GetEntry()->GetIntNumber();
+	TheSettings->ChPSDTotalStart[ch] = DGChPSDTotalStart_NEL[ch]->GetEntry()->GetIntNumber();
+	TheSettings->ChPSDTotalStop[ch] = DGChPSDTotalStop_NEL[ch]->GetEntry()->GetIntNumber();
+	TheSettings->ChPSDTailStart[ch] = DGChPSDTailStart_NEL[ch]->GetEntry()->GetIntNumber();
+	TheSettings->ChPSDTailStop[ch] = DGChPSDTailStop_NEL[ch]->GetEntry()->GetIntNumber();
       }
       else if(DGPSDFW_RB->IsDown()){
+	TheSettings->ChRecordLength[ch] = DGChRecordLength_NEL[ch]->GetEntry()->GetIntNumber();
+	TheSettings->ChBaselineSamples[ch] = DGChBaselineSamples_CBL[ch]->GetComboBox()->GetSelected();
+	TheSettings->ChChargeSensitivity[ch] = DGChChargeSensitivity_CBL[ch]->GetComboBox()->GetSelected();
+	TheSettings->ChPSDCut[ch] = DGChPSDCut_NEL[ch]->GetEntry()->GetIntNumber();
+	TheSettings->ChTriggerConfig[ch] = DGChTriggerConfig_CBL[ch]->GetComboBox()->GetSelected();
+	TheSettings->ChTriggerValidation[ch] = DGChTriggerValidation_NEL[ch]->GetEntry()->GetIntNumber();
+	TheSettings->ChShortGate[ch] = DGChShortGate_NEL[ch]->GetEntry()->GetIntNumber();
+	TheSettings->ChLongGate[ch] = DGChLongGate_NEL[ch]->GetEntry()->GetIntNumber();
+	TheSettings->ChPreTrigger[ch] = DGChPreTrigger_NEL[ch]->GetEntry()->GetIntNumber();
+	TheSettings->ChGateOffset[ch] = DGChGateOffset_NEL[ch]->GetEntry()->GetIntNumber();
       }
     }
+  
+    TheSettings->HorizontalSliderPtr = DisplayHorizontalScale_THS->GetPointerPosition();
+  
+    Float_t Min = 0., Max = 0.;
+  
+    DisplayHorizontalScale_THS->GetPosition(Min, Max);
+    TheSettings->HorizontalSliderMin = Min;
+    TheSettings->HorizontalSliderMax = Max;
+  
+    DisplayVerticalScale_DVS->GetPosition(Min, Max);
+    TheSettings->VerticalSliderMin = Min;
+    TheSettings->VerticalSliderMax = Max;
 
-    TheSettings->WaveformMode = AQWaveform_RB->IsDisabledAndSelected();
-    TheSettings->SpectrumMode = AQSpectrum_RB->IsDisabledAndSelected();
-    TheSettings->PSDMode = AQPSDHistogram_RB->IsDisabledAndSelected();
+    //////////////////////////
+    // Data acquisition subtab
 
-    TheSettings->TriggerCoincidenceEnable = DGTriggerCoincidenceEnable_CB->IsDisabledAndSelected();
+    // Scope display
+    TheSettings->WaveformMode = AQWaveform_RB->IsDown();
+    TheSettings->SpectrumMode = AQSpectrum_RB->IsDown();
+    TheSettings->PSDMode = AQPSDHistogram_RB->IsDown();
+    
+    // Trigger control settings
+    TheSettings->TriggerType = DGTriggerType_CBL->GetComboBox()->GetSelected();
+    TheSettings->TriggerTypeName = DGTriggerType_CBL->GetComboBox()->GetSelectedEntry()->GetTitle();
 
-    if(DGPSDFW_RB->IsDown()){
-      TheSettings->PSDMode = AQPSDHistogram_RB->IsDisabledAndSelected();
-      TheSettings->PSDListAnalysis = DGPSDListAnalysis_RB->IsDisabledAndSelected();
-      TheSettings->PSDWaveformAnalysis = DGPSDWaveformAnalysis_RB->IsDisabledAndSelected();
+    if(DGStandardFW_RB->IsDown()){
+      TheSettings->TriggerEdge = DGTriggerEdge_CBL->GetComboBox()->GetSelected();
+      TheSettings->TriggerEdgeName = DGTriggerEdge_CBL->GetComboBox()->GetSelectedEntry()->GetTitle();
     }
+    else if(DGPSDFW_RB->IsDown()){
+      TheSettings->PSDTriggerHoldoff = DGPSDTriggerHoldoff_NEL->GetEntry()->GetIntNumber();
+    }
+  
+    TheSettings->TriggerCoincidenceEnable = DGTriggerCoincidenceEnable_CB->IsDown();
+    TheSettings->TriggerCoincidenceLevel = DGTriggerCoincidenceLevel_CBL->GetComboBox()->GetSelected();
 
-    TheSettings->DataReductionEnable = AQDataReductionEnable_CB->IsDisabledAndSelected();
-    TheSettings->ZeroSuppressionEnable = DGZLEEnable_CB->IsDisabledAndSelected();
+    // Acquisition
+    TheSettings->AcquisitionControl = DGAcquisitionControl_CBL->GetComboBox()->GetSelected();
+    TheSettings->AcquisitionControlName = DGAcquisitionControl_CBL->GetComboBox()->GetSelectedEntry()->GetTitle();
 
-    TheSettings->SpectrumPulseHeight = SpectrumPulseHeight_RB->IsDisabledAndSelected();
-    TheSettings->SpectrumPulseArea = SpectrumPulseArea_RB->IsDisabledAndSelected();
+    if(DGStandardFW_RB->IsDown()){
+      TheSettings->RecordLength = DGRecordLength_NEL->GetEntry()->GetIntNumber();
+      TheSettings->PostTrigger = DGPostTrigger_NEL->GetEntry()->GetIntNumber();
+    }
+    else{
+      TheSettings->PSDOperationMode = DGPSDMode_CBL->GetComboBox()->GetSelected();
+      TheSettings->PSDListAnalysis = DGPSDListAnalysis_RB->IsDown();
+      TheSettings->PSDWaveformAnalysis = DGPSDWaveformAnalysis_RB->IsDown();
+    }
+  
+    TheSettings->AcquisitionTime = AQTime_NEL->GetEntry()->GetIntNumber();
+
+    // Readout
+    TheSettings->EventsBeforeReadout = DGEventsBeforeReadout_NEL->GetEntry()->GetIntNumber();
+    TheSettings->DataReductionEnable = AQDataReductionEnable_CB->IsDown();
+    TheSettings->DataReductionFactor = AQDataReductionFactor_NEL->GetEntry()->GetIntNumber();
+    TheSettings->ZeroSuppressionEnable = DGZLEEnable_CB->IsDown();
+
+
+    ///////////////////////
+    // Pulse spectra subtab
+
+    TheSettings->SpectrumChannel = SpectrumChannel_CBL->GetComboBox()->GetSelected();
+    TheSettings->SpectrumNumBins = SpectrumNumBins_NEL->GetEntry()->GetIntNumber();
+    TheSettings->SpectrumMinBin = SpectrumMinBin_NEL->GetEntry()->GetNumber();
+    TheSettings->SpectrumMaxBin = SpectrumMaxBin_NEL->GetEntry()->GetNumber();
+
+    TheSettings->SpectrumPulseHeight = SpectrumPulseHeight_RB->IsDown();
+    TheSettings->SpectrumPulseArea = SpectrumPulseArea_RB->IsDown();
+
     TheSettings->LDEnable = SpectrumLDEnable_CB->IsDown();
-    TheSettings->LDTrigger = SpectrumLDTrigger_CB->IsDisabledAndSelected();
+    TheSettings->SpectrumLLD = SpectrumLLD_NEL->GetEntry()->GetIntNumber();
+    TheSettings->SpectrumULD = SpectrumULD_NEL->GetEntry()->GetIntNumber();
+    TheSettings->LDTrigger = SpectrumLDTrigger_CB->IsDown();
 
-    TheSettings->PSDYAxisTail = PSDYAxisTail_RB->IsDisabledAndSelected();
-    TheSettings->PSDYAxisTailTotal = PSDYAxisTailTotal_RB->IsDisabledAndSelected();
+    TheSettings->LDChannel = SpectrumLDTriggerChannel_CBL->GetComboBox()->GetSelected();
+  
+    TheSettings->SpectrumCalibrationEnable = SpectrumCalibration_CB->IsDown();
+    TheSettings->SpectrumCalibrationUseSlider = SpectrumUseCalibrationSlider_CB->IsDown();
+    TheSettings->SpectrumCalibrationUnit = SpectrumCalibrationUnit_CBL->GetComboBox()->GetSelectedEntry()->GetTitle();
 
-    TheSettings->WaveformStoreRaw = WaveformStoreRaw_CB->IsDisabledAndSelected();
-    TheSettings->WaveformStoreEnergyData = WaveformStoreEnergyData_CB->IsDisabledAndSelected();
-    TheSettings->WaveformStorePSDData = WaveformStorePSDData_CB->IsDisabledAndSelected();
 
-    TheSettings->DisplayContinuous = DisplayContinuous_RB->IsDisabledAndSelected();
-    TheSettings->DisplayUpdateable = DisplayUpdateable_RB->IsDisabledAndSelected();
-    TheSettings->DisplayNonUpdateable = DisplayNonUpdateable_RB->IsDisabledAndSelected();
+    //////////////////////////////
+    // Pulse discrimination subtab 
+
+    TheSettings->PSDChannel = PSDChannel_CBL->GetComboBox()->GetSelected();
+    TheSettings->PSDYAxisTail = PSDYAxisTail_RB->IsDown();
+    TheSettings->PSDYAxisTailTotal = PSDYAxisTailTotal_RB->IsDown();
+    TheSettings->PSDThreshold = PSDThreshold_NEL->GetEntry()->GetNumber();
+    TheSettings->PSDTotalBins = PSDTotalBins_NEL->GetEntry()->GetNumber();
+    TheSettings->PSDTotalMinBin = PSDTotalMinBin_NEL->GetEntry()->GetNumber();
+    TheSettings->PSDTotalMaxBin = PSDTotalMaxBin_NEL->GetEntry()->GetNumber();
+    TheSettings->PSDTailBins = PSDTailBins_NEL->GetEntry()->GetNumber();
+    TheSettings->PSDTailMinBin = PSDTailMinBin_NEL->GetEntry()->GetNumber();
+    TheSettings->PSDTailMaxBin = PSDTailMaxBin_NEL->GetEntry()->GetNumber();
+
+
+    //////////////////////////
+    // Display graphics subtab
+
+    TheSettings->DisplayTitlesEnable = DisplayTitlesEnable_CB->IsDown();
+
+    TheSettings->DisplayTitle = DisplayTitle_TEL->GetEntry()->GetText();
+
+    TheSettings->DisplayXTitle = DisplayXTitle_TEL->GetEntry()->GetText();
+    TheSettings->DisplayXTitleSize = DisplayXTitleSize_NEL->GetEntry()->GetNumber();
+    TheSettings->DisplayXTitleOffset = DisplayXTitleOffset_NEL->GetEntry()->GetNumber();
+
+    TheSettings->DisplayYTitle = DisplayYTitle_TEL->GetEntry()->GetText();
+    TheSettings->DisplayYTitleSize = DisplayYTitleSize_NEL->GetEntry()->GetNumber();
+    TheSettings->DisplayYTitleOffset = DisplayYTitleOffset_NEL->GetEntry()->GetNumber();
+	
+    TheSettings->DisplayTrigger = DisplayTrigger_CB->IsDown();
+    TheSettings->DisplayBaselineBox = DisplayBaselineBox_CB->IsDown();
+    TheSettings->DisplayPSDLimits = DisplayPSDLimits_CB->IsDown();
+    TheSettings->DisplayZLEThreshold = DisplayZLEThreshold_CB->IsDown();
+    TheSettings->DisplayLegend = DisplayLegend_CB->IsDown();
+    TheSettings->DisplayGrid = DisplayGrid_CB->IsDown();
+    TheSettings->DisplayXAxisInLog = DisplayXAxisLog_CB->IsDown();
+    TheSettings->DisplayYAxisInLog = DisplayYAxisLog_CB->IsDown();
+  
+    TheSettings->WaveformWithLine = DrawWaveformWithLine_RB->IsDown();
+    TheSettings->WaveformWithMarkers = DrawWaveformWithMarkers_RB->IsDown();
+    TheSettings->WaveformWithBoth = DrawWaveformWithBoth_RB->IsDown();
+  
+    TheSettings->SpectrumWithLine = DrawSpectrumWithLine_RB->IsDown();
+    TheSettings->SpectrumWithMarkers = DrawSpectrumWithMarkers_RB->IsDown();
+    TheSettings->SpectrumWithBars = DrawSpectrumWithBars_RB->IsDown();
+  
+    TheSettings->SpectrumRefreshRate = SpectrumRefreshRate_NEL->GetEntry()->GetIntNumber();
+
+    TheSettings->DisplayContinuous = DisplayContinuous_RB->IsDown();
+    TheSettings->DisplayUpdateable = DisplayUpdateable_RB->IsDown();
+    TheSettings->DisplayNonUpdateable = DisplayNonUpdateable_RB->IsDown();
+  
+
+    ////////////////////////////
+    // Persistent storage subtab
+
+    TheSettings->WaveformStorageEnable = WaveformStorageEnable_CB->IsDown();
+    TheSettings->WaveformStoreRaw = WaveformStoreRaw_CB->IsDown();
+    TheSettings->WaveformStoreEnergyData = WaveformStoreEnergyData_CB->IsDown();
+    TheSettings->WaveformStorePSDData= WaveformStorePSDData_CB->IsDown();
+
+    TheSettings->ObjectSaveWithTimeExtension = ObjectSaveWithTimeExtension_CB->IsDown();
+    TheSettings->CanvasSaveWithTimeExtension = CanvasSaveWithTimeExtension_CB->IsDown();
+
+    ///////////////////////////////
+    // Acquisition disabled widgets
+
+    // Because of the frustrating way ROOT implements button behavior,
+    // buttons that are intentionally disabled while acquisition is on
+    // (to prevent the user from changing settings during acquisition)
+    // must be tested for the special disabled-and-selected
+    // enumerator. This is necessary since widgets that are activated
+    // during acquisition will call this method and, unless the
+    // following value readouts are performed, the settings for the
+    // disabled will be wrong. This results in bad and unexpected
+    // behavior. Thus, we must ensure that all of the following buttons
+    // are disabled during acquisition!
+
+    Bool_t AcquisitionOn = AAAcquisitionManager::GetInstance()->GetAcquisitionEnable();
+
+    if(AcquisitionOn){
+      for(Int_t ch=0; ch<NumDGChannels; ch++){
+	TheSettings->ChEnable[ch] = DGChEnable_CB[ch]->IsDisabledAndSelected();
+	TheSettings->ChPosPolarity[ch] = DGChPosPolarity_RB[ch]->IsDisabledAndSelected();
+	TheSettings->ChNegPolarity[ch] = DGChNegPolarity_RB[ch]->IsDisabledAndSelected();
+	if(DGStandardFW_RB->IsDown()){
+	  TheSettings->ChZLEPosLogic[ch] = DGChZLEPosLogic_RB[ch]->IsDisabledAndSelected();
+	  TheSettings->ChZLENegLogic[ch] = DGChZLENegLogic_RB[ch]->IsDisabledAndSelected();
+	}
+	else if(DGPSDFW_RB->IsDown()){
+	}
+      }
+
+      TheSettings->WaveformMode = AQWaveform_RB->IsDisabledAndSelected();
+      TheSettings->SpectrumMode = AQSpectrum_RB->IsDisabledAndSelected();
+      TheSettings->PSDMode = AQPSDHistogram_RB->IsDisabledAndSelected();
+
+      TheSettings->TriggerCoincidenceEnable = DGTriggerCoincidenceEnable_CB->IsDisabledAndSelected();
+
+      if(DGPSDFW_RB->IsDown()){
+	TheSettings->PSDMode = AQPSDHistogram_RB->IsDisabledAndSelected();
+	TheSettings->PSDListAnalysis = DGPSDListAnalysis_RB->IsDisabledAndSelected();
+	TheSettings->PSDWaveformAnalysis = DGPSDWaveformAnalysis_RB->IsDisabledAndSelected();
+      }
+
+      TheSettings->DataReductionEnable = AQDataReductionEnable_CB->IsDisabledAndSelected();
+      TheSettings->ZeroSuppressionEnable = DGZLEEnable_CB->IsDisabledAndSelected();
+
+      TheSettings->SpectrumPulseHeight = SpectrumPulseHeight_RB->IsDisabledAndSelected();
+      TheSettings->SpectrumPulseArea = SpectrumPulseArea_RB->IsDisabledAndSelected();
+      TheSettings->LDEnable = SpectrumLDEnable_CB->IsDown();
+      TheSettings->LDTrigger = SpectrumLDTrigger_CB->IsDisabledAndSelected();
+
+      TheSettings->PSDYAxisTail = PSDYAxisTail_RB->IsDisabledAndSelected();
+      TheSettings->PSDYAxisTailTotal = PSDYAxisTailTotal_RB->IsDisabledAndSelected();
+
+      TheSettings->WaveformStoreRaw = WaveformStoreRaw_CB->IsDisabledAndSelected();
+      TheSettings->WaveformStoreEnergyData = WaveformStoreEnergyData_CB->IsDisabledAndSelected();
+      TheSettings->WaveformStorePSDData = WaveformStorePSDData_CB->IsDisabledAndSelected();
+
+      TheSettings->DisplayContinuous = DisplayContinuous_RB->IsDisabledAndSelected();
+      TheSettings->DisplayUpdateable = DisplayUpdateable_RB->IsDisabledAndSelected();
+      TheSettings->DisplayNonUpdateable = DisplayNonUpdateable_RB->IsDisabledAndSelected();
+    }
   }
 }
 
@@ -2873,8 +2886,8 @@ void AAInterface::SaveActiveSettings()
 
 void AAInterface::SaveSettingsToFile()
 {
-  if(!InterfaceBuildComplete)
-    return;
+  //  if(!InterfaceBuildComplete)
+  //    return;
   
   // Save all interface settings to the AASettings object
   SaveSettings();
@@ -2934,7 +2947,7 @@ void AAInterface::LoadSettingsFromFile()
     else{
       BoardEnable_TB[board]->SetText("Board disabled");
       BoardEnable_TB[board]->SetBackgroundColor(ColorManager->Number2Pixel(ButtonBackColorOff));
-      BoardEnable_TB[board]->SetForegroundColor(ColorManager->Number2Pixel(kBlack));
+      BoardEnable_TB[board]->SetForegroundColor(ColorManager->Number2Pixel(kWhite));
       BoardEnable_TB[board]->ChangeOptions(BoardEnable_TB[board]->GetOptions() | kFixedSize);
     }
   }

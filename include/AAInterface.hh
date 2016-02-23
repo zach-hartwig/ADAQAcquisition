@@ -111,7 +111,7 @@ private:
 
   // File name for settings storage
   string SettingsFileName;
-  
+
   // Variables for use with high voltage widgets
   vector<string> HVChLabels;
   vector<int> HVChPower_TB_ID_Vec;
@@ -134,12 +134,15 @@ private:
 
   // Object to convert numeric color to pixel color
   TColor *ColorManager;
+  
+  // Variables for handling boards/devices
+  const Int_t NumBoards;
+  enum{zBR, zDG, zHV};
 
-    // IDs for each module
-  enum{V1718, V1720, V6534};
-
+  // Class to hold all interface widget settings
   AASettings *TheSettings;
 
+  // "Slot" classes for handling widget signals
   AAChannelSlots *ChannelSlots;
   AADisplaySlots *DisplaySlots;
   AASubtabSlots *SubtabSlots;
