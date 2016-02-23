@@ -2932,11 +2932,11 @@ void AAInterface::LoadSettingsFromFile()
 
   for(Int_t board=0; board<3; board++){
     BoardType_CBL[board]->GetComboBox()->Select(TheSettings->BoardType[board]);
-
+    
     if(board != 0)
       BoardAddress_NEF[board]->GetEntry()->SetHexNumber(TheSettings->BoardAddress[board]);
     
-    BoardLinkNumber_NEL[board]->GetEntry()->SetIntNumber(TheSettings->BoardType[board]);
+    BoardLinkNumber_NEL[board]->GetEntry()->SetIntNumber(TheSettings->BoardLinkNumber[board]);
     
     if(TheSettings->BoardEnable[board]){
       BoardEnable_TB[board]->SetText("Board enabled");
