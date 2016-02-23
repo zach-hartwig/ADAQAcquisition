@@ -45,14 +45,14 @@ void AATabSlots::HandleSettingsTextButtons()
   int TextButtonID = TextButton->WidgetId();
 
   switch(TextButtonID){
-
+    
   case SetSettingsFileName_TB_ID:{
-
+    
     const char *FileTypes[] = {"Settings file", "*.acq.root",
 			       0, 0};
     
     string SettingsFileName = TI->CreateFileDialog(FileTypes, kFDOpen);
-
+    
     if(SettingsFileName == "NULL"){
     }
     else{
@@ -63,6 +63,7 @@ void AATabSlots::HandleSettingsTextButtons()
 	FileNameNoPath = FileNameNoPath.substr(Found+1, FileNameNoPath.size());
       
       TI->SettingsFileName_TEL->GetEntry()->SetText(FileNameNoPath.c_str());
+      TI->SettingsFileName = SettingsFileName;
     }
   }
     break;
