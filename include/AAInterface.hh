@@ -106,11 +106,15 @@ private:
   Bool_t InterfaceBuildComplete;
   
   // Dimensions for interface window
-  int DisplayWidth, DisplayHeight;
-  int ButtonForeColor, ButtonBackColorOn, ButtonBackColorOff;
-
+  Int_t DisplayWidth, DisplayHeight;
+  Int_t ButtonForeColor, ButtonBackColorOn, ButtonBackColorOff;
+  
   // File name for settings storage
   string SettingsFileName;
+  Bool_t AutoSaveSettings, AutoLoadSettings;
+  
+  // Class to hold all interface widget settings
+  AASettings *TheSettings;
 
   // Variables for use with high voltage widgets
   vector<string> HVChLabels;
@@ -138,9 +142,6 @@ private:
   // Variables for handling boards/devices
   const Int_t NumBoards;
   enum{zBR, zDG, zHV};
-
-  // Class to hold all interface widget settings
-  AASettings *TheSettings;
 
   // "Slot" classes for handling widget signals
   AAChannelSlots *ChannelSlots;

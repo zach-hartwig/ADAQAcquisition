@@ -63,6 +63,7 @@ AAInterface::AAInterface()
     DisplayWidth(1121), DisplayHeight(833), 
     ButtonForeColor(kWhite), ButtonBackColorOn(kGreen-5), ButtonBackColorOff(kRed-3),
     SettingsFileName("ADAQAcquisition.cfg.root"),
+    AutoSaveSettings(false), AutoLoadSettings(false),
     NumBoards(3),
     ColorManager(new TColor)
 {
@@ -2871,6 +2872,9 @@ void AAInterface::SaveSettings()
       TheSettings->DisplayNonUpdateable = DisplayNonUpdateable_RB->IsDisabledAndSelected();
     }
   }
+  
+  if(AutoSaveSettings)
+    SaveSettingsToFile();
 }
 
 
