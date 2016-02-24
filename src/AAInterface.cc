@@ -62,7 +62,7 @@ AAInterface::AAInterface(Bool_t ALS, string SFN)
     InterfaceBuildComplete(false),
     DisplayWidth(1121), DisplayHeight(833), 
     ButtonForeColor(kWhite), ButtonBackColorOn(kGreen-5), ButtonBackColorOff(kRed-3),
-    SettingsFileName("Default.acq.root"),
+    SettingsFileName("DefaultSettings.acq.root"),
     AutoSaveSettings(false), AutoLoadSettings(false),
     NumBoards(3),
     ColorManager(new TColor)
@@ -159,10 +159,10 @@ void AAInterface::BuildSecondaryFrames()
   AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
   AAAcquisitionManager *TheACQManager = AAAcquisitionManager::GetInstance();
   AAGraphics *TheGRPManager = AAGraphics::GetInstance();
-
+  
   // Fill the secondary frames depending on the established links to
   // the to the requested devices
-  
+
   FillRegisterFrame();
 
   Int_t NumHVChannels = 0, NumDGChannels = 0;
@@ -189,12 +189,12 @@ void AAInterface::BuildSecondaryFrames()
   
   TheSettings = new AASettings(NumHVChannels, NumDGChannels);
   
-
   // Pass the settings pointer to the managers
   TheVMEManager->SetSettingsPointer(TheSettings);
   TheACQManager->SetSettingsPointer(TheSettings);
   TheGRPManager->SetSettingsPointer(TheSettings);
 
+  
   // Set the boolean to register that the GUI build is complete
   InterfaceBuildComplete = true;
   
@@ -2936,7 +2936,7 @@ void AAInterface::LoadSettingsFromFile()
     AutoSaveSettings_CB->SetState(kButtonDown);
   else
     AutoSaveSettings_CB->SetState(kButtonUp);
-
+  
   
   ////////////////////
   // Connection tab //
@@ -2972,7 +2972,7 @@ void AAInterface::LoadSettingsFromFile()
     DGStandardFW_RB->SetState(kButtonUp);
     DGPSDFW_RB->SetState(kButtonDown);
   }
-  
+
   if(!InterfaceBuildComplete)
     return;
   
@@ -3112,12 +3112,12 @@ void AAInterface::LoadSettingsFromFile()
     DGZLEEnable_CB->SetState(kButtonDown);
   else
     DGZLEEnable_CB->SetState(kButtonUp);
-  
 
   ////////////////
   // Pulse spectra
 
-  SpectrumChannel_CBL->GetComboBox()->Select(TheSettings->SpectrumChannel);
+  SpectrumChannel_CBL->GetComboBox()->Select(TheSettings->SpectrumChannel,false);
+
   SpectrumNumBins_NEL->GetEntry()->SetIntNumber(TheSettings->SpectrumNumBins);
   SpectrumMinBin_NEL->GetEntry()->SetNumber(TheSettings->SpectrumMinBin);
   SpectrumMaxBin_NEL->GetEntry()->SetNumber(TheSettings->SpectrumMaxBin);
@@ -3143,9 +3143,9 @@ void AAInterface::LoadSettingsFromFile()
     SpectrumLDTrigger_CB->SetState(kButtonDown);
   else
     SpectrumLDTrigger_CB->SetState(kButtonUp);
-      
-  SpectrumLDTriggerChannel_CBL->GetComboBox()->Select(TheSettings->LDChannel);
-  
+
+  SpectrumLDTriggerChannel_CBL->GetComboBox()->Select(TheSettings->LDChannel, false);
+
   if(TheSettings->SpectrumCalibrationEnable)
     SpectrumCalibration_CB->SetState(kButtonDown);
   else
@@ -3161,7 +3161,7 @@ void AAInterface::LoadSettingsFromFile()
   ///////////////////////
   // Pulse discrimination
 
-  PSDChannel_CBL->GetComboBox()->Select(TheSettings->PSDChannel);
+  PSDChannel_CBL->GetComboBox()->Select(TheSettings->PSDChannel, false);
 
   if(TheSettings->PSDYAxisTail){
     PSDYAxisTail_RB->SetState(kButtonDown);

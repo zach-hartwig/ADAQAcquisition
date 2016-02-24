@@ -92,7 +92,7 @@ void AATabSlots::HandleConnectionTextButtons()
   enum{BR, DG, HV};
   
   // Temporarily redirect the std::cout messages to a local buffer
-  streambuf* StandardBuffer = cout.rdbuf();
+  streambuf *StandardBuffer = cout.rdbuf();
   ostringstream NewBuffer;
   cout.rdbuf( NewBuffer.rdbuf() );
   
@@ -103,7 +103,7 @@ void AATabSlots::HandleConnectionTextButtons()
 
     // If no connection is presently established...
     if(!TheVMEManager->GetVMEConnectionEstablished()){
-      
+
       Int_t DGLinkOpen = -42;
       if(TI->BoardEnable_TB[DG]->GetString() == "Board enabled"){
 	
@@ -152,11 +152,11 @@ void AATabSlots::HandleConnectionTextButtons()
       }
       
       if(BRLinkOpen == 0 or DGLinkOpen == 0 or HVLinkOpen == 0){
-	
+
 	TheVMEManager->SetVMEConnectionEstablished(true);
-	
+
 	TI->BuildSecondaryFrames();
-	
+
 	AAAcquisitionManager::GetInstance()->Initialize();
 
 	TI->VMEConnect_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOn));
