@@ -83,9 +83,9 @@ AAInterface::AAInterface(Bool_t ALS, string SFN)
   // Pass a pointer to this class instance to the acquisition manager
   // so that the GUI can be accessed from there
   AAAcquisitionManager::GetInstance()->SetInterfacePointer(this);
-
+  
   BuildPrimaryFrames();
-
+  
   // If the user has specified an ADAQAcquisition settings file as the
   // first cmd line arg then enable auto load and set the file name
   
@@ -2907,17 +2907,12 @@ void AAInterface::SaveActiveSettings()
 
 void AAInterface::SaveSettingsToFile()
 {
-  //  if(!InterfaceBuildComplete)
-  //    return;
-  
   // Save all interface settings to the AASettings object
   SaveSettings();
   
   // Write the AASettings object to the settings ROOT file
   TFile *SettingsFile = new TFile(SettingsFileName.c_str(), "recreate");
-
-  //AASettings *InterfaceSettings = (AASettings *)TheSettings->Clone("InterfaceSettings");
-
+  
   TheSettings->Write("TheSettings");
   SettingsFile->Close();
 }

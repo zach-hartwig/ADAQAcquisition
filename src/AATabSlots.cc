@@ -87,10 +87,8 @@ void AATabSlots::HandleConnectionTextButtons()
   TGTextButton *TextButton = (TGTextButton *) gTQSender;
   int TextButtonID = TextButton->WidgetId();
 
-  // TI->SaveSettings();
-
   AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
-  
+
   enum{BR, DG, HV};
   
   // Temporarily redirect the std::cout messages to a local buffer
@@ -108,11 +106,11 @@ void AATabSlots::HandleConnectionTextButtons()
       
       Int_t DGLinkOpen = -42;
       if(TI->BoardEnable_TB[DG]->GetString() == "Board enabled"){
-
+	
 	uint32_t Addr = TI->BoardAddress_NEF[DG]->GetEntry()->GetHexNumber();
 	int Link = TI->BoardLinkNumber_NEL[DG]->GetEntry()->GetIntNumber();
 	ZBoardType Type = (ZBoardType)TI->BoardType_CBL[DG]->GetComboBox()->GetSelected();
-
+	
 	TheVMEManager->SetDGEnable(true);
 	TheVMEManager->SetDGType(Type);
 	TheVMEManager->SetDGAddress(Addr);
@@ -156,7 +154,7 @@ void AATabSlots::HandleConnectionTextButtons()
       if(BRLinkOpen == 0 or DGLinkOpen == 0 or HVLinkOpen == 0){
 	
 	TheVMEManager->SetVMEConnectionEstablished(true);
-
+	
 	TI->BuildSecondaryFrames();
 	
 	AAAcquisitionManager::GetInstance()->Initialize();

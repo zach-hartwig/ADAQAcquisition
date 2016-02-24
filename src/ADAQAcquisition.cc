@@ -50,9 +50,9 @@ Int_t main(Int_t argc, char **argv)
   
   // Run ROOT in standalone mode
   TApplication *TheApplication = new TApplication("ADAQAcquisition", &argc, argv);
-
+  
   // Create the various singleton manager classes. 
-
+  
   AAVMEManager *TheVMEManager = new AAVMEManager;
 
   AAAcquisitionManager *TheACQManager = new AAAcquisitionManager;

@@ -75,12 +75,12 @@ void AASubtabSlots::HandleCheckButtons()
 
 void AASubtabSlots::HandleComboBoxes(int ActiveID, int SelectedID)
 {
-  TI->SaveSettings();
-  
   AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
   
   if(!TheVMEManager->GetVMEConnectionEstablished())
     return;
+  
+  TI->SaveSettings();
   
   switch(ActiveID){
     
@@ -197,8 +197,6 @@ void AASubtabSlots::HandleNumberEntries()
     
   case SpectrumCalibrationEnergy_NEL_ID:
     break;
-
-
 
   case SpectrumCalibrationPulseUnit_NEL_ID:{
     double Value = 0.;
@@ -701,12 +699,13 @@ void AASubtabSlots::HandleRadioButtons()
     TI->DisplayHorizontalScale_THS->SetPosition(0,1);
     TI->DisplayVerticalScale_DVS->SetPosition(0,1);
     break;
-
+    
   case DGPSDListAnalysis_RB_ID:
-    if(TI->DGPSDListAnalysis_RB->IsDown())
+    if(TI->DGPSDListAnalysis_RB->IsDown() and
+       TI->DGPSDMode_CBL->GetComboBox()->GetSelected() != 1)
       TI->DGPSDWaveformAnalysis_RB->SetState(kButtonUp);
     break;
-
+    
   case DGPSDWaveformAnalysis_RB_ID:
     if(TI->DGPSDWaveformAnalysis_RB->IsDown())
       TI->DGPSDListAnalysis_RB->SetState(kButtonUp);

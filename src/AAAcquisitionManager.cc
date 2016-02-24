@@ -747,15 +747,24 @@ void AAAcquisitionManager::StartAcquisition()
 	    // Pulse area spectrum
 	    else{
 	      
-	      // Determine if the pulse area is within the acceptable
-	      // lower/upper-level discrimator range if the user has
-	      // specified this check on spectrum binning; otherwise,
-	      // simply bin the pulse area in the spectrum
+	      // If using the level discriminator, determine if the
+	      // pulse area is within the acceptable lower/upper-level
+	      // discrimator range 
 	      
 	      if(TheSettings->LDEnable){
 		if(PulseArea > LLD and PulseArea < ULD)
 		  Spectrum_H[ch]->Fill(PulseArea);
 	      }
+	      
+	      // If reading out waveforms with DPP-PSD in list mode,
+	      // the maxium useful value is 2**16-1; prevent filling
+	      // the Spectrum with these values
+	      
+	      else if(TheSettings->PSDListAnalysis){
+		if(PulseArea < pow(2,16)-1)
+		  Spectrum_H[ch]->Fill(PulseArea);
+	      }
+	      
 	      else
 		Spectrum_H[ch]->Fill(PulseArea);
 	      
@@ -788,6 +797,11 @@ void AAAcquisitionManager::StartAcquisition()
 	  // Skip this waveform if the pulse area/height does not fall
 	  // within the discrimnator window (LLD to ULD). 
 	  if(TheSettings->LDEnable and !FillWaveformTree)
+	    continue;
+	  
+	  // Skip this waveform if readout is using DPP-PSD list mode
+	  // and the pulse area is exceeds maximum useful value
+	  if(TheSettings->PSDListAnalysis and PulseArea > pow(2,16)-2)
 	    continue;
 	  
 	  // If the user has specified to store ANY data at all then
