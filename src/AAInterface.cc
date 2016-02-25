@@ -2581,6 +2581,17 @@ void AAInterface::SaveSettings()
 {
   AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
 
+  // If the "Save" settings text button is highlighted (indicating a
+  // settings save has occured at some point in the past) and the
+  // "auto save" check box is not checked then reset it since setting
+  // may have changed
+  if(SaveSettingsToFile_TB->GetString() == "Saved!" and
+     !AutoSaveSettings_CB->IsDown()){
+    SaveSettingsToFile_TB->SetText("Save");
+    SaveSettingsToFile_TB->SetForegroundColor(ColorManager->Number2Pixel(kBlack));
+    SaveSettingsToFile_TB->SetBackgroundColor(ColorManager->Number2Pixel(18));
+  }
+  
   // The "Settings" and "VMEConnection" widgets are built regardless
   // of program state so we can always save their state; however, the
   // AASettings object is DG and HV channel dependent, which is not
@@ -2645,9 +2656,9 @@ void AAInterface::SaveSettings()
   /////////////////////
 
   if(TheSettings->BoardEnable[zDG]){
-  
+    
     const Int_t NumDGChannels = TheVMEManager->GetDGManager()->GetNumChannels();
-  
+    
     // Acquisition channel 
     for(Int_t ch=0; ch<NumDGChannels; ch++){
       TheSettings->ChEnable[ch] = DGChEnable_CB[ch]->IsDown();
@@ -2927,7 +2938,7 @@ void AAInterface::LoadSettingsFromFile()
   // widgets; note that a new AASettings object named 'TheSettings' is
   // used here to prevent overwriting the class data member
   AASettings *TheSettings = (AASettings *)SettingsFile->Get("TheSettings");
-  
+
   //////////////////
   // Settings tab //
   //////////////////
@@ -2972,247 +2983,275 @@ void AAInterface::LoadSettingsFromFile()
     DGStandardFW_RB->SetState(kButtonUp);
     DGPSDFW_RB->SetState(kButtonDown);
   }
+  
+  // If the full interface (e.g. the secondary frames that are device
+  // specific) has not been built then return to prevent seg faults
 
   if(!InterfaceBuildComplete)
     return;
+
+  // Get the VME manager
+  AAVMEManager *VMEManager = AAVMEManager::GetInstance();
+
+
+  //////////////////////
+  // High voltage tab //
+  //////////////////////
+
+  size_t HVChSize = TheSettings->HVChVoltage.size();
+  
+  if(VMEManager->GetHVEnable() and HVChSize != 0){
+    const Int_t NumHVChannels = VMEManager->GetHVManager()->GetNumChannels();
+    
+    for(Int_t ch=0; ch<NumHVChannels; ch++){
+      // To be implemented
+    }
+  }
+
   
   /////////////////////
   // Acquisition tab //
   /////////////////////
   
-  // Channel-specific settings
-  
-  const Int_t NumDGChannels = AAVMEManager::GetInstance()->GetDGManager()->GetNumChannels();
-  
-  for(Int_t ch=0; ch<NumDGChannels; ch++){
-    
-    if(TheSettings->ChEnable[ch])
-      DGChEnable_CB[ch]->SetState(kButtonDown);
-    else
-      DGChEnable_CB[ch]->SetState(kButtonUp);
-    
-    if(TheSettings->ChPosPolarity[ch])
-      DGChPosPolarity_RB[ch]->SetState(kButtonDown);
-    else
-      DGChPosPolarity_RB[ch]->SetState(kButtonUp);
-    
-    if(TheSettings->ChNegPolarity[ch])
-      DGChNegPolarity_RB[ch]->SetState(kButtonDown);
-    else
-      DGChNegPolarity_RB[ch]->SetState(kButtonUp);
+  size_t DGChSize = TheSettings->ChEnable.size();
 
-    DGChDCOffset_NEL[ch]->GetEntry()->SetHexNumber(TheSettings->ChDCOffset[ch]);
-    DGChTriggerThreshold_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChTriggerThreshold[ch]);
-
-    if(TheSettings->STDFirmware){
-      DGChZLEThreshold_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChZLEThreshold[ch]);
-      DGChZLEForward_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChZLEForward[ch]);
-      DGChZLEBackward_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChZLEBackward[ch]);
-
-      if(TheSettings->ChZLEPosLogic[ch])
-	DGChZLEPosLogic_RB[ch]->SetState(kButtonDown);
-      else
-	DGChZLEPosLogic_RB[ch]->SetState(kButtonUp);
+  if(VMEManager->GetDGEnable() and DGChSize != 0){
+    
+    // Channel-specific settings
+    
+    const Int_t NumDGChannels = AAVMEManager::GetInstance()->GetDGManager()->GetNumChannels();
+    
+    for(Int_t ch=0; ch<NumDGChannels; ch++){
       
-      if(TheSettings->ChZLENegLogic[ch])
-	DGChZLENegLogic_RB[ch]->SetState(kButtonDown);
+      if(TheSettings->ChEnable[ch])
+	DGChEnable_CB[ch]->SetState(kButtonDown);
       else
-	DGChZLENegLogic_RB[ch]->SetState(kButtonUp);
+	DGChEnable_CB[ch]->SetState(kButtonUp);
+    
+      if(TheSettings->ChPosPolarity[ch])
+	DGChPosPolarity_RB[ch]->SetState(kButtonDown);
+      else
+	DGChPosPolarity_RB[ch]->SetState(kButtonUp);
+    
+      if(TheSettings->ChNegPolarity[ch])
+	DGChNegPolarity_RB[ch]->SetState(kButtonDown);
+      else
+	DGChNegPolarity_RB[ch]->SetState(kButtonUp);
 
-      DGChBaselineCalcMin_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChBaselineCalcMin[ch]);
-      DGChBaselineCalcMax_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChBaselineCalcMax[ch]);
-      DGChPSDTotalStart_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChPSDTotalStart[ch]);
-      DGChPSDTotalStop_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChPSDTotalStop[ch]);
-      DGChPSDTailStart_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChPSDTailStart[ch]);
-      DGChPSDTailStop_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChPSDTotalStop[ch]);
+      DGChDCOffset_NEL[ch]->GetEntry()->SetHexNumber(TheSettings->ChDCOffset[ch]);
+      DGChTriggerThreshold_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChTriggerThreshold[ch]);
+
+      if(TheSettings->STDFirmware){
+	DGChZLEThreshold_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChZLEThreshold[ch]);
+	DGChZLEForward_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChZLEForward[ch]);
+	DGChZLEBackward_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChZLEBackward[ch]);
+
+	if(TheSettings->ChZLEPosLogic[ch])
+	  DGChZLEPosLogic_RB[ch]->SetState(kButtonDown);
+	else
+	  DGChZLEPosLogic_RB[ch]->SetState(kButtonUp);
+      
+	if(TheSettings->ChZLENegLogic[ch])
+	  DGChZLENegLogic_RB[ch]->SetState(kButtonDown);
+	else
+	  DGChZLENegLogic_RB[ch]->SetState(kButtonUp);
+
+	DGChBaselineCalcMin_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChBaselineCalcMin[ch]);
+	DGChBaselineCalcMax_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChBaselineCalcMax[ch]);
+	DGChPSDTotalStart_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChPSDTotalStart[ch]);
+	DGChPSDTotalStop_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChPSDTotalStop[ch]);
+	DGChPSDTailStart_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChPSDTailStart[ch]);
+	DGChPSDTailStop_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChPSDTotalStop[ch]);
+      }
+      else if(TheSettings->PSDFirmware){
+	DGChRecordLength_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChRecordLength[ch]);
+	DGChBaselineSamples_CBL[ch]->GetComboBox()->Select(TheSettings->ChBaselineSamples[ch]);
+	DGChChargeSensitivity_CBL[ch]->GetComboBox()->Select(TheSettings->ChChargeSensitivity[ch]);
+	DGChPSDCut_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChPSDCut[ch]);
+	DGChTriggerConfig_CBL[ch]->GetComboBox()->Select(TheSettings->ChTriggerConfig[ch]);
+	DGChTriggerValidation_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChTriggerValidation[ch]);
+	DGChShortGate_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChShortGate[ch]);
+	DGChLongGate_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChLongGate[ch]);
+	DGChPreTrigger_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChPreTrigger[ch]);
+	DGChGateOffset_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChGateOffset[ch]);
+      }
+    }
+  
+    // Acquisition display type
+
+    if(TheSettings->WaveformMode){
+      AQWaveform_RB->SetState(kButtonDown);
+      AQSpectrum_RB->SetState(kButtonUp);
+      AQPSDHistogram_RB->SetState(kButtonUp);
+    }
+    else if(TheSettings->SpectrumMode){
+      AQWaveform_RB->SetState(kButtonUp);
+      AQSpectrum_RB->SetState(kButtonDown);
+      AQPSDHistogram_RB->SetState(kButtonUp);
+    }
+    else if(TheSettings->PSDMode){
+      AQWaveform_RB->SetState(kButtonUp);
+      AQSpectrum_RB->SetState(kButtonUp);
+      AQPSDHistogram_RB->SetState(kButtonDown);
+    }
+
+    // Trigger control
+
+    DGTriggerType_CBL->GetComboBox()->Select(TheSettings->TriggerType);
+
+    if(TheSettings->STDFirmware)
+      DGTriggerEdge_CBL->GetComboBox()->Select(TheSettings->TriggerEdge);
+    else if(TheSettings->PSDFirmware)
+      DGPSDTriggerHoldoff_NEL->GetEntry()->SetIntNumber(TheSettings->PSDTriggerHoldoff);
+
+    if(TheSettings->TriggerCoincidenceEnable)
+      DGTriggerCoincidenceEnable_CB->SetState(kButtonDown);
+    else
+      DGTriggerCoincidenceEnable_CB->SetState(kButtonUp);
+
+    DGTriggerCoincidenceLevel_CBL->GetComboBox()->Select(TheSettings->TriggerCoincidenceLevel);
+
+    // Acquisition
+
+    DGAcquisitionControl_CBL->GetComboBox()->Select(TheSettings->AcquisitionControl);
+  
+    if(TheSettings->STDFirmware){
+      DGRecordLength_NEL->GetEntry()->SetIntNumber(TheSettings->RecordLength);
+      DGPostTrigger_NEL->GetEntry()->SetIntNumber(TheSettings->PostTrigger);
     }
     else if(TheSettings->PSDFirmware){
-      DGChRecordLength_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChRecordLength[ch]);
-      DGChBaselineSamples_CBL[ch]->GetComboBox()->Select(TheSettings->ChBaselineSamples[ch]);
-      DGChChargeSensitivity_CBL[ch]->GetComboBox()->Select(TheSettings->ChChargeSensitivity[ch]);
-      DGChPSDCut_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChPSDCut[ch]);
-      DGChTriggerConfig_CBL[ch]->GetComboBox()->Select(TheSettings->ChTriggerConfig[ch]);
-      DGChTriggerValidation_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChTriggerValidation[ch]);
-      DGChShortGate_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChShortGate[ch]);
-      DGChLongGate_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChLongGate[ch]);
-      DGChPreTrigger_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChPreTrigger[ch]);
-      DGChGateOffset_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChGateOffset[ch]);
-    }
-  }
-
-  // Acquisition display type
-
-  if(TheSettings->WaveformMode){
-    AQWaveform_RB->SetState(kButtonDown);
-    AQSpectrum_RB->SetState(kButtonUp);
-    AQPSDHistogram_RB->SetState(kButtonUp);
-  }
-  else if(TheSettings->SpectrumMode){
-    AQWaveform_RB->SetState(kButtonUp);
-    AQSpectrum_RB->SetState(kButtonDown);
-    AQPSDHistogram_RB->SetState(kButtonUp);
-  }
-  else if(TheSettings->PSDMode){
-    AQWaveform_RB->SetState(kButtonUp);
-    AQSpectrum_RB->SetState(kButtonUp);
-    AQPSDHistogram_RB->SetState(kButtonDown);
-  }
-
-  // Trigger control
-
-  DGTriggerType_CBL->GetComboBox()->Select(TheSettings->TriggerType);
-
-  if(TheSettings->STDFirmware)
-    DGTriggerEdge_CBL->GetComboBox()->Select(TheSettings->TriggerEdge);
-  else if(TheSettings->PSDFirmware)
-    DGPSDTriggerHoldoff_NEL->GetEntry()->SetIntNumber(TheSettings->PSDTriggerHoldoff);
-
-  if(TheSettings->TriggerCoincidenceEnable)
-    DGTriggerCoincidenceEnable_CB->SetState(kButtonDown);
-  else
-    DGTriggerCoincidenceEnable_CB->SetState(kButtonUp);
-
-  DGTriggerCoincidenceLevel_CBL->GetComboBox()->Select(TheSettings->TriggerCoincidenceLevel);
-
-  // Acquisition
-
-  DGAcquisitionControl_CBL->GetComboBox()->Select(TheSettings->AcquisitionControl);
-  
-  if(TheSettings->STDFirmware){
-    DGRecordLength_NEL->GetEntry()->SetIntNumber(TheSettings->RecordLength);
-    DGPostTrigger_NEL->GetEntry()->SetIntNumber(TheSettings->PostTrigger);
-  }
-  else if(TheSettings->PSDFirmware){
-    DGPSDMode_CBL->GetComboBox()->Select(TheSettings->PSDOperationMode);
+      DGPSDMode_CBL->GetComboBox()->Select(TheSettings->PSDOperationMode);
     
-    if(TheSettings->PSDListAnalysis){
-      DGPSDListAnalysis_RB->SetState(kButtonDown);
-      DGPSDWaveformAnalysis_RB->SetState(kButtonUp);
+      if(TheSettings->PSDListAnalysis){
+	DGPSDListAnalysis_RB->SetState(kButtonDown);
+	DGPSDWaveformAnalysis_RB->SetState(kButtonUp);
+      }
+      else{
+	DGPSDWaveformAnalysis_RB->SetState(kButtonUp);
+	DGPSDWaveformAnalysis_RB->SetState(kButtonDown);
+      }
+    }
+  
+    AQTime_NEL->GetEntry()->SetIntNumber(TheSettings->AcquisitionTime);
+
+    // Readout
+
+    DGEventsBeforeReadout_NEL->GetEntry()->SetIntNumber(TheSettings->EventsBeforeReadout);
+
+    if(TheSettings->DataReductionEnable)
+      AQDataReductionEnable_CB->SetState(kButtonDown);
+    else
+      AQDataReductionEnable_CB->SetState(kButtonUp);
+    
+    AQDataReductionFactor_NEL->GetEntry()->SetIntNumber(TheSettings->DataReductionFactor);
+
+    if(TheSettings->ZeroSuppressionEnable)
+      DGZLEEnable_CB->SetState(kButtonDown);
+    else
+      DGZLEEnable_CB->SetState(kButtonUp);
+
+    ////////////////
+    // Pulse spectra
+
+    SpectrumChannel_CBL->GetComboBox()->Select(TheSettings->SpectrumChannel,false);
+
+    SpectrumNumBins_NEL->GetEntry()->SetIntNumber(TheSettings->SpectrumNumBins);
+    SpectrumMinBin_NEL->GetEntry()->SetNumber(TheSettings->SpectrumMinBin);
+    SpectrumMaxBin_NEL->GetEntry()->SetNumber(TheSettings->SpectrumMaxBin);
+
+    if(TheSettings->SpectrumPulseHeight){
+      SpectrumPulseHeight_RB->SetState(kButtonDown);
+      SpectrumPulseArea_RB->SetState(kButtonUp);
     }
     else{
-      DGPSDWaveformAnalysis_RB->SetState(kButtonUp);
-      DGPSDWaveformAnalysis_RB->SetState(kButtonDown);
+      SpectrumPulseHeight_RB->SetState(kButtonUp);
+      SpectrumPulseArea_RB->SetState(kButtonDown);
     }
+  
+    if(TheSettings->LDEnable)
+      SpectrumLDEnable_CB->SetState(kButtonDown);
+    else
+      SpectrumLDEnable_CB->SetState(kButtonUp);
+  
+    SpectrumLLD_NEL->GetEntry()->SetIntNumber(TheSettings->SpectrumLLD);
+    SpectrumULD_NEL->GetEntry()->SetIntNumber(TheSettings->SpectrumULD);
+
+    if(TheSettings->LDTrigger)
+      SpectrumLDTrigger_CB->SetState(kButtonDown);
+    else
+      SpectrumLDTrigger_CB->SetState(kButtonUp);
+
+    SpectrumLDTriggerChannel_CBL->GetComboBox()->Select(TheSettings->LDChannel, false);
+
+    if(TheSettings->SpectrumCalibrationEnable)
+      SpectrumCalibration_CB->SetState(kButtonDown);
+    else
+      SpectrumCalibration_CB->SetState(kButtonUp);
+
+    if(TheSettings->SpectrumCalibrationUseSlider)
+      SpectrumUseCalibrationSlider_CB->SetState(kButtonDown);
+    else
+      SpectrumUseCalibrationSlider_CB->SetState(kButtonUp);
+
+    // TheSettings->SpectrumCalibrationUnit = SpectrumCalibrationUnit_CBL->GetComboBox()->GetSelectedEntry()->GetTitle();
+
+    ///////////////////////
+    // Pulse discrimination
+
+    PSDChannel_CBL->GetComboBox()->Select(TheSettings->PSDChannel, false);
+
+    if(TheSettings->PSDYAxisTail){
+      PSDYAxisTail_RB->SetState(kButtonDown);
+      PSDYAxisTailTotal_RB->SetState(kButtonUp);
+    }
+    else{
+      PSDYAxisTail_RB->SetState(kButtonUp);
+      PSDYAxisTailTotal_RB->SetState(kButtonDown);
+    }
+
+    PSDThreshold_NEL->GetEntry()->SetNumber(TheSettings->PSDThreshold);
+    PSDTotalBins_NEL->GetEntry()->SetNumber(TheSettings->PSDTotalBins);
+    PSDTotalMinBin_NEL->GetEntry()->SetNumber(TheSettings->PSDTotalMinBin);
+    PSDTotalMaxBin_NEL->GetEntry()->SetNumber(TheSettings->PSDTotalMaxBin);
+    PSDTailBins_NEL->GetEntry()->SetNumber(TheSettings->PSDTailBins);
+    PSDTailMinBin_NEL->GetEntry()->SetNumber(TheSettings->PSDTailMinBin);
+    PSDTailMaxBin_NEL->GetEntry()->SetNumber(TheSettings->PSDTailMaxBin);
+
+    /////////////////////
+    // Persistent storage
+  
+    if(TheSettings->WaveformStorageEnable)
+      WaveformStorageEnable_CB->SetState(kButtonDown);
+    else
+      WaveformStorageEnable_CB->SetState(kButtonUp);
+  
+    if(TheSettings->WaveformStoreRaw)
+      WaveformStoreRaw_CB->SetState(kButtonDown);
+    else
+      WaveformStoreRaw_CB->SetState(kButtonUp);
+
+    if(TheSettings->WaveformStoreEnergyData)
+      WaveformStoreEnergyData_CB->SetState(kButtonDown);
+    else
+      WaveformStoreEnergyData_CB->SetState(kButtonUp);
+
+    if(TheSettings->WaveformStorePSDData)
+      WaveformStorePSDData_CB->SetState(kButtonDown);
+    else
+      WaveformStorePSDData_CB->SetState(kButtonUp);
+
+    if(TheSettings->ObjectSaveWithTimeExtension)
+      ObjectSaveWithTimeExtension_CB->SetState(kButtonDown);
+    else
+      ObjectSaveWithTimeExtension_CB->SetState(kButtonUp);
+
+    if(TheSettings->CanvasSaveWithTimeExtension)
+      CanvasSaveWithTimeExtension_CB->SetState(kButtonDown);
+    else
+      CanvasSaveWithTimeExtension_CB->SetState(kButtonUp);
   }
-  
-  AQTime_NEL->GetEntry()->SetIntNumber(TheSettings->AcquisitionTime);
 
-  // Readout
-
-  DGEventsBeforeReadout_NEL->GetEntry()->SetIntNumber(TheSettings->EventsBeforeReadout);
-
-  if(TheSettings->DataReductionEnable)
-    AQDataReductionEnable_CB->SetState(kButtonDown);
-  else
-    AQDataReductionEnable_CB->SetState(kButtonUp);
-    
-  AQDataReductionFactor_NEL->GetEntry()->SetIntNumber(TheSettings->DataReductionFactor);
-
-  if(TheSettings->ZeroSuppressionEnable)
-    DGZLEEnable_CB->SetState(kButtonDown);
-  else
-    DGZLEEnable_CB->SetState(kButtonUp);
-
-  ////////////////
-  // Pulse spectra
-
-  SpectrumChannel_CBL->GetComboBox()->Select(TheSettings->SpectrumChannel,false);
-
-  SpectrumNumBins_NEL->GetEntry()->SetIntNumber(TheSettings->SpectrumNumBins);
-  SpectrumMinBin_NEL->GetEntry()->SetNumber(TheSettings->SpectrumMinBin);
-  SpectrumMaxBin_NEL->GetEntry()->SetNumber(TheSettings->SpectrumMaxBin);
-
-  if(TheSettings->SpectrumPulseHeight){
-    SpectrumPulseHeight_RB->SetState(kButtonDown);
-    SpectrumPulseArea_RB->SetState(kButtonUp);
-  }
-  else{
-    SpectrumPulseHeight_RB->SetState(kButtonUp);
-    SpectrumPulseArea_RB->SetState(kButtonDown);
-  }
-  
-  if(TheSettings->LDEnable)
-    SpectrumLDEnable_CB->SetState(kButtonDown);
-  else
-    SpectrumLDEnable_CB->SetState(kButtonUp);
-  
-  SpectrumLLD_NEL->GetEntry()->SetIntNumber(TheSettings->SpectrumLLD);
-  SpectrumULD_NEL->GetEntry()->SetIntNumber(TheSettings->SpectrumULD);
-
-  if(TheSettings->LDTrigger)
-    SpectrumLDTrigger_CB->SetState(kButtonDown);
-  else
-    SpectrumLDTrigger_CB->SetState(kButtonUp);
-
-  SpectrumLDTriggerChannel_CBL->GetComboBox()->Select(TheSettings->LDChannel, false);
-
-  if(TheSettings->SpectrumCalibrationEnable)
-    SpectrumCalibration_CB->SetState(kButtonDown);
-  else
-    SpectrumCalibration_CB->SetState(kButtonUp);
-
-  if(TheSettings->SpectrumCalibrationUseSlider)
-    SpectrumUseCalibrationSlider_CB->SetState(kButtonDown);
-  else
-    SpectrumUseCalibrationSlider_CB->SetState(kButtonUp);
-
-  // TheSettings->SpectrumCalibrationUnit = SpectrumCalibrationUnit_CBL->GetComboBox()->GetSelectedEntry()->GetTitle();
-
-  ///////////////////////
-  // Pulse discrimination
-
-  PSDChannel_CBL->GetComboBox()->Select(TheSettings->PSDChannel, false);
-
-  if(TheSettings->PSDYAxisTail){
-    PSDYAxisTail_RB->SetState(kButtonDown);
-    PSDYAxisTailTotal_RB->SetState(kButtonUp);
-  }
-  else{
-    PSDYAxisTail_RB->SetState(kButtonUp);
-    PSDYAxisTailTotal_RB->SetState(kButtonDown);
-  }
-
-  PSDThreshold_NEL->GetEntry()->SetNumber(TheSettings->PSDThreshold);
-  PSDTotalBins_NEL->GetEntry()->SetNumber(TheSettings->PSDTotalBins);
-  PSDTotalMinBin_NEL->GetEntry()->SetNumber(TheSettings->PSDTotalMinBin);
-  PSDTotalMaxBin_NEL->GetEntry()->SetNumber(TheSettings->PSDTotalMaxBin);
-  PSDTailBins_NEL->GetEntry()->SetNumber(TheSettings->PSDTailBins);
-  PSDTailMinBin_NEL->GetEntry()->SetNumber(TheSettings->PSDTailMinBin);
-  PSDTailMaxBin_NEL->GetEntry()->SetNumber(TheSettings->PSDTailMaxBin);
-
-  /////////////////////
-  // Persistent storage
-  
-  if(TheSettings->WaveformStorageEnable)
-    WaveformStorageEnable_CB->SetState(kButtonDown);
-  else
-    WaveformStorageEnable_CB->SetState(kButtonUp);
-  
-  if(TheSettings->WaveformStoreRaw)
-    WaveformStoreRaw_CB->SetState(kButtonDown);
-  else
-    WaveformStoreRaw_CB->SetState(kButtonUp);
-
-  if(TheSettings->WaveformStoreEnergyData)
-    WaveformStoreEnergyData_CB->SetState(kButtonDown);
-  else
-    WaveformStoreEnergyData_CB->SetState(kButtonUp);
-
-  if(TheSettings->WaveformStorePSDData)
-    WaveformStorePSDData_CB->SetState(kButtonDown);
-  else
-    WaveformStorePSDData_CB->SetState(kButtonUp);
-
-  if(TheSettings->ObjectSaveWithTimeExtension)
-    ObjectSaveWithTimeExtension_CB->SetState(kButtonDown);
-  else
-    ObjectSaveWithTimeExtension_CB->SetState(kButtonUp);
-
-  if(TheSettings->CanvasSaveWithTimeExtension)
-    CanvasSaveWithTimeExtension_CB->SetState(kButtonDown);
-  else
-    CanvasSaveWithTimeExtension_CB->SetState(kButtonUp);
-  
+  // Close the transient settings ROOT file
   SettingsFile->Close();
 }
 

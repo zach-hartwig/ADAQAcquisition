@@ -64,21 +64,34 @@ void AATabSlots::HandleSettingsTextButtons()
       
       TI->SettingsFileName_TEL->GetEntry()->SetText(FileNameNoPath.c_str());
       TI->SettingsFileName = SettingsFileName;
+
+      TI->SaveSettingsToFile_TB->SetText("Save");
+      TI->SaveSettingsToFile_TB->SetForegroundColor(TI->ColorManager->Number2Pixel(kBlack));
+      TI->SaveSettingsToFile_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(18));
+
+      TI->LoadSettingsFromFile_TB->SetText("Load");
+      TI->LoadSettingsFromFile_TB->SetForegroundColor(TI->ColorManager->Number2Pixel(kBlack));
+      TI->LoadSettingsFromFile_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(18));
     }
   }
     break;
     
   case SaveSettingsToFile_TB_ID:
     TI->SaveSettingsToFile();
+    TI->SaveSettingsToFile_TB->SetText("Saved!");
+    TI->SaveSettingsToFile_TB->SetForegroundColor(TI->ColorManager->Number2Pixel(kWhite));
+    TI->SaveSettingsToFile_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOn));
     break;
 
   case LoadSettingsFromFile_TB_ID:
     TI->LoadSettingsFromFile();
+    TI->LoadSettingsFromFile_TB->SetText("Loaded!");
+    TI->LoadSettingsFromFile_TB->SetForegroundColor(TI->ColorManager->Number2Pixel(kWhite));
+    TI->LoadSettingsFromFile_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOn));
     break;
     
   default:
     break;
-    
   }
 }
 

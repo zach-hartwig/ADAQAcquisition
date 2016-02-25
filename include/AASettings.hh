@@ -45,7 +45,7 @@ public:
     HVChCurrent.resize(DGChannels);
     
     // Digitizer channel settings
-
+    
     ChEnable.resize(DGChannels);
     ChPosPolarity.resize(DGChannels);
     ChNegPolarity.resize(DGChannels);
