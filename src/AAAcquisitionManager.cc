@@ -179,6 +179,9 @@ void AAAcquisitionManager::PrepareAcquisition()
   if(TheSettings->ZeroSuppressionEnable){
     Waveforms.clear();
     Waveforms.resize(NumDGChannels);
+
+    Waveforms4Storage.clear();
+    Waveforms4Storage.resize(NumDGChannels);
   }
   
   // Raw and data reduction waveforms : All digitizer channels (outer
@@ -188,6 +191,9 @@ void AAAcquisitionManager::PrepareAcquisition()
 
     Waveforms.clear();
     Waveforms.resize(NumDGChannels);
+
+    Waveforms4Storage.clear();
+    Waveforms4Storage.resize(NumDGChannels);
     
     for(Int_t ch=0; ch<NumDGChannels; ch++){
       
@@ -804,6 +810,25 @@ void AAAcquisitionManager::StartAcquisition()
 	  if(UsePSDFirmware and TheSettings->PSDListAnalysis)
 	    if(PulseArea > pow(2,16)-2)
 	      continue;
+
+	  // If storing raw waveforms to disk then copy the read out
+	  // waveforms vector ("Waveforms") to the vector whose
+	  // address is assigned to the waveforms branch in the ROOT
+	  // TTree in the ADAQ file ("Waveforms4Storage"). While this
+	  // is slightly inefficient (i.e. having two
+	  // vector-of-vectors with the same data), it enables the
+	  // user to analyze and view the waveforms without having to
+	  // store them to disk. I am making the assumption that if
+	  // the user is storing full waveforms then they understand
+	  // the throughput penalty necessary to do this. Thus, the
+	  // small amount of CPU time required for copying the vectors
+	  // should be negligible.
+	  
+	  if(TheSettings->WaveformStoreRaw){
+	    for(int ch=0; ch<DGManager->GetNumChannels(); ch++){
+	      Waveforms4Storage[ch] = Waveforms[ch];
+	    }
+	  }
 	  
 	  // If the user has specified to store ANY data at all then
 	  // fill the waveform tree via the readout manager
@@ -816,7 +841,7 @@ void AAAcquisitionManager::StartAcquisition()
 	  // should be used as the "trigger" for writing waveforms
 	  FillWaveformTree = false;
 	}
-
+	
 	/////////////////////////////////
 	// Post-readout waveform plotting
 	
@@ -1191,7 +1216,7 @@ void AAAcquisitionManager::CreateADAQFile(string FileName)
     // -A branch to store analyzed waveform data in 
     
     TheReadoutManager->CreateWaveformTreeBranches(ch, 
-						  &Waveforms[ch],
+						  &Waveforms4Storage[ch],
 						  WaveformData[ch]);
   }
   

@@ -186,7 +186,13 @@ private:
   
   ADAQReadoutManager *TheReadoutManager;
 #ifndef __CINT__
+  // Waveforms receives digitized waveform data during readout and is
+  // used for on-the-fly waveform analysis and graphing
   vector<vector<uint16_t> > Waveforms;
+  
+  // Waveforms4Storage has its addressed tied to the ROOT TTree in the
+  // ADAQ file for persistently storing waveforms to disk
+  vector<vector<uint16_t> > Waveforms4Storage;
 #endif
   vector<ADAQWaveformData *> WaveformData;
 };
