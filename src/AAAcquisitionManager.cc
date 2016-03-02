@@ -760,7 +760,7 @@ void AAAcquisitionManager::StartAcquisition()
 	      // the maxium useful value is 2**16-1; prevent filling
 	      // the Spectrum with these values
 	      
-	      else if(TheSettings->PSDListAnalysis){
+	      else if(UsePSDFirmware and TheSettings->PSDListAnalysis){
 		if(PulseArea < pow(2,16)-1)
 		  Spectrum_H[ch]->Fill(PulseArea);
 	      }
@@ -801,8 +801,9 @@ void AAAcquisitionManager::StartAcquisition()
 	  
 	  // Skip this waveform if readout is using DPP-PSD list mode
 	  // and the pulse area is exceeds maximum useful value
-	  if(TheSettings->PSDListAnalysis and PulseArea > pow(2,16)-2)
-	    continue;
+	  if(UsePSDFirmware and TheSettings->PSDListAnalysis)
+	    if(PulseArea > pow(2,16)-2)
+	      continue;
 	  
 	  // If the user has specified to store ANY data at all then
 	  // fill the waveform tree via the readout manager
