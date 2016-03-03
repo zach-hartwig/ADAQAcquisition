@@ -58,10 +58,10 @@ AAGraphics::AAGraphics()
     kBlue-7, kViolet-7, kRed-7, kOrange-7,
     kYellow-6, kGreen-7, kCyan-7, kAzure-7;
   
-  // Initialize lines and boxes for plotting
+  // Get the number of digitizer channels
+  const Int_t NumDGChannels = 16;//AAVMEManager::GetInstance()->GetDGManager()->GetNumChannels();
 
-  const Int_t NumDGChannels = 16;
-
+  // Initialize channel-specific graphical objects
   for(int ch=0; ch<NumDGChannels; ch++){
     Trigger_L.push_back(new TLine);
     Trigger_L[ch]->SetLineColor(ChColor[ch]);
@@ -77,6 +77,9 @@ AAGraphics::AAGraphics()
     Baseline_B[ch]->SetFillColor(ChColor[ch]);
     Baseline_B[ch]->SetFillStyle(3002);
     Baseline_B[ch]->SetLineWidth(0);
+    
+    BaselineStart.push_back(0);
+    BaselineStop.push_back(1);
     
     PSDTotal_B.push_back(new TBox);
     PSDTotal_B[ch]->SetFillColor(ChColor[ch]);
@@ -106,7 +109,6 @@ AAGraphics::AAGraphics()
     PSDTriggerHoldoff_L[ch]->SetLineColor(ChColor[ch]);
     PSDTriggerHoldoff_L[ch]->SetLineStyle(7);
     PSDTriggerHoldoff_L[ch]->SetLineWidth(2);
-    
   }
 
   SpectrumCalibration_L = new TLine;
@@ -150,6 +152,72 @@ void AAGraphics::SetupWaveformGraphics(vector<Int_t> &WaveformLength)
   for(; It!=WaveformLength.end(); It++){
     if((*It) > MaxWaveformLength)
       MaxWaveformLength = (*It);
+  }
+
+  // Get the
+  ADAQDigitizer *DGManager = AAVMEManager::GetInstance()->GetDGManager();
+
+  // Setup the baseline calculation start/stop values here a single
+  // time since these don't change during waveform acquisition
+
+  // STD firmware: baseline width, position set in absolute sample numbes
+  // PSD firwmare: baseline width set by user in fixed samples; position in
+  //               time is relative to pregate setting
+  
+  Int_t NumDGChannels = DGManager->GetNumChannels();
+  
+  for(Int_t ch=0; ch<DGManager->GetNumChannels(); ch++){
+    
+    if(TheSettings->STDFirmware){
+      BaselineStart[ch] = TheSettings->ChBaselineCalcMin[ch];
+      BaselineStop[ch] = TheSettings->ChBaselineCalcMax[ch];
+    }
+    else if(TheSettings->PSDFirmware){
+
+      Int_t BaselineSamples = 0;
+      Int_t BaselineSelection = TheSettings->ChBaselineSamples[ch];
+      
+      ZBoardType DGType = AAVMEManager::GetInstance()->GetDGManager()->GetBoardType();
+      
+      if(DGType == zV1720 or DGType == zDT5720 or
+	 DGType == zDT5790M or DGType == zDT5790N or DGType == zDT5790P){
+	  
+	switch(BaselineSelection){
+	case 1:
+	  BaselineSamples = 8;
+	  break;
+	case 2:
+	  BaselineSamples = 32;
+	  break;
+	case 3:
+	  BaselineSamples = 128;
+	  break;
+	default:
+	  break;
+	}
+      }
+      else if(DGType == zV1725 or DGType == zDT5730){
+	  
+	switch(BaselineSelection){
+	case 1:
+	  BaselineSamples = 16;
+	  break;
+	case 2:
+	  BaselineSamples = 64;
+	  break;
+	case 3:
+	  BaselineSamples = 256;
+	  break;
+	case 4:
+	  BaselineSamples = 1024;
+	  break;
+	default:
+	  break;
+	}
+      }
+      BaselineStop[ch] = TheSettings->ChPreTrigger[ch] - TheSettings->ChGateOffset[ch] - 1;
+      BaselineStart[ch] = BaselineStop[ch] - BaselineSamples;
+    }
   }
 
   Time.clear();
@@ -371,67 +439,9 @@ void AAGraphics::DrawWaveformGraphics(vector<double> &BaselineValue,
     if(TheSettings->DisplayBaselineBox){
       Double_t BaselineWidth = (YMax-YMin)*0.03;
       
-      // STD firmware: baseline width, position set in absolute sample numbes
-      // PSD firwmare: baseline width set by user in fixed samples; position in
-      //               time is relative to pregate setting
-
-      Int_t BaselineStart = 0; // [sample]
-      Int_t BaselineStop = 0;  // [sample]
-
-      if(TheSettings->STDFirmware){
-	BaselineStart = TheSettings->ChBaselineCalcMin[ch];
-	BaselineStop = TheSettings->ChBaselineCalcMax[ch];
-      }
-      else if(TheSettings->PSDFirmware){
-
-	Int_t BaselineSamples =0;
-	Int_t BaselineSelection = TheSettings->ChBaselineSamples[ch];
-
-	ZBoardType DGType = AAVMEManager::GetInstance()->GetDGManager()->GetBoardType();
-	
-	if(DGType == zV1720 or DGType == zDT5720 or
-	   DGType == zDT5790M or DGType == zDT5790N or DGType == zDT5790P){
-	  
-	  switch(BaselineSelection){
-	  case 1:
-	    BaselineSamples = 8;
-	    break;
-	  case 2:
-	    BaselineSamples = 32;
-	    break;
-	  case 3:
-	    BaselineSamples = 128;
-	    break;
-	  default:
-	    break;
-	  }
-	}
-	else if(DGType == zV1725 or DGType == zDT5730){
-	  
-	  switch(BaselineSelection){
-	  case 1:
-	    BaselineSamples = 16;
-	    break;
-	  case 2:
-	    BaselineSamples = 64;
-	    break;
-	  case 3:
-	    BaselineSamples = 256;
-	    break;
-	  case 4:
-	    BaselineSamples = 1024;
-	    break;
-	  default:
-	    break;
-	  }
-	}
-	BaselineStop = TheSettings->ChPreTrigger[ch] - TheSettings->ChGateOffset[ch] - 1;
-	BaselineStart = BaselineStop - BaselineSamples;
-      }
-      
-      Baseline_B[ch]->DrawBox(BaselineStart,
+      Baseline_B[ch]->DrawBox(BaselineStart[ch],
 			      BaselineValue[ch] - BaselineWidth,
-			      BaselineStop,
+			      BaselineStop[ch],
 			      BaselineValue[ch] + BaselineWidth);
     }
     

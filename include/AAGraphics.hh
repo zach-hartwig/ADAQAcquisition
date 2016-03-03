@@ -95,7 +95,7 @@ private:
 
   Double_t XMin, XMax, YMin, YMax;
 
-  Int_t BaselineStart, BaselineStop;
+  vector<Int_t> BaselineStart, BaselineStop;
   
   vector<TGraph *> WaveformGraphs;
   TH1F *WaveformGraphAxes_H;
