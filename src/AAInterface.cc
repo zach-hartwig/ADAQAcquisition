@@ -2809,6 +2809,20 @@ void AAInterface::SaveSettings()
     TheSettings->PSDTailMaxBin = PSDTailMaxBin_NEL->GetEntry()->GetNumber();
 
 
+    ////////////////////////////
+    // Persistent storage subtab
+
+    TheSettings->WaveformFileName = WaveformFileName_TEL->GetEntry()->GetText();
+
+    TheSettings->WaveformStorageEnable = WaveformStorageEnable_CB->IsDown();
+    TheSettings->WaveformStoreRaw = WaveformStoreRaw_CB->IsDown();
+    TheSettings->WaveformStoreEnergyData = WaveformStoreEnergyData_CB->IsDown();
+    TheSettings->WaveformStorePSDData= WaveformStorePSDData_CB->IsDown();
+
+    TheSettings->ObjectSaveWithTimeExtension = ObjectSaveWithTimeExtension_CB->IsDown();
+    TheSettings->CanvasSaveWithTimeExtension = CanvasSaveWithTimeExtension_CB->IsDown();
+
+
     //////////////////////////
     // Display graphics subtab
 
@@ -2847,19 +2861,6 @@ void AAInterface::SaveSettings()
     TheSettings->DisplayUpdateable = DisplayUpdateable_RB->IsDown();
     TheSettings->DisplayNonUpdateable = DisplayNonUpdateable_RB->IsDown();
   
-
-    ////////////////////////////
-    // Persistent storage subtab
-
-    TheSettings->WaveformFileName = WaveformFileName_TEL->GetEntry()->GetText();
-
-    TheSettings->WaveformStorageEnable = WaveformStorageEnable_CB->IsDown();
-    TheSettings->WaveformStoreRaw = WaveformStoreRaw_CB->IsDown();
-    TheSettings->WaveformStoreEnergyData = WaveformStoreEnergyData_CB->IsDown();
-    TheSettings->WaveformStorePSDData= WaveformStorePSDData_CB->IsDown();
-
-    TheSettings->ObjectSaveWithTimeExtension = ObjectSaveWithTimeExtension_CB->IsDown();
-    TheSettings->CanvasSaveWithTimeExtension = CanvasSaveWithTimeExtension_CB->IsDown();
 
     ///////////////////////////////
     // Acquisition disabled widgets
@@ -3290,6 +3291,114 @@ void AAInterface::LoadSettingsFromFile()
       CanvasSaveWithTimeExtension_CB->SetState(kButtonDown);
     else
       CanvasSaveWithTimeExtension_CB->SetState(kButtonUp);
+
+    ///////////
+    // Graphics
+
+    if(TheSettings->DisplayTitlesEnable)
+      DisplayTitlesEnable_CB->SetState(kButtonDown);
+    else
+      DisplayTitlesEnable_CB->SetState(kButtonUp);
+
+    DisplayTitle_TEL->GetEntry()->SetText(TheSettings->DisplayTitle.c_str());
+
+    DisplayXTitle_TEL->GetEntry()->SetText(TheSettings->DisplayXTitle.c_str());
+    DisplayXTitleSize_NEL->GetEntry()->SetNumber(TheSettings->DisplayXTitleSize);
+    DisplayXTitleOffset_NEL->GetEntry()->SetNumber(TheSettings->DisplayXTitleOffset);
+
+    DisplayYTitle_TEL->GetEntry()->SetText(TheSettings->DisplayYTitle.c_str());
+    DisplayYTitleSize_NEL->GetEntry()->SetNumber(TheSettings->DisplayYTitleSize);
+    DisplayYTitleOffset_NEL->GetEntry()->SetNumber(TheSettings->DisplayYTitleOffset);
+    
+    if(TheSettings->DisplayTrigger)
+      DisplayTrigger_CB->SetState(kButtonDown);
+    else
+      DisplayTrigger_CB->SetState(kButtonUp);
+
+    if(TheSettings->DisplayBaselineBox)
+      DisplayBaselineBox_CB->SetState(kButtonDown);
+    else
+      DisplayBaselineBox_CB->SetState(kButtonUp);
+      
+    if(TheSettings->DisplayPSDLimits)
+      DisplayPSDLimits_CB->SetState(kButtonDown);
+    else
+      DisplayPSDLimits_CB->SetState(kButtonUp);
+
+    if(TheSettings->DisplayZLEThreshold)
+      DisplayZLEThreshold_CB->SetState(kButtonDown);
+    else
+      DisplayZLEThreshold_CB->SetState(kButtonUp);
+
+    if(TheSettings->DisplayLegend)
+      DisplayLegend_CB->SetState(kButtonDown);
+    else
+      DisplayLegend_CB->SetState(kButtonUp);
+
+    if(TheSettings->DisplayGrid)
+      DisplayGrid_CB->SetState(kButtonDown);
+    else
+      DisplayGrid_CB->SetState(kButtonUp);
+      
+    if(TheSettings->DisplayXAxisInLog)
+      DisplayXAxisLog_CB->SetState(kButtonDown);
+    else
+      DisplayXAxisLog_CB->SetState(kButtonUp);
+      
+    if(TheSettings->DisplayYAxisInLog)
+      DisplayYAxisLog_CB->SetState(kButtonDown);
+    else
+      DisplayYAxisLog_CB->SetState(kButtonUp);
+
+    if(TheSettings->WaveformWithLine){
+      DrawWaveformWithLine_RB->SetState(kButtonDown);
+      DrawWaveformWithMarkers_RB->SetState(kButtonUp);
+      DrawWaveformWithBoth_RB->SetState(kButtonUp);
+    }
+    else if(TheSettings->WaveformWithMarkers){
+      DrawWaveformWithLine_RB->SetState(kButtonUp);
+      DrawWaveformWithMarkers_RB->SetState(kButtonDown);
+      DrawWaveformWithBoth_RB->SetState(kButtonUp);
+    }
+    else if(TheSettings->WaveformWithBoth){
+      DrawWaveformWithLine_RB->SetState(kButtonUp);
+      DrawWaveformWithMarkers_RB->SetState(kButtonUp);
+      DrawWaveformWithBoth_RB->SetState(kButtonDown);
+    }
+
+    if(TheSettings->SpectrumWithLine){
+      DrawSpectrumWithLine_RB->SetState(kButtonDown);
+      DrawSpectrumWithMarkers_RB->SetState(kButtonUp);
+      DrawSpectrumWithBars_RB->SetState(kButtonUp);
+    }
+    else if(TheSettings->SpectrumWithMarkers){
+      DrawSpectrumWithLine_RB->SetState(kButtonUp);
+      DrawSpectrumWithMarkers_RB->SetState(kButtonDown);
+      DrawSpectrumWithBars_RB->SetState(kButtonUp);
+    }
+    else if(TheSettings->SpectrumWithBars){
+      DrawSpectrumWithLine_RB->SetState(kButtonUp);
+      DrawSpectrumWithMarkers_RB->SetState(kButtonUp);
+      DrawSpectrumWithBars_RB->SetState(kButtonDown);
+    }
+
+    SpectrumRefreshRate_NEL->GetEntry()->SetIntNumber(TheSettings->SpectrumRefreshRate);
+
+    if(TheSettings->DisplayContinuous){
+      DisplayContinuous_RB->SetState(kButtonDown);
+      DisplayUpdateable_RB->SetState(kButtonUp);
+      DisplayNonUpdateable_RB->SetState(kButtonUp);
+    }
+    else if(TheSettings->DisplayUpdateable){
+      DisplayContinuous_RB->SetState(kButtonUp);
+      DisplayUpdateable_RB->SetState(kButtonDown);
+      DisplayNonUpdateable_RB->SetState(kButtonUp);
+    }
+    else if(TheSettings->DisplayNonUpdateable){
+      DisplayContinuous_RB->SetState(kButtonUp);
+      DisplayUpdateable_RB->SetState(kButtonUp);
+      DisplayNonUpdateable_RB->SetState(kButtonDown);
+    }
   }
 
   // Close the transient settings ROOT file
