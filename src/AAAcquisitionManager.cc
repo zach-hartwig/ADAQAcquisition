@@ -71,8 +71,6 @@ void AAAcquisitionManager::Initialize()
   
   for(Int_t ch=0; ch<DGChannels; ch++){
 
-    NumPSDEvents.push_back(0);
-
     BufferFull.push_back(true);
     
     WaveformLength.push_back(0);
@@ -81,18 +79,14 @@ void AAAcquisitionManager::Initialize()
     BaselineStop.push_back(0);
     BaselineLength.push_back(0);
     BaselineValue.push_back(0);
+    
+    Polarity.push_back(0.);
 
     PeakPosition.push_back(0);
     PSDTotalAbsStart.push_back(0);
     PSDTotalAbsStop.push_back(0);
     PSDTailAbsStart.push_back(0);
     PSDTailAbsStop.push_back(0);
-    
-    Polarity.push_back(0.);
-
-    CorrectedTimeStamp.push_back(0);
-    PrevTimeStamp.push_back(0);
-    TimeStampRollovers.push_back(0);
     
     CalibrationDataStruct DataStruct;
     CalibrationData.push_back(DataStruct);
@@ -104,6 +98,12 @@ void AAAcquisitionManager::Initialize()
 
     PSDHistogram_H.push_back(new TH2F);
     PSDHistogramExists.push_back(true);
+    
+    NumPSDEvents.push_back(0);
+    
+    CorrectedTimeStamp.push_back(0);
+    PrevTimeStamp.push_back(0);
+    TimeStampRollovers.push_back(0);
   }
 }
 
@@ -111,13 +111,13 @@ void AAAcquisitionManager::Initialize()
 void AAAcquisitionManager::PrepareAcquisition()
 {
   ADAQDigitizer *DGManager = AAVMEManager::GetInstance()->GetDGManager();
-
+  
   Int_t NumDGChannels = DGManager->GetNumChannels();
-
+  
   // Set CAEN firmware type class member booleans for easy use
   UseSTDFirmware = TheSettings->STDFirmware;
   UsePSDFirmware = TheSettings->PSDFirmware;
-
+  
   // Set user-preference to analyze PSD list data or waveforms
   AnalyzePSDList = TheSettings->PSDListAnalysis;
   AnalyzePSDWaveform = TheSettings->PSDWaveformAnalysis;
@@ -134,7 +134,7 @@ void AAAcquisitionManager::PrepareAcquisition()
 
   ///////////////////////
   // Baseline calculation
-  
+
   for(Int_t ch=0; ch<NumDGChannels; ch++){
     
     if(UseSTDFirmware){
@@ -207,14 +207,16 @@ void AAAcquisitionManager::PrepareAcquisition()
   //////////////////////////
   // PSD integral calculation
   
-  if(UsePSDFirmware)
+  if(UsePSDFirmware){
     for(Int_t ch=0; ch<NumDGChannels; ch++){
       Int_t GateStart = TheSettings->ChPreTrigger[ch] - TheSettings->ChGateOffset[ch];
       PSDTotalAbsStart[ch] = PSDTailAbsStart[ch] = GateStart;
       PSDTotalAbsStop[ch] = GateStart + TheSettings->ChLongGate[ch];
       PSDTailAbsStop[ch] = GateStart + TheSettings->ChShortGate[ch];
     }
+  }
   
+
   ///////////////////
   // Waveform readout
   
@@ -258,12 +260,12 @@ void AAAcquisitionManager::PrepareAcquisition()
 	Waveforms[ch].resize(0);
     }
   }
-  
+
   WaveformData.clear();
   for(Int_t ch=0; ch<NumDGChannels; ch++)
     WaveformData.push_back(new ADAQWaveformData);
-  
-  
+
+
   /////////////////////////
   // Pulse spectra creation
 
@@ -312,6 +314,7 @@ void AAAcquisitionManager::PrepareAcquisition()
     }
   }
   
+  
   // GraphicsManager settings
   
   // In order to maximize readout loop efficiency, any graphical
@@ -324,7 +327,7 @@ void AAAcquisitionManager::PrepareAcquisition()
     AAGraphics::GetInstance()->SetupSpectrumGraphics();
   else if(TheSettings->PSDMode)
     AAGraphics::GetInstance()->SetupPSDHistogramGraphics();
-
+  
   for(Int_t ch=0; ch<NumDGChannels; ch++){
     NumPSDEvents[ch] = 0;
     
@@ -347,14 +350,14 @@ void AAAcquisitionManager::PrepareAcquisition()
   else if(UsePSDFirmware){
     PSDWaveforms = NULL;
   }
-  
+
   // Initialize variables for the PC buffer and event readout. Memory
   // is preallocated for the buffer to receive readout events.
   Buffer = NULL;
   BufferSize = ReadSize = FPGAEvents = PCEvents = EventCounter = 0;
   for(Int_t ch=0; ch<DGManager->GetNumChannels(); ch++)
     NumPSDEvents[ch] = 0;
-  
+
   // Allocate memory for the PC readout buffer only after the
   // digitizer been completely programmed
   DGManager->MallocReadoutBuffer(&Buffer, &BufferSize);
@@ -385,9 +388,9 @@ void AAAcquisitionManager::StartAcquisition()
   
   AAGraphics *TheGraphicsManager = AAGraphics::GetInstance();
 
-  // Prepare variables and the digitizer for data acquisition
+  // Prepare variables and the digitizer for data acquisitio
   PrepareAcquisition();
-
+  
   // Start data acquisition
   AcquisitionEnable = true;
 
@@ -465,7 +468,7 @@ void AAAcquisitionManager::StartAcquisition()
       // Skip channels that are not enabled for efficiency
       if(!TheSettings->ChEnable[ch])
 	continue;
-
+      
       // If DPP-PSD, get number of events in present channel
       if(UsePSDFirmware)
 	PCEvents = NumPSDEvents[ch];
@@ -922,11 +925,10 @@ void AAAcquisitionManager::StartAcquisition()
 	    }
 	  }
 	}
-	
 	EventCounter++;
-
+	
       } // End of the data readout loop over events
-
+      
       // ZSH (23 Jul 15) : It is not clear to me why the following
       // reset of PSD event counter variable is needed. The value
       // should be set automatically during readout from the

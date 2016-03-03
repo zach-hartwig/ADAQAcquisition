@@ -486,8 +486,6 @@ void AAGraphics::DrawWaveformGraphics(vector<double> &BaselineValue,
 }
 
 
-
-
 void AAGraphics::SetupSpectrumGraphics()
 {
   if(TheSettings->DisplayTitlesEnable){

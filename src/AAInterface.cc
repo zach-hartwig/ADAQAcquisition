@@ -2904,7 +2904,7 @@ void AAInterface::SaveSettings()
     // are disabled during acquisition!
 
     Bool_t AcquisitionOn = AAAcquisitionManager::GetInstance()->GetAcquisitionEnable();
-
+    
     if(AcquisitionOn){
       for(Int_t ch=0; ch<NumDGChannels; ch++){
 	TheSettings->ChEnable[ch] = DGChEnable_CB[ch]->IsDisabledAndSelected();
@@ -2917,7 +2917,7 @@ void AAInterface::SaveSettings()
 	else if(DGPSDFW_RB->IsDown()){
 	}
       }
-
+      
       TheSettings->WaveformMode = AQWaveform_RB->IsDisabledAndSelected();
       TheSettings->SpectrumMode = AQSpectrum_RB->IsDisabledAndSelected();
       TheSettings->PSDMode = AQPSDHistogram_RB->IsDisabledAndSelected();
