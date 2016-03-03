@@ -535,7 +535,15 @@ void AAAcquisitionManager::StartAcquisition()
 	  // Perform DPP-PSD firmware waveform readout
 	  
 	  else if(UsePSDFirmware and AnalyzePSDWaveform){
-	    DGManager->DecodeDPPWaveforms(&PSDEvents[ch][evt], PSDWaveforms);
+
+	    // Segmentation fault protection for using the acquisition
+	    // timer. Timing can get out of sync at shut-down so this
+	    // check prevents the decoding events when memory has
+	    // already been freed to prevent crash.
+	    if(AcquisitionEnable)
+	      DGManager->DecodeDPPWaveforms(&PSDEvents[ch][evt], PSDWaveforms);
+	    else
+	      break;
 	  }
 	}
 	

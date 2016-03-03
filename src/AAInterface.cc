@@ -3442,22 +3442,22 @@ void AAInterface::UpdateAfterAQTimerStopped(bool ROOTFileOpen)
   AQStartStop_TB->SetBackgroundColor(ColorManager->Number2Pixel(ButtonBackColorOff));
   AQStartStop_TB->SetForegroundColor(ColorManager->Number2Pixel(kWhite));
   AQStartStop_TB->SetText("Stopped");
-  
+
   SetAcquisitionWidgetState(true, kButtonUp);
   
   // Reset the attributes of the timer start text button
   AQTimerStart_TB->SetBackgroundColor(ColorManager->Number2Pixel(18));
   AQTimerStart_TB->SetForegroundColor(ColorManager->Number2Pixel(kBlack));
   AQTimerStart_TB->SetText("Start timer");
-
+  
   Bool_t ADAQFileIsOpen = AAAcquisitionManager::GetInstance()->GetADAQFileIsOpen();
-
+  
   // If an ADAQ file is open then the storage widget check boxes
   // (waveform, energy data, PSD data) and the waveform file name
   // setting button are disabled. We want to reenable them but ensure
   // that those that were checked remain checked. If an ADAQ file is
   // not open then these widgets do not need to be updated
-  
+
   if(ADAQFileIsOpen){
     if(WaveformFileName_TB->GetState() == kButtonDisabled)
       WaveformFileName_TB->SetState(kButtonUp);
