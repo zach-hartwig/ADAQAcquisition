@@ -144,11 +144,52 @@ void AAAcquisitionManager::PrepareAcquisition()
       BaselineValue[ch] = 0.;
     }
     else if(UsePSDFirmware){
-      Int_t BaselineSamples = pow(2,(TheSettings->ChBaselineSamples[ch]+1));
+
+      ZBoardType DGType = DGManager->GetBoardType();
+
+      Int_t BaselineSamples = 0;
+      Int_t BaselineSelection = TheSettings->ChBaselineSamples[ch];
+
+      if(DGType == zV1720 or DGType == zDT5720 or
+	 DGType == zDT5790M or DGType == zDT5790N or DGType == zDT5790P){
+	
+	switch(BaselineSelection){
+	case 1:
+	  BaselineSamples = 8;
+	  break;
+	case 2:
+	  BaselineSamples = 32;
+	  break;
+	case 3:
+	  BaselineSamples = 128;
+	  break;
+	default:
+	  break;
+	}
+      }
+      else if(DGType == zV1725 or DGType == zDT5730){
+
+	switch(BaselineSelection){
+	case 1:
+	  BaselineSamples = 16;
+	  break;
+	case 2:
+	  BaselineSamples = 64;
+	  break;
+	case 3:
+	  BaselineSamples = 256;
+	  break;
+	case 4:
+	  BaselineSamples = 1024;
+	  break;
+	default:
+	  break;
+	}
+      }
       
       BaselineStop[ch] = TheSettings->ChPreTrigger[ch] - TheSettings->ChGateOffset[ch] - 1;
       BaselineStart[ch] = BaselineStop[ch] - BaselineSamples;
-      BaselineLength[ch] = pow(2,(TheSettings->ChBaselineSamples[ch]+1));
+      BaselineLength[ch] = BaselineSamples;
       BaselineValue[ch] = 0.;
     }
     

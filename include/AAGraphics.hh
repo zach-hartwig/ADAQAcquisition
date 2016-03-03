@@ -77,7 +77,6 @@ private:
   vector<TLine *> PSDTail_L0, PSDTail_L1;
   vector<TLine *> PSDTriggerHoldoff_L;
   vector<TBox *> Baseline_B, PSDTotal_B;
-
   
   TLine *Spectrum_L, *SpectrumCalibration_L;
 
@@ -95,6 +94,8 @@ private:
   Double_t XSize, YSize, XOffset, YOffset;
 
   Double_t XMin, XMax, YMin, YMax;
+
+  Int_t BaselineStart, BaselineStop;
   
   vector<TGraph *> WaveformGraphs;
   TH1F *WaveformGraphAxes_H;

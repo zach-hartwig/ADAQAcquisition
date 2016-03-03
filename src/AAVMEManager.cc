@@ -298,8 +298,8 @@ bool AAVMEManager::ProgramDigitizers()
     for(Int_t ch=0; ch<DGMgr->GetNumChannels(); ch++){
       
       if(!TheSettings->ChEnable[ch])
-	continue;
-
+      	continue;
+      
       PSDParameters.nsbl[ch] = TheSettings->ChBaselineSamples[ch];
       PSDParameters.csens[ch] = TheSettings->ChChargeSensitivity[ch];
 
@@ -351,7 +351,7 @@ bool AAVMEManager::ProgramDigitizers()
 	continue;
       
       DGMgr->SetRecordLength(TheSettings->ChRecordLength[ch], ch);
-
+      
       DGMgr->SetChannelDCOffset(ch, TheSettings->ChDCOffset[ch]);
       
       DGMgr->SetDPPPreTriggerSize(ch, TheSettings->ChPreTrigger[ch]);

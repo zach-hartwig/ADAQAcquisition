@@ -1252,12 +1252,32 @@ void AAInterface::FillAcquisitionFrame()
 
       DGChannelControl_GF->AddFrame(DGChBaselineSamples_CBL[ch] = new ADAQComboBoxWithLabel(DGChannelControl_GF, "Baseline (samples)", -1),
 				    new TGLayoutHints(kLHintsLeft, 10,0,0,0));
-      DGChBaselineSamples_CBL[ch]->GetComboBox()->AddEntry("8",2);
-      DGChBaselineSamples_CBL[ch]->GetComboBox()->AddEntry("32",4);
-      DGChBaselineSamples_CBL[ch]->GetComboBox()->AddEntry("128",6);
-      DGChBaselineSamples_CBL[ch]->GetComboBox()->Resize(57,20);
-      DGChBaselineSamples_CBL[ch]->GetComboBox()->Select(4);
 
+      // The fixed number of samples that can be used to compute the
+      // baseline in DPP-PSD are device dependent:
+      //
+      // x720/x790 : 0 == FIXED; 1 == 8 samples; 2 == 32 samples; 3 == 128
+      // x751      : 0 == FIXED; 1 == 8 samples; 2 == 16 samples; 3 == 32 samples;
+      //             4 == 64 samples; 5 == 128 samples; 6 == 256 samples; 7 == 512 samples;
+      // x725/x730 : 0 == FIXED; 1 == 16 samples; 2 == 64, 3 = 256, 4 = 1024
+
+      ZBoardType DGType = TheVMEManager->GetDGManager()->GetBoardType();
+
+      if(DGType == zV1720 or DGType == zDT5720 or
+	 DGType == zDT5790M or DGType == zDT5790N or DGType == zDT5790P){
+	DGChBaselineSamples_CBL[ch]->GetComboBox()->AddEntry("8", 1);
+	DGChBaselineSamples_CBL[ch]->GetComboBox()->AddEntry("32", 2);
+	DGChBaselineSamples_CBL[ch]->GetComboBox()->AddEntry("128", 3);
+      }
+      else if(DGType == zV1725 or DGType == zDT5730){
+      	DGChBaselineSamples_CBL[ch]->GetComboBox()->AddEntry("16", 1);
+	DGChBaselineSamples_CBL[ch]->GetComboBox()->AddEntry("64", 2);
+	DGChBaselineSamples_CBL[ch]->GetComboBox()->AddEntry("256", 3);
+	DGChBaselineSamples_CBL[ch]->GetComboBox()->AddEntry("1024", 4);
+      }
+      DGChBaselineSamples_CBL[ch]->GetComboBox()->Resize(57,20);
+      DGChBaselineSamples_CBL[ch]->GetComboBox()->Select(1);
+      
       DGChannelControl_GF->AddFrame(DGChChargeSensitivity_CBL[ch] = new ADAQComboBoxWithLabel(DGChannelControl_GF, "Q sensitivity (fC/LSB)", -1),
 				    new TGLayoutHints(kLHintsLeft, 10,0,0,0));
       DGChChargeSensitivity_CBL[ch]->GetComboBox()->AddEntry("40",0);

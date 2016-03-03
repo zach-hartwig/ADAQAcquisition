@@ -42,6 +42,7 @@ AAGraphics *AAGraphics::GetInstance()
 AAGraphics::AAGraphics()
   : MaxWaveformLength(0), WaveformWidth(2), SpectrumWidth(2),
     XMin(0.), XMax(1.), YMin(0.), YMax(1.),
+    BaselineStart(0), BaselineStop(1),
     WaveformGraphAxes_H(new TH1F)
 {
   if(TheGraphicsManager)
@@ -150,7 +151,7 @@ void AAGraphics::SetupWaveformGraphics(vector<Int_t> &WaveformLength)
     if((*It) > MaxWaveformLength)
       MaxWaveformLength = (*It);
   }
-  
+
   Time.clear();
   for(int t=0; t<MaxWaveformLength; t++)
     Time.push_back(t);
@@ -383,8 +384,47 @@ void AAGraphics::DrawWaveformGraphics(vector<double> &BaselineValue,
       }
       else if(TheSettings->PSDFirmware){
 
-	Int_t BaselineSamples = pow(2,(TheSettings->ChBaselineSamples[ch]+1));
-		
+	Int_t BaselineSamples =0;
+	Int_t BaselineSelection = TheSettings->ChBaselineSamples[ch];
+
+	ZBoardType DGType = AAVMEManager::GetInstance()->GetDGManager()->GetBoardType();
+	
+	if(DGType == zV1720 or DGType == zDT5720 or
+	   DGType == zDT5790M or DGType == zDT5790N or DGType == zDT5790P){
+	  
+	  switch(BaselineSelection){
+	  case 1:
+	    BaselineSamples = 8;
+	    break;
+	  case 2:
+	    BaselineSamples = 32;
+	    break;
+	  case 3:
+	    BaselineSamples = 128;
+	    break;
+	  default:
+	    break;
+	  }
+	}
+	else if(DGType == zV1725 or DGType == zDT5730){
+	  
+	  switch(BaselineSelection){
+	  case 1:
+	    BaselineSamples = 16;
+	    break;
+	  case 2:
+	    BaselineSamples = 64;
+	    break;
+	  case 3:
+	    BaselineSamples = 256;
+	    break;
+	  case 4:
+	    BaselineSamples = 1024;
+	    break;
+	  default:
+	    break;
+	  }
+	}
 	BaselineStop = TheSettings->ChPreTrigger[ch] - TheSettings->ChGateOffset[ch] - 1;
 	BaselineStart = BaselineStop - BaselineSamples;
       }
