@@ -262,7 +262,7 @@ void AAGraphics::SetupWaveformGraphics(vector<Int_t> &WaveformLength)
   
   WaveformGraphs.clear();
   
-  for(Int_t ch=0; ch<TheSettings->ChEnable.size(); ch++){
+  for(Int_t ch=0; ch<NumDGChannels; ch++){
     
     // Create a new TGraph representing the waveform
     WaveformGraphs.push_back(new TGraph);
@@ -308,8 +308,10 @@ void AAGraphics::PlotWaveforms(vector<vector<uint16_t> > &Waveforms,
 			       vector<Int_t> &WaveformLength)
 {
   Int_t NumGraphs = 0;
+
+  Int_t NumDGChannels = AAVMEManager::GetInstance()->GetDGManager()->GetNumChannels();
   
-  for(int ch=0; ch<TheSettings->ChEnable.size(); ch++){
+  for(int ch=0; ch<NumDGChannels; ch++){
     
     if(!TheSettings->ChEnable[ch])
       continue;
