@@ -145,6 +145,8 @@ void AAAcquisitionManager::PrepareAcquisition()
     }
     else if(UsePSDFirmware){
 
+      // Set the device-specific baseline calculation region
+
       ZBoardType DGType = DGManager->GetBoardType();
 
       Int_t BaselineSamples = 0;
@@ -186,7 +188,9 @@ void AAAcquisitionManager::PrepareAcquisition()
 	  break;
 	}
       }
-      
+
+      // Use the baseline calculation region (fixed number of samples)
+      // to specify the baseline start/stop times 
       BaselineStop[ch] = TheSettings->ChPreTrigger[ch] - TheSettings->ChGateOffset[ch] - 1;
       BaselineStart[ch] = BaselineStop[ch] - BaselineSamples;
       BaselineLength[ch] = BaselineSamples;

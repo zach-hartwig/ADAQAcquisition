@@ -2453,6 +2453,10 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
   AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
   const int NumDGChannels = TheVMEManager->GetDGManager()->GetNumChannels();
 
+  ///////////////////////////////
+  // Channel-specific settings //
+  ///////////////////////////////
+
   for(Int_t ch=0; ch<NumDGChannels; ch++){
     DGChEnable_CB[ch]->SetState(ButtonState);
     DGChPosPolarity_RB[ch]->SetState(ButtonState);
@@ -2486,6 +2490,10 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
     }
   }
 
+  /////////////////////////////
+  // Data acquisition subtab //
+  /////////////////////////////
+
   AQWaveform_RB->SetEnabled(WidgetState);
   AQSpectrum_RB->SetEnabled(WidgetState);
   AQPSDHistogram_RB->SetEnabled(WidgetState);
@@ -2515,6 +2523,11 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
   AQDataReductionFactor_NEL->GetEntry()->SetState(WidgetState);
   DGZLEEnable_CB->SetState(ButtonState);
 
+
+  //////////////////////////
+  // Pulse spectra subtab //
+  //////////////////////////
+
   SpectrumNumBins_NEL->GetEntry()->SetState(WidgetState);
   SpectrumMinBin_NEL->GetEntry()->SetState(WidgetState);
   SpectrumMaxBin_NEL->GetEntry()->SetState(WidgetState);
@@ -2525,12 +2538,26 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
   SpectrumULD_NEL->GetEntry()->SetState(WidgetState);
   SpectrumLDTrigger_CB->SetState(ButtonState);
   SpectrumLDTriggerChannel_CBL->GetComboBox()->SetEnabled(WidgetState);
-  
+
   SpectrumRefreshRate_NEL->GetEntry()->SetState(WidgetState);
   DisplayContinuous_RB->SetEnabled(WidgetState);
   DisplayUpdateable_RB->SetEnabled(WidgetState);
   DisplayNonUpdateable_RB->SetEnabled(WidgetState);
 
+
+  /////////////////////////////////
+  // Pulse discrimination subtab //
+  /////////////////////////////////
+
+  PSDYAxisTail_RB->SetEnabled(WidgetState);
+  PSDYAxisTailTotal_RB->SetEnabled(WidgetState);
+  PSDTotalBins_NEL->GetEntry()->SetState(WidgetState);
+  PSDTotalMinBin_NEL->GetEntry()->SetState(WidgetState);
+  PSDTotalMaxBin_NEL->GetEntry()->SetState(WidgetState);
+  PSDTailBins_NEL->GetEntry()->SetState(WidgetState);
+  PSDTailMinBin_NEL->GetEntry()->SetState(WidgetState);
+  PSDTailMaxBin_NEL->GetEntry()->SetState(WidgetState);
+  PSDThreshold_NEL->GetEntry()->SetState(WidgetState);
 
   // The following widgets have special settings depending on
   // the acquisition state
@@ -2800,13 +2827,13 @@ void AAInterface::SaveSettings()
     TheSettings->PSDChannel = PSDChannel_CBL->GetComboBox()->GetSelected();
     TheSettings->PSDYAxisTail = PSDYAxisTail_RB->IsDown();
     TheSettings->PSDYAxisTailTotal = PSDYAxisTailTotal_RB->IsDown();
-    TheSettings->PSDThreshold = PSDThreshold_NEL->GetEntry()->GetNumber();
     TheSettings->PSDTotalBins = PSDTotalBins_NEL->GetEntry()->GetNumber();
     TheSettings->PSDTotalMinBin = PSDTotalMinBin_NEL->GetEntry()->GetNumber();
     TheSettings->PSDTotalMaxBin = PSDTotalMaxBin_NEL->GetEntry()->GetNumber();
     TheSettings->PSDTailBins = PSDTailBins_NEL->GetEntry()->GetNumber();
     TheSettings->PSDTailMinBin = PSDTailMinBin_NEL->GetEntry()->GetNumber();
     TheSettings->PSDTailMaxBin = PSDTailMaxBin_NEL->GetEntry()->GetNumber();
+    TheSettings->PSDThreshold = PSDThreshold_NEL->GetEntry()->GetNumber();
 
 
     ////////////////////////////
