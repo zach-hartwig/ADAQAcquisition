@@ -460,7 +460,7 @@ void AASubtabSlots::HandleTextButtons()
     WaveformFileName = TI->CreateFileDialog(FileTypes, kFDOpen);
     
     if(WaveformFileName == "NULL")
-      WaveformFileName = "DefaultWaveforms.adaq.root";
+      WaveformFileName = "DefaultData.adaq.root";
     
     string FileNameNoPath = WaveformFileName;
     
