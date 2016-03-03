@@ -2851,6 +2851,8 @@ void AAInterface::SaveSettings()
     ////////////////////////////
     // Persistent storage subtab
 
+    TheSettings->WaveformFileName = WaveformFileName_TEL->GetEntry()->GetText();
+
     TheSettings->WaveformStorageEnable = WaveformStorageEnable_CB->IsDown();
     TheSettings->WaveformStoreRaw = WaveformStoreRaw_CB->IsDown();
     TheSettings->WaveformStoreEnergyData = WaveformStoreEnergyData_CB->IsDown();
@@ -2951,13 +2953,30 @@ void AAInterface::SaveSettingsToFile()
 
 void AAInterface::LoadSettingsFromFile()
 {
+  ///////////////////////////////////////////
+  // Load the interface settings from file //
+  ///////////////////////////////////////////
+  
   // Open the ROOT file containing an ADAQAcquisition AASettings object
   TFile *SettingsFile = new TFile(SettingsFileName.c_str(), "read");
-  
-  // Load the settings object that will be used for readout into the
-  // widgets; note that a new AASettings object named 'TheSettings' is
-  // used here to prevent overwriting the class data member
-  AASettings *TheSettings = (AASettings *)SettingsFile->Get("TheSettings");
+
+  // Attempt to load the AASettings object that contains all of the
+  // interface settings that have been saved. Note that we use a local
+  // instantiation for 'TheSettings' to prevent overwriting the class
+  // data member 'TheSettings', which causes errors
+  AASettings *TheSettings = NULL;
+  TheSettings = (AASettings *)SettingsFile->Get("TheSettings");
+
+  // Check to ensure that AASettings object was found
+  if(TheSettings == NULL){
+    cout << "\nError! The expected AASettings object named 'TheSettings' could not be found in\n"
+	 <<   "       in the specified ADAQAcquisition settings file ("
+	 << SettingsFileName << ")!\n"
+	 <<   "       The settings cannot be updated!\n"
+	 << endl;
+    return;
+  }
+
 
   //////////////////
   // Settings tab //
@@ -3239,6 +3258,8 @@ void AAInterface::LoadSettingsFromFile()
 
     /////////////////////
     // Persistent storage
+
+    WaveformFileName_TEL->GetEntry()->SetText(TheSettings->WaveformFileName.c_str());
   
     if(TheSettings->WaveformStorageEnable)
       WaveformStorageEnable_CB->SetState(kButtonDown);

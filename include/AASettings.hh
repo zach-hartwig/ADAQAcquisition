@@ -211,31 +211,10 @@ public:
   Double_t PSDTailMinBin, PSDTailMaxBin;
   
 
-  ///////////////////////////
-  // Graphics widget settings
-
-  Bool_t DisplayTitlesEnable;
-  
-  string DisplayTitle, DisplayXTitle, DisplayYTitle;
-  Double_t DisplayXTitleSize, DisplayXTitleOffset;
-  Double_t DisplayYTitleSize, DisplayYTitleOffset;
-
-  Bool_t DisplayTrigger, DisplayBaselineBox;
-  Bool_t DisplayPSDLimits, DisplayZLEThreshold;
-  Bool_t DisplayLegend, DisplayGrid;
-
-  Bool_t DisplayXAxisInLog, DisplayYAxisInLog;
-
-  Bool_t WaveformWithLine, WaveformWithMarkers, WaveformWithBoth;
-  Bool_t SpectrumWithLine, SpectrumWithMarkers, SpectrumWithBars;
-
-  int SpectrumRefreshRate;
-
-  Bool_t DisplayContinuous, DisplayUpdateable, DisplayNonUpdateable;
-
-  
   //////////////////////////////
   // Persistent storage settings
+
+  string WaveformFileName;
   
   Bool_t WaveformStorageEnable;
   Bool_t WaveformStoreRaw;
@@ -244,6 +223,29 @@ public:
 
   Bool_t ObjectSaveWithTimeExtension;
   Bool_t CanvasSaveWithTimeExtension;
+
+
+  ///////////////////////////
+  // Graphics widget settings
+  
+  Bool_t DisplayTitlesEnable;
+  
+  string DisplayTitle, DisplayXTitle, DisplayYTitle;
+  Double_t DisplayXTitleSize, DisplayXTitleOffset;
+  Double_t DisplayYTitleSize, DisplayYTitleOffset;
+  
+  Bool_t DisplayTrigger, DisplayBaselineBox;
+  Bool_t DisplayPSDLimits, DisplayZLEThreshold;
+  Bool_t DisplayLegend, DisplayGrid;
+  
+  Bool_t DisplayXAxisInLog, DisplayYAxisInLog;
+  
+  Bool_t WaveformWithLine, WaveformWithMarkers, WaveformWithBoth;
+  Bool_t SpectrumWithLine, SpectrumWithMarkers, SpectrumWithBars;
+  
+  int SpectrumRefreshRate;
+  
+  Bool_t DisplayContinuous, DisplayUpdateable, DisplayNonUpdateable;
   
   ClassDef(AASettings, 1);
 };
