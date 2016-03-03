@@ -492,16 +492,16 @@ void AAInterface::FillRegisterFrame()
   if(InterfaceBuildComplete)
     return;
   
-  string FrameTitle[NumBoards] = {"CAEN VME Bridge Module", "CAEN Digitizer Module", "CAEN High Voltage Module"};
-
-  Int_t ReadAddressID[NumBoards] = {BRReadAddress_ID, DGReadAddress_ID, HVReadAddress_ID};
-  Int_t ReadValueID[NumBoards] = {BRReadValue_ID, DGReadValue_ID, HVReadValue_ID};
-
-  Int_t WriteAddressID[NumBoards] = {BRWriteAddress_ID, DGWriteAddress_ID, HVWriteAddress_ID};
-  Int_t WriteValueID[NumBoards] = {BRWriteValue_ID, DGWriteValue_ID, HVWriteValue_ID};
-
-  Int_t ReadID[NumBoards] = {BRRead_ID, DGRead_ID, HVRead_ID};
-  Int_t WriteID[NumBoards] = {BRWrite_ID, DGWrite_ID, HVWrite_ID};
+  vector<string> FrameTitle{"CAEN VME Bridge Module", "CAEN Digitizer Module", "CAEN High Voltage Module"};
+  
+  vector<Int_t> ReadAddressID{BRReadAddress_ID, DGReadAddress_ID, HVReadAddress_ID};
+  vector<Int_t> ReadValueID{BRReadValue_ID, DGReadValue_ID, HVReadValue_ID};
+  
+  vector<Int_t> WriteAddressID{BRWriteAddress_ID, DGWriteAddress_ID, HVWriteAddress_ID};
+  vector<Int_t> WriteValueID{BRWriteValue_ID, DGWriteValue_ID, HVWriteValue_ID};
+  
+  vector<Int_t> ReadID{BRRead_ID, DGRead_ID, HVRead_ID};
+  vector<Int_t> WriteID{BRWrite_ID, DGWrite_ID, HVWrite_ID};
 
   const Int_t RWButtonX = 250;
   const Int_t RWButtonY = 30;
