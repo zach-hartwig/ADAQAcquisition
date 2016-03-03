@@ -1,9 +1,33 @@
 ## ADAQAcquisition Source Code Change Log
 
 name: Changelog.md  
-date: 20 Jan 16 (last updated)
+date: 03 Mar 16 (last updated)
 auth: Zach Hartwig  
 mail: hartwig@psfc.mit.edu
+
+## Version 1.6 Series
+
+### 1.6.0
+
+ - New capability to save/load all interface settings to a new
+   ADAQAcquistion settings file (*.acq.root). Settings file can be
+   loaded from within the program via the new 'Settings' tab or
+   specified as the first command line argument at startup. Settings
+   can be optionally automatically saved during the session
+
+ - Minor optimization of waveform plotting for efficiency
+
+ - A large number of bugs have been fixed:
+   - Fixed the inability to _not_ save waveforms to ADAQ file 
+   - Correcting seg fault when DPP-PSD is used with acquisition time
+   - Limiting 2**16 max readout into CAEN DPP-PSD list mode only operation
+   - Corrected the device-specific baseline calculation maps for CAEN DPP-PSD
+   - Allocated correct numbers of waveforms dynamically for the linked device
+   - Enable PSD histogram to update when plotting in tail/total Y-axis
+   - Disabling PSD histogram widgets during acquisition
+   - Corrected default ADAQ file name when none chosen in the file dialog
+   - Corrected strange compilation bug for Ubuntu 14.04LTS systems
+
 
 ## Version 1.4 Series
 
