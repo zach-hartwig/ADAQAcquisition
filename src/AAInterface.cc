@@ -1278,13 +1278,24 @@ void AAInterface::FillAcquisitionFrame()
       
       DGChannelControl_GF->AddFrame(DGChChargeSensitivity_CBL[ch] = new ADAQComboBoxWithLabel(DGChannelControl_GF, "Q sensitivity (fC/LSB)", -1),
 				    new TGLayoutHints(kLHintsLeft, 10,0,0,0));
-      DGChChargeSensitivity_CBL[ch]->GetComboBox()->AddEntry("40",0);
-      DGChChargeSensitivity_CBL[ch]->GetComboBox()->AddEntry("160",1);
-      DGChChargeSensitivity_CBL[ch]->GetComboBox()->AddEntry("640",2);
-      DGChChargeSensitivity_CBL[ch]->GetComboBox()->AddEntry("2500",3);
+
+      if(DGType == zV1720 or DGType == zDT5720 or
+	 DGType == zDT5790M or DGType == zDT5790N or DGType == zDT5790P){
+	DGChChargeSensitivity_CBL[ch]->GetComboBox()->AddEntry("40", 0);
+	DGChChargeSensitivity_CBL[ch]->GetComboBox()->AddEntry("160", 1);
+	DGChChargeSensitivity_CBL[ch]->GetComboBox()->AddEntry("640", 2);
+	DGChChargeSensitivity_CBL[ch]->GetComboBox()->AddEntry("2500", 3);
+      }
+      else if(DGType == zV1725 or DGType == zDT5730){
+	DGChChargeSensitivity_CBL[ch]->GetComboBox()->AddEntry("5", 0);
+	DGChChargeSensitivity_CBL[ch]->GetComboBox()->AddEntry("20", 1);
+	DGChChargeSensitivity_CBL[ch]->GetComboBox()->AddEntry("80", 2);
+	DGChChargeSensitivity_CBL[ch]->GetComboBox()->AddEntry("320", 3);
+	DGChChargeSensitivity_CBL[ch]->GetComboBox()->AddEntry("1280", 4);
+      }
       DGChChargeSensitivity_CBL[ch]->GetComboBox()->Resize(57,20);
       DGChChargeSensitivity_CBL[ch]->GetComboBox()->Select(0);
-
+      
       DGChannelControl_GF->AddFrame(DGChPSDCut_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF,
 										      "PSD readout cut",
 										      -1),

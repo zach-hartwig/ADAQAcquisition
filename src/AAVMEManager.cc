@@ -302,11 +302,11 @@ bool AAVMEManager::ProgramDigitizers()
       
       PSDParameters.nsbl[ch] = TheSettings->ChBaselineSamples[ch];
       PSDParameters.csens[ch] = TheSettings->ChChargeSensitivity[ch];
-
+      
       // Channel self-triggering (automatic)
       if(TheSettings->TriggerType == 2)
 	PSDParameters.selft[ch] = 1;
-
+      
       // Software or external triggering
       else
 	PSDParameters.selft[ch] = 0;
