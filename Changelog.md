@@ -7,6 +7,14 @@ mail: hartwig@psfc.mit.edu
 
 ## Version 1.6 Series
 
+### 1.6.1
+
+ - Correctly casting the CAEN DPP-PSD short charge into a 16-bit
+   integer when reading out waveforms with DPP-PSD list mode. It was
+   previously reading out into a 15-bit integer, which resulting in
+   1/2 the use of the dynamic input.
+
+
 ### 1.6.0
 
  - New capability to save/load all interface settings to a new
