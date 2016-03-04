@@ -702,8 +702,8 @@ void AAAcquisitionManager::StartAcquisition()
 	  PSDTotal = (UShort_t)PSDEvents[ch][evt].ChargeLong;
 	  
 	  // The PSD short integral
-	  PSDTail = (UShort_t)PSDTotal - PSDEvents[ch][evt].ChargeShort;
-
+	  PSDTail = PSDTotal - (UShort_t)PSDEvents[ch][evt].ChargeShort;
+	  
 	  // Set the PSD long integral to the pulse area
 	  PulseArea = PSDTotal;
 	}
