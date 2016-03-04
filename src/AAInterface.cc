@@ -43,10 +43,10 @@ using namespace boost::assign;
 #include "ADAQDigitizer.hh"
 #include "ADAQBridge.hh"
 
+// ADAQAcquisition
 #include "AAInterface.hh"
 #include "AATypes.hh"
 #include "AAVersion.hh"
-
 #include "AAChannelSlots.hh"
 #include "AADisplaySlots.hh"
 #include "AASubtabSlots.hh"
@@ -194,7 +194,6 @@ void AAInterface::BuildSecondaryFrames()
   TheACQManager->SetSettingsPointer(TheSettings);
   TheGRPManager->SetSettingsPointer(TheSettings);
 
-  
   // Set the boolean to register that the GUI build is complete
   InterfaceBuildComplete = true;
   
@@ -377,11 +376,11 @@ void AAInterface::FillConnectionFrame()
     BoardOptions_HF->AddFrame(BoardType_CBL[board], new TGLayoutHints(kLHintsCenterX, 22,0,10,5));
     BoardType_CBL[board]->GetComboBox()->Resize(75,20);
 
-    if(board == 0){
+    if(board == zBR){
       BoardType_CBL[board]->GetComboBox()->AddEntry("V1718", zV1718);
       BoardType_CBL[board]->GetComboBox()->Select(zV1718);
     }
-    if(board == 1){
+    if(board == zDG){
       BoardType_CBL[board]->GetComboBox()->AddEntry("V1720", zV1720);
       BoardType_CBL[board]->GetComboBox()->AddEntry("V1724", zV1724);
       BoardType_CBL[board]->GetComboBox()->AddEntry("V1725", zV1725);
@@ -392,7 +391,7 @@ void AAInterface::FillConnectionFrame()
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790P", zDT5790P);
       BoardType_CBL[board]->GetComboBox()->Select(zV1725);
     }
-    else if(board == 2){
+    else if(board == zHV){
       BoardType_CBL[board]->GetComboBox()->AddEntry("V6533M", zV6533M);
       BoardType_CBL[board]->GetComboBox()->AddEntry("V6533N", zV6533N);
       BoardType_CBL[board]->GetComboBox()->AddEntry("V6533P", zV6533P);
@@ -405,7 +404,7 @@ void AAInterface::FillConnectionFrame()
       BoardType_CBL[board]->GetComboBox()->Select(zV6534M);
     }
 
-    if(board == 1){
+    if(board == zDG){
       TGVerticalFrame *FWType_VF = new TGVerticalFrame(BoardOptions_HF);
       BoardOptions_HF->AddFrame(FWType_VF, new TGLayoutHints(kLHintsNormal, 15,0,5,0));
       
@@ -416,15 +415,14 @@ void AAInterface::FillConnectionFrame()
       FWType_VF->AddFrame(DGPSDFW_RB = new TGRadioButton(FWType_VF, "DPP-PSD firmware", DGPSDFW_RB_ID),
 			  new TGLayoutHints(kLHintsNormal, 0,0,0,0));
       DGPSDFW_RB->Connect("Clicked()", "AATabSlots", TabSlots, "HandleRadioButtons()");
-      // DGStandardFW_RB->SetState(kButtonDown);
-      DGPSDFW_RB->SetState(kButtonDown);
+      DGStandardFW_RB->SetState(kButtonDown);
     }
     
     TGHorizontalFrame *BoardAddress_HF = new TGHorizontalFrame(BoardOptions_VF);
     BoardOptions_VF->AddFrame(BoardAddress_HF, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
-
+    
     Int_t LeftOffset = 5;
-    if(board == 1)
+    if(board == zDG)
       LeftOffset = 60;
     
     BoardAddress_HF->AddFrame(new TGLabel(BoardAddress_HF,"0x"), 
@@ -436,7 +434,7 @@ void AAInterface::FillConnectionFrame()
     // established (see the ADAQBridge class of the ADAQ library for
     // details) Thus, there is special handling of the V1718 controls.
     
-    if(board == 0){
+    if(board == zBR){
       // Push back a zero to maintain an array size of 3
       BoardAddress_NEF.push_back(0);
 
@@ -470,7 +468,7 @@ void AAInterface::FillConnectionFrame()
     BoardLinkNumber_NEL[board]->GetEntry()->SetNumber(0);
 
     LeftOffset = 57;
-    if(board == 1)
+    if(board == zDG)
       LeftOffset = 112;
     
     BoardOptions_VF->AddFrame(BoardLinkNumber_NEL[board], new TGLayoutHints(kLHintsNormal, LeftOffset, 0, 2, 5));

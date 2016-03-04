@@ -10,10 +10,11 @@
 //                                                                             //
 /////////////////////////////////////////////////////////////////////////////////
 
-#ifndef __ADAQTypes_hh__
-#define __ADAQTypes_hh__ 1
+#ifndef __AATypes_hh__
+#define __AATypes_hh__ 1
 
 enum{
+
   //////////////////
   // Settings tab //
   //////////////////
