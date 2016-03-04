@@ -1,11 +1,18 @@
 ## ADAQAcquisition Source Code Change Log
 
 name: Changelog.md  
-date: 03 Mar 16 (last updated)
+date: 04 Mar 16 (last updated)
 auth: Zach Hartwig  
 mail: hartwig@psfc.mit.edu
 
 ## Version 1.6 Series
+
+
+### 1.6.2
+
+ - Correctly settings CAEN device-specific values for DPP-PSD firmware
+   charge sensitivity for x725/x730 family of digitizers
+
 
 ### 1.6.1
 
