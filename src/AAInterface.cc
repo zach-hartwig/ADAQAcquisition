@@ -1286,7 +1286,14 @@ void AAInterface::FillAcquisitionFrame()
 	DGChChargeSensitivity_CBL[ch]->GetComboBox()->AddEntry("640", 2);
 	DGChChargeSensitivity_CBL[ch]->GetComboBox()->AddEntry("2500", 3);
       }
-      else if(DGType == zV1725 or DGType == zDT5730){
+      else if(DGType == zV1725){
+	DGChChargeSensitivity_CBL[ch]->GetComboBox()->AddEntry("10", 0);
+	DGChChargeSensitivity_CBL[ch]->GetComboBox()->AddEntry("40", 1);
+	DGChChargeSensitivity_CBL[ch]->GetComboBox()->AddEntry("160", 2);
+	DGChChargeSensitivity_CBL[ch]->GetComboBox()->AddEntry("640", 3);
+	DGChChargeSensitivity_CBL[ch]->GetComboBox()->AddEntry("2560", 4);
+      }
+      else if(DGType == zDT5730){
 	DGChChargeSensitivity_CBL[ch]->GetComboBox()->AddEntry("5", 0);
 	DGChChargeSensitivity_CBL[ch]->GetComboBox()->AddEntry("20", 1);
 	DGChChargeSensitivity_CBL[ch]->GetComboBox()->AddEntry("80", 2);
