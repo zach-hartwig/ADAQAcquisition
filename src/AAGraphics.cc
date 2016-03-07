@@ -109,8 +109,10 @@ AAGraphics::AAGraphics()
     PSDTriggerHoldoff_L[ch]->SetLineColor(ChColor[ch]);
     PSDTriggerHoldoff_L[ch]->SetLineStyle(7);
     PSDTriggerHoldoff_L[ch]->SetLineWidth(2);
+    
+    WaveformGraphs.push_back(new TGraph);
   }
-
+  
   SpectrumCalibration_L = new TLine;
   SpectrumCalibration_L->SetLineColor(kRed);
   SpectrumCalibration_L->SetLineStyle(7);
@@ -120,12 +122,12 @@ AAGraphics::AAGraphics()
 
   Waveform_LG = new TLegend(0.85, 0.4, 0.95, 0.92);
   Waveform_LG->SetTextSize(0.04);
-
+  
   for(Int_t ch=0; ch<NumDGChannels; ch++){
     TLine *Line = new TLine;
     Line->SetLineColor(ChColor[ch]);
     Line->SetLineWidth(4);
-
+    
     stringstream SS;
     SS << "Ch" << ch;
     string LineName = SS.str();
@@ -252,20 +254,19 @@ void AAGraphics::SetupWaveformGraphics(vector<Int_t> &WaveformLength)
   // once at the beginning of acquisition) in the following order:
   //
   // 0. Previous TGraph objects are deleted to prevent memory leak
-  // 1. The vector is cleared
-  // 2. New TGraph objects are created for enabled channels
+  // 1. New TGraph objects are created for all channels
   // 3. Static graphical attributes are set for each channel's TGraph
-
+  
   vector<TGraph *>::iterator it = WaveformGraphs.begin();
   for(; it!=WaveformGraphs.end(); it++)
     delete (*it);
   
-  WaveformGraphs.clear();
+  //  WaveformGraphs.resize(NumDGChannels);
   
   for(Int_t ch=0; ch<NumDGChannels; ch++){
     
     // Create a new TGraph representing the waveform
-    WaveformGraphs.push_back(new TGraph);
+    WaveformGraphs[ch] = new TGraph;
     
     // Set the static waveform graphical options
     WaveformGraphs[ch]->SetLineColor(ChColor[ch]);
@@ -274,7 +275,6 @@ void AAGraphics::SetupWaveformGraphics(vector<Int_t> &WaveformLength)
     WaveformGraphs[ch]->SetMarkerSize(0.75);
     WaveformGraphs[ch]->SetMarkerColor(ChColor[ch]);
     WaveformGraphs[ch]->SetFillColor(ChColor[ch]);
-
   }
   
   // Delete and recreate a TH1F object that is used to create the X
@@ -393,7 +393,7 @@ void AAGraphics::PlotWaveforms(vector<vector<uint16_t> > &Waveforms,
     
     NumGraphs++;
   }
-  
+
   if(TheSettings->DisplayLegend)
     Waveform_LG->Draw();
   
