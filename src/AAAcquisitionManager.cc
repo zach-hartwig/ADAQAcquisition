@@ -465,18 +465,19 @@ void AAAcquisitionManager::StartAcquisition()
     
     // Loop over the digitizer readout channels
     for(Int_t ch=0; ch<DGManager->GetNumChannels(); ch++){      
+
       // Skip channels that are not enabled for efficiency
       if(!TheSettings->ChEnable[ch])
 	continue;
-      
+
       // If DPP-PSD, get number of events in present channel
       if(UsePSDFirmware)
 	PCEvents = NumPSDEvents[ch];
-
+      
       // Reset all channel's corrected time stamp values to -42 to
       // ensure time stamps only register for the triggered channel
       CorrectedTimeStamp[ch] = 0;
-
+      
       // Loop over the digitizer stored events in the PC buffer
       for(Int_t evt=0; evt<PCEvents; evt++){
 
@@ -576,19 +577,19 @@ void AAAcquisitionManager::StartAcquisition()
 	// Post-readout waveform processing
 	
 	// Readout and process full waveforms for STD firwmare; do the
-	// same for PSD firmware in 'Oscilloscope' or 'Mixed' modes 
-	//if(UseSTDFirmware or (UsePSDFirmware and !UsePSDListMode)){
+	// same for PSD firmware in 'Oscilloscope' mode (all
+	// digitizers) or 'Mixed' modes (V1720/DT5790)
 	
 	if(UseSTDFirmware or (UsePSDFirmware and AnalyzePSDWaveform)){
 
-	  // Get  the total number of samples in the current waveform
-	  Int_t NumSamples = 0;
+	  // Get the number of samples in the current waveform
+	  uint32_t NumSamples = 0;
 	  if(UseSTDFirmware)
 	    NumSamples = Waveforms[ch].size();
 	  else if(UsePSDFirmware)
 	    NumSamples = PSDWaveforms->Ns;
 	  
-	  for(Int_t sample=0; sample<NumSamples; sample++){
+	  for(uint32_t sample=0; sample<NumSamples; sample++){
 	    
 	    // Store raw and data-reduction waveforms into the waveforms
 	    // data member; zero-suppression waveforms are already
@@ -1084,10 +1085,10 @@ void AAAcquisitionManager::SaveObjectData(string ObjectType,
 	Int_t XMax = PSDHistogram_H[Channel]->GetXaxis()->GetXmax();
 	Int_t YMin = PSDHistogram_H[Channel]->GetYaxis()->GetXmin();
 	Int_t YMax = PSDHistogram_H[Channel]->GetYaxis()->GetXmax();
-
-	cout << setw(10) << NumXBins << setw(10) << XMin << setw(10) << XMax << "\n"
-	     << setw(10) << NumYBins << setw(10) << YMin << setw(10) << YMax << "\n"
-	     << endl;
+	
+	ObjectOutput << setw(10) << NumXBins << setw(10) << XMin << setw(10) << XMax << "\n"
+		     << setw(10) << NumYBins << setw(10) << YMin << setw(10) << YMax << "\n"
+		     << endl;
 	
 	for(Int_t xbin=1; xbin<=NumXBins; xbin++){
 	  for(Int_t ybin=1; ybin<=NumYBins; ybin++){
