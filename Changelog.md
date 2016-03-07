@@ -1,11 +1,19 @@
 ## ADAQAcquisition Source Code Change Log
 
 name: Changelog.md  
-date: 04 Mar 16 (last updated)
+date: 07 Mar 16 (last updated)
 auth: Zach Hartwig  
 mail: hartwig@psfc.mit.edu
 
 ## Version 1.6 Series
+
+### 1.6.3
+
+ - Apply DPP-PSD channel-specific settings regardless of whether the
+   channel is enabled. This prevents "dual channel setting" boards
+   (e.g Ch0 value applied to Ch0 and Ch1) from inducing segaults when
+   th primary channel (e.g. Ch0) is not enabled. Future work will be
+   attempt to make this behavior to the user in the interface.
 
 
 ### 1.6.2
