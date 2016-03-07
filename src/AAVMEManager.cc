@@ -292,13 +292,17 @@ bool AAVMEManager::ProgramDigitizers()
 
     //////////////////////////////////////////////
     // Create and fill the PSD parameter structure
+
+    // Note that many DPP-PSD devices (e.g. the 16 channel V1725 and
+    // V1730 boards) use a "dual channel" approach for some settings,
+    // i.e. setting Ch0 record length will actually set Ch0 and
+    // Ch1. At present, DPP-PSD is under heavy development and
+    // documentation is spotty at best. Future updates will try to
+    // make this as clear to the user in the interface.
     
     CAEN_DGTZ_DPP_PSD_Params_t PSDParameters;
     
     for(Int_t ch=0; ch<DGMgr->GetNumChannels(); ch++){
-      
-      if(!TheSettings->ChEnable[ch])
-      	continue;
       
       PSDParameters.nsbl[ch] = TheSettings->ChBaselineSamples[ch];
       PSDParameters.csens[ch] = TheSettings->ChChargeSensitivity[ch];
@@ -346,9 +350,6 @@ bool AAVMEManager::ProgramDigitizers()
     // Set channel-specific, non-PSD structure PSD settings
     
     for(Int_t ch=0; ch<DGMgr->GetNumChannels(); ch++){
-      
-      if(!TheSettings->ChEnable[ch])
-	continue;
       
       DGMgr->SetRecordLength(TheSettings->ChRecordLength[ch], ch);
       
