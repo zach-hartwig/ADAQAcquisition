@@ -103,7 +103,8 @@ public:
   
   //////////////////////////
   // Channel widget settings
-  
+
+  Bool_t          ChannelLockToZero;
   vector<Bool_t>  ChEnable;
   vector<Bool_t>  ChPosPolarity;
   vector<Bool_t>  ChNegPolarity;

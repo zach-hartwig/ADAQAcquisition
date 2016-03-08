@@ -24,7 +24,9 @@ public:
   AAChannelSlots(AAInterface *);
   ~AAChannelSlots();
 
+  void HandleCheckButtons();
   void HandleNumberEntries();
+  void HandleRadioButtons();
 
   ClassDef(AAChannelSlots, 1);
   

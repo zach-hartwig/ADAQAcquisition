@@ -103,6 +103,8 @@ enum{
   ////////////////////////////////////////////////////////////////////////
   // Widget IDs for the channel subframe (right side of acquisition frame)
 
+  DGChannelLockToZero_CB_ID,
+
   DGCh0Enable_CB_ID,
   DGCh1Enable_CB_ID,
   DGCh2Enable_CB_ID,

@@ -79,6 +79,7 @@ public:
   void UpdateAfterAQTimerStopped(bool);
   void UpdateAfterCalibrationPointAdded(int);
   void UpdateHVMonitors(int, int, int);
+  void UpdateChannelSettingsToChannelZero();
 
   string CreateFileDialog(const char *[], EFileDialogMode);
 
@@ -218,15 +219,15 @@ private:
   // Scope frame widgets
 
   // Channel-specific widgets (in the left columnar subframe)
-
+  
   // Firmware-agnostic widgets
-
+  TGCheckButton *DGChannelLockToZero_CB;
   TGCheckButton *DGChEnable_CB[MAX_DG_CHANNELS];
   TGRadioButton *DGChPosPolarity_RB[MAX_DG_CHANNELS];
   TGRadioButton *DGChNegPolarity_RB[MAX_DG_CHANNELS];
   ADAQNumberEntryWithLabel *DGChDCOffset_NEL[MAX_DG_CHANNELS];
   ADAQNumberEntryWithLabel *DGChTriggerThreshold_NEL[MAX_DG_CHANNELS];
-
+  
   // CAEN Standard firmware widgets
   
   ADAQNumberEntryWithLabel *DGChZLEThreshold_NEL[MAX_DG_CHANNELS];
