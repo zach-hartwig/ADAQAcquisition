@@ -3108,10 +3108,11 @@ void AAInterface::LoadSettingsFromFile()
     const Int_t NumHVChannels = VMEManager->GetHVManager()->GetNumChannels();
     
     for(Int_t ch=0; ch<NumHVChannels; ch++){
-      // To be implemented
+      HVChVoltage_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->HVChVoltage[ch]);
+      HVChCurrent_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->HVChCurrent[ch]);
     }
   }
-
+  
   
   /////////////////////
   // Acquisition tab //
