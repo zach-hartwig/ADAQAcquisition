@@ -871,7 +871,7 @@ void AAInterface::FillVoltageFrame()
     HVChCurrent_NEL[ch]->GetEntry()->SetNumLimits(TGNumberFormat::kNELLimitMinMax);
     HVChCurrent_NEL[ch]->GetEntry()->SetLimitValues(0, TheVMEManager->GetHVManager()->GetMaxCurrent());
     HVChCurrent_NEL[ch]->GetEntry()->SetNumber(0);
-
+    
     TGVerticalFrame *HVChannelGet_VF = new TGVerticalFrame(HVChannel_GF);
     HVChannel_GF->AddFrame(HVChannelGet_VF, new TGLayoutHints(kLHintsTop | kLHintsLeft, 15,15,5,0));
 
@@ -909,8 +909,6 @@ void AAInterface::FillVoltageFrame()
   HVAllChannel_GF->SetTitlePos(TGGroupFrame::kCenter);
   HVChannelControls_VF->AddFrame(HVAllChannel_GF, new TGLayoutHints(kLHintsCenterX, 5,5,5,0));
 
-  // ROOT check button to enable/disable real-time monitoring of all
-  // channel's set voltage and drawn current
   HVAllChannel_GF->AddFrame(HVMonitorEnable_CB = new TGCheckButton(HVAllChannel_GF, "Enable monitoring", HVEnableMonitoring_CB_ID),
 			    new TGLayoutHints(kLHintsNormal, 5,5,5,5));
   HVMonitorEnable_CB->Connect("Clicked()", "AATabSlots", TabSlots, "HandleCheckButtons()");
@@ -2687,7 +2685,7 @@ void AAInterface::SaveSettings()
     else if(BoardEnable_TB[board]->GetString() == "Board disabled")
       TheSettings->BoardEnable[board] = false;
   }
-  
+
   TheSettings->STDFirmware = DGStandardFW_RB->IsDown();
   TheSettings->PSDFirmware = DGPSDFW_RB->IsDown();
 
@@ -2703,7 +2701,7 @@ void AAInterface::SaveSettings()
   // High voltage tab //
   //////////////////////
   
-  if(TheSettings->BoardEnable[zHV]){
+  if(TheSettings->BoardEnable[zHV] and TheVMEManager->GetHVManager()->GetLinkEstablished()){
     
     const Int_t NumHVChannels = TheVMEManager->GetHVManager()->GetNumChannels();
     
@@ -2718,7 +2716,8 @@ void AAInterface::SaveSettings()
   // Acquisition tab //
   /////////////////////
 
-  if(TheSettings->BoardEnable[zDG]){
+  
+  if(TheSettings->BoardEnable[zDG] and TheVMEManager->GetDGManager()->GetLinkEstablished()){
     
     const Int_t NumDGChannels = TheVMEManager->GetDGManager()->GetNumChannels();
     

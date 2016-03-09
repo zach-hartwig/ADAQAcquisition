@@ -42,7 +42,7 @@ public:
     // High voltage channel settings
     
     HVChVoltage.resize(HVChannels);
-    HVChCurrent.resize(DGChannels);
+    HVChCurrent.resize(HVChannels);
     
     // Digitizer channel settings
     
