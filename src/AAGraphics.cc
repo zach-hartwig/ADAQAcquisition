@@ -156,7 +156,6 @@ void AAGraphics::SetupWaveformGraphics(vector<Int_t> &WaveformLength)
       MaxWaveformLength = (*It);
   }
 
-  // Get the
   ADAQDigitizer *DGManager = AAVMEManager::GetInstance()->GetDGManager();
 
   // Setup the baseline calculation start/stop values here a single
@@ -175,7 +174,7 @@ void AAGraphics::SetupWaveformGraphics(vector<Int_t> &WaveformLength)
       BaselineStop[ch] = TheSettings->ChBaselineCalcMax[ch];
     }
     else if(TheSettings->PSDFirmware){
-
+      
       Int_t BaselineSamples = 0;
       Int_t BaselineSelection = TheSettings->ChBaselineSamples[ch];
       
@@ -261,7 +260,8 @@ void AAGraphics::SetupWaveformGraphics(vector<Int_t> &WaveformLength)
   for(; it!=WaveformGraphs.end(); it++)
     delete (*it);
   
-  //  WaveformGraphs.resize(NumDGChannels);
+  WaveformGraphs.clear();
+  WaveformGraphs.resize(NumDGChannels);
   
   for(Int_t ch=0; ch<NumDGChannels; ch++){
     

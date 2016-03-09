@@ -60,7 +60,7 @@ using namespace boost::assign;
 AAInterface::AAInterface(Bool_t ALS, string SFN)
   : TGMainFrame(gClient->GetRoot()),
     InterfaceBuildComplete(false),
-    DisplayWidth(1121), DisplayHeight(833), 
+    DisplayWidth(1130), DisplayHeight(833), 
     ButtonForeColor(kWhite), ButtonBackColorOn(kGreen-5), ButtonBackColorOff(kRed-3),
     SettingsFileName("DefaultSettings.acq.root"),
     AutoSaveSettings(false), AutoLoadSettings(false),
@@ -1000,11 +1000,21 @@ void AAInterface::FillAcquisitionFrame()
   // be used to view all channel widgets in a smalle frame. Pro'n'shit
   // if I do say so myself. And I do.
 
-  TGCanvas *DGChannelControls_C = new TGCanvas(AcquisitionFrame,300,100,kRaisedFrame);
-  AcquisitionFrame->AddFrame(DGChannelControls_C, new TGLayoutHints(kLHintsExpandX | kLHintsExpandY));
+  TGVerticalFrame *DGChannel_VF = new TGVerticalFrame(AcquisitionFrame);
+  AcquisitionFrame->AddFrame(DGChannel_VF, new TGLayoutHints(kLHintsExpandY, 5,5,5,5));
+  
+  DGChannel_VF->AddFrame(DGChannelLockToZero_CB = new TGCheckButton(DGChannel_VF,
+								    "Lock all settings to channel 0",
+								    DGChannelLockToZero_CB_ID),
+			 new TGLayoutHints(kLHintsTop, 15,5,5,5));
+  DGChannelLockToZero_CB->Connect("Clicked()", "AAChannelSlots", ChannelSlots, "HandleCheckButtons()");
+  
+  TGCanvas *DGChannelControls_C = new TGCanvas(DGChannel_VF, 300, 100, kRaisedFrame);
+  DGChannel_VF->AddFrame(DGChannelControls_C, new TGLayoutHints(kLHintsExpandX | kLHintsExpandY));
   
   TGVerticalFrame *DGChannelControls_VF = new TGVerticalFrame(DGChannelControls_C->GetViewPort(),10,10);
   DGChannelControls_C->SetContainer(DGChannelControls_VF);
+  
 
   // The widgets and layouts for control of channel-relevant
   // parameters for each of the 8 digitizers is identical although the
@@ -1026,22 +1036,23 @@ void AAInterface::FillAcquisitionFrame()
     ////////////////////////////////////////////////////
 
     if(DGStandardFW_RB->IsDown()){
-
+      
       DGChannelControl_GF->AddFrame(new TGLabel(DGChannelControl_GF, "Acquisition settings"),
 				    new TGLayoutHints(kLHintsLeft,0,0,5,0));
-    
+      
       // Horizontal frame to hold the "enable" and "pulse polarity" buttons
       TGHorizontalFrame *DGChannelControl_HF = new TGHorizontalFrame(DGChannelControl_GF);
       DGChannelControl_GF->AddFrame(DGChannelControl_HF);
-    
+      
       // ROOT check button to enable channel for digitization
       DGChannelControl_HF->AddFrame(DGChEnable_CB[ch] = new TGCheckButton(DGChannelControl_HF, "Enable", DGChEnable_CB_ID_Vec[ch]),
 				    new TGLayoutHints(kLHintsCenterY,10,0,0,0));
+      DGChEnable_CB[ch]->Connect("Clicked()", "AAChannelSlots", ChannelSlots, "HandleCheckButtons()");
       if(ch == 0) 
 	DGChEnable_CB[ch]->SetState(kButtonDown);
-
+      
       // TGLabel for the pulse polarity radio buttons
-
+      
       DGChannelControl_HF->AddFrame(new TGLabel(DGChannelControl_HF,"Polarity:"),
 				    new TGLayoutHints(kLHintsCenterY,25,0,5,0));
 
@@ -1049,10 +1060,14 @@ void AAInterface::FillAcquisitionFrame()
       DGChPolarity_BG->SetTitlePos(TGButtonGroup::kCenter);
       DGChPolarity_BG->SetBorderDrawn(false);
       DGChannelControl_HF->AddFrame(DGChPolarity_BG, new TGLayoutHints(kLHintsNormal,-2,-15,-10,-10));
-
+      
       DGChPosPolarity_RB[ch] = new TGRadioButton(DGChPolarity_BG, "+  ", -1);
+      DGChPosPolarity_RB[ch]->Connect("Clicked()", "AAChannelSlots", ChannelSlots, "HandleRadioButtons()");
+      
       DGChNegPolarity_RB[ch] = new TGRadioButton(DGChPolarity_BG, "-", -1);
+      DGChNegPolarity_RB[ch]->Connect("Clicked()", "AAChannelSlots", ChannelSlots, "HandleRadioButtons()");
       DGChNegPolarity_RB[ch]->SetState(kButtonDown);
+
       DGChPolarity_BG->Show();
 
       // ADAQ number entry to set channel's DAC offset [hex : 0x0000 - 0xffff]]
@@ -2471,6 +2486,7 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
   // Channel-specific settings //
   ///////////////////////////////
 
+  DGChannelLockToZero_CB->SetState(ButtonState);
   for(Int_t ch=0; ch<NumDGChannels; ch++){
     DGChEnable_CB[ch]->SetState(ButtonState);
     DGChPosPolarity_RB[ch]->SetState(ButtonState);
@@ -2719,6 +2735,8 @@ void AAInterface::SaveSettings()
   
   if(TheSettings->BoardEnable[zDG] and TheVMEManager->GetDGManager()->GetLinkEstablished()){
     
+    TheSettings->ChannelLockToZero = DGChannelLockToZero_CB->IsDown();
+    
     const Int_t NumDGChannels = TheVMEManager->GetDGManager()->GetNumChannels();
     
     // Acquisition channel 
@@ -2921,6 +2939,7 @@ void AAInterface::SaveSettings()
     Bool_t AcquisitionOn = AAAcquisitionManager::GetInstance()->GetAcquisitionEnable();
     
     if(AcquisitionOn){
+      TheSettings->ChannelLockToZero = DGChannelLockToZero_CB->IsDisabledAndSelected();
       for(Int_t ch=0; ch<NumDGChannels; ch++){
 	TheSettings->ChEnable[ch] = DGChEnable_CB[ch]->IsDisabledAndSelected();
 	TheSettings->ChPosPolarity[ch] = DGChPosPolarity_RB[ch]->IsDisabledAndSelected();
@@ -2968,6 +2987,9 @@ void AAInterface::SaveSettings()
   
   if(AutoSaveSettings)
     SaveSettingsToFile();
+
+  if(TheSettings->ChannelLockToZero)
+    UpdateChannelSettingsToChannelZero();
 }
 
 
@@ -3102,6 +3124,11 @@ void AAInterface::LoadSettingsFromFile()
     // Channel-specific settings
     
     const Int_t NumDGChannels = AAVMEManager::GetInstance()->GetDGManager()->GetNumChannels();
+
+    if(TheSettings->ChannelLockToZero)
+      DGChannelLockToZero_CB->SetState(kButtonDown);
+    else
+      DGChannelLockToZero_CB->SetState(kButtonUp);
     
     for(Int_t ch=0; ch<NumDGChannels; ch++){
       
@@ -3524,6 +3551,48 @@ void AAInterface::UpdateHVMonitors(int Channel, int HV, int I)
 {
   HVChVoltageMonitor_NEFL[Channel]->GetEntry()->SetNumber(HV);
   HVChCurrentMonitor_NEFL[Channel]->GetEntry()->SetNumber(I);
+}
+
+
+void AAInterface::UpdateChannelSettingsToChannelZero()
+{
+  AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
+  Int_t NumDGChannels = TheVMEManager->GetDGManager()->GetNumChannels();
+  
+  for(Int_t ch=1; ch<NumDGChannels; ch++){
+    
+    DGChEnable_CB[ch]->SetState(DGChEnable_CB[0]->GetState());
+    DGChPosPolarity_RB[ch]->SetState(DGChPosPolarity_RB[0]->GetState());
+    DGChNegPolarity_RB[ch]->SetState(DGChNegPolarity_RB[0]->GetState());
+    DGChDCOffset_NEL[ch]->GetEntry()->SetHexNumber(DGChDCOffset_NEL[0]->GetEntry()->GetHexNumber());
+    DGChTriggerThreshold_NEL[ch]->GetEntry()->SetIntNumber(DGChTriggerThreshold_NEL[0]->GetEntry()->GetIntNumber());
+
+    if(TheSettings->STDFirmware){
+      DGChZLEThreshold_NEL[ch]->GetEntry()->SetIntNumber(DGChZLEThreshold_NEL[0]->GetEntry()->GetIntNumber());
+      DGChZLEForward_NEL[ch]->GetEntry()->SetIntNumber(DGChZLEForward_NEL[0]->GetEntry()->GetIntNumber());
+      DGChZLEBackward_NEL[ch]->GetEntry()->SetIntNumber(DGChZLEBackward_NEL[0]->GetEntry()->GetIntNumber());
+      DGChZLEPosLogic_RB[ch]->SetState(DGChZLEPosLogic_RB[0]->GetState());
+      DGChZLENegLogic_RB[ch]->SetState(DGChZLENegLogic_RB[0]->GetState());
+      DGChBaselineCalcMin_NEL[ch]->GetEntry()->SetIntNumber(DGChBaselineCalcMin_NEL[0]->GetEntry()->GetIntNumber());
+      DGChBaselineCalcMax_NEL[ch]->GetEntry()->SetIntNumber(DGChBaselineCalcMax_NEL[0]->GetEntry()->GetIntNumber());
+      DGChPSDTotalStart_NEL[ch]->GetEntry()->SetIntNumber(DGChPSDTotalStart_NEL[0]->GetEntry()->GetIntNumber());
+      DGChPSDTotalStop_NEL[ch]->GetEntry()->SetIntNumber(DGChPSDTotalStop_NEL[0]->GetEntry()->GetIntNumber());
+      DGChPSDTailStart_NEL[ch]->GetEntry()->SetIntNumber(DGChPSDTailStart_NEL[0]->GetEntry()->GetIntNumber());
+      DGChPSDTailStop_NEL[ch]->GetEntry()->SetIntNumber(DGChPSDTailStop_NEL[0]->GetEntry()->GetIntNumber());
+    }
+    else if(TheSettings->PSDFirmware){
+      DGChRecordLength_NEL[ch]->GetEntry()->SetIntNumber(DGChRecordLength_NEL[0]->GetEntry()->GetIntNumber());
+      DGChBaselineSamples_CBL[ch]->GetComboBox()->Select(DGChBaselineSamples_CBL[0]->GetComboBox()->GetSelected());
+      DGChChargeSensitivity_CBL[ch]->GetComboBox()->Select(DGChChargeSensitivity_CBL[0]->GetComboBox()->GetSelected());
+      DGChPSDCut_NEL[ch]->GetEntry()->SetIntNumber(DGChPSDCut_NEL[0]->GetEntry()->GetIntNumber());
+      DGChTriggerConfig_CBL[ch]->GetComboBox()->Select(DGChTriggerConfig_CBL[0]->GetComboBox()->GetSelected());
+      DGChTriggerValidation_NEL[ch]->GetEntry()->SetIntNumber(DGChTriggerValidation_NEL[0]->GetEntry()->GetIntNumber());
+      DGChShortGate_NEL[ch]->GetEntry()->SetIntNumber(DGChShortGate_NEL[0]->GetEntry()->GetIntNumber());
+      DGChLongGate_NEL[ch]->GetEntry()->SetIntNumber(DGChLongGate_NEL[0]->GetEntry()->GetIntNumber());
+      DGChPreTrigger_NEL[ch]->GetEntry()->SetIntNumber(DGChPreTrigger_NEL[0]->GetEntry()->GetIntNumber());
+      DGChGateOffset_NEL[ch]->GetEntry()->SetIntNumber(DGChGateOffset_NEL[0]->GetEntry()->GetIntNumber());
+    }
+  }
 }
 
 

@@ -25,6 +25,26 @@ AAChannelSlots::~AAChannelSlots()
 {;}
 
 
+void AAChannelSlots::HandleCheckButtons()
+{
+  TGCheckButton *ActiveButton = (TGCheckButton *) gTQSender;
+  int ActiveID = ActiveButton->WidgetId();
+  
+  TI->SaveSettings();
+
+  switch(ActiveID){
+    
+  case DGChannelLockToZero_CB_ID:
+    if(ActiveButton->IsDown())
+      TI->UpdateChannelSettingsToChannelZero();
+    break;
+    
+  default:
+    break;
+  }
+}
+
+
 void AAChannelSlots::HandleNumberEntries()
 {
   // Get the pointer and the widget ID for the active number entry
@@ -58,10 +78,17 @@ void AAChannelSlots::HandleNumberEntries()
       
       // Set the channel trigger threshold 
       TheVMEManager->GetDGManager()->SetChannelTriggerThreshold(ch, thr);
-
-      cout << "HERE" << endl;
     }
     break;
   }
   }
+}
+
+
+void AAChannelSlots::HandleRadioButtons()
+{
+  TGRadioButton *ActiveButton = (TGRadioButton *) gTQSender;
+  int ActiveID = ActiveButton->WidgetId();
+  
+  TI->SaveSettings();
 }
