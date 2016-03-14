@@ -103,8 +103,9 @@ public:
   
   //////////////////////////
   // Channel widget settings
-
+  
   Bool_t          ChannelLockToZero;
+  Int_t           ChannelLockLower, ChannelLockUpper;
   vector<Bool_t>  ChEnable;
   vector<Bool_t>  ChPosPolarity;
   vector<Bool_t>  ChNegPolarity;
@@ -127,16 +128,16 @@ public:
 
   // CAEN DPP-PSD firmware specific settings
 
-  vector<Int_t> ChRecordLength;
-  vector<Int_t> ChBaselineSamples;
-  vector<Int_t> ChChargeSensitivity;
-  vector<Int_t> ChPSDCut;
-  vector<Int_t> ChTriggerConfig;
-  vector<Int_t> ChTriggerValidation;
-  vector<Int_t> ChShortGate;
-  vector<Int_t> ChLongGate;
-  vector<Int_t> ChPreTrigger;
-  vector<Int_t> ChGateOffset;
+  vector<Int_t>  ChRecordLength;
+  vector<Int_t>  ChBaselineSamples;
+  vector<Int_t>  ChChargeSensitivity;
+  vector<Int_t>  ChPSDCut;
+  vector<Int_t>  ChTriggerConfig;
+  vector<Int_t>  ChTriggerValidation;
+  vector<Int_t>  ChShortGate;
+  vector<Int_t>  ChLongGate;
+  vector<Int_t>  ChPreTrigger;
+  vector<Int_t>  ChGateOffset;
   
 
   //////////////////////////

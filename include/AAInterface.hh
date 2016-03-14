@@ -222,6 +222,7 @@ private:
   
   // Firmware-agnostic widgets
   TGCheckButton *DGChannelLockToZero_CB;
+  ADAQNumberEntryWithLabel *DGChannelLockLower_NEL, *DGChannelLockUpper_NEL;
   TGCheckButton *DGChEnable_CB[MAX_DG_CHANNELS];
   TGRadioButton *DGChPosPolarity_RB[MAX_DG_CHANNELS];
   TGRadioButton *DGChNegPolarity_RB[MAX_DG_CHANNELS];

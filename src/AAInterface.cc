@@ -1008,6 +1008,31 @@ void AAInterface::FillAcquisitionFrame()
 								    DGChannelLockToZero_CB_ID),
 			 new TGLayoutHints(kLHintsTop, 15,5,5,5));
   DGChannelLockToZero_CB->Connect("Clicked()", "AAChannelSlots", ChannelSlots, "HandleCheckButtons()");
+
+  TGHorizontalFrame *DGChannelLock_HF = new TGHorizontalFrame(DGChannel_VF);
+  DGChannel_VF->AddFrame(DGChannelLock_HF, new TGLayoutHints(kLHintsTop, 15,5,5,5));
+
+  DGChannelLock_HF->AddFrame(DGChannelLockLower_NEL = new ADAQNumberEntryWithLabel(DGChannelLock_HF,
+										   "Lower",
+										   DGChannelLockLower_NEL_ID),
+			     new TGLayoutHints(kLHintsNormal, 5,5,5,5));
+  DGChannelLockLower_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+  DGChannelLockLower_NEL->GetEntry()->SetNumLimits(TGNumberFormat::kNELLimitMinMax);
+  DGChannelLockLower_NEL->GetEntry()->SetLimitValues(1, NumDGChannels-1);
+  DGChannelLockLower_NEL->GetEntry()->SetNumber(1);
+  DGChannelLockLower_NEL->GetEntry()->Resize(30,20);
+  
+  
+  DGChannelLock_HF->AddFrame(DGChannelLockUpper_NEL = new ADAQNumberEntryWithLabel(DGChannelLock_HF,
+										   "Upper",
+										   DGChannelLockUpper_NEL_ID),
+			     new TGLayoutHints(kLHintsNormal, 5,5,5,5));
+  DGChannelLockUpper_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+  DGChannelLockUpper_NEL->GetEntry()->SetNumLimits(TGNumberFormat::kNELLimitMinMax);
+  DGChannelLockUpper_NEL->GetEntry()->SetLimitValues(1, NumDGChannels-1);
+  DGChannelLockUpper_NEL->GetEntry()->SetNumber(NumDGChannels-1);
+  DGChannelLockUpper_NEL->GetEntry()->Resize(30,20);
+  
   
   TGCanvas *DGChannelControls_C = new TGCanvas(DGChannel_VF, 300, 100, kRaisedFrame);
   DGChannel_VF->AddFrame(DGChannelControls_C, new TGLayoutHints(kLHintsExpandX | kLHintsExpandY));
@@ -2736,6 +2761,8 @@ void AAInterface::SaveSettings()
   if(TheSettings->BoardEnable[zDG] and TheVMEManager->GetDGManager()->GetLinkEstablished()){
     
     TheSettings->ChannelLockToZero = DGChannelLockToZero_CB->IsDown();
+    TheSettings->ChannelLockLower = DGChannelLockLower_NEL->GetEntry()->GetIntNumber();
+    TheSettings->ChannelLockUpper = DGChannelLockUpper_NEL->GetEntry()->GetIntNumber();
     
     const Int_t NumDGChannels = TheVMEManager->GetDGManager()->GetNumChannels();
     
@@ -3130,6 +3157,9 @@ void AAInterface::LoadSettingsFromFile()
       DGChannelLockToZero_CB->SetState(kButtonDown);
     else
       DGChannelLockToZero_CB->SetState(kButtonUp);
+    
+    DGChannelLockLower_NEL->GetEntry()->SetIntNumber(TheSettings->ChannelLockLower);
+    DGChannelLockUpper_NEL->GetEntry()->SetIntNumber(TheSettings->ChannelLockUpper);
     
     for(Int_t ch=0; ch<NumDGChannels; ch++){
       
@@ -3559,8 +3589,11 @@ void AAInterface::UpdateChannelSettingsToChannelZero()
 {
   AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
   Int_t NumDGChannels = TheVMEManager->GetDGManager()->GetNumChannels();
+
+  Int_t LowerChannel = DGChannelLockLower_NEL->GetEntry()->GetIntNumber();
+  Int_t UpperChannel = DGChannelLockUpper_NEL->GetEntry()->GetIntNumber();
   
-  for(Int_t ch=1; ch<NumDGChannels; ch++){
+  for(Int_t ch=LowerChannel; ch<UpperChannel; ch++){
     
     DGChEnable_CB[ch]->SetState(DGChEnable_CB[0]->GetState());
     DGChPosPolarity_RB[ch]->SetState(DGChPosPolarity_RB[0]->GetState());
