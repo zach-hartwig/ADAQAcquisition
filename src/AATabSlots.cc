@@ -104,15 +104,15 @@ void AATabSlots::HandleConnectionTextButtons()
 
   enum{BR, DG, HV};
   
-  // Temporarily redirect the std::cout messages to a local buffer
-  streambuf *StandardBuffer = cout.rdbuf();
-  ostringstream NewBuffer;
-  cout.rdbuf( NewBuffer.rdbuf() );
-  
   switch(TextButtonID){
     
     // Connect AAInterface with VME boards
-  case VMEConnect_TB_ID:
+  case VMEConnect_TB_ID:{
+
+    // Temporarily redirect the std::cout messages to a local buffer
+    streambuf *StandardBuffer = cout.rdbuf();
+    ostringstream NewBuffer;
+    cout.rdbuf( NewBuffer.rdbuf() );
 
     // If no connection is presently established...
     if(!TheVMEManager->GetVMEConnectionEstablished()){
@@ -188,7 +188,7 @@ void AATabSlots::HandleConnectionTextButtons()
       else
 	TI->VMEConnect_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOff));
     }
-
+    
     // If a connection is already established then terminate the connection
     else if(TheVMEManager->GetVMEConnectionEstablished()){
       
@@ -210,7 +210,11 @@ void AATabSlots::HandleConnectionTextButtons()
       TI->ConnectionOutput_TV->ShowBottom();
       TI->ConnectionOutput_TV->Update();
     }
+
+    // Redirect std::cout back to the normal terminal output
+    cout.rdbuf(StandardBuffer);
     break;
+  }
 
     // Set the V6534Enable boolean that controls whether or not the
     // V6534 high voltage board should be presently used
@@ -247,6 +251,14 @@ void AATabSlots::HandleConnectionTextButtons()
     }
     break;
 
+  case DGCalibrateADCs_TB_ID:{
+    ADAQDigitizer *DGMgr = TheVMEManager->GetDGManager();
+    if(DGMgr->GetLinkEstablished()){
+      DGMgr->Calibrate();
+    }
+    break;
+  }
+    
   case BRBoardEnable_TB_ID:
     if(TI->BoardEnable_TB[BR]->GetString() == "Board enabled"){
       TI->BoardEnable_TB[BR]->SetText("Board disabled");
@@ -262,9 +274,6 @@ void AATabSlots::HandleConnectionTextButtons()
     }
     break;
   }
-
-  // Redirect std::cout back to the normal terminal output
-  cout.rdbuf(StandardBuffer);
 }
 
 

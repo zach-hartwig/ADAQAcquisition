@@ -47,6 +47,8 @@ enum{
   DGStandardFW_RB_ID,
   DGPSDFW_RB_ID,
 
+  DGCalibrateADCs_TB_ID,
+
   
   ///////////////////
   // Registers tab //

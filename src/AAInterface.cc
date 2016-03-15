@@ -472,15 +472,35 @@ void AAInterface::FillConnectionFrame()
       LeftOffset = 112;
     
     BoardOptions_VF->AddFrame(BoardLinkNumber_NEL[board], new TGLayoutHints(kLHintsNormal, LeftOffset, 0, 2, 5));
-    
-    BoardEnable_TB.push_back(new TGTextButton(BoardOptions_VF, "Board enabled", BoardEnableID[board]));
-    BoardOptions_VF->AddFrame(BoardEnable_TB[board], new TGLayoutHints(kLHintsCenterX));
-    
-    BoardEnable_TB[board]->Connect("Clicked()", "AATabSlots", TabSlots, "HandleConnectionTextButtons()");
-    BoardEnable_TB[board]->Resize(110,25);
-    BoardEnable_TB[board]->SetBackgroundColor(ColorManager->Number2Pixel(ButtonBackColorOn));
-    BoardEnable_TB[board]->SetForegroundColor(ColorManager->Number2Pixel(kWhite));
-    BoardEnable_TB[board]->ChangeOptions(BoardEnable_TB[board]->GetOptions() | kFixedSize);
+
+    if(board == zDG){
+      TGHorizontalFrame *DigitizerButtons_HF = new TGHorizontalFrame(BoardOptions_VF);
+      BoardOptions_VF->AddFrame(DigitizerButtons_HF, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
+      
+      BoardEnable_TB.push_back(new TGTextButton(DigitizerButtons_HF, "Board enabled", BoardEnableID[board]));
+      BoardEnable_TB[board]->Resize(110,25);
+      BoardEnable_TB[board]->SetBackgroundColor(ColorManager->Number2Pixel(ButtonBackColorOn));
+      BoardEnable_TB[board]->SetForegroundColor(ColorManager->Number2Pixel(kWhite));
+      BoardEnable_TB[board]->ChangeOptions(BoardEnable_TB[board]->GetOptions() | kFixedSize);
+      BoardEnable_TB[board]->Connect("Clicked()", "AATabSlots", TabSlots, "HandleConnectionTextButtons()");
+      DigitizerButtons_HF->AddFrame(BoardEnable_TB[board], new TGLayoutHints(kLHintsLeft, 0,3,0,0));
+      
+      DigitizerButtons_HF->AddFrame(DGCalibrateADCs_TB = new TGTextButton(DigitizerButtons_HF, "Calibrate ADCs", DGCalibrateADCs_TB_ID),
+				    new TGLayoutHints(kLHintsRight, 3,0,0,0));
+      DGCalibrateADCs_TB->Resize(110,25);
+      DGCalibrateADCs_TB->ChangeOptions(DGCalibrateADCs_TB->GetOptions() | kFixedSize);
+      DGCalibrateADCs_TB->Connect("Clicked()", "AATabSlots", TabSlots, "HandleConnectionTextButtons()");
+    }
+    else{
+      BoardEnable_TB.push_back(new TGTextButton(BoardOptions_VF, "Board enabled", BoardEnableID[board]));
+      BoardOptions_VF->AddFrame(BoardEnable_TB[board], new TGLayoutHints(kLHintsCenterX));
+      
+      BoardEnable_TB[board]->Connect("Clicked()", "AATabSlots", TabSlots, "HandleConnectionTextButtons()");
+      BoardEnable_TB[board]->Resize(110,25);
+      BoardEnable_TB[board]->SetBackgroundColor(ColorManager->Number2Pixel(ButtonBackColorOn));
+      BoardEnable_TB[board]->SetForegroundColor(ColorManager->Number2Pixel(kWhite));
+      BoardEnable_TB[board]->ChangeOptions(BoardEnable_TB[board]->GetOptions() | kFixedSize);
+    }
   }
 }
 

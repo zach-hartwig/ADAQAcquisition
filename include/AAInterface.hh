@@ -184,7 +184,8 @@ private:
   vector<ADAQNumberEntryWithLabel *> BoardLinkNumber_NEL;
   vector<TGTextButton *> BoardEnable_TB;
   TGRadioButton *DGStandardFW_RB, *DGPSDFW_RB;
-
+  TGTextButton *DGCalibrateADCs_TB;
+  
   /////////////////
   // Register frame
   
