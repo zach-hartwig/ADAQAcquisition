@@ -943,52 +943,52 @@ void AAInterface::FillAcquisitionFrame()
   }
 
   DGChEnable_CB_ID_Vec += 
-    (int)DGCh0Enable_CB_ID,  (int)DGCh1Enable_CB_ID,  (int)DGCh2Enable_CB_ID, 
-    (int)DGCh3Enable_CB_ID,  (int)DGCh4Enable_CB_ID,  (int)DGCh5Enable_CB_ID, 
-    (int)DGCh6Enable_CB_ID,  (int)DGCh7Enable_CB_ID,  (int)DGCh8Enable_CB_ID,
-    (int)DGCh9Enable_CB_ID,  (int)DGCh10Enable_CB_ID, (int)DGCh11Enable_CB_ID,
-    (int)DGCh12Enable_CB_ID, (int)DGCh13Enable_CB_ID, (int)DGCh14Enable_CB_ID,
-    (int)DGCh15Enable_CB_ID;
+    (Int_t)DGCh0Enable_CB_ID,  (Int_t)DGCh1Enable_CB_ID,  (Int_t)DGCh2Enable_CB_ID, 
+    (Int_t)DGCh3Enable_CB_ID,  (Int_t)DGCh4Enable_CB_ID,  (Int_t)DGCh5Enable_CB_ID, 
+    (Int_t)DGCh6Enable_CB_ID,  (Int_t)DGCh7Enable_CB_ID,  (Int_t)DGCh8Enable_CB_ID,
+    (Int_t)DGCh9Enable_CB_ID,  (Int_t)DGCh10Enable_CB_ID, (Int_t)DGCh11Enable_CB_ID,
+    (Int_t)DGCh12Enable_CB_ID, (Int_t)DGCh13Enable_CB_ID, (Int_t)DGCh14Enable_CB_ID,
+    (Int_t)DGCh15Enable_CB_ID;
   
   DGChDCOffset_NEL_ID_Vec += 
-    (int)DGCh0DCOffset_NEL_ID,  (int)DGCh1DCOffset_NEL_ID,  (int)DGCh2DCOffset_NEL_ID, 
-    (int)DGCh3DCOffset_NEL_ID,  (int)DGCh4DCOffset_NEL_ID,  (int)DGCh5DCOffset_NEL_ID, 
-    (int)DGCh6DCOffset_NEL_ID,  (int)DGCh7DCOffset_NEL_ID,  (int)DGCh8DCOffset_NEL_ID,
-    (int)DGCh9DCOffset_NEL_ID,  (int)DGCh10DCOffset_NEL_ID, (int)DGCh11DCOffset_NEL_ID,
-    (int)DGCh12DCOffset_NEL_ID, (int)DGCh13DCOffset_NEL_ID, (int)DGCh14DCOffset_NEL_ID,
-    (int)DGCh15DCOffset_NEL_ID;
+    (Int_t)DGCh0DCOffset_NEL_ID,  (Int_t)DGCh1DCOffset_NEL_ID,  (Int_t)DGCh2DCOffset_NEL_ID, 
+    (Int_t)DGCh3DCOffset_NEL_ID,  (Int_t)DGCh4DCOffset_NEL_ID,  (Int_t)DGCh5DCOffset_NEL_ID, 
+    (Int_t)DGCh6DCOffset_NEL_ID,  (Int_t)DGCh7DCOffset_NEL_ID,  (Int_t)DGCh8DCOffset_NEL_ID,
+    (Int_t)DGCh9DCOffset_NEL_ID,  (Int_t)DGCh10DCOffset_NEL_ID, (Int_t)DGCh11DCOffset_NEL_ID,
+    (Int_t)DGCh12DCOffset_NEL_ID, (Int_t)DGCh13DCOffset_NEL_ID, (Int_t)DGCh14DCOffset_NEL_ID,
+    (Int_t)DGCh15DCOffset_NEL_ID;
 
   DGChTriggerThreshold_NEL_ID_Vec += 
-    (int)DGCh0TriggerThreshold_NEL_ID,  (int)DGCh1TriggerThreshold_NEL_ID,  (int)DGCh2TriggerThreshold_NEL_ID, 
-    (int)DGCh3TriggerThreshold_NEL_ID,  (int)DGCh4TriggerThreshold_NEL_ID,  (int)DGCh5TriggerThreshold_NEL_ID, 
-    (int)DGCh6TriggerThreshold_NEL_ID,  (int)DGCh7TriggerThreshold_NEL_ID,  (int)DGCh8TriggerThreshold_NEL_ID,
-    (int)DGCh9TriggerThreshold_NEL_ID,  (int)DGCh10TriggerThreshold_NEL_ID, (int)DGCh11TriggerThreshold_NEL_ID,
-    (int)DGCh12TriggerThreshold_NEL_ID, (int)DGCh13TriggerThreshold_NEL_ID, (int)DGCh14TriggerThreshold_NEL_ID,
-    (int)DGCh15TriggerThreshold_NEL_ID;
+    (Int_t)DGCh0TriggerThreshold_NEL_ID,  (Int_t)DGCh1TriggerThreshold_NEL_ID,  (Int_t)DGCh2TriggerThreshold_NEL_ID, 
+    (Int_t)DGCh3TriggerThreshold_NEL_ID,  (Int_t)DGCh4TriggerThreshold_NEL_ID,  (Int_t)DGCh5TriggerThreshold_NEL_ID, 
+    (Int_t)DGCh6TriggerThreshold_NEL_ID,  (Int_t)DGCh7TriggerThreshold_NEL_ID,  (Int_t)DGCh8TriggerThreshold_NEL_ID,
+    (Int_t)DGCh9TriggerThreshold_NEL_ID,  (Int_t)DGCh10TriggerThreshold_NEL_ID, (Int_t)DGCh11TriggerThreshold_NEL_ID,
+    (Int_t)DGCh12TriggerThreshold_NEL_ID, (Int_t)DGCh13TriggerThreshold_NEL_ID, (Int_t)DGCh14TriggerThreshold_NEL_ID,
+    (Int_t)DGCh15TriggerThreshold_NEL_ID;
 
   insert(DGChTriggerThreshold_NEL_ID_Map)
-    ((int)DGCh0TriggerThreshold_NEL_ID,0)   ((int)DGCh1TriggerThreshold_NEL_ID,1)   ((int)DGCh2TriggerThreshold_NEL_ID,2) 
-    ((int)DGCh3TriggerThreshold_NEL_ID,3)   ((int)DGCh4TriggerThreshold_NEL_ID,4)   ((int)DGCh5TriggerThreshold_NEL_ID,5)
-    ((int)DGCh6TriggerThreshold_NEL_ID,6)   ((int)DGCh7TriggerThreshold_NEL_ID,7)   ((int)DGCh8TriggerThreshold_NEL_ID,8)
-    ((int)DGCh9TriggerThreshold_NEL_ID,9)   ((int)DGCh10TriggerThreshold_NEL_ID,10) ((int)DGCh11TriggerThreshold_NEL_ID,11)
-    ((int)DGCh12TriggerThreshold_NEL_ID,12) ((int)DGCh13TriggerThreshold_NEL_ID,13) ((int)DGCh14TriggerThreshold_NEL_ID,14)
-    ((int)DGCh15TriggerThreshold_NEL_ID,15);
+    ((Int_t)DGCh0TriggerThreshold_NEL_ID,0)   ((Int_t)DGCh1TriggerThreshold_NEL_ID,1)   ((Int_t)DGCh2TriggerThreshold_NEL_ID,2) 
+    ((Int_t)DGCh3TriggerThreshold_NEL_ID,3)   ((Int_t)DGCh4TriggerThreshold_NEL_ID,4)   ((Int_t)DGCh5TriggerThreshold_NEL_ID,5)
+    ((Int_t)DGCh6TriggerThreshold_NEL_ID,6)   ((Int_t)DGCh7TriggerThreshold_NEL_ID,7)   ((Int_t)DGCh8TriggerThreshold_NEL_ID,8)
+    ((Int_t)DGCh9TriggerThreshold_NEL_ID,9)   ((Int_t)DGCh10TriggerThreshold_NEL_ID,10) ((Int_t)DGCh11TriggerThreshold_NEL_ID,11)
+    ((Int_t)DGCh12TriggerThreshold_NEL_ID,12) ((Int_t)DGCh13TriggerThreshold_NEL_ID,13) ((Int_t)DGCh14TriggerThreshold_NEL_ID,14)
+    ((Int_t)DGCh15TriggerThreshold_NEL_ID,15);
 
   DGChBaselineCalcMin_NEL_ID_Vec += 
-    (int)DGCh0BaselineCalcMin_NEL_ID,  (int)DGCh1BaselineCalcMin_NEL_ID,  (int)DGCh2BaselineCalcMin_NEL_ID, 
-    (int)DGCh3BaselineCalcMin_NEL_ID,  (int)DGCh4BaselineCalcMin_NEL_ID,  (int)DGCh5BaselineCalcMin_NEL_ID,
-    (int)DGCh6BaselineCalcMin_NEL_ID,  (int)DGCh7BaselineCalcMin_NEL_ID,  (int)DGCh8BaselineCalcMin_NEL_ID,
-    (int)DGCh9BaselineCalcMin_NEL_ID,  (int)DGCh10BaselineCalcMin_NEL_ID, (int)DGCh11BaselineCalcMin_NEL_ID,
-    (int)DGCh12BaselineCalcMin_NEL_ID, (int)DGCh13BaselineCalcMin_NEL_ID, (int)DGCh14BaselineCalcMin_NEL_ID,
-    (int)DGCh15BaselineCalcMin_NEL_ID;
+    (Int_t)DGCh0BaselineCalcMin_NEL_ID,  (Int_t)DGCh1BaselineCalcMin_NEL_ID,  (Int_t)DGCh2BaselineCalcMin_NEL_ID, 
+    (Int_t)DGCh3BaselineCalcMin_NEL_ID,  (Int_t)DGCh4BaselineCalcMin_NEL_ID,  (Int_t)DGCh5BaselineCalcMin_NEL_ID,
+    (Int_t)DGCh6BaselineCalcMin_NEL_ID,  (Int_t)DGCh7BaselineCalcMin_NEL_ID,  (Int_t)DGCh8BaselineCalcMin_NEL_ID,
+    (Int_t)DGCh9BaselineCalcMin_NEL_ID,  (Int_t)DGCh10BaselineCalcMin_NEL_ID, (Int_t)DGCh11BaselineCalcMin_NEL_ID,
+    (Int_t)DGCh12BaselineCalcMin_NEL_ID, (Int_t)DGCh13BaselineCalcMin_NEL_ID, (Int_t)DGCh14BaselineCalcMin_NEL_ID,
+    (Int_t)DGCh15BaselineCalcMin_NEL_ID;
 
   DGChBaselineCalcMax_NEL_ID_Vec += 
-    (int)DGCh0BaselineCalcMax_NEL_ID,  (int)DGCh1BaselineCalcMax_NEL_ID,  (int)DGCh2BaselineCalcMax_NEL_ID,
-    (int)DGCh3BaselineCalcMax_NEL_ID,  (int)DGCh4BaselineCalcMax_NEL_ID,  (int)DGCh5BaselineCalcMax_NEL_ID, 
-    (int)DGCh6BaselineCalcMax_NEL_ID,  (int)DGCh7BaselineCalcMax_NEL_ID,  (int)DGCh7BaselineCalcMax_NEL_ID,
-    (int)DGCh9BaselineCalcMax_NEL_ID,  (int)DGCh10BaselineCalcMax_NEL_ID, (int)DGCh11BaselineCalcMax_NEL_ID,
-    (int)DGCh12BaselineCalcMax_NEL_ID, (int)DGCh13BaselineCalcMax_NEL_ID, (int)DGCh14BaselineCalcMax_NEL_ID,
-    (int)DGCh15BaselineCalcMax_NEL_ID;
+    (Int_t)DGCh0BaselineCalcMax_NEL_ID,  (Int_t)DGCh1BaselineCalcMax_NEL_ID,  (Int_t)DGCh2BaselineCalcMax_NEL_ID,
+    (Int_t)DGCh3BaselineCalcMax_NEL_ID,  (Int_t)DGCh4BaselineCalcMax_NEL_ID,  (Int_t)DGCh5BaselineCalcMax_NEL_ID, 
+    (Int_t)DGCh6BaselineCalcMax_NEL_ID,  (Int_t)DGCh7BaselineCalcMax_NEL_ID,  (Int_t)DGCh7BaselineCalcMax_NEL_ID,
+    (Int_t)DGCh9BaselineCalcMax_NEL_ID,  (Int_t)DGCh10BaselineCalcMax_NEL_ID, (Int_t)DGCh11BaselineCalcMax_NEL_ID,
+    (Int_t)DGCh12BaselineCalcMax_NEL_ID, (Int_t)DGCh13BaselineCalcMax_NEL_ID, (Int_t)DGCh14BaselineCalcMax_NEL_ID,
+    (Int_t)DGCh15BaselineCalcMax_NEL_ID;
 
   
   //////////////////////////////
@@ -1004,34 +1004,36 @@ void AAInterface::FillAcquisitionFrame()
   AcquisitionFrame->AddFrame(DGChannel_VF, new TGLayoutHints(kLHintsExpandY, 5,5,5,5));
   
   DGChannel_VF->AddFrame(DGChannelLockToZero_CB = new TGCheckButton(DGChannel_VF,
-								    "Lock all settings to channel 0",
+								    "Lock channel 0 settings to channels:",
 								    DGChannelLockToZero_CB_ID),
 			 new TGLayoutHints(kLHintsTop, 15,5,5,5));
   DGChannelLockToZero_CB->Connect("Clicked()", "AAChannelSlots", ChannelSlots, "HandleCheckButtons()");
-
+  
   TGHorizontalFrame *DGChannelLock_HF = new TGHorizontalFrame(DGChannel_VF);
-  DGChannel_VF->AddFrame(DGChannelLock_HF, new TGLayoutHints(kLHintsTop, 15,5,5,5));
+  DGChannel_VF->AddFrame(DGChannelLock_HF, new TGLayoutHints(kLHintsTop, 0,0,0,0));
 
   DGChannelLock_HF->AddFrame(DGChannelLockLower_NEL = new ADAQNumberEntryWithLabel(DGChannelLock_HF,
-										   "Lower",
+										   "Lower  ",
 										   DGChannelLockLower_NEL_ID),
-			     new TGLayoutHints(kLHintsNormal, 5,5,5,5));
+			     new TGLayoutHints(kLHintsNormal, 15,5,0,5));
   DGChannelLockLower_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
   DGChannelLockLower_NEL->GetEntry()->SetNumLimits(TGNumberFormat::kNELLimitMinMax);
   DGChannelLockLower_NEL->GetEntry()->SetLimitValues(1, NumDGChannels-1);
   DGChannelLockLower_NEL->GetEntry()->SetNumber(1);
-  DGChannelLockLower_NEL->GetEntry()->Resize(30,20);
+  DGChannelLockLower_NEL->GetEntry()->Resize(50,20);
+  DGChannelLockLower_NEL->GetEntry()->Connect("ValueSet(Long_t)", "AAChannelSlots", ChannelSlots, "HandleNumberEntries()");
   
   
   DGChannelLock_HF->AddFrame(DGChannelLockUpper_NEL = new ADAQNumberEntryWithLabel(DGChannelLock_HF,
 										   "Upper",
 										   DGChannelLockUpper_NEL_ID),
-			     new TGLayoutHints(kLHintsNormal, 5,5,5,5));
+			     new TGLayoutHints(kLHintsNormal, 5,5,0,5));
   DGChannelLockUpper_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
   DGChannelLockUpper_NEL->GetEntry()->SetNumLimits(TGNumberFormat::kNELLimitMinMax);
   DGChannelLockUpper_NEL->GetEntry()->SetLimitValues(1, NumDGChannels-1);
   DGChannelLockUpper_NEL->GetEntry()->SetNumber(NumDGChannels-1);
-  DGChannelLockUpper_NEL->GetEntry()->Resize(30,20);
+  DGChannelLockUpper_NEL->GetEntry()->Resize(50,20);
+  DGChannelLockUpper_NEL->GetEntry()->Connect("ValueSet(Long_t)", "AAChannelSlots", ChannelSlots, "HandleNumberEntries()");
   
   
   TGCanvas *DGChannelControls_C = new TGCanvas(DGChannel_VF, 300, 100, kRaisedFrame);
@@ -1086,10 +1088,10 @@ void AAInterface::FillAcquisitionFrame()
       DGChPolarity_BG->SetBorderDrawn(false);
       DGChannelControl_HF->AddFrame(DGChPolarity_BG, new TGLayoutHints(kLHintsNormal,-2,-15,-10,-10));
       
-      DGChPosPolarity_RB[ch] = new TGRadioButton(DGChPolarity_BG, "+  ", -1);
+      DGChPosPolarity_RB[ch] = new TGRadioButton(DGChPolarity_BG, "+  ");
       DGChPosPolarity_RB[ch]->Connect("Clicked()", "AAChannelSlots", ChannelSlots, "HandleRadioButtons()");
       
-      DGChNegPolarity_RB[ch] = new TGRadioButton(DGChPolarity_BG, "-", -1);
+      DGChNegPolarity_RB[ch] = new TGRadioButton(DGChPolarity_BG, "-");
       DGChNegPolarity_RB[ch]->Connect("Clicked()", "AAChannelSlots", ChannelSlots, "HandleRadioButtons()");
       DGChNegPolarity_RB[ch]->SetState(kButtonDown);
 
@@ -1103,13 +1105,14 @@ void AAInterface::FillAcquisitionFrame()
       DGChDCOffset_NEL[ch]->GetEntry()->SetLimitValues(0x0000,0xffff);
       DGChDCOffset_NEL[ch]->GetEntry()->SetNumber(0x8000);
       DGChDCOffset_NEL[ch]->GetEntry()->Resize(55,20);
+      DGChDCOffset_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AAChannelSlots", ChannelSlots, "HandleNumberEntries()");
       
       // ADAQ number entry to set channel's trigger threshold [ADC]
       DGChannelControl_GF->AddFrame(DGChTriggerThreshold_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "Trigger threshold (ADC)", DGChTriggerThreshold_NEL_ID_Vec[ch]),
 				    new TGLayoutHints(kLHintsNormal, 10,0,0,0));
-      DGChTriggerThreshold_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
       DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
       DGChTriggerThreshold_NEL[ch]->GetEntry()->Resize(55,20);
+      DGChTriggerThreshold_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AAChannelSlots", ChannelSlots, "HandleNumberEntries()");
 
       Int_t BitDepth = AAVMEManager::GetInstance()->GetDGManager()->GetNumADCBits();
       Int_t Trigger = pow(2,(BitDepth-1));
@@ -1129,15 +1132,15 @@ void AAInterface::FillAcquisitionFrame()
       // ADAQ number entry to set minimum sample for baseline calculation [sample]
       DGBaseline_HF->AddFrame(DGChBaselineCalcMin_NEL[ch] = new ADAQNumberEntryWithLabel(DGBaseline_HF, "Min.", DGChBaselineCalcMin_NEL_ID_Vec[ch]),
 			      new TGLayoutHints(kLHintsNormal, 10,0,0,0));
-      DGChBaselineCalcMin_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
-    
       DGChBaselineCalcMin_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
       DGChBaselineCalcMin_NEL[ch]->GetEntry()->SetNumber(0);
       DGChBaselineCalcMin_NEL[ch]->GetEntry()->Resize(55,20);
+      DGChBaselineCalcMin_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AAChannelSlots", ChannelSlots, "HandleNumberEntries()");
 
       // ADAQ number entry to set maximum sample for baseline calculation [sample]
       DGBaseline_HF->AddFrame(DGChBaselineCalcMax_NEL[ch] = new ADAQNumberEntryWithLabel(DGBaseline_HF, "Max.", DGChBaselineCalcMax_NEL_ID_Vec[ch]),
 			      new TGLayoutHints(kLHintsNormal, 15,0.0,0));
+      DGChBaselineCalcMax_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AAChannelSlots", ChannelSlots, "HandleNumberEntries()");
       DGChBaselineCalcMax_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
       DGChBaselineCalcMax_NEL[ch]->GetEntry()->SetNumber(30);
       DGChBaselineCalcMax_NEL[ch]->GetEntry()->Resize(55,20);
@@ -1159,6 +1162,7 @@ void AAInterface::FillAcquisitionFrame()
       DGChPSDTotalStart_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
       DGChPSDTotalStart_NEL[ch]->GetEntry()->SetNumber(-10);
       DGChPSDTotalStart_NEL[ch]->GetEntry()->Resize(45,20);
+      DGChPSDTotalStart_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AAChannelSlots", ChannelSlots, "HandleNumberEntries()");
     
     
       DGPSDTotal_HF->AddFrame(DGChPSDTotalStop_NEL[ch] = new ADAQNumberEntryWithLabel(DGPSDTotal_HF,
@@ -1168,6 +1172,7 @@ void AAInterface::FillAcquisitionFrame()
       DGChPSDTotalStop_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
       DGChPSDTotalStop_NEL[ch]->GetEntry()->SetNumber(39);
       DGChPSDTotalStop_NEL[ch]->GetEntry()->Resize(45,20);
+      DGChPSDTotalStop_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AAChannelSlots", ChannelSlots, "HandleNumberEntries()");
 
 
       TGHorizontalFrame *DGPSDTail_HF = new TGHorizontalFrame(DGChannelControl_GF);
@@ -1183,6 +1188,7 @@ void AAInterface::FillAcquisitionFrame()
       DGChPSDTailStart_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
       DGChPSDTailStart_NEL[ch]->GetEntry()->SetNumber(7);
       DGChPSDTailStart_NEL[ch]->GetEntry()->Resize(45,20);
+      DGChPSDTailStart_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AAChannelSlots", ChannelSlots, "HandleNumberEntries()");
     
     
       DGPSDTail_HF->AddFrame(DGChPSDTailStop_NEL[ch] = new ADAQNumberEntryWithLabel(DGPSDTail_HF,
@@ -1192,10 +1198,11 @@ void AAInterface::FillAcquisitionFrame()
       DGChPSDTailStop_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
       DGChPSDTailStop_NEL[ch]->GetEntry()->SetNumber(39);
       DGChPSDTailStop_NEL[ch]->GetEntry()->Resize(45,20);
-
-            DGChannelControl_GF->AddFrame(new TGLabel(DGChannelControl_GF, "Zero Length Encoding (ZLE)"),
+      DGChPSDTailStop_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AAChannelSlots", ChannelSlots, "HandleNumberEntries()");
+	    
+      DGChannelControl_GF->AddFrame(new TGLabel(DGChannelControl_GF, "Zero Length Encoding (ZLE)"),
 				    new TGLayoutHints(kLHintsLeft,0,0,10,0));
-    
+      
       TGHorizontalFrame *ZLE_HF1 = new TGHorizontalFrame(DGChannelControl_GF);
       DGChannelControl_GF->AddFrame(ZLE_HF1, new TGLayoutHints(kLHintsNormal, 10,0,0,0));
 
@@ -1210,6 +1217,7 @@ void AAInterface::FillAcquisitionFrame()
     
       DGChZLENegLogic_RB[ch] = new TGRadioButton(ZLELogicButtons_BG, "-", -1);
       DGChZLENegLogic_RB[ch]->SetState(kButtonDown);
+      DGChZLENegLogic_RB[ch]->Connect("Clicked()", "AAChannelSlots", ChannelSlots, "HandleRadioButtons()");
 
     
       DGChannelControl_GF->AddFrame(DGChZLEThreshold_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "Threshold (ADC)", -1),
@@ -1218,6 +1226,7 @@ void AAInterface::FillAcquisitionFrame()
       DGChZLEThreshold_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEANonNegative);
       DGChZLEThreshold_NEL[ch]->GetEntry()->SetNumber(2100);
       DGChZLEThreshold_NEL[ch]->GetEntry()->Resize(55,20);
+      DGChZLEThreshold_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AAChannelSlots", ChannelSlots, "HandleNumberEntries()");
     
 
       TGHorizontalFrame *ZLE_HF0 = new TGHorizontalFrame(DGChannelControl_GF);
@@ -1229,6 +1238,7 @@ void AAInterface::FillAcquisitionFrame()
       DGChZLEForward_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
       DGChZLEForward_NEL[ch]->GetEntry()->SetNumber(10);
       DGChZLEForward_NEL[ch]->GetEntry()->Resize(55,20);
+      DGChZLEForward_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AAChannelSlots", ChannelSlots, "HandleNumberEntries()");
 
       ZLE_HF0->AddFrame(DGChZLEBackward_NEL[ch] = new ADAQNumberEntryWithLabel(ZLE_HF0, "Back", -1),
 			new TGLayoutHints(kLHintsNormal, 15,0,0,0));
@@ -1236,38 +1246,42 @@ void AAInterface::FillAcquisitionFrame()
       DGChZLEBackward_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
       DGChZLEBackward_NEL[ch]->GetEntry()->SetNumber(10);
       DGChZLEBackward_NEL[ch]->GetEntry()->Resize(55,20);
+      DGChZLEBackward_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AAChannelSlots", ChannelSlots, "HandleNumberEntries()");
     }
     else if(DGPSDFW_RB->IsDown()){
 
-
       DGChannelControl_GF->AddFrame(new TGLabel(DGChannelControl_GF, "Acquisition settings"),
 				    new TGLayoutHints(kLHintsLeft,0,0,5,0));
-    
+      
       // Horizontal frame to hold the "enable" and "pulse polarity" buttons
       TGHorizontalFrame *DGChannelControl_HF = new TGHorizontalFrame(DGChannelControl_GF);
       DGChannelControl_GF->AddFrame(DGChannelControl_HF);
-    
+      
       // ROOT check button to enable channel for digitization
       DGChannelControl_HF->AddFrame(DGChEnable_CB[ch] = new TGCheckButton(DGChannelControl_HF, "Enable", DGChEnable_CB_ID_Vec[ch]),
 				    new TGLayoutHints(kLHintsCenterY,10,0,0,0));
+      DGChEnable_CB[ch]->Connect("Clicked()", "AAChannelSlots", ChannelSlots, "HandleCheckButtons()");
       if(ch == 0) 
 	DGChEnable_CB[ch]->SetState(kButtonDown);
-
+      
       // TGLabel for the pulse polarity radio buttons
-
+      
       DGChannelControl_HF->AddFrame(new TGLabel(DGChannelControl_HF,"Polarity:"),
 				    new TGLayoutHints(kLHintsCenterY,25,0,5,0));
-
+      
       TGHButtonGroup *DGChPolarity_BG = new TGHButtonGroup(DGChannelControl_HF, "");
       DGChPolarity_BG->SetTitlePos(TGButtonGroup::kCenter);
       DGChPolarity_BG->SetBorderDrawn(false);
       DGChannelControl_HF->AddFrame(DGChPolarity_BG, new TGLayoutHints(kLHintsNormal,-2,-15,-10,-10));
 
       DGChPosPolarity_RB[ch] = new TGRadioButton(DGChPolarity_BG, "+  ", -1);
+      DGChPosPolarity_RB[ch]->Connect("Clicked()", "AAChannelSlots", ChannelSlots, "HandleRadioButtons()");
+      
       DGChNegPolarity_RB[ch] = new TGRadioButton(DGChPolarity_BG, "-", -1);
       DGChNegPolarity_RB[ch]->SetState(kButtonDown);
+      DGChNegPolarity_RB[ch]->Connect("Clicked()", "AAChannelSlots", ChannelSlots, "HandleRadioButtons()");
       DGChPolarity_BG->Show();
-
+      
       // ADAQ number entry to set channel's DAC offset [hex : 0x0000 - 0xffff]]
       DGChannelControl_GF->AddFrame(DGChDCOffset_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "DC offset (hex)", DGChDCOffset_NEL_ID_Vec[ch]),
 				    new TGLayoutHints(kLHintsNormal, 10,0,0,0));
@@ -1276,6 +1290,7 @@ void AAInterface::FillAcquisitionFrame()
       DGChDCOffset_NEL[ch]->GetEntry()->SetLimitValues(0x0000,0xffff);
       DGChDCOffset_NEL[ch]->GetEntry()->SetNumber(0x8000);
       DGChDCOffset_NEL[ch]->GetEntry()->Resize(55,20);
+      DGChDCOffset_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AAChannelSlots", ChannelSlots, "HandleNumberEntries()");
       
       DGChannelControl_GF->AddFrame(DGChRecordLength_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF,
 											    "Record length (samples)",
@@ -1285,6 +1300,7 @@ void AAInterface::FillAcquisitionFrame()
       DGChRecordLength_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
       DGChRecordLength_NEL[ch]->GetEntry()->Resize(55,20);
       DGChRecordLength_NEL[ch]->GetEntry()->SetNumber(512);
+      DGChRecordLength_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AAChannelSlots", ChannelSlots, "HandleNumberEntries()");
 
       DGChannelControl_GF->AddFrame(DGChBaselineSamples_CBL[ch] = new ADAQComboBoxWithLabel(DGChannelControl_GF, "Baseline (samples)", -1),
 				    new TGLayoutHints(kLHintsLeft, 10,0,0,0));
@@ -1313,6 +1329,7 @@ void AAInterface::FillAcquisitionFrame()
       }
       DGChBaselineSamples_CBL[ch]->GetComboBox()->Resize(57,20);
       DGChBaselineSamples_CBL[ch]->GetComboBox()->Select(1);
+      DGChBaselineSamples_CBL[ch]->GetComboBox()->Connect("Selected(int,int)", "AAChannelSlots", ChannelSlots, "HandleComboBoxes(int,int)");
       
       DGChannelControl_GF->AddFrame(DGChChargeSensitivity_CBL[ch] = new ADAQComboBoxWithLabel(DGChannelControl_GF, "Q sensitivity (fC/LSB)", -1),
 				    new TGLayoutHints(kLHintsLeft, 10,0,0,0));
@@ -1340,6 +1357,7 @@ void AAInterface::FillAcquisitionFrame()
       }
       DGChChargeSensitivity_CBL[ch]->GetComboBox()->Resize(57,20);
       DGChChargeSensitivity_CBL[ch]->GetComboBox()->Select(0);
+      DGChChargeSensitivity_CBL[ch]->GetComboBox()->Connect("Selected(int,int)", "AAChannelSlots", ChannelSlots, "HandleComboBoxes(int,int)");
       
       DGChannelControl_GF->AddFrame(DGChPSDCut_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF,
 										      "PSD readout cut",
@@ -1350,6 +1368,7 @@ void AAInterface::FillAcquisitionFrame()
       DGChPSDCut_NEL[ch]->GetEntry()->Resize(55,20);
       DGChPSDCut_NEL[ch]->GetEntry()->SetNumber(200);
       DGChPSDCut_NEL[ch]->GetEntry()->SetState(false);
+      DGChPSDCut_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AAChannelSlots", ChannelSlots, "HandleNumberEntries()");
 
       
       DGChannelControl_GF->AddFrame(new TGLabel(DGChannelControl_GF, "Trigger settings"),
@@ -1361,10 +1380,10 @@ void AAInterface::FillAcquisitionFrame()
       // ADAQ number entry to set channel's trigger threshold [ADC]
       Trigger_HF0->AddFrame(DGChTriggerThreshold_NEL[ch] = new ADAQNumberEntryWithLabel(Trigger_HF0, "Level (ADC)", DGChTriggerThreshold_NEL_ID_Vec[ch]),
 			    new TGLayoutHints(kLHintsNormal, 10,0,0,0));
-      DGChTriggerThreshold_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
       DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
       DGChTriggerThreshold_NEL[ch]->GetEntry()->SetNumber(500);
       DGChTriggerThreshold_NEL[ch]->GetEntry()->Resize(55,20);
+      DGChTriggerThreshold_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
       
       Trigger_HF0->AddFrame(DGChTriggerConfig_CBL[ch] = new ADAQComboBoxWithLabel(Trigger_HF0, "", -1),
 			    new TGLayoutHints(kLHintsLeft, 5,0,0,0));
@@ -1372,6 +1391,7 @@ void AAInterface::FillAcquisitionFrame()
       DGChTriggerConfig_CBL[ch]->GetComboBox()->AddEntry("Threshold",1);
       DGChTriggerConfig_CBL[ch]->GetComboBox()->Resize(80,20);
       DGChTriggerConfig_CBL[ch]->GetComboBox()->Select(1);
+      DGChTriggerConfig_CBL[ch]->GetComboBox()->Connect("Selected(int,int)", "AAChannelSlots", ChannelSlots, "HandleComboBoxes(int,int)");
 
       /* Trigger holdoff should be channel-specific but it is NOT as
 	 of CAENDigitizer-2.6.7. I have asked CAEN for
@@ -1393,6 +1413,8 @@ void AAInterface::FillAcquisitionFrame()
       DGChTriggerValidation_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
       DGChTriggerValidation_NEL[ch]->GetEntry()->SetNumber(50);
       DGChTriggerValidation_NEL[ch]->GetEntry()->Resize(55,20);
+      DGChTriggerValidation_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
+	    
       
       // PSD integral (gate) settings
 
@@ -1410,6 +1432,7 @@ void AAInterface::FillAcquisitionFrame()
       DGChShortGate_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
       DGChShortGate_NEL[ch]->GetEntry()->Resize(49,20);
       DGChShortGate_NEL[ch]->GetEntry()->SetNumber(100);
+      DGChShortGate_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
       
       PSD_HF0->AddFrame(DGChLongGate_NEL[ch] = new ADAQNumberEntryWithLabel(PSD_HF0,
 									    "Long",
@@ -1419,6 +1442,7 @@ void AAInterface::FillAcquisitionFrame()
       DGChLongGate_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
       DGChLongGate_NEL[ch]->GetEntry()->Resize(49,20);
       DGChLongGate_NEL[ch]->GetEntry()->SetNumber(450);
+      DGChLongGate_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
 
       TGHorizontalFrame *PSD_HF1 = new TGHorizontalFrame(DGChannelControl_GF);
       DGChannelControl_GF->AddFrame(PSD_HF1, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
@@ -1431,6 +1455,7 @@ void AAInterface::FillAcquisitionFrame()
       DGChPreTrigger_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
       DGChPreTrigger_NEL[ch]->GetEntry()->Resize(49,20);
       DGChPreTrigger_NEL[ch]->GetEntry()->SetNumber(100);
+      DGChPreTrigger_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
       
       PSD_HF1->AddFrame(DGChGateOffset_NEL[ch] = new ADAQNumberEntryWithLabel(PSD_HF1,
 									      "Gate offset",
@@ -1439,6 +1464,7 @@ void AAInterface::FillAcquisitionFrame()
       DGChGateOffset_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
       DGChGateOffset_NEL[ch]->GetEntry()->Resize(49,20);
       DGChGateOffset_NEL[ch]->GetEntry()->SetNumber(50);
+      DGChGateOffset_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
     }
   }
   
@@ -3014,7 +3040,7 @@ void AAInterface::SaveSettings()
   
   if(AutoSaveSettings)
     SaveSettingsToFile();
-
+  
   if(TheSettings->ChannelLockToZero)
     UpdateChannelSettingsToChannelZero();
 }
@@ -3588,11 +3614,10 @@ void AAInterface::UpdateHVMonitors(int Channel, int HV, int I)
 void AAInterface::UpdateChannelSettingsToChannelZero()
 {
   AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
-  Int_t NumDGChannels = TheVMEManager->GetDGManager()->GetNumChannels();
-
+  
   Int_t LowerChannel = DGChannelLockLower_NEL->GetEntry()->GetIntNumber();
   Int_t UpperChannel = DGChannelLockUpper_NEL->GetEntry()->GetIntNumber();
-  
+
   for(Int_t ch=LowerChannel; ch<UpperChannel; ch++){
     
     DGChEnable_CB[ch]->SetState(DGChEnable_CB[0]->GetState());

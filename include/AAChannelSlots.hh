@@ -25,6 +25,7 @@ public:
   ~AAChannelSlots();
 
   void HandleCheckButtons();
+  void HandleComboBoxes(Int_t, Int_t);
   void HandleNumberEntries();
   void HandleRadioButtons();
 

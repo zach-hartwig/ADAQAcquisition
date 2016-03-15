@@ -187,7 +187,7 @@ void AASubtabSlots::HandleNumberEntries()
 {
   // Get the pointer and the widget ID for the active number entry
   TGNumberEntry *ActiveEntry = (TGNumberEntry *) gTQSender;
-  int ActiveID = ActiveEntry->WidgetId();
+  Int_t ActiveID = ActiveEntry->WidgetId();
 
   TI->SaveSettings();
   
@@ -199,7 +199,7 @@ void AASubtabSlots::HandleNumberEntries()
     break;
 
   case SpectrumCalibrationPulseUnit_NEL_ID:{
-    double Value = 0.;
+    Double_t Value = 0.;
     if(ActiveID == SpectrumCalibrationEnergy_NEL_ID)
       Value = TI->SpectrumCalibrationEnergy_NEL->GetEntry()->GetNumber();
     else

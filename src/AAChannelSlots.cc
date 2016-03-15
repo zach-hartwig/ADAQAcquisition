@@ -31,12 +31,14 @@ void AAChannelSlots::HandleCheckButtons()
   int ActiveID = ActiveButton->WidgetId();
   
   TI->SaveSettings();
-
+  
   switch(ActiveID){
     
   case DGChannelLockToZero_CB_ID:
-    if(ActiveButton->IsDown())
+    if(ActiveButton->IsDown()){
       TI->UpdateChannelSettingsToChannelZero();
+      TI->SaveSettings();
+    }
     break;
     
   default:
@@ -45,12 +47,17 @@ void AAChannelSlots::HandleCheckButtons()
 }
 
 
+void AAChannelSlots::HandleComboBoxes(Int_t ActiveID, Int_t SelectedID)
+{
+  TI->SaveSettings();
+}
+
 void AAChannelSlots::HandleNumberEntries()
 {
   // Get the pointer and the widget ID for the active number entry
   TGNumberEntry *ActiveEntry = (TGNumberEntry *) gTQSender;
-  int ActiveID = ActiveEntry->WidgetId();
-  
+  Int_t ActiveID = ActiveEntry->WidgetId();
+
   TI->SaveSettings();
 
   AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
@@ -88,7 +95,7 @@ void AAChannelSlots::HandleNumberEntries()
 void AAChannelSlots::HandleRadioButtons()
 {
   TGRadioButton *ActiveButton = (TGRadioButton *) gTQSender;
-  int ActiveID = ActiveButton->WidgetId();
-  
+  Int_t ActiveID = ActiveButton->WidgetId();
+
   TI->SaveSettings();
 }
