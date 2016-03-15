@@ -283,11 +283,14 @@ void AASubtabSlots::HandleTextButtons()
     TheVMEManager->GetDGManager()->GetChannelBufferStatus(BufferStatus);
 
     Double_t BufferLevel = 0.;
-    TheVMEManager->GetDGManager()->GetBufferLevel(BufferLevel);
+    if(TI->TheSettings->STDFirmware)
+      TheVMEManager->GetDGManager()->GetSTDBufferLevel(BufferLevel);
+    else if(TI->TheSettings->PSDFirmware)
+      TheVMEManager->GetDGManager()->GetPSDBufferLevel(BufferLevel);
     
     TI->DGBufferStatus_PB->Reset();
     TI->DGBufferStatus_PB->Increment(BufferLevel*100);
-
+    
     if(BufferLevel > 0.90){
       TI->DGBufferStatus_PB->SetBarColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOff));
       TI->DGBufferStatus_PB->SetForegroundColor(TI->ColorManager->Number2Pixel(TI->ButtonForeColor));
