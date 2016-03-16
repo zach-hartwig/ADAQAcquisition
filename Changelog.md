@@ -1,11 +1,27 @@
 ## ADAQAcquisition Source Code Change Log
 
 name: Changelog.md  
-date: 07 Mar 16 (last updated)
+date: 16 Mar 16 (last updated)
 auth: Zach Hartwig  
 mail: hartwig@psfc.mit.edu
 
 ## Version 1.6 Series
+
+### 1.6.4
+
+ - Added basic ability to temperature-calibrate digitizer ADCs from
+   the "VME connection" tab for x725 and x730 family of digitizers
+ 
+ - Enabling digitizer channel 0 settings to be automatically applied
+   to a user-selected range of channels. Greatly eases assigning
+   settings for many-channel digitizers.
+
+ - A number of important bugs have been fixed:
+   - Correctly allocating number of channels in AASettings class
+   - Fixing ability to plot waveforms in STD firmware
+   - Enabling HV tab settings to be loaded from settings file
+   - Enabling digitizer FPGA buffer check for CAEN DPP-PSD firmware
+   
 
 ### 1.6.3
 
