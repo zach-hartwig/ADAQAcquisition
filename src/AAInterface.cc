@@ -3564,6 +3564,9 @@ void AAInterface::UpdateAfterAQTimerStopped(bool ROOTFileOpen)
 
   SetAcquisitionWidgetState(true, kButtonUp);
   
+  // Re-enable the timer settings text field
+  AQTime_NEL->GetEntry()->SetState(true);
+  
   // Reset the attributes of the timer start text button
   AQTimerStart_TB->SetBackgroundColor(ColorManager->Number2Pixel(18));
   AQTimerStart_TB->SetForegroundColor(ColorManager->Number2Pixel(kBlack));
