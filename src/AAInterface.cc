@@ -3641,7 +3641,7 @@ void AAInterface::UpdateChannelSettingsToChannelZero()
   Int_t LowerChannel = DGChannelLockLower_NEL->GetEntry()->GetIntNumber();
   Int_t UpperChannel = DGChannelLockUpper_NEL->GetEntry()->GetIntNumber();
 
-  for(Int_t ch=LowerChannel; ch<UpperChannel; ch++){
+  for(Int_t ch=LowerChannel; ch<=UpperChannel; ch++){
     
     DGChEnable_CB[ch]->SetState(DGChEnable_CB[0]->GetState());
     DGChPosPolarity_RB[ch]->SetState(DGChPosPolarity_RB[0]->GetState());
