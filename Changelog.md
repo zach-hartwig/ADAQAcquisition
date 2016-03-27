@@ -1,11 +1,20 @@
 ## ADAQAcquisition Source Code Change Log
 
 name: Changelog.md  
-date: 16 Mar 16 (last updated)
+date: 26 Mar 16 (last updated)
 auth: Zach Hartwig  
 mail: hartwig@psfc.mit.edu
 
 ## Version 1.6 Series
+
+### 1.6.5
+
+ - Properly re-enabling the acquisition timer setting widget after
+   finishing a timed acquisition with data written to ADAQ file
+
+ - Correctly setting the range to apply digitizer channel 0 settings
+   to when the user has enabled the channel lock-to-0 feature
+   
 
 ### 1.6.4
 
