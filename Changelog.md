@@ -1,11 +1,20 @@
 ## ADAQAcquisition Source Code Change Log
 
 name: Changelog.md  
-date: 26 Mar 16 (last updated)
+date: 01 Apar 16 (last updated)
 auth: Zach Hartwig  
 mail: hartwig@psfc.mit.edu
 
 ## Version 1.6 Series
+
+### 1.6.6
+
+ - Preventing seg fault triggers when the user attempts to calibrate
+   digitizer ADCs without connecting to a digitizer
+
+ - Properly storing uncalibrated energy data to the ADAQ file
+   regardless of whether spectrum is calibrated/uncalibrated
+
 
 ### 1.6.5
 
