@@ -708,14 +708,7 @@ void AAAcquisitionManager::StartAcquisition()
 	  // Set the PSD long integral to the pulse area
 	  PulseArea = PSDTotal;
 	}
-	
-	if(CalibrationEnable[ch]){
-	  if(TheSettings->SpectrumPulseHeight)
-	    PulseHeight = CalibrationCurves[ch]->Eval(PulseHeight);
-	  else
-	    PulseArea = CalibrationCurves[ch]->Eval(PulseArea);
-	}
-	
+
 	/////////////////////////////////////////
 	// Trigger time stamp rollover correction
 
@@ -779,6 +772,22 @@ void AAAcquisitionManager::StartAcquisition()
 	  if(TheSettings->WaveformStorePSDData){
 	    WaveformData[ch]->SetPSDTotalIntegral(PSDTotal);
 	    WaveformData[ch]->SetPSDTailIntegral(PSDTail);
+	  }
+
+
+	  ////////////////////////////////////////////
+	  // Handle calibration for live-time analysis
+
+	  // Note that calibration of pulse area/height data occurs
+	  // after the energy data has been saved to the WaveformData
+	  // class. This ensures that uncalibrated energy data is
+	  // written to the ADAQ file for later processing.
+
+	  if(CalibrationEnable[ch]){
+	    if(TheSettings->SpectrumPulseHeight)
+	      PulseHeight = CalibrationCurves[ch]->Eval(PulseHeight);
+	    else
+	      PulseArea = CalibrationCurves[ch]->Eval(PulseArea);
 	  }
 
 	  /////////////////////////////////////////
