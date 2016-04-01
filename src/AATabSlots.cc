@@ -251,13 +251,10 @@ void AATabSlots::HandleConnectionTextButtons()
     }
     break;
 
-  case DGCalibrateADCs_TB_ID:{
-    ADAQDigitizer *DGMgr = TheVMEManager->GetDGManager();
-    if(DGMgr->GetLinkEstablished()){
-      DGMgr->Calibrate();
-    }
+  case DGCalibrateADCs_TB_ID:
+    if(TheVMEManager->GetDGLinkOpen())
+      TheVMEManager->GetDGManager()->Calibrate();
     break;
-  }
     
   case BRBoardEnable_TB_ID:
     if(TI->BoardEnable_TB[BR]->GetString() == "Board enabled"){
