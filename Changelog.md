@@ -9,8 +9,9 @@ mail: hartwig@psfc.mit.edu
 
 ### 1.6.7
 
- - Locking channel settings together for pre-trigger on DT5790 since
-   this the pre-trigger is a global setting on this device
+ - Locking channel settings together for the channel pretrigger and
+   the channel record length on DT5790 since these are both global
+   settings for the x720 family running DPP-PSD firmware
 
 
 ### 1.6.6
