@@ -1,11 +1,17 @@
 ## ADAQAcquisition Source Code Change Log
 
 name: Changelog.md  
-date: 01 Apar 16 (last updated)
+date: 12 Apr 16 (last updated)
 auth: Zach Hartwig  
 mail: hartwig@psfc.mit.edu
 
 ## Version 1.6 Series
+
+### 1.6.7
+
+ - Locking channel settings together for pre-trigger on DT5790 since
+   this the pre-trigger is a global setting on this device
+
 
 ### 1.6.6
 
