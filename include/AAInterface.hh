@@ -124,11 +124,17 @@ private:
 
   // Channel-specific variables for acquisition setting widgets
   vector<string> DGChannelLabels;
+
   vector<Int_t> DGChEnable_CB_ID_Vec;
+
   vector<Int_t> DGChDCOffset_NEL_ID_Vec;
+
   vector<Int_t> DGChTriggerThreshold_NEL_ID_Vec;
   map<Int_t, Int_t> DGChTriggerThreshold_NEL_ID_Map;
-
+  
+  vector<Int_t> DGChRecordLength_NEL_ID_Vec;
+  map<Int_t, Int_t> DGChRecordLength_NEL_ID_Map;
+  
   vector<Int_t> DGChPreTrigger_NEL_ID_Vec;
   map<Int_t, Int_t> DGChPreTrigger_NEL_ID_Map;
 

@@ -1010,6 +1010,22 @@ void AAInterface::FillAcquisitionFrame()
     (Int_t)DGCh12BaselineCalcMax_NEL_ID, (Int_t)DGCh13BaselineCalcMax_NEL_ID, (Int_t)DGCh14BaselineCalcMax_NEL_ID,
     (Int_t)DGCh15BaselineCalcMax_NEL_ID;
 
+  DGChRecordLength_NEL_ID_Vec += 
+    (Int_t)DGCh0RecordLength_NEL_ID,  (Int_t)DGCh1RecordLength_NEL_ID,  (Int_t)DGCh2RecordLength_NEL_ID,
+    (Int_t)DGCh3RecordLength_NEL_ID,  (Int_t)DGCh4RecordLength_NEL_ID,  (Int_t)DGCh5RecordLength_NEL_ID, 
+    (Int_t)DGCh6RecordLength_NEL_ID,  (Int_t)DGCh7RecordLength_NEL_ID,  (Int_t)DGCh7RecordLength_NEL_ID,
+    (Int_t)DGCh9RecordLength_NEL_ID,  (Int_t)DGCh10RecordLength_NEL_ID, (Int_t)DGCh11RecordLength_NEL_ID,
+    (Int_t)DGCh12RecordLength_NEL_ID, (Int_t)DGCh13RecordLength_NEL_ID, (Int_t)DGCh14RecordLength_NEL_ID,
+    (Int_t)DGCh15RecordLength_NEL_ID;
+
+  insert(DGChRecordLength_NEL_ID_Map)
+    ((Int_t)DGCh0RecordLength_NEL_ID,0)   ((Int_t)DGCh1RecordLength_NEL_ID,1)   ((Int_t)DGCh2RecordLength_NEL_ID,2) 
+    ((Int_t)DGCh3RecordLength_NEL_ID,3)   ((Int_t)DGCh4RecordLength_NEL_ID,4)   ((Int_t)DGCh5RecordLength_NEL_ID,5)
+    ((Int_t)DGCh6RecordLength_NEL_ID,6)   ((Int_t)DGCh7RecordLength_NEL_ID,7)   ((Int_t)DGCh8RecordLength_NEL_ID,8)
+    ((Int_t)DGCh9RecordLength_NEL_ID,9)   ((Int_t)DGCh10RecordLength_NEL_ID,10) ((Int_t)DGCh11RecordLength_NEL_ID,11)
+    ((Int_t)DGCh12RecordLength_NEL_ID,12) ((Int_t)DGCh13RecordLength_NEL_ID,13) ((Int_t)DGCh14RecordLength_NEL_ID,14)
+    ((Int_t)DGCh15RecordLength_NEL_ID,15);
+
   DGChPreTrigger_NEL_ID_Vec += 
     (Int_t)DGCh0PreTrigger_NEL_ID,  (Int_t)DGCh1PreTrigger_NEL_ID,  (Int_t)DGCh2PreTrigger_NEL_ID,
     (Int_t)DGCh3PreTrigger_NEL_ID,  (Int_t)DGCh4PreTrigger_NEL_ID,  (Int_t)DGCh5PreTrigger_NEL_ID, 
@@ -1330,7 +1346,7 @@ void AAInterface::FillAcquisitionFrame()
       
       DGChannelControl_GF->AddFrame(DGChRecordLength_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF,
 											    "Record length (samples)",
-											    -1),
+											    DGChRecordLength_NEL_ID_Vec[ch]),
 				    new TGLayoutHints(kLHintsLeft,10,0,0,0));
       DGChRecordLength_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
       DGChRecordLength_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);

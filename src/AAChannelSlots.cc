@@ -61,11 +61,21 @@ void AAChannelSlots::HandleNumberEntries()
   TI->SaveSettings();
 
   AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
-  
-  if(ActiveID >= DGCh0PreTrigger_NEL_ID and ActiveID <= DGCh15PreTrigger_NEL_ID){
+
+  // x720 + DPP-PSD specific settings
+
+  ZBoardType DGType = TheVMEManager->GetDGManager()->GetBoardType();
+  if(DGType == zDT5790M or DGType == zDT5790N or DGType == zDT5790P){
     
-    ZBoardType DGType = TheVMEManager->GetDGManager()->GetBoardType();
-    if(DGType == zDT5790M or DGType == zDT5790N or DGType == zDT5790P){
+    if(ActiveID >= DGCh0RecordLength_NEL_ID and ActiveID <= DGCh15RecordLength_NEL_ID){
+      if(ActiveID == DGCh0RecordLength_NEL_ID)
+	TI->DGChRecordLength_NEL[1]->GetEntry()->SetIntNumber(ActiveEntry->GetIntNumber());
+      
+      else if(ActiveID == DGCh1RecordLength_NEL_ID)
+	TI->DGChRecordLength_NEL[0]->GetEntry()->SetIntNumber(ActiveEntry->GetIntNumber());
+    }
+    
+    if(ActiveID >= DGCh0PreTrigger_NEL_ID and ActiveID <= DGCh15PreTrigger_NEL_ID){
       if(ActiveID == DGCh0PreTrigger_NEL_ID)
 	TI->DGChPreTrigger_NEL[1]->GetEntry()->SetIntNumber(ActiveEntry->GetIntNumber());
       
@@ -73,36 +83,6 @@ void AAChannelSlots::HandleNumberEntries()
 	TI->DGChPreTrigger_NEL[0]->GetEntry()->SetIntNumber(ActiveEntry->GetIntNumber());
     }
   }
-
-  /*
-  switch(ActiveID){
-    
-    // Set the channel trigger thresholds
-  case DGCh0TriggerThreshold_NEL_ID:
-  case DGCh1TriggerThreshold_NEL_ID:
-  case DGCh2TriggerThreshold_NEL_ID:
-  case DGCh3TriggerThreshold_NEL_ID:
-  case DGCh4TriggerThreshold_NEL_ID:
-  case DGCh5TriggerThreshold_NEL_ID:
-  case DGCh6TriggerThreshold_NEL_ID:
-  case DGCh7TriggerThreshold_NEL_ID:{
-
-    // Only enable setting if digitizer is currently acquiring
-    if(TheVMEManager->GetDGEnable()){
-      
-      // Get the channel number to be set
-      uint32_t ch = TI->DGChTriggerThreshold_NEL_ID_Map[ActiveID];
-      
-      // Get the trigger threshold value [ADC] to be set
-      uint32_t thr = TI->DGChTriggerThreshold_NEL[ch]->GetEntry()->GetIntNumber();
-      
-      // Set the channel trigger threshold 
-      TheVMEManager->GetDGManager()->SetChannelTriggerThreshold(ch, thr);
-    }
-    break;
-  }
-  }
-  */
 }
 
 
