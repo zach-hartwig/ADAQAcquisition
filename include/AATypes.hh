@@ -193,6 +193,23 @@ enum{
   DGCh13BaselineCalcMax_NEL_ID,
   DGCh14BaselineCalcMax_NEL_ID,
   DGCh15BaselineCalcMax_NEL_ID,
+
+  DGCh0PreTrigger_NEL_ID,
+  DGCh1PreTrigger_NEL_ID,
+  DGCh2PreTrigger_NEL_ID,
+  DGCh3PreTrigger_NEL_ID,
+  DGCh4PreTrigger_NEL_ID,
+  DGCh5PreTrigger_NEL_ID,
+  DGCh6PreTrigger_NEL_ID,
+  DGCh7PreTrigger_NEL_ID,
+  DGCh8PreTrigger_NEL_ID,
+  DGCh9PreTrigger_NEL_ID,
+  DGCh10PreTrigger_NEL_ID,
+  DGCh11PreTrigger_NEL_ID,
+  DGCh12PreTrigger_NEL_ID,
+  DGCh13PreTrigger_NEL_ID,
+  DGCh14PreTrigger_NEL_ID,
+  DGCh15PreTrigger_NEL_ID,
   
   ///////////////////////////////////////////////////////////////////////
   // Widget IDs for the display subframe (top-right of acquisition frame)

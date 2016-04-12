@@ -119,15 +119,18 @@ private:
 
   // Variables for use with high voltage widgets
   vector<string> HVChLabels;
-  vector<int> HVChPower_TB_ID_Vec;
-  map<int,int> HVChPower_TB_ID_Map;
+  vector<Int_t> HVChPower_TB_ID_Vec;
+  map<Int_t, Int_t> HVChPower_TB_ID_Map;
 
   // Channel-specific variables for acquisition setting widgets
   vector<string> DGChannelLabels;
-  vector<int> DGChEnable_CB_ID_Vec;
-  vector<int> DGChDCOffset_NEL_ID_Vec;
-  vector<int> DGChTriggerThreshold_NEL_ID_Vec;
-  map<int,int> DGChTriggerThreshold_NEL_ID_Map;
+  vector<Int_t> DGChEnable_CB_ID_Vec;
+  vector<Int_t> DGChDCOffset_NEL_ID_Vec;
+  vector<Int_t> DGChTriggerThreshold_NEL_ID_Vec;
+  map<Int_t, Int_t> DGChTriggerThreshold_NEL_ID_Map;
+
+  vector<Int_t> DGChPreTrigger_NEL_ID_Vec;
+  map<Int_t, Int_t> DGChPreTrigger_NEL_ID_Map;
 
   // Channel-specific variables for analysis setting widgets
   vector<int> DGChBaselineCalcMin_NEL_ID_Vec;

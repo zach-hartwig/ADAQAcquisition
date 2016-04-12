@@ -61,7 +61,20 @@ void AAChannelSlots::HandleNumberEntries()
   TI->SaveSettings();
 
   AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
+  
+  if(ActiveID >= DGCh0PreTrigger_NEL_ID and ActiveID <= DGCh15PreTrigger_NEL_ID){
+    
+    ZBoardType DGType = TheVMEManager->GetDGManager()->GetBoardType();
+    if(DGType == zDT5790M or DGType == zDT5790N or DGType == zDT5790P){
+      if(ActiveID == DGCh0PreTrigger_NEL_ID)
+	TI->DGChPreTrigger_NEL[1]->GetEntry()->SetIntNumber(ActiveEntry->GetIntNumber());
+      
+      else if(ActiveID == DGCh1PreTrigger_NEL_ID)
+	TI->DGChPreTrigger_NEL[0]->GetEntry()->SetIntNumber(ActiveEntry->GetIntNumber());
+    }
+  }
 
+  /*
   switch(ActiveID){
     
     // Set the channel trigger thresholds
@@ -89,6 +102,7 @@ void AAChannelSlots::HandleNumberEntries()
     break;
   }
   }
+  */
 }
 
 

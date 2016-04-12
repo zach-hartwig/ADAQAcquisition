@@ -1010,6 +1010,22 @@ void AAInterface::FillAcquisitionFrame()
     (Int_t)DGCh12BaselineCalcMax_NEL_ID, (Int_t)DGCh13BaselineCalcMax_NEL_ID, (Int_t)DGCh14BaselineCalcMax_NEL_ID,
     (Int_t)DGCh15BaselineCalcMax_NEL_ID;
 
+  DGChPreTrigger_NEL_ID_Vec += 
+    (Int_t)DGCh0PreTrigger_NEL_ID,  (Int_t)DGCh1PreTrigger_NEL_ID,  (Int_t)DGCh2PreTrigger_NEL_ID,
+    (Int_t)DGCh3PreTrigger_NEL_ID,  (Int_t)DGCh4PreTrigger_NEL_ID,  (Int_t)DGCh5PreTrigger_NEL_ID, 
+    (Int_t)DGCh6PreTrigger_NEL_ID,  (Int_t)DGCh7PreTrigger_NEL_ID,  (Int_t)DGCh7PreTrigger_NEL_ID,
+    (Int_t)DGCh9PreTrigger_NEL_ID,  (Int_t)DGCh10PreTrigger_NEL_ID, (Int_t)DGCh11PreTrigger_NEL_ID,
+    (Int_t)DGCh12PreTrigger_NEL_ID, (Int_t)DGCh13PreTrigger_NEL_ID, (Int_t)DGCh14PreTrigger_NEL_ID,
+    (Int_t)DGCh15PreTrigger_NEL_ID;
+
+  insert(DGChPreTrigger_NEL_ID_Map)
+    ((Int_t)DGCh0PreTrigger_NEL_ID,0)   ((Int_t)DGCh1PreTrigger_NEL_ID,1)   ((Int_t)DGCh2PreTrigger_NEL_ID,2) 
+    ((Int_t)DGCh3PreTrigger_NEL_ID,3)   ((Int_t)DGCh4PreTrigger_NEL_ID,4)   ((Int_t)DGCh5PreTrigger_NEL_ID,5)
+    ((Int_t)DGCh6PreTrigger_NEL_ID,6)   ((Int_t)DGCh7PreTrigger_NEL_ID,7)   ((Int_t)DGCh8PreTrigger_NEL_ID,8)
+    ((Int_t)DGCh9PreTrigger_NEL_ID,9)   ((Int_t)DGCh10PreTrigger_NEL_ID,10) ((Int_t)DGCh11PreTrigger_NEL_ID,11)
+    ((Int_t)DGCh12PreTrigger_NEL_ID,12) ((Int_t)DGCh13PreTrigger_NEL_ID,13) ((Int_t)DGCh14PreTrigger_NEL_ID,14)
+    ((Int_t)DGCh15PreTrigger_NEL_ID,15);
+
   
   //////////////////////////////
   // Fill left vertical panel //
@@ -1429,11 +1445,11 @@ void AAInterface::FillAcquisitionFrame()
 
       DGChannelControl_GF->AddFrame(DGChTriggerValidation_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "Validation (samples)", -1),
 			       new TGLayoutHints(kLHintsNormal, 10,0,0,0));
-      DGChTriggerValidation_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
+      DGChTriggerValidation_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AAChannelSlots", ChannelSlots, "HandleNumberEntries()");
       DGChTriggerValidation_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
       DGChTriggerValidation_NEL[ch]->GetEntry()->SetNumber(50);
       DGChTriggerValidation_NEL[ch]->GetEntry()->Resize(55,20);
-      DGChTriggerValidation_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
+      DGChTriggerValidation_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AAChannelSlots", ChannelSlots, "HandleNumberEntries()");
 	    
       
       // PSD integral (gate) settings
@@ -1452,7 +1468,7 @@ void AAInterface::FillAcquisitionFrame()
       DGChShortGate_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
       DGChShortGate_NEL[ch]->GetEntry()->Resize(49,20);
       DGChShortGate_NEL[ch]->GetEntry()->SetNumber(100);
-      DGChShortGate_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
+      DGChShortGate_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AAChannelSlots", ChannelSlots, "HandleNumberEntries()");
       
       PSD_HF0->AddFrame(DGChLongGate_NEL[ch] = new ADAQNumberEntryWithLabel(PSD_HF0,
 									    "Long",
@@ -1462,20 +1478,20 @@ void AAInterface::FillAcquisitionFrame()
       DGChLongGate_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
       DGChLongGate_NEL[ch]->GetEntry()->Resize(49,20);
       DGChLongGate_NEL[ch]->GetEntry()->SetNumber(450);
-      DGChLongGate_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
+      DGChLongGate_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AAChannelSlots", ChannelSlots, "HandleNumberEntries()");
 
       TGHorizontalFrame *PSD_HF1 = new TGHorizontalFrame(DGChannelControl_GF);
       DGChannelControl_GF->AddFrame(PSD_HF1, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
 
       PSD_HF1->AddFrame(DGChPreTrigger_NEL[ch] = new ADAQNumberEntryWithLabel(PSD_HF1,
 									      "PreTrig",
-									      -1),
+									      DGChPreTrigger_NEL_ID_Vec[ch]),
 			new TGLayoutHints(kLHintsLeft,10,0,0,0));
       DGChPreTrigger_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
       DGChPreTrigger_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
       DGChPreTrigger_NEL[ch]->GetEntry()->Resize(49,20);
       DGChPreTrigger_NEL[ch]->GetEntry()->SetNumber(100);
-      DGChPreTrigger_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
+      DGChPreTrigger_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AAChannelSlots", ChannelSlots, "HandleNumberEntries()");
       
       PSD_HF1->AddFrame(DGChGateOffset_NEL[ch] = new ADAQNumberEntryWithLabel(PSD_HF1,
 									      "Gate offset",
@@ -1484,7 +1500,7 @@ void AAInterface::FillAcquisitionFrame()
       DGChGateOffset_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
       DGChGateOffset_NEL[ch]->GetEntry()->Resize(49,20);
       DGChGateOffset_NEL[ch]->GetEntry()->SetNumber(50);
-      DGChGateOffset_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
+      DGChGateOffset_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AAChannelSlots", ChannelSlots, "HandleNumberEntries()");
     }
   }
   

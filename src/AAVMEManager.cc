@@ -354,8 +354,9 @@ bool AAVMEManager::ProgramDigitizers()
       DGMgr->SetRecordLength(TheSettings->ChRecordLength[ch], ch);
       
       DGMgr->SetChannelDCOffset(ch, TheSettings->ChDCOffset[ch]);
-      
-      DGMgr->SetDPPPreTriggerSize(ch, TheSettings->ChPreTrigger[ch]);
+
+      if(ch==0)
+	DGMgr->SetDPPPreTriggerSize(ch, TheSettings->ChPreTrigger[ch]);
       
       if(TheSettings->ChPosPolarity[ch])
 	DGMgr->SetChannelPulsePolarity(ch, CAEN_DGTZ_PulsePolarityPositive);
