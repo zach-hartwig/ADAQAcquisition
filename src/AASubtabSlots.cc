@@ -299,20 +299,6 @@ void AASubtabSlots::HandleTextButtons()
       TI->DGBufferStatus_PB->SetBarColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOn));
       TI->DGBufferStatus_PB->SetForegroundColor(TI->ColorManager->Number2Pixel(kBlack));
     }
-
-    // This check presently unused due to potentially severe bug in
-    // CAEN firmware that prevents 0x1n88:bit[0] from being correctly
-    // set to indicate if channel memory is full when record length is
-    // below ~285 samples. ZSH (10 Jul 15)
-    
-    /*
-    bool BufferFull = false;
-    for(int ch=0; ch<DGChannels; ch++){
-      if(BufferStatus[ch] == true)
-	BufferFull = true;
-    }
-    */
-    
     break;
   }
 
