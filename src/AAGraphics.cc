@@ -53,10 +53,11 @@ AAGraphics::AAGraphics()
   gStyle->SetPalette(55);
   
   // Fill a vector with channel colors for plotting
-  ChColor += kBlue, kViolet, kRed, kOrange, 
-    kYellow-3, kGreen+2, kCyan+2, kAzure+7,
-    kBlue-7, kViolet-7, kRed-7, kOrange-7,
-    kYellow-6, kGreen-7, kCyan-7, kAzure-7;
+  ChColor +=
+    kBlue, kViolet+1, kMagenta, kPink+1,
+    kRed, kOrange+2, kGreen+1, kCyan+1,
+    kBlue+2, kViolet+2, kMagenta+2, kPink+3,
+    kRed+2, kOrange+3, kGreen+3, kCyan+3;
   
   // Get the number of digitizer channels
   const Int_t NumDGChannels = 16;//AAVMEManager::GetInstance()->GetDGManager()->GetNumChannels();
