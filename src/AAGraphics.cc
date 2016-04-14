@@ -511,8 +511,12 @@ void AAGraphics::SetupSpectrumGraphics()
       string Unit = TheSettings->SpectrumCalibrationUnit;
       XTitle = "Energy deposited [" + Unit + "]";
     }
-    else
-      XTitle = "Pulse value [ADC]";
+    else{
+      if(TheSettings->SpectrumPulseHeight)
+	XTitle = "Pulse height [ADC]";
+      else if(TheSettings->SpectrumPulseArea)
+	XTitle = "Pulse area [ADC]";
+    }
     YTitle = "Counts";
     
     XSize = YSize = 0.05;
