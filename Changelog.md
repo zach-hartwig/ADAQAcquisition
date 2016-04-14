@@ -1,11 +1,26 @@
 ## ADAQAcquisition Source Code Change Log
 
 name: Changelog.md  
-date: 12 Apr 16 (last updated)
+date: 14 Apr 16 (last updated)
 auth: Zach Hartwig  
 mail: hartwig@psfc.mit.edu
 
 ## Version 1.6 Series
+
+### 1.6.8
+
+ - Removing bug preventing correct DPP-PSD acquisition settings for
+   any digitizer channel greater than 0 on V1725 board
+
+ - Correcting calculation of the tail integral from CAEN's
+   non-standard short integral for DPP-PSD using full waveforms
+
+ - Updating channel waveform/spectrum colors for better visibility;
+   updating PSD color palette to new ROOT "Bird" palette
+
+ - X-axis labels for uncalibrated spectra now correctly specify "Pulse
+   area [ADC]" and "Pulse height [ADC]"
+
 
 ### 1.6.7
 
