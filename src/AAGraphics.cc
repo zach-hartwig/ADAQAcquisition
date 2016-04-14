@@ -50,7 +50,7 @@ AAGraphics::AAGraphics()
   TheGraphicsManager = this;
 
   // Set the default palette used to color the PSDHistogram
-  gStyle->SetPalette(55);
+  gStyle->SetPalette(kBird);
   
   // Fill a vector with channel colors for plotting
   ChColor +=
