@@ -673,6 +673,15 @@ void AAAcquisitionManager::StartAcquisition()
 	    sample = PSDTailAbsStart[ch];
 	    for(; sample<PSDTailAbsStop[ch]; sample++)
 	      PSDTail += Polarity[ch] * (Waveforms[ch][sample] - BaselineValue[ch]);
+
+	    // If running CAEN's DPP-PSD firmware and analyzing full
+	    // waveforms then convert CAEN's "short integral" (the
+	    // non-standard convention of gate offset to the end of
+	    // the short integral) to "tail integral" (the standard
+	    // integral from mid-pulse to the end of the waveform).
+	    
+	    if(UsePSDFirmware)
+	      PSDTail = PSDTotal - PSDTail;
 	  }
 	} // End STD or PSD waveform analysis
 	
@@ -693,18 +702,17 @@ void AAAcquisitionManager::StartAcquisition()
 	  // the available channels that can accomodate the dynamic
 	  // range of the digitizer input
 	  //
-	  // (2) CAEN's "short" integral covers the peak of the
-	  // waveform. The standard in PSD with liquid organic
-	  // scintillators is to examine the tail. To be consistent
-	  // with naming conventions and user expectations, the tail
-	  // integral is computed from the "short" integral
+	  // (2) Convert CAEN's "short integral" (the non-standard
+	  // convention of gate offset to the end of the short
+	  // integral) to the "tail integral" (the standard integral
+	  // from mid-pulse to the end of the waveform). See below.
 	  
 	  // The PSD long integral
 	  PSDTotal = (UShort_t)PSDEvents[ch][evt].ChargeLong;
 	  
 	  // The PSD short integral
 	  PSDTail = PSDTotal - (UShort_t)PSDEvents[ch][evt].ChargeShort;
-	  
+
 	  // Set the PSD long integral to the pulse area
 	  PulseArea = PSDTotal;
 	}
