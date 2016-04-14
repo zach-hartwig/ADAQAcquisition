@@ -393,7 +393,7 @@ void AAGraphics::PlotWaveforms(vector<vector<uint16_t> > &Waveforms,
     
     NumGraphs++;
   }
-
+  
   if(TheSettings->DisplayLegend)
     Waveform_LG->Draw();
   
@@ -412,7 +412,7 @@ void AAGraphics::DrawWaveformGraphics(vector<double> &BaselineValue,
     
     if(!TheSettings->ChEnable[ch])
       continue;
-    
+
     if(TheSettings->DisplayTrigger){
 
       // STD firmware: trigger value is in absolute ADC units
