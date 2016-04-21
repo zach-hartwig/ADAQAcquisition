@@ -653,8 +653,6 @@ void AAGraphics::PlotPSDHistogram(TH2F *PSDHistogram_H)
   else 
     gPad->SetLogy(false);
 
-  gPad->SetLogz(true);
-
   PSDHistogram_H->SetTitle(Title.c_str());
   
   PSDHistogram_H->GetXaxis()->SetTitle(XTitle.c_str());
