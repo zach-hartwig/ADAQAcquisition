@@ -1,11 +1,24 @@
 ## ADAQAcquisition Source Code Change Log
 
 name: Changelog.md  
-date: 14 Apr 16 (last updated)
+date: 21 Apr 16 (last updated)
 auth: Zach Hartwig  
 mail: hartwig@psfc.mit.edu
 
 ## Version 1.6 Series
+
+### 1.6.9
+
+ - Preventing seg fault at end of timed acquisition with ADAQ file
+   writing during DPP-PSD firmware
+
+ - Preventing collision between ADAQ file and settings file
+   overwritting / crashing by only allowing one to write/read
+
+ - Turned off log scale for Z-axis on PSD histogram for visibility
+
+ - Updated all file header copyright for 2016
+ 
 
 ### 1.6.8
 
