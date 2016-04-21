@@ -77,17 +77,31 @@ void AATabSlots::HandleSettingsTextButtons()
     break;
     
   case SaveSettingsToFile_TB_ID:
-    TI->SaveSettingsToFile();
-    TI->SaveSettingsToFile_TB->SetText("Saved!");
-    TI->SaveSettingsToFile_TB->SetForegroundColor(TI->ColorManager->Number2Pixel(kWhite));
-    TI->SaveSettingsToFile_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOn));
+    if(AAAcquisitionManager::GetInstance()->GetADAQFileIsOpen()){
+      cout << "\nError! ADAQ interface settings cannot be saved while an ADAQ file is open!\n"
+	   <<   "       Close the ADAQ file and then save settings.\n"
+	   << endl;
+    }
+    else{    
+      TI->SaveSettingsToFile();
+      TI->SaveSettingsToFile_TB->SetText("Saved!");
+      TI->SaveSettingsToFile_TB->SetForegroundColor(TI->ColorManager->Number2Pixel(kWhite));
+      TI->SaveSettingsToFile_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOn));
+    }
     break;
-
+    
   case LoadSettingsFromFile_TB_ID:
-    TI->LoadSettingsFromFile();
-    TI->LoadSettingsFromFile_TB->SetText("Loaded!");
-    TI->LoadSettingsFromFile_TB->SetForegroundColor(TI->ColorManager->Number2Pixel(kWhite));
-    TI->LoadSettingsFromFile_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOn));
+    if(AAAcquisitionManager::GetInstance()->GetADAQFileIsOpen()){
+      cout << "\nError! ADAQ interface settings cannot be loaded while an ADAQ file is open!\n"
+	   <<   "       Close the ADAQ file and then load settings.\n"
+	   << endl;
+    }
+    else{
+      TI->LoadSettingsFromFile();
+      TI->LoadSettingsFromFile_TB->SetText("Loaded!");
+      TI->LoadSettingsFromFile_TB->SetForegroundColor(TI->ColorManager->Number2Pixel(kWhite));
+      TI->LoadSettingsFromFile_TB->SetBackgroundColor(TI->ColorManager->Number2Pixel(TI->ButtonBackColorOn));
+    }
     break;
     
   default:

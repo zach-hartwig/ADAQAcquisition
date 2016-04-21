@@ -76,9 +76,9 @@ public:
   
   void SetAcquisitionTimerEnable(Bool_t ATE) {AcquisitionTimerEnable = ATE;}
   Bool_t GetAcquisitionTimerEnable() {return AcquisitionTimerEnable;}
-
+  
   Bool_t GetADAQFileIsOpen() {return TheReadoutManager->GetADAQFileOpen();}
-
+  
   void SetAcquisitionTimeStart(Double_t  T) {AcquisitionTimeStart = T;}
   void SetAcquisitionTimeStop(Double_t  T) {AcquisitionTimeStop = T;}
   
