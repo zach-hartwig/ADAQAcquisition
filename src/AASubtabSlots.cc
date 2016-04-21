@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////////
 //                                                                             //
-//                           Copyright (C) 2012-2015                           //
+//                           Copyright (C) 2012-2016                           //
 //                 Zachary Seth Hartwig : All rights reserved                  //
 //                                                                             //
 //      The ADAQAcquisition source code is licensed under the GNU GPL v3.0.    //
