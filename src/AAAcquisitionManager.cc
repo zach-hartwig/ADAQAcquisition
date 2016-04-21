@@ -488,9 +488,9 @@ void AAAcquisitionManager::StartAcquisition()
 	BaselineValue[ch] = PulseHeight = PulseArea = 0.;
 	PSDTotal = PSDTail = 0.;
 	WaveformData[ch]->Initialize();
-
-	if(AcquisitionTimerEnable){
 	
+	if(AcquisitionTimerEnable){
+	  
 	  // Calculate the elapsed time since the timer was started
 	  AcquisitionTimePrev = AcquisitionTimeNow;
 	  AcquisitionTimeNow = time(NULL) - AcquisitionTimeStart; // [seconds]
@@ -501,13 +501,14 @@ void AAAcquisitionManager::StartAcquisition()
 	    TheInterface->UpdateAQTimer(TimeRemaining);
 	  }
 	  
-	  // If the timer has reached zero thenstop acquisition
+	  // If the timer is zero then stop acquisition; make sure to
+	  // 'return' to completely escape the acquisition loop
 	  if(AcquisitionTimeNow >= AcquisitionTimeStop){
 	    StopAcquisition();
-	    break;
+	    return;
 	  }
 	}
-
+	
 	/////////////////////////////
 	// Event and waveform readout
 	
@@ -990,7 +991,9 @@ void AAAcquisitionManager::StartAcquisition()
 void AAAcquisitionManager::StopAcquisition()
 {
   ADAQDigitizer *DGManager = AAVMEManager::GetInstance()->GetDGManager();
+  
   Int_t AcqControl = TheSettings->AcquisitionControl;
+  
   if(AcqControl == 0)
     DGManager->SWStopAcquisition();
   else if(AcqControl == 1 or AcqControl == 2)
@@ -1007,7 +1010,7 @@ void AAAcquisitionManager::StopAcquisition()
     DGManager->FreeDPPEvents((void **)PSDEvents); 
     DGManager->FreeDPPWaveforms(PSDWaveforms);
   }
-  
+
   if(AcquisitionTimerEnable){
     
     // Set the information in the ADAQ file to signal that the
