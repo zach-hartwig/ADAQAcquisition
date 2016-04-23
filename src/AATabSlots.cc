@@ -620,15 +620,6 @@ void AATabSlots::HandleRadioButtons()
   // TI->SaveSettings();
   
   switch(ActiveID){
-  case DGStandardFW_RB_ID:
-    if(TI->DGStandardFW_RB->IsDown())
-      TI->DGPSDFW_RB->SetState(kButtonUp);
-    break;
-
-  case DGPSDFW_RB_ID:
-    if(TI->DGPSDFW_RB->IsDown())
-      TI->DGStandardFW_RB->SetState(kButtonUp);
-    break;
 
   default:
     break;

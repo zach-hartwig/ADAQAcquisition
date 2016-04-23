@@ -345,7 +345,7 @@ void AAInterface::FillConnectionFrame()
   // The VME addresses, address display, and enable/disable widgets
   
   vector<string> Title;
-  Title += "VME-USB Bridge", "VME/Desktop Digitizer", "VME/Desktop High Voltage";
+  Title += "VME-USB bridge", "VME/Desktop digitizer", "VME/Desktop high voltage";
   
   vector<int> BoardEnableID, BoardAddressID, BoardLinkNumberID;
   BoardEnableID += (int)BRBoardEnable_TB_ID, (int)DGBoardEnable_TB_ID, (int)HVBoardEnable_TB_ID;
@@ -372,8 +372,12 @@ void AAInterface::FillConnectionFrame()
     TGHorizontalFrame *BoardOptions_HF = new TGHorizontalFrame(BoardOptions_VF);
     BoardOptions_VF->AddFrame(BoardOptions_HF, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
 
+    Int_t LeftOffset = 22;
+    if(board == zDG)
+      LeftOffset = 60;
+
     BoardType_CBL.push_back(new ADAQComboBoxWithLabel(BoardOptions_HF, "Type", -1));
-    BoardOptions_HF->AddFrame(BoardType_CBL[board], new TGLayoutHints(kLHintsCenterX, 22,0,10,5));
+    BoardOptions_HF->AddFrame(BoardType_CBL[board], new TGLayoutHints(kLHintsCenterX, LeftOffset,0,10,5));
     BoardType_CBL[board]->GetComboBox()->Resize(75,20);
 
     if(board == zBR){
@@ -404,26 +408,12 @@ void AAInterface::FillConnectionFrame()
       BoardType_CBL[board]->GetComboBox()->Select(zV6534M);
     }
 
-    if(board == zDG){
-      TGVerticalFrame *FWType_VF = new TGVerticalFrame(BoardOptions_HF);
-      BoardOptions_HF->AddFrame(FWType_VF, new TGLayoutHints(kLHintsNormal, 15,0,5,0));
-      
-      FWType_VF->AddFrame(DGStandardFW_RB = new TGRadioButton(FWType_VF, "STD firmware", DGStandardFW_RB_ID),
-			  new TGLayoutHints(kLHintsNormal, 0,0,0,0));
-      DGStandardFW_RB->Connect("Clicked()", "AATabSlots", TabSlots, "HandleRadioButtons()");
-      
-      FWType_VF->AddFrame(DGPSDFW_RB = new TGRadioButton(FWType_VF, "DPP-PSD firmware", DGPSDFW_RB_ID),
-			  new TGLayoutHints(kLHintsNormal, 0,0,0,0));
-      DGPSDFW_RB->Connect("Clicked()", "AATabSlots", TabSlots, "HandleRadioButtons()");
-      DGStandardFW_RB->SetState(kButtonDown);
-    }
-    
     TGHorizontalFrame *BoardAddress_HF = new TGHorizontalFrame(BoardOptions_VF);
     BoardOptions_VF->AddFrame(BoardAddress_HF, new TGLayoutHints(kLHintsNormal, 0,0,0,0));
     
-    Int_t LeftOffset = 5;
+    LeftOffset = 5;
     if(board == zDG)
-      LeftOffset = 60;
+      LeftOffset = 42;
     
     BoardAddress_HF->AddFrame(new TGLabel(BoardAddress_HF,"0x"), 
 			      new TGLayoutHints(kLHintsCenterX, LeftOffset,0,5,5));
@@ -469,7 +459,7 @@ void AAInterface::FillConnectionFrame()
 
     LeftOffset = 57;
     if(board == zDG)
-      LeftOffset = 112;
+      LeftOffset = 95;
     
     BoardOptions_VF->AddFrame(BoardLinkNumber_NEL[board], new TGLayoutHints(kLHintsNormal, LeftOffset, 0, 2, 5));
 
@@ -947,7 +937,11 @@ void AAInterface::FillAcquisitionFrame()
     return;
   
   AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
+
+  // Get necessary information about the digitizer
   
+  string FirmwareType = TheVMEManager->GetDGManager()->GetBoardFirmwareType();
+
   const int NumDGChannels = TheVMEManager->GetDGManager()->GetNumChannels();
   
   /////////////////////////////
@@ -1113,8 +1107,8 @@ void AAInterface::FillAcquisitionFrame()
     ////////////////////////////////////////////////////
     // CAEN STD firmware GUI channel-specific widgets //
     ////////////////////////////////////////////////////
-
-    if(DGStandardFW_RB->IsDown()){
+    
+    if(FirmwareType == "STD"){
       
       DGChannelControl_GF->AddFrame(new TGLabel(DGChannelControl_GF, "Acquisition settings"),
 				    new TGLayoutHints(kLHintsLeft,0,0,5,0));
@@ -1300,8 +1294,8 @@ void AAInterface::FillAcquisitionFrame()
       DGChZLEBackward_NEL[ch]->GetEntry()->Resize(55,20);
       DGChZLEBackward_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AAChannelSlots", ChannelSlots, "HandleNumberEntries()");
     }
-    else if(DGPSDFW_RB->IsDown()){
-
+    else if(FirmwareType == "PSD"){
+      
       DGChannelControl_GF->AddFrame(new TGLabel(DGChannelControl_GF, "Acquisition settings"),
 				    new TGLayoutHints(kLHintsLeft,0,0,5,0));
       
@@ -1695,7 +1689,7 @@ void AAInterface::FillAcquisitionFrame()
   DGTriggerType_CBL->GetComboBox()->ChangeOptions(DGTriggerType_CBL->GetComboBox()->GetOptions() | kFixedSize);
 
   // ADAQ combo box to enable specification of trigger type
-  if(DGStandardFW_RB->IsDown()){
+  if(FirmwareType == "STD"){
     DGTriggerControls_GF->AddFrame(DGTriggerEdge_CBL = new ADAQComboBoxWithLabel(DGTriggerControls_GF, "Edge", DGTriggerEdge_CBL_ID),
 				   new TGLayoutHints(kLHintsNormal,5,5,0,5));
     DGTriggerEdge_CBL->GetComboBox()->AddEntry("Rising",0);
@@ -1704,7 +1698,7 @@ void AAInterface::FillAcquisitionFrame()
     DGTriggerEdge_CBL->GetComboBox()->Resize(110,20);
     DGTriggerEdge_CBL->GetComboBox()->ChangeOptions(DGTriggerEdge_CBL->GetComboBox()->GetOptions() | kFixedSize);
   }
-  else if(DGPSDFW_RB->IsDown()){
+  else if(FirmwareType == "PSD"){
     DGTriggerControls_GF->AddFrame(DGPSDTriggerHoldoff_NEL = new ADAQNumberEntryWithLabel(DGTriggerControls_GF, "Holdoff (samples)", DGPSDTriggerHoldoff_NEL_ID),
 				   new TGLayoutHints(kLHintsNormal,5,0,0,5));
     DGPSDTriggerHoldoff_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
@@ -1746,7 +1740,7 @@ void AAInterface::FillAcquisitionFrame()
   DGAcquisitionControl_CBL->GetComboBox()->AddEntry("Gated (TTL)",2);
   DGAcquisitionControl_CBL->GetComboBox()->Select(0);
   
-  if(DGStandardFW_RB->IsDown()){
+  if(FirmwareType == "STD"){
     
     // ADAQ number entry specifying number of samples
     DGAcquisitionControl_GF->AddFrame(DGRecordLength_NEL = new ADAQNumberEntryWithLabel(DGAcquisitionControl_GF, "Record length (#)", DGRecordLength_NEL_ID),
@@ -1764,8 +1758,8 @@ void AAInterface::FillAcquisitionFrame()
     DGPostTrigger_NEL->GetEntry()->SetLimitValues(0,100);
     DGPostTrigger_NEL->GetEntry()->SetNumber(70);
   }
-  else if(DGPSDFW_RB->IsDown()){
-
+  else if(FirmwareType == "PSD"){
+    
     // The DPP-PSD "Oscilloscope" mode - called "Waveform only" mode
     // here - has been discontinued for x725 and x730 but will remain
     // implemented on x720/x790 digitizers. Enable user to use this
@@ -2583,6 +2577,8 @@ void AAInterface::SetVoltageWidgetState(bool WidgetState, EButtonState ButtonSta
 void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState ButtonState)
 {
   AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
+  
+  string FirmwareType = TheVMEManager->GetDGManager()->GetBoardFirmwareType();
   const int NumDGChannels = TheVMEManager->GetDGManager()->GetNumChannels();
 
   ///////////////////////////////
@@ -2596,7 +2592,7 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
     DGChNegPolarity_RB[ch]->SetState(ButtonState);
     DGChDCOffset_NEL[ch]->GetEntry()->SetState(WidgetState);
     DGChTriggerThreshold_NEL[ch]->GetEntry()->SetState(WidgetState);
-    if(DGStandardFW_RB->IsDown()){
+    if(FirmwareType == "STD"){
       DGChZLEThreshold_NEL[ch]->GetEntry()->SetState(WidgetState);
       DGChZLEBackward_NEL[ch]->GetEntry()->SetState(WidgetState);
       DGChZLEForward_NEL[ch]->GetEntry()->SetState(WidgetState);
@@ -2609,7 +2605,7 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
       DGChPSDTailStart_NEL[ch]->GetEntry()->SetState(WidgetState);
       DGChPSDTailStop_NEL[ch]->GetEntry()->SetState(WidgetState);
     }
-    else if(DGPSDFW_RB->IsDown()){
+    else if(FirmwareType == "PSD"){
       DGChRecordLength_NEL[ch]->GetEntry()->SetState(WidgetState);
       DGChBaselineSamples_CBL[ch]->GetComboBox()->SetEnabled(WidgetState);
       DGChChargeSensitivity_CBL[ch]->GetComboBox()->SetEnabled(WidgetState);
@@ -2630,27 +2626,25 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
   AQWaveform_RB->SetEnabled(WidgetState);
   AQSpectrum_RB->SetEnabled(WidgetState);
   AQPSDHistogram_RB->SetEnabled(WidgetState);
-
+  
   DGTriggerType_CBL->GetComboBox()->SetEnabled(WidgetState);
-  if(DGStandardFW_RB->IsDown()){
-     DGTriggerEdge_CBL->GetComboBox()->SetEnabled(WidgetState);
-  }
-  else if(DGPSDFW_RB->IsDown()){
+  if(FirmwareType == "STD")
+    DGTriggerEdge_CBL->GetComboBox()->SetEnabled(WidgetState);
+  else if(FirmwareType == "PSD")
     DGPSDTriggerHoldoff_NEL->GetEntry()->SetState(WidgetState);
-  }
   DGTriggerCoincidenceEnable_CB->SetState(ButtonState);
-
+  
   DGAcquisitionControl_CBL->GetComboBox()->SetEnabled(WidgetState);
-  if(DGStandardFW_RB->IsDown()){
+  if(FirmwareType == "STD"){
     DGRecordLength_NEL->GetEntry()->SetState(WidgetState);
     DGPostTrigger_NEL->GetEntry()->SetState(WidgetState);
   }
-  else if(DGPSDFW_RB->IsDown()){
+  else if(FirmwareType == "PSD"){
     DGPSDMode_CBL->GetComboBox()->SetEnabled(WidgetState);
     DGPSDListAnalysis_RB->SetState(ButtonState);
     DGPSDWaveformAnalysis_RB->SetState(ButtonState);
   }
-
+  
   DGEventsBeforeReadout_NEL->GetEntry()->SetState(WidgetState);
   AQDataReductionEnable_CB->SetState(ButtonState);
   AQDataReductionFactor_NEL->GetEntry()->SetState(WidgetState);
@@ -2805,9 +2799,15 @@ void AAInterface::SaveSettings()
       TheSettings->BoardEnable[board] = false;
   }
 
-  TheSettings->STDFirmware = DGStandardFW_RB->IsDown();
-  TheSettings->PSDFirmware = DGPSDFW_RB->IsDown();
-
+  string FirmwareType = TheVMEManager->GetDGManager()->GetBoardFirmwareType();
+  if(FirmwareType == "STD"){
+    TheSettings->STDFirmware = true;
+    TheSettings->PSDFirmware = false;
+  }
+  else if(FirmwareType == "PSD"){
+    TheSettings->STDFirmware = false;
+    TheSettings->PSDFirmware = true;
+  }
 
   // The following widgets are built after a connection has been
   // established; test to ensure this has occured before attempting to
@@ -2844,6 +2844,8 @@ void AAInterface::SaveSettings()
     
     const Int_t NumDGChannels = TheVMEManager->GetDGManager()->GetNumChannels();
     
+    string FirmwareType = TheVMEManager->GetDGManager()->GetBoardFirmwareType();
+    
     // Acquisition channel 
     for(Int_t ch=0; ch<NumDGChannels; ch++){
       TheSettings->ChEnable[ch] = DGChEnable_CB[ch]->IsDown();
@@ -2851,7 +2853,7 @@ void AAInterface::SaveSettings()
       TheSettings->ChNegPolarity[ch] = DGChNegPolarity_RB[ch]->IsDown();
       TheSettings->ChDCOffset[ch] = DGChDCOffset_NEL[ch]->GetEntry()->GetHexNumber();
       TheSettings->ChTriggerThreshold[ch] = DGChTriggerThreshold_NEL[ch]->GetEntry()->GetIntNumber();
-      if(DGStandardFW_RB->IsDown()){
+      if(FirmwareType == "STD"){
 	TheSettings->ChZLEThreshold[ch] = DGChZLEThreshold_NEL[ch]->GetEntry()->GetIntNumber();
 	TheSettings->ChZLEForward[ch] = DGChZLEForward_NEL[ch]->GetEntry()->GetIntNumber();
 	TheSettings->ChZLEBackward[ch] = DGChZLEBackward_NEL[ch]->GetEntry()->GetIntNumber();
@@ -2864,7 +2866,7 @@ void AAInterface::SaveSettings()
 	TheSettings->ChPSDTailStart[ch] = DGChPSDTailStart_NEL[ch]->GetEntry()->GetIntNumber();
 	TheSettings->ChPSDTailStop[ch] = DGChPSDTailStop_NEL[ch]->GetEntry()->GetIntNumber();
       }
-      else if(DGPSDFW_RB->IsDown()){
+      else if(FirmwareType == "PSD"){
 	TheSettings->ChRecordLength[ch] = DGChRecordLength_NEL[ch]->GetEntry()->GetIntNumber();
 	TheSettings->ChBaselineSamples[ch] = DGChBaselineSamples_CBL[ch]->GetComboBox()->GetSelected();
 	TheSettings->ChChargeSensitivity[ch] = DGChChargeSensitivity_CBL[ch]->GetComboBox()->GetSelected();
@@ -2902,31 +2904,31 @@ void AAInterface::SaveSettings()
     TheSettings->TriggerType = DGTriggerType_CBL->GetComboBox()->GetSelected();
     TheSettings->TriggerTypeName = DGTriggerType_CBL->GetComboBox()->GetSelectedEntry()->GetTitle();
 
-    if(DGStandardFW_RB->IsDown()){
+    if(FirmwareType == "STD"){
       TheSettings->TriggerEdge = DGTriggerEdge_CBL->GetComboBox()->GetSelected();
       TheSettings->TriggerEdgeName = DGTriggerEdge_CBL->GetComboBox()->GetSelectedEntry()->GetTitle();
     }
-    else if(DGPSDFW_RB->IsDown()){
+    else if(FirmwareType == "PSD"){
       TheSettings->PSDTriggerHoldoff = DGPSDTriggerHoldoff_NEL->GetEntry()->GetIntNumber();
     }
-  
+    
     TheSettings->TriggerCoincidenceEnable = DGTriggerCoincidenceEnable_CB->IsDown();
     TheSettings->TriggerCoincidenceLevel = DGTriggerCoincidenceLevel_CBL->GetComboBox()->GetSelected();
 
     // Acquisition
     TheSettings->AcquisitionControl = DGAcquisitionControl_CBL->GetComboBox()->GetSelected();
     TheSettings->AcquisitionControlName = DGAcquisitionControl_CBL->GetComboBox()->GetSelectedEntry()->GetTitle();
-
-    if(DGStandardFW_RB->IsDown()){
+    
+    if(FirmwareType == "STD"){
       TheSettings->RecordLength = DGRecordLength_NEL->GetEntry()->GetIntNumber();
       TheSettings->PostTrigger = DGPostTrigger_NEL->GetEntry()->GetIntNumber();
     }
-    else{
+    else if(FirmwareType == "PSD"){
       TheSettings->PSDOperationMode = DGPSDMode_CBL->GetComboBox()->GetSelected();
       TheSettings->PSDListAnalysis = DGPSDListAnalysis_RB->IsDown();
       TheSettings->PSDWaveformAnalysis = DGPSDWaveformAnalysis_RB->IsDown();
     }
-  
+    
     TheSettings->AcquisitionTime = AQTime_NEL->GetEntry()->GetIntNumber();
 
     // Readout
@@ -3049,11 +3051,11 @@ void AAInterface::SaveSettings()
 	TheSettings->ChEnable[ch] = DGChEnable_CB[ch]->IsDisabledAndSelected();
 	TheSettings->ChPosPolarity[ch] = DGChPosPolarity_RB[ch]->IsDisabledAndSelected();
 	TheSettings->ChNegPolarity[ch] = DGChNegPolarity_RB[ch]->IsDisabledAndSelected();
-	if(DGStandardFW_RB->IsDown()){
+	if(FirmwareType == "STD"){
 	  TheSettings->ChZLEPosLogic[ch] = DGChZLEPosLogic_RB[ch]->IsDisabledAndSelected();
 	  TheSettings->ChZLENegLogic[ch] = DGChZLENegLogic_RB[ch]->IsDisabledAndSelected();
 	}
-	else if(DGPSDFW_RB->IsDown()){
+	else if(FirmwareType == "PSD"){
 	}
       }
       
@@ -3062,13 +3064,13 @@ void AAInterface::SaveSettings()
       TheSettings->PSDMode = AQPSDHistogram_RB->IsDisabledAndSelected();
 
       TheSettings->TriggerCoincidenceEnable = DGTriggerCoincidenceEnable_CB->IsDisabledAndSelected();
-
-      if(DGPSDFW_RB->IsDown()){
+      
+      if(FirmwareType == "PSD"){
 	TheSettings->PSDMode = AQPSDHistogram_RB->IsDisabledAndSelected();
 	TheSettings->PSDListAnalysis = DGPSDListAnalysis_RB->IsDisabledAndSelected();
 	TheSettings->PSDWaveformAnalysis = DGPSDWaveformAnalysis_RB->IsDisabledAndSelected();
       }
-
+      
       TheSettings->DataReductionEnable = AQDataReductionEnable_CB->IsDisabledAndSelected();
       TheSettings->ZeroSuppressionEnable = DGZLEEnable_CB->IsDisabledAndSelected();
 
@@ -3182,15 +3184,6 @@ void AAInterface::LoadSettingsFromFile()
       BoardEnable_TB[board]->SetForegroundColor(ColorManager->Number2Pixel(kWhite));
       BoardEnable_TB[board]->ChangeOptions(BoardEnable_TB[board]->GetOptions() | kFixedSize);
     }
-  }
-  
-  if(TheSettings->STDFirmware){
-    DGStandardFW_RB->SetState(kButtonDown);
-    DGPSDFW_RB->SetState(kButtonUp);
-  }
-  else if(TheSettings->PSDFirmware){
-    DGStandardFW_RB->SetState(kButtonUp);
-    DGPSDFW_RB->SetState(kButtonDown);
   }
   
   // If the full interface (e.g. the secondary frames that are device
