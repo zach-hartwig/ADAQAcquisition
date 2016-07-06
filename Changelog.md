@@ -1,11 +1,17 @@
 ## ADAQAcquisition Source Code Change Log
 
 name: Changelog.md  
-date: 21 Apr 16 (last updated)
+date: 06 Jul 16 Apr 16 (last updated)
 auth: Zach Hartwig  
 mail: hartwig@psfc.mit.edu
 
 ## Version 1.6 Series
+
+### 1.6.10
+
+ - Enabling auto-detection of CAEN digitizer firmware; removed and
+   cleanup of widgets and code as necessary
+   
 
 ### 1.6.9
 
