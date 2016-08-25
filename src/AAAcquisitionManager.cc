@@ -47,7 +47,7 @@ AAAcquisitionManager::AAAcquisitionManager()
     EventCounter(0),
     LLD(0), ULD(0), SampleHeight(0.), TriggerHeight(0.),
     PulseHeight(0.), PulseArea(0.), PSDTotal(0.), PSDTail(0.), PeakPosition(0),
-    TimeStamp(0), TimeStampGap(0),
+    RawTimeStamp(0),
     FillWaveformTree(false), TheReadoutManager(new ADAQReadoutManager)
 {
   if(TheAcquisitionManager)
@@ -721,36 +721,37 @@ void AAAcquisitionManager::StartAcquisition()
 	/////////////////////////////////////////
 	// Trigger time stamp rollover correction
 
-	// Correct the time stamp for rollover. Note the timestamp is
-	// stored in a bits [31:1] of a 32-bit unsigned integer. The
-	// formula to compute the absolute time stamp is:
+	// Correct the time stamp for rollover. For STD firmware, the
+	// timestamp is stored in bits [31:1] of a 32-bit unsigned
+	// integer and requires a bit shift before operating on. For
+	// PSD firmware, the returned 32 bit integer does not require
+	// a bit shift. The formula for accounting for timestamp
+	// rollover is:
 	//
-	//   Corrected = Time + Gap + n*2^31
+	//   Corrected = Raw + Rollovers * 2**31
 	//
 	// where:
 	//  - 'Corrected' is the 64-bit rollover-corrected time stamp
-	//  - 'Time' is the unmodified 31-bit time stamp
-	//  - 'Gap' is skipped time : (2^31-Prev) @ rollover; 0 @ otherwise
-	//  - 'Prev' is previous unmodified 31-bit time stamp (no rollover)
-	//  - 'n' is the number of rollovers that have occured
+	//  - 'Raw' is the unmodified 31-bit time stamp
+	//  - 'Rollovers' is the number of rollovers that have occured
 
+	// Get the raw time stamp
 	if(UseSTDFirmware)
-	  TimeStamp = (EventInfo.TriggerTimeTag >> 1);
+	  RawTimeStamp = (EventInfo.TriggerTimeTag >> 1);
 	else if(UsePSDFirmware)
-	  TimeStamp = (PSDEvents[ch][evt].TimeTag >> 1);
+	  RawTimeStamp = (PSDEvents[ch][evt].TimeTag);
 	
-	if(TimeStamp < PrevTimeStamp[ch]){
+	// Test the time stamp for a rollover and increment if found
+	if(RawTimeStamp < PrevTimeStamp[ch])
 	  TimeStampRollovers[ch]++;
-	  TimeStampGap = pow(2,31) - PrevTimeStamp[ch];
-	}
-	else
-	  TimeStampGap = 0;
 	
-	CorrectedTimeStamp[ch] = TimeStamp + TimeStampGap + TimeStampRollovers[ch] * pow(2,31);
+	// Compute the corrected time stamp; store as 64-bit integer
+	CorrectedTimeStamp[ch] = (ULong64_t)(RawTimeStamp + TimeStampRollovers[ch] * pow(2,31));
 
-	PrevTimeStamp[ch] = TimeStamp;
-
-
+	// Set the previous time stamp
+	PrevTimeStamp[ch] = RawTimeStamp;
+	
+	
 	////////////////////////////
 	// Post-readout data storage 
 

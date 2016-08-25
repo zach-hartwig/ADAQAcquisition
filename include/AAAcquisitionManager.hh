@@ -153,11 +153,11 @@ private:
   Double_t  SampleHeight, TriggerHeight;
   Double_t  PulseHeight, PulseArea;
   Double_t  PSDTotal, PSDTail;
-
+  
   vector<ULong64_t> CorrectedTimeStamp;
 #ifndef __CINT__
   vector<uint32_t> PrevTimeStamp, TimeStampRollovers;
-  uint32_t TimeStamp, TimeStampGap;
+  uint32_t RawTimeStamp;
 #endif
 
   vector<bool> CalibrationEnable;
