@@ -1,11 +1,19 @@
 ## ADAQAcquisition Source Code Change Log
-
 name: Changelog.md  
-date: 06 Jul 16 Apr 16 (last updated)
+date: 25 Aug 16 (last updated)
 auth: Zach Hartwig  
 mail: hartwig@psfc.mit.edu
 
 ## Version 1.6 Series
+
+
+### 1.6.11
+
+ - Fixed timestamp readout for differences between STD firmware
+   (requires 1 bit shift) to DPP-PSD firmware (requires no bit shift)
+
+ - Corrected bug in 64-bit rollover-corrected timestamp
+ 
 
 ### 1.6.10
 
