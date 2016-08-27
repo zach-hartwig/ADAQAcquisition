@@ -14,6 +14,7 @@
 #include <TGraph.h>
 #include <TStyle.h>
 #include <TFrame.h>
+#include <TPaletteAxis.h>
 
 // Boost
 #include <boost/assign/std/vector.hpp>
@@ -633,7 +634,13 @@ void AAGraphics::PlotPSDHistogram(TH2F *PSDHistogram_H)
 {
   Int_t Channel = TheSettings->PSDChannel;
   
+  // Draw the PSDHistogram and prevent the user from inducing segfaults
+  // upon moving the color axis
   PSDHistogram_H->Draw("COLZ");
+  gPad->Update();
+  TPaletteAxis *palette = (TPaletteAxis*)
+    PSDHistogram_H->GetListOfFunctions()->FindObject("palette");
+  palette->SetBit(TBox::kCannotMove);
   
   XMin = TheSettings->PSDTotalMaxBin * TheSettings->HorizontalSliderMin;
   XMax = TheSettings->PSDTotalMaxBin * TheSettings->HorizontalSliderMax;
