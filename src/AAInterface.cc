@@ -1666,6 +1666,9 @@ void AAInterface::FillAcquisitionFrame()
   AQPSDHistogram_RB = new TGRadioButton(DGScopeMode_BG, "PSD Histogram", AQPSDHistogram_RB_ID);
   AQPSDHistogram_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
   
+  AQRate_RB = new TGRadioButton(DGScopeMode_BG, "Trigger Rate Plot", AQRate_RB_ID);
+  AQRate_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
+
   DGScopeMode_BG->Show();
 
 
@@ -2625,6 +2628,7 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
 
   AQWaveform_RB->SetEnabled(WidgetState);
   AQSpectrum_RB->SetEnabled(WidgetState);
+  AQRate_RB->SetEnabled(WidgetState);
   AQPSDHistogram_RB->SetEnabled(WidgetState);
   
   DGTriggerType_CBL->GetComboBox()->SetEnabled(WidgetState);
@@ -2898,6 +2902,7 @@ void AAInterface::SaveSettings()
     // Scope display
     TheSettings->WaveformMode = AQWaveform_RB->IsDown();
     TheSettings->SpectrumMode = AQSpectrum_RB->IsDown();
+    TheSettings->RateMode = AQRate_RB->IsDown();
     TheSettings->PSDMode = AQPSDHistogram_RB->IsDown();
     
     // Trigger control settings
@@ -3062,6 +3067,7 @@ void AAInterface::SaveSettings()
       TheSettings->WaveformMode = AQWaveform_RB->IsDisabledAndSelected();
       TheSettings->SpectrumMode = AQSpectrum_RB->IsDisabledAndSelected();
       TheSettings->PSDMode = AQPSDHistogram_RB->IsDisabledAndSelected();
+      TheSettings->RateMode = AQRate_RB->IsDisabledAndSelected();
 
       TheSettings->TriggerCoincidenceEnable = DGTriggerCoincidenceEnable_CB->IsDisabledAndSelected();
       
@@ -3294,16 +3300,25 @@ void AAInterface::LoadSettingsFromFile()
       AQWaveform_RB->SetState(kButtonDown);
       AQSpectrum_RB->SetState(kButtonUp);
       AQPSDHistogram_RB->SetState(kButtonUp);
+      AQRate_RB->SetState(kButtonUp);
     }
     else if(TheSettings->SpectrumMode){
       AQWaveform_RB->SetState(kButtonUp);
       AQSpectrum_RB->SetState(kButtonDown);
       AQPSDHistogram_RB->SetState(kButtonUp);
+      AQRate_RB->SetState(kButtonUp);
     }
     else if(TheSettings->PSDMode){
       AQWaveform_RB->SetState(kButtonUp);
       AQSpectrum_RB->SetState(kButtonUp);
       AQPSDHistogram_RB->SetState(kButtonDown);
+      AQRate_RB->SetState(kButtonUp);
+    }
+    else if(TheSettings->RateMode){
+      AQWaveform_RB->SetState(kButtonUp);
+      AQSpectrum_RB->SetState(kButtonUp);
+      AQPSDHistogram_RB->SetState(kButtonUp);
+      AQRate_RB->SetState(kButtonDown);
     }
 
     // Trigger control

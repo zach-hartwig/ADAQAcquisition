@@ -59,6 +59,9 @@ public:
 
   void SetupSpectrumGraphics();
   void PlotSpectrum(TH1F *);
+
+  void SetupRateGraphics();
+  void PlotRate(TH1F *);
   
   void SetupPSDHistogramGraphics();
   void PlotPSDHistogram(TH2F *);

@@ -166,6 +166,9 @@ private:
   
   vector<TH1F *> Spectrum_H;
   vector<Bool_t> SpectrumExists;
+
+  vector<TH1F *> Rate_H;
+  vector<Bool_t> RateExists;
   
   vector<TH2F *> PSDHistogram_H;
   vector<Bool_t> PSDHistogramExists;

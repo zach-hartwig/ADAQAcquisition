@@ -487,6 +487,9 @@ void AAGraphics::DrawWaveformGraphics(vector<double> &BaselineValue,
   TheCanvas_C->Update();
 }
 
+void AAGraphics::SetupRateGraphics()
+{
+}
 
 void AAGraphics::SetupSpectrumGraphics()
 {
@@ -526,6 +529,9 @@ void AAGraphics::SetupSpectrumGraphics()
   }
 }
 
+void AAGraphics::PlotRate(TH1F *Rate_H)
+{
+}
 
 void AAGraphics::PlotSpectrum(TH1F *Spectrum_H)
 {

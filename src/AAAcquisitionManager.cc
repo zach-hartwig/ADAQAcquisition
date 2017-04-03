@@ -96,6 +96,9 @@ void AAAcquisitionManager::Initialize()
     Spectrum_H.push_back(new TH1F);
     SpectrumExists.push_back(true);
 
+    Rate_H.push_back(new TH1F);
+    RateExists.push_back(true);
+
     PSDHistogram_H.push_back(new TH2F);
     PSDHistogramExists.push_back(true);
     
@@ -327,7 +330,9 @@ void AAAcquisitionManager::PrepareAcquisition()
     AAGraphics::GetInstance()->SetupSpectrumGraphics();
   else if(TheSettings->PSDMode)
     AAGraphics::GetInstance()->SetupPSDHistogramGraphics();
-  
+  else if(TheSettings->RateMode)
+    AAGraphics::GetInstance()->SetupRateGraphics();
+
   for(Int_t ch=0; ch<NumDGChannels; ch++){
     NumPSDEvents[ch] = 0;
     
@@ -869,6 +874,9 @@ void AAAcquisitionManager::StartAcquisition()
 	      PSDHistogram_H[ch]->Fill(PSDTotal, PSDParameter);
 	    }
 	  }
+
+    else if(TheSettings->RateMode){
+    }
 	}
 	
 	///////////////////////////////////////
@@ -958,7 +966,7 @@ void AAAcquisitionManager::StartAcquisition()
 
       // Zero the number of of PSD events after each channel readout.
       if(UsePSDFirmware)
-	NumPSDEvents[ch] = 0;
+        NumPSDEvents[ch] = 0;
       
     }// End of the data readout loop over channels
 
@@ -975,14 +983,19 @@ void AAAcquisitionManager::StartAcquisition()
       Int_t Rate = TheSettings->SpectrumRefreshRate;
       
       if(TheSettings->SpectrumMode){
-	if(EventCounter % Rate == 0)
-	  TheGraphicsManager->PlotSpectrum(Spectrum_H[TheSettings->SpectrumChannel]);
+        if(EventCounter % Rate == 0)
+          TheGraphicsManager->PlotSpectrum(Spectrum_H[TheSettings->SpectrumChannel]);
+      }
+
+      else if(TheSettings->RateMode){
+        if(EventCounter % Rate == 0)
+          TheGraphicsManager->PlotRate(Rate_H[TheSettings->RateChannel]);
       }
       
       else if(TheSettings->PSDMode){
-	if(EventCounter % Rate == 0){
-	  TheGraphicsManager->PlotPSDHistogram(PSDHistogram_H[TheSettings->PSDChannel]);
-	}
+        if(EventCounter % Rate == 0){
+          TheGraphicsManager->PlotPSDHistogram(PSDHistogram_H[TheSettings->PSDChannel]);
+        }
       }
     }
   } // End of the acquisition loop
@@ -1131,10 +1144,10 @@ void AAAcquisitionManager::SaveObjectData(string ObjectType,
       }
       
       else if(ObjectType == "Spectrum")
-	Spectrum_H[Channel]->Write("Spectrum");
+        Spectrum_H[Channel]->Write("Spectrum");
       
       else if(ObjectType == "PSDHistogram")
-	PSDHistogram_H[Channel]->Write("PSDHistogram");
+        PSDHistogram_H[Channel]->Write("PSDHistogram");
       
       ObjectOutput->Close();
     }

@@ -155,6 +155,7 @@ public:
   Bool_t WaveformMode;
   Bool_t SpectrumMode;
   Bool_t PSDMode;
+  Bool_t RateMode;
   Bool_t PSDListAnalysis, PSDWaveformAnalysis;
   
   // Trigger
@@ -201,6 +202,9 @@ public:
   Bool_t SpectrumCalibrationUseSlider;
   string SpectrumCalibrationUnit;
 
+  ////////////////////////////////////
+  // Rate plot widget settings
+  Int_t RateChannel;
 
   //////////////////////////////
   // Pulse discrimination limits

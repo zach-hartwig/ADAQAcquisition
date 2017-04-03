@@ -243,6 +243,7 @@ enum{
   AQWaveform_RB_ID,
   AQSpectrum_RB_ID,
   AQPSDHistogram_RB_ID,
+  AQRate_RB_ID,
   
   DGTriggerType_CBL_ID,
   DGTriggerEdge_CBL_ID,
