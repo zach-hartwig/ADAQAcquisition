@@ -877,10 +877,6 @@ void AAAcquisitionManager::StartAcquisition()
 	      PSDHistogram_H[ch]->Fill(PSDTotal, PSDParameter);
 	    }
 	  }
-
-    else if(TheSettings->RateMode){
-      
-    }
 	}
 	
 	///////////////////////////////////////
@@ -991,10 +987,10 @@ void AAAcquisitionManager::StartAcquisition()
           TheGraphicsManager->PlotSpectrum(Spectrum_H[TheSettings->SpectrumChannel]);
       }
 
-      else if(TheSettings->RateMode){
-        if(EventCounter % Rate == 0)
-          TheGraphicsManager->PlotRate(Rate_P[TheSettings->RateChannel]);
-      }
+//      else if(TheSettings->RateMode){
+//        if(EventCounter % Rate == 0)
+//          TheGraphicsManager->PlotRate(Rate_P[TheSettings->RateChannel]);
+//      }
       
       else if(TheSettings->PSDMode){
         if(EventCounter % Rate == 0){
