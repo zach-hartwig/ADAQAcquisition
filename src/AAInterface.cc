@@ -2507,6 +2507,34 @@ void AAInterface::FillAcquisitionFrame()
 				   new TGLayoutHints(kLHintsNormal, 0,3,3,-2));
   DrawSpectrumWithBars_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
 
+//
+  TGGroupFrame *RateDrawOptions_GF = new TGGroupFrame(DisplaySettings_GF, "Rate plot options", kVerticalFrame);
+  DisplaySettings_GF->AddFrame(RateDrawOptions_GF,
+			       new TGLayoutHints(kLHintsNormal, 0,0,5,0));
+  
+  RateDrawOptions_GF->AddFrame(RatePlotDisp_NEL = new ADAQNumberEntryWithLabel(RateDrawOptions_GF, "Rate display period (s)", -1),
+			      new TGLayoutHints(kLHintsNormal, 0,0,5,0));
+  RatePlotDisp_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
+  RatePlotDisp_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+  RatePlotDisp_NEL->GetEntry()->Resize(50,20);
+  RatePlotDisp_NEL->GetEntry()->SetNumber(60);
+
+  RateDrawOptions_GF->AddFrame(RatePlotPeriod_NEL = new ADAQNumberEntryWithLabel(RateDrawOptions_GF, "Rate integration period (s)", -1),
+			      new TGLayoutHints(kLHintsNormal, 0,0,5,0));
+  RatePlotPeriod_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
+  RatePlotPeriod_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+  RatePlotPeriod_NEL->GetEntry()->Resize(50,20);
+  RatePlotPeriod_NEL->GetEntry()->SetNumber(2);
+
+
+
+  DrawSpectrumWithLine_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
+  DrawSpectrumWithLine_RB->SetState(kButtonDown);
+  
+
+
+//
+
   
   TGGroupFrame *DisplayControl_GF = new TGGroupFrame(GraphicsSubframe, "Control", kVerticalFrame);
   DisplayControl_GF->SetTitlePos(TGGroupFrame::kCenter);
@@ -3025,6 +3053,9 @@ void AAInterface::SaveSettings()
     TheSettings->SpectrumWithLine = DrawSpectrumWithLine_RB->IsDown();
     TheSettings->SpectrumWithMarkers = DrawSpectrumWithMarkers_RB->IsDown();
     TheSettings->SpectrumWithBars = DrawSpectrumWithBars_RB->IsDown();
+
+    TheSettings->RateIntegrationPeriod = RatePlotPeriod_NEL->GetEntry()->GetNumber();
+    TheSettings->RateDisplayPeriod = RatePlotPeriod_NEL->GetEntry()->GetNumber();
   
     TheSettings->SpectrumRefreshRate = SpectrumRefreshRate_NEL->GetEntry()->GetIntNumber();
 

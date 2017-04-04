@@ -1405,6 +1405,8 @@ void AAAcquisitionManager::CloseADAQFile()
 
 void AAAcquisitionManager::SetupRateVector()
 {
+  TheSettings->RateNumPeriods = (int)(TheSettings->RateDisplayPeriod/TheSettings->RateIntegrationPeriod);
+
   for(Int_t ch=0; ch<AAVMEManager::GetInstance()->GetDGManager()->GetNumChannels(); ch++){
     Rate_C[ch].reserve(TheSettings->RateNumPeriods);
   }
