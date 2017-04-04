@@ -87,7 +87,10 @@ public:
 
   TH1F *GetSpectrum(Int_t C) {return Spectrum_H[C];}
   TGraph *GetCalibrationCurve(Int_t C) {return CalibrationCurves[C];}
-  
+
+  void SetupRateVector();
+  TGraph *GetRatePlot(Int_t C) {return Rate_P[C];}
+
   TH2F *GetPSDHistogram(Int_t C) {return PSDHistogram_H[C];}
   
   TString GetADAQFileComment() {return TheReadoutManager->GetFileComment();}
@@ -167,7 +170,8 @@ private:
   vector<TH1F *> Spectrum_H;
   vector<Bool_t> SpectrumExists;
 
-  vector<TH1F *> Rate_H;
+  vector<TGraph *> Rate_P;
+  vector< vector<unsigned int> > Rate_C;
   vector<Bool_t> RateExists;
   
   vector<TH2F *> PSDHistogram_H;

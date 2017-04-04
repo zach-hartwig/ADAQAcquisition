@@ -957,7 +957,7 @@ void AAInterface::FillAcquisitionFrame()
   }
 
   DGChEnable_CB_ID_Vec += 
-    (Int_t)DGCh0Enable_CB_ID,  (Int_t)DGCh1Enable_CB_ID,  (Int_t)DGCh2Enable_CB_ID, 
+    (Int_t)DGCh0Enable_CB_ID,  (Int_t)DGCh1Enable_CB_ID,  (Int_t)DGCh2Enable_CB_ID,
     (Int_t)DGCh3Enable_CB_ID,  (Int_t)DGCh4Enable_CB_ID,  (Int_t)DGCh5Enable_CB_ID, 
     (Int_t)DGCh6Enable_CB_ID,  (Int_t)DGCh7Enable_CB_ID,  (Int_t)DGCh8Enable_CB_ID,
     (Int_t)DGCh9Enable_CB_ID,  (Int_t)DGCh10Enable_CB_ID, (Int_t)DGCh11Enable_CB_ID,
@@ -2518,7 +2518,6 @@ void AAInterface::FillAcquisitionFrame()
   SpectrumRefreshRate_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
   SpectrumRefreshRate_NEL->GetEntry()->Resize(50,20);
   SpectrumRefreshRate_NEL->GetEntry()->SetNumber(100);
-  
 
   TGButtonGroup *DisplayControl_BG = new TGButtonGroup(DisplayControl_GF, "");
   DisplayControl_BG->SetBorderDrawn(false);
