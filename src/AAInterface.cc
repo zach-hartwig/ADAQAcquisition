@@ -2531,7 +2531,7 @@ void AAInterface::FillAcquisitionFrame()
   RatePlotPeriod_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
   RatePlotPeriod_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
   RatePlotPeriod_NEL->GetEntry()->Resize(50,20);
-  RatePlotPeriod_NEL->GetEntry()->SetNumber(1);
+  RatePlotPeriod_NEL->GetEntry()->SetNumber(2);
 
   RateDrawOptions_GF->AddFrame(RateTSResolution_NEL = new ADAQNumberEntryWithLabel(RateDrawOptions_GF, "Timestamp Resolution (ns)", -1),
 			      new TGLayoutHints(kLHintsNormal, 0,0,5,0));
@@ -3074,7 +3074,7 @@ void AAInterface::SaveSettings()
 
     TheSettings->RateChannel = RateChannel_CBL->GetComboBox()->GetSelected();
     TheSettings->RateIntegrationPeriod = RatePlotPeriod_NEL->GetEntry()->GetNumber();
-    TheSettings->RateDisplayPeriod = RatePlotPeriod_NEL->GetEntry()->GetNumber();
+    TheSettings->RateDisplayPeriod = RatePlotDisp_NEL->GetEntry()->GetNumber();
     TheSettings->RateTSResolution = RateTSResolution_NEL->GetEntry()->GetNumber();
 
     TheSettings->SpectrumRefreshRate = SpectrumRefreshRate_NEL->GetEntry()->GetIntNumber();
