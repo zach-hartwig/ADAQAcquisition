@@ -564,78 +564,68 @@ void AAGraphics::PlotRate(Double_t tss)
   std::list<unsigned int> * data = AAAcquisitionManager::GetInstance()->GetRateList(Channel);
 
   // Plotting arrays filled with the data from the list pointer
-  
+  Double_t ta[data->size()];
+  Double_t ra[data->size()];
+
+  unsigned int ci = 0;
+  for (std::list<unsigned int>::iterator it=data->begin(); it != data->end(); ++it){
+    ta[ci] = ci*TheSettings->RateIntegrationPeriod + tss;
+    ra[ci++] = ((Double_t)*it)/TheSettings->RateIntegrationPeriod;
+  }
   
 
-//  Spectrum_H->SetLineColor(ChColor[Channel]);
-//  Spectrum_H->SetLineWidth(SpectrumWidth);
-//  Spectrum_H->SetMarkerStyle(24);
-//  Spectrum_H->SetMarkerColor(ChColor[Channel]);
-//  Spectrum_H->SetMarkerSize(0.75);
-//  Spectrum_H->SetFillColor(ChColor[Channel]);
-//  
-//  if(TheSettings->SpectrumWithLine){
-//    Spectrum_H->SetFillStyle(0);
-//    Spectrum_H->Draw("");
-//  }
-//  else if(TheSettings->SpectrumWithMarkers)
-//    Spectrum_H->Draw("E1");
-//  else
-//    Spectrum_H->Draw("B");
+  RateGraph->SetLineColor(ChColor[Channel]);
+  RateGraph->SetLineWidth(SpectrumWidth);
+  RateGraph->SetMarkerStyle(24);
+  RateGraph->SetMarkerColor(ChColor[Channel]);
+  RateGraph->SetMarkerSize(0.75);
+  RateGraph->SetFillColor(ChColor[Channel]);
+
+  RateGraph->DrawGraph(data->size(),ta,ra,"ALP");
 
 //  // Set spectrum axes range and lin/log 
 
-//  XMin = TheSettings->SpectrumMaxBin * TheSettings->HorizontalSliderMin;
-//  XMax = TheSettings->SpectrumMaxBin * TheSettings->HorizontalSliderMax;
-//  Spectrum_H->GetXaxis()->SetRangeUser(XMin, XMax);
-//  
-//  (TheSettings->DisplayXAxisInLog) ? 
-//    gPad->SetLogx(true) : gPad->SetLogx(false);
-//  
-//  Int_t AbsoluteMax = Spectrum_H->GetBinContent(Spectrum_H->GetMaximumBin()) * 1.05;
-//  YMin = AbsoluteMax * TheSettings->VerticalSliderMin;
-//  YMax = AbsoluteMax * TheSettings->VerticalSliderMax;
-//  
-//  if(TheSettings->DisplayYAxisInLog){
-//    if(YMin == 0) YMin = 1;
-//    gPad->SetLogy(true);
-//  }
-//  else 
-//    gPad->SetLogy(false);
-//  
-//  Spectrum_H->SetMinimum(YMin);
-//  Spectrum_H->SetMaximum(YMax);
+  XMin = ta[data->size()-1] * TheSettings->HorizontalSliderMin;
+  XMax = ta[data->size()-1] * TheSettings->HorizontalSliderMax;
+  RateGraph->GetXaxis()->SetRangeUser(XMin, XMax);
+  
+  (TheSettings->DisplayXAxisInLog) ? 
+    gPad->SetLogx(true) : gPad->SetLogx(false);
+  
+  Double_t AbsoluteMax = RateGraph->GetMaximum() * 1.05;
+  YMin = AbsoluteMax * TheSettings->VerticalSliderMin;
+  YMax = AbsoluteMax * TheSettings->VerticalSliderMax;
+  
+  if(TheSettings->DisplayYAxisInLog){
+    if(YMin == 0) YMin = 1;
+    gPad->SetLogy(true);
+  }
+  else 
+    gPad->SetLogy(false);
+  
+  RateGraph->SetMinimum(YMin);
+  RateGraph->SetMaximum(YMax);
 
-//  // Set plot and axis title text properties
+  // Set plot and axis title text properties
 
-//  Spectrum_H->SetTitle(Title.c_str());
-//  
-//  Spectrum_H->GetXaxis()->SetTitle(XTitle.c_str());
-//  Spectrum_H->GetXaxis()->SetTitleSize(XSize);
-//  Spectrum_H->GetXaxis()->SetTitleOffset(XOffset);
-//  Spectrum_H->GetXaxis()->SetLabelSize(XSize);
+  RateGraph->SetTitle(Title.c_str());
+  
+  RateGraph->GetXaxis()->SetTitle(XTitle.c_str());
+  RateGraph->GetXaxis()->SetTitleSize(XSize);
+  RateGraph->GetXaxis()->SetTitleOffset(XOffset);
+  RateGraph->GetXaxis()->SetLabelSize(XSize);
 
-//  Spectrum_H->GetYaxis()->SetTitle(YTitle.c_str());
-//  Spectrum_H->GetYaxis()->SetTitleSize(YSize);
-//  Spectrum_H->GetYaxis()->SetTitleOffset(YOffset);
-//  Spectrum_H->GetYaxis()->SetLabelSize(YSize);
+  RateGraph->GetYaxis()->SetTitle(YTitle.c_str());
+  RateGraph->GetYaxis()->SetTitleSize(YSize);
+  RateGraph->GetYaxis()->SetTitleOffset(YOffset);
+  RateGraph->GetYaxis()->SetLabelSize(YSize);
 
-//  (TheSettings->DisplayLegend) ? Spectrum_H->SetStats(true) : Spectrum_H->SetStats(false);
-//  (TheSettings->DisplayGrid) ? gPad->SetGrid(true, true) : gPad->SetGrid(false, false);
-//  
-//  // If calibration is enabled the draw a vertical line corresponding
-//  // to the current pulse value selected by the triple slider pointer
+  (TheSettings->DisplayGrid) ? gPad->SetGrid(true, true) : gPad->SetGrid(false, false);
+  
+  // If calibration is enabled the draw a vertical line corresponding
+  // to the current pulse value selected by the triple slider pointer
 
-//  if(TheSettings->SpectrumCalibrationEnable){
-//    Double_t PulseValue = TheSettings->SpectrumMaxBin *
-//      TheSettings->HorizontalSliderPtr;
-//    
-//    SpectrumCalibration_L->DrawLine(PulseValue,
-//				    YMin,
-//				    PulseValue,
-//				    YMax);
-//  }
-//  TheCanvas_C->Update();
+  TheCanvas_C->Update();
 }
 
 void AAGraphics::PlotSpectrum(TH1F *Spectrum_H)
