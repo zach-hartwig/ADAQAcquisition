@@ -2731,6 +2731,10 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
   PSDTailMaxBin_NEL->GetEntry()->SetState(WidgetState);
   PSDThreshold_NEL->GetEntry()->SetState(WidgetState);
 
+  RatePlotDisp_NEL->GetEntry()->SetState(WidgetState);
+  RatePlotPeriod_NEL->GetEntry()->SetState(WidgetState);
+  RateTSResolution_NEL->GetEntry()->SetState(WidgetState);
+
   // The following widgets have special settings depending on
   // the acquisition state
   
