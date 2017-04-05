@@ -25,6 +25,7 @@ using namespace boost::assign;
 #include <sstream>
 #include <numeric>
 #include <cmath>
+#include <list>
 
 // ADAQAcquisition
 #include "AAGraphics.hh"
@@ -136,6 +137,8 @@ AAGraphics::AAGraphics()
     
     Waveform_LG->AddEntry(Line, LineName.c_str(), "L");
   }
+
+  RateGraph = NULL;
 }
 
 
@@ -489,7 +492,31 @@ void AAGraphics::DrawWaveformGraphics(vector<double> &BaselineValue,
 
 void AAGraphics::SetupRateGraphics()
 {
-  // AAAcquisitionManager::GetInstance()->SetupRateVector();
+  if(TheSettings->DisplayTitlesEnable){
+    Title = TheSettings->DisplayTitle;
+    XTitle = TheSettings->DisplayXTitle;
+    YTitle = TheSettings->DisplayYTitle;
+    
+    XSize = TheSettings->DisplayXTitleSize;
+    XOffset = TheSettings->DisplayXTitleOffset;
+
+    YSize = TheSettings->DisplayYTitleSize;
+    YOffset = TheSettings->DisplayYTitleOffset;
+  }
+  else{
+    Title = "Trigger rate";
+    string Unit = TheSettings->SpectrumCalibrationUnit;
+    XTitle = "Run time [s]";
+
+    YTitle = "Triggers/s";
+    
+    XSize = YSize = 0.05;
+    XOffset = 1.1;
+    YOffset = 1.2;
+  }
+
+  if (!RateGraph)
+    RateGraph =  new TGraph();
 }
 
 void AAGraphics::SetupSpectrumGraphics()
@@ -528,11 +555,17 @@ void AAGraphics::SetupSpectrumGraphics()
     XOffset = 1.1;
     YOffset = 1.2;
   }
+
 }
 
-void AAGraphics::PlotRate(TGraph *Rate_P)
+void AAGraphics::PlotRate(Double_t tss)
 {
   Int_t Channel = TheSettings->RateChannel;
+  std::list<unsigned int> * data = AAAcquisitionManager::GetInstance()->GetRateList(Channel);
+
+  // Plotting arrays filled with the data from the list pointer
+  
+  
 
 //  Spectrum_H->SetLineColor(ChColor[Channel]);
 //  Spectrum_H->SetLineWidth(SpectrumWidth);

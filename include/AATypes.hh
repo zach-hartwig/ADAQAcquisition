@@ -355,7 +355,10 @@ enum{
 
   DisplayContinuous_RB_ID,
   DisplayUpdateable_RB_ID,
-  DisplayNonUpdateable_RB_ID
+  DisplayNonUpdateable_RB_ID,
+
+  RateChannel_CBL_ID,
+  RateDrawOptions_CBL_ID
 };
 
 struct CalibrationDataStruct{

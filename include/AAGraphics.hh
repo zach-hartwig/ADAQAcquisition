@@ -61,7 +61,7 @@ public:
   void PlotSpectrum(TH1F *);
 
   void SetupRateGraphics();
-  void PlotRate(TGraph *);
+  void PlotRate(Double_t tss);
   
   void SetupPSDHistogramGraphics();
   void PlotPSDHistogram(TH2F *);
@@ -92,6 +92,8 @@ private:
   AASettings *TheSettings;
 
   vector<Int_t> Time;
+
+  TGraph * RateGraph;
 
   string Title, XTitle, YTitle;
   Double_t XSize, YSize, XOffset, YOffset;

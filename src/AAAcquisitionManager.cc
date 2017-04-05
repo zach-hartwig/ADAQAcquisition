@@ -96,8 +96,9 @@ void AAAcquisitionManager::Initialize()
     Spectrum_H.push_back(new TH1F);
     SpectrumExists.push_back(true);
 
-    Rate_P.push_back(new TGraph);
-    Rate_C.push_back(std::vector<unsigned int>(0));
+    // Rate_P.push_back(new TGraph);
+    Rate_C.push_back(new std::list<unsigned int>(0));
+    Rate_Lead.push_back(std::numeric_limits<double>::max());
     RateExists.push_back(true);
 
     PSDHistogram_H.push_back(new TH2F);
@@ -316,6 +317,7 @@ void AAAcquisitionManager::PrepareAcquisition()
       
       PSDHistogramExists[ch] = true;
     }
+
   }
   
   
@@ -877,6 +879,33 @@ void AAAcquisitionManager::StartAcquisition()
 	      PSDHistogram_H[ch]->Fill(PSDTotal, PSDParameter);
 	    }
 	  }
+
+    else if(TheSettings->RateMode){
+      Double_t tss = ((Double_t)CorrectedTimeStamp[ch])*TheSettings->RateTSResolution*1e-9;
+
+      // First event initialization
+      if (Rate_Lead[ch] == std::numeric_limits<double>::max())
+        Rate_Lead[ch] = tss;
+
+      // Current plot vector index
+      UInt_t tvi = (tss-Rate_Lead[ch])/TheSettings->RateIntegrationPeriod;
+
+      // Increase size of storage list if needed
+      if(tvi>=Rate_C[ch]->size()){
+        Rate_C[ch]->resize(tvi+1,0);
+      }
+
+      // Last element of list now corresponds to current event if it didn't
+      // before
+      Rate_C[ch]->back()++;
+    
+      // Trim front of container if beyond number of requested periods and
+      // corresponding increment the list start time
+      while(Rate_C[ch]->size()>TheSettings->RateNumPeriods){
+        Rate_C[ch]->pop_front();
+        Rate_Lead[ch]+=TheSettings->RateIntegrationPeriod;
+      }
+    }
 	}
 	
 	///////////////////////////////////////
@@ -987,10 +1016,10 @@ void AAAcquisitionManager::StartAcquisition()
           TheGraphicsManager->PlotSpectrum(Spectrum_H[TheSettings->SpectrumChannel]);
       }
 
-//      else if(TheSettings->RateMode){
-//        if(EventCounter % Rate == 0)
-//          TheGraphicsManager->PlotRate(Rate_P[TheSettings->RateChannel]);
-//      }
+      else if(TheSettings->RateMode){
+        if(EventCounter % Rate == 0)
+          TheGraphicsManager->PlotRate(Rate_Lead[TheSettings->RateChannel]);
+      }
       
       else if(TheSettings->PSDMode){
         if(EventCounter % Rate == 0){
@@ -1404,7 +1433,8 @@ void AAAcquisitionManager::SetupRateVector()
   TheSettings->RateNumPeriods = (int)(TheSettings->RateDisplayPeriod/TheSettings->RateIntegrationPeriod);
 
   for(Int_t ch=0; ch<AAVMEManager::GetInstance()->GetDGManager()->GetNumChannels(); ch++){
-    Rate_C[ch].reserve(TheSettings->RateNumPeriods);
+    // Rate_C[ch]->reserve(TheSettings->RateNumPeriods);
+    Rate_Lead[ch] = std::numeric_limits<double>::max();
   }
 }
 

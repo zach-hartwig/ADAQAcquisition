@@ -379,8 +379,10 @@ private:
 
   ADAQNumberEntryWithLabel *SpectrumRefreshRate_NEL;
 
+  ADAQComboBoxWithLabel *RateChannel_CBL;
   ADAQNumberEntryWithLabel *RatePlotDisp_NEL;
   ADAQNumberEntryWithLabel *RatePlotPeriod_NEL;
+  ADAQNumberEntryWithLabel *RateTSResolution_NEL;
 
   TGRadioButton *DisplayContinuous_RB, *DisplayUpdateable_RB, *DisplayNonUpdateable_RB;
 

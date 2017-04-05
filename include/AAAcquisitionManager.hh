@@ -30,6 +30,7 @@
 
 // C++
 #include <vector>
+#include <list>
 #include <string>
 using namespace std;
 
@@ -89,7 +90,7 @@ public:
   TGraph *GetCalibrationCurve(Int_t C) {return CalibrationCurves[C];}
 
   void SetupRateVector();
-  TGraph *GetRatePlot(Int_t C) {return Rate_P[C];}
+  list<unsigned int> * GetRateList(Int_t C) {return Rate_C[C];}
 
   TH2F *GetPSDHistogram(Int_t C) {return PSDHistogram_H[C];}
   
@@ -170,8 +171,9 @@ private:
   vector<TH1F *> Spectrum_H;
   vector<Bool_t> SpectrumExists;
 
-  vector<TGraph *> Rate_P;
-  vector< vector<unsigned int> > Rate_C;
+  // vector<TGraph *> Rate_P;
+  vector< list<unsigned int> * > Rate_C;
+  vector<double> Rate_Lead;
   vector<Bool_t> RateExists;
   
   vector<TH2F *> PSDHistogram_H;

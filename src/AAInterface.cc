@@ -2511,6 +2511,13 @@ void AAInterface::FillAcquisitionFrame()
   TGGroupFrame *RateDrawOptions_GF = new TGGroupFrame(DisplaySettings_GF, "Rate plot options", kVerticalFrame);
   DisplaySettings_GF->AddFrame(RateDrawOptions_GF,
 			       new TGLayoutHints(kLHintsNormal, 0,0,5,0));
+
+  RateDrawOptions_GF->AddFrame(RateChannel_CBL = new ADAQComboBoxWithLabel(RateDrawOptions_GF, "", RateDrawOptions_CBL_ID),
+				 new TGLayoutHints(kLHintsNormal,0,0,5,5));
+  for(uint32_t ch=0; ch<NumDGChannels; ch++)
+    RateChannel_CBL->GetComboBox()->AddEntry(DGChannelLabels[ch].c_str(),ch);
+  RateChannel_CBL->GetComboBox()->Select(0);
+  RateChannel_CBL->GetComboBox()->Connect("Selected(int,int)", "AASubtabSlots", SubtabSlots, "HandleComboBoxes(int,int)");
   
   RateDrawOptions_GF->AddFrame(RatePlotDisp_NEL = new ADAQNumberEntryWithLabel(RateDrawOptions_GF, "Rate display period (s)", -1),
 			      new TGLayoutHints(kLHintsNormal, 0,0,5,0));
@@ -2524,7 +2531,14 @@ void AAInterface::FillAcquisitionFrame()
   RatePlotPeriod_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
   RatePlotPeriod_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
   RatePlotPeriod_NEL->GetEntry()->Resize(50,20);
-  RatePlotPeriod_NEL->GetEntry()->SetNumber(2);
+  RatePlotPeriod_NEL->GetEntry()->SetNumber(1);
+
+  RateDrawOptions_GF->AddFrame(RateTSResolution_NEL = new ADAQNumberEntryWithLabel(RateDrawOptions_GF, "Timestamp Resolution (ns)", -1),
+			      new TGLayoutHints(kLHintsNormal, 0,0,5,0));
+  RateTSResolution_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
+  RateTSResolution_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+  RateTSResolution_NEL->GetEntry()->Resize(50,20);
+  RateTSResolution_NEL->GetEntry()->SetNumber(4);
 
 
 
@@ -3054,9 +3068,11 @@ void AAInterface::SaveSettings()
     TheSettings->SpectrumWithMarkers = DrawSpectrumWithMarkers_RB->IsDown();
     TheSettings->SpectrumWithBars = DrawSpectrumWithBars_RB->IsDown();
 
+    TheSettings->RateChannel = RateChannel_CBL->GetComboBox()->GetSelected();
     TheSettings->RateIntegrationPeriod = RatePlotPeriod_NEL->GetEntry()->GetNumber();
     TheSettings->RateDisplayPeriod = RatePlotPeriod_NEL->GetEntry()->GetNumber();
-  
+    TheSettings->RateTSResolution = RateTSResolution_NEL->GetEntry()->GetNumber();
+
     TheSettings->SpectrumRefreshRate = SpectrumRefreshRate_NEL->GetEntry()->GetIntNumber();
 
     TheSettings->DisplayContinuous = DisplayContinuous_RB->IsDown();
@@ -3450,6 +3466,7 @@ void AAInterface::LoadSettingsFromFile()
       SpectrumUseCalibrationSlider_CB->SetState(kButtonUp);
 
     // TheSettings->SpectrumCalibrationUnit = SpectrumCalibrationUnit_CBL->GetComboBox()->GetSelectedEntry()->GetTitle();
+
 
     ///////////////////////
     // Pulse discrimination
