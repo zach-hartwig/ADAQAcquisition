@@ -45,7 +45,7 @@ AAGraphics::AAGraphics()
   : MaxWaveformLength(0), WaveformWidth(2), SpectrumWidth(2),
     XMin(0.), XMax(1.), YMin(0.), YMax(1.),
     BaselineStart(0), BaselineStop(1),
-    WaveformGraphAxes_H(new TH1F)
+    WaveformGraphAxes_H(new TH1F), RateGraphAxes_H(new TH1F)
 {
   if(TheGraphicsManager)
     cout << "\nError! The GraphicsManager was constructed twice!\n" << endl;
@@ -363,7 +363,7 @@ void AAGraphics::PlotWaveforms(vector<vector<uint16_t> > &Waveforms,
     // The WaveformGraphAxes_H object creates the X and Y axes upon
     // which the TGraph waveform objects are plotted. A TH1F is used
     // because (a)the TAxis::SetRangeUser() methods do NOT appear to
-    // work when using the TGraph::DrawGraph() method amd (b) to
+    // work when using the TGraph::DrawGraph() method and (b) to
     // refresh the canvas between successive triggers. This is done
     // such that we do NOT need to delete/recreate the TGraph object
     // via dynamic memory allocation every time we plot (as was done
@@ -515,8 +515,32 @@ void AAGraphics::SetupRateGraphics()
     YOffset = 1.2;
   }
 
+	if (RateGraph)
+		delete RateGraph;
+
   if (!RateGraph)
     RateGraph =  new TGraph();
+
+  delete RateGraphAxes_H;
+  RateGraphAxes_H = new TH1F("RateGraphAxes_H",
+				 "A TH1F used to create X and Y axes for rate plotting",
+				 100, 0, MaxWaveformLength);
+  
+  // Set the waveform title and axes properties
+  RateGraphAxes_H->SetTitle(Title.c_str());
+  
+  RateGraphAxes_H->GetXaxis()->SetTitle(XTitle.c_str());
+  RateGraphAxes_H->GetXaxis()->SetTitleSize(XSize);
+  RateGraphAxes_H->GetXaxis()->SetTitleOffset(XOffset);
+  RateGraphAxes_H->GetXaxis()->SetLabelSize(XSize);
+  RateGraphAxes_H->GetXaxis()->SetRangeUser(0, MaxWaveformLength);
+  
+  RateGraphAxes_H->GetYaxis()->SetTitle(YTitle.c_str());
+  RateGraphAxes_H->GetYaxis()->SetTitleSize(YSize);
+  RateGraphAxes_H->GetYaxis()->SetTitleOffset(YOffset);
+  RateGraphAxes_H->GetYaxis()->SetLabelSize(YSize);
+
+  RateGraphAxes_H->SetStats(false);
 }
 
 void AAGraphics::SetupSpectrumGraphics()
@@ -568,9 +592,12 @@ void AAGraphics::PlotRate(Double_t tss)
   Double_t ra[data->size()];
 
   unsigned int ci = 0;
+  Double_t AbsoluteMax = 0;
   for (std::list<unsigned int>::iterator it=data->begin(); it != data->end(); ++it){
     ta[ci] = ci*TheSettings->RateIntegrationPeriod + tss;
-    ra[ci++] = ((Double_t)*it)/TheSettings->RateIntegrationPeriod;
+    ra[ci] = ((Double_t)*it)/TheSettings->RateIntegrationPeriod;
+    if (ra[ci]>AbsoluteMax) AbsoluteMax = 1.05*ra[ci];
+    ci++;
   }
   
 
@@ -581,18 +608,15 @@ void AAGraphics::PlotRate(Double_t tss)
   RateGraph->SetMarkerSize(0.75);
   RateGraph->SetFillColor(ChColor[Channel]);
 
-  RateGraph->DrawGraph(data->size(),ta,ra,"ALP");
-
 //  // Set spectrum axes range and lin/log 
 
   XMin = ta[data->size()-1] * TheSettings->HorizontalSliderMin;
   XMax = ta[data->size()-1] * TheSettings->HorizontalSliderMax;
-  RateGraph->GetXaxis()->SetRangeUser(XMin, XMax);
   
   (TheSettings->DisplayXAxisInLog) ? 
     gPad->SetLogx(true) : gPad->SetLogx(false);
   
-  Double_t AbsoluteMax = RateGraph->GetMaximum() * 1.05;
+  // Double_t AbsoluteMax = RateGraph->GetMaximum() * 1.05;
   YMin = AbsoluteMax * TheSettings->VerticalSliderMin;
   YMax = AbsoluteMax * TheSettings->VerticalSliderMax;
   
@@ -602,23 +626,18 @@ void AAGraphics::PlotRate(Double_t tss)
   }
   else 
     gPad->SetLogy(false);
-  
-  RateGraph->SetMinimum(YMin);
-  RateGraph->SetMaximum(YMax);
 
+	RateGraphAxes_H->GetXaxis()->SetRangeUser(XMin,XMax);
+	RateGraphAxes_H->SetMinimum(YMin);
+	RateGraphAxes_H->SetMaximum(YMax);
+	RateGraphAxes_H->Draw("");
+
+	RateGraph->SetTitle("");
+  RateGraph->DrawGraph(data->size(),ta,ra,"ALP");
+  RateGraph->GetXaxis()->SetRangeUser(XMin, XMax);
+  
   // Set plot and axis title text properties
 
-  RateGraph->SetTitle(Title.c_str());
-  
-  RateGraph->GetXaxis()->SetTitle(XTitle.c_str());
-  RateGraph->GetXaxis()->SetTitleSize(XSize);
-  RateGraph->GetXaxis()->SetTitleOffset(XOffset);
-  RateGraph->GetXaxis()->SetLabelSize(XSize);
-
-  RateGraph->GetYaxis()->SetTitle(YTitle.c_str());
-  RateGraph->GetYaxis()->SetTitleSize(YSize);
-  RateGraph->GetYaxis()->SetTitleOffset(YOffset);
-  RateGraph->GetYaxis()->SetLabelSize(YSize);
 
   (TheSettings->DisplayGrid) ? gPad->SetGrid(true, true) : gPad->SetGrid(false, false);
   

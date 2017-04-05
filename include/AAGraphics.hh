@@ -93,7 +93,8 @@ private:
 
   vector<Int_t> Time;
 
-  TGraph * RateGraph;
+  TGraph *RateGraph;
+  TH1F *RateGraphAxes_H;
 
   string Title, XTitle, YTitle;
   Double_t XSize, YSize, XOffset, YOffset;

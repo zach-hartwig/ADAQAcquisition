@@ -883,6 +883,8 @@ void AAAcquisitionManager::StartAcquisition()
     else if(TheSettings->RateMode){
       Double_t tss = ((Double_t)CorrectedTimeStamp[ch])*TheSettings->RateTSResolution*1e-9;
 
+      // std::cout<<tss<<" "<<Rate_C[ch]->size()<<" "<<Rate_Lead[ch]<<" "<<TheSettings->RateNumPeriods<<"\n";
+
       // First event initialization
       if (Rate_Lead[ch] == std::numeric_limits<double>::max())
         Rate_Lead[ch] = tss;
@@ -891,7 +893,7 @@ void AAAcquisitionManager::StartAcquisition()
       UInt_t tvi = (tss-Rate_Lead[ch])/TheSettings->RateIntegrationPeriod;
 
       // Increase size of storage list if needed
-      if(tvi>=Rate_C[ch]->size()){
+      if(tvi>=(double)Rate_C[ch]->size()){
         Rate_C[ch]->resize(tvi+1,0);
       }
 
@@ -905,6 +907,8 @@ void AAAcquisitionManager::StartAcquisition()
         Rate_C[ch]->pop_front();
         Rate_Lead[ch]+=TheSettings->RateIntegrationPeriod;
       }
+
+      // std::cout<<tss<<" "<<Rate_C[ch]->size()<<" "<<Rate_Lead[ch]<<" "<<TheSettings->RateNumPeriods<<"\n\n";
     }
 	}
 	
@@ -1435,6 +1439,7 @@ void AAAcquisitionManager::SetupRateVector()
   for(Int_t ch=0; ch<AAVMEManager::GetInstance()->GetDGManager()->GetNumChannels(); ch++){
     // Rate_C[ch]->reserve(TheSettings->RateNumPeriods);
     Rate_Lead[ch] = std::numeric_limits<double>::max();
+    Rate_C[ch]->clear();
   }
 }
 
