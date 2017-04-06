@@ -490,124 +490,6 @@ void AAGraphics::DrawWaveformGraphics(vector<double> &BaselineValue,
   TheCanvas_C->Update();
 }
 
-//void AAGraphics::SetupRateGraphics()
-//{
-//  if(TheSettings->DisplayTitlesEnable){
-//    Title = TheSettings->DisplayTitle;
-//    XTitle = TheSettings->DisplayXTitle;
-//    YTitle = TheSettings->DisplayYTitle;
-//    
-//    XSize = TheSettings->DisplayXTitleSize;
-//    XOffset = TheSettings->DisplayXTitleOffset;
-
-//    YSize = TheSettings->DisplayYTitleSize;
-//    YOffset = TheSettings->DisplayYTitleOffset;
-//  }
-//  else{
-//    Title = "Trigger rate";
-//    string Unit = TheSettings->SpectrumCalibrationUnit;
-//    XTitle = "Run time [s]";
-
-//    YTitle = "Triggers/s";
-//    
-//    XSize = YSize = 0.05;
-//    XOffset = 1.1;
-//    YOffset = 1.2;
-//  }
-
-//	if (RateGraph)
-//		delete RateGraph;
-
-//  if (!RateGraph)
-//    RateGraph =  new TGraph();
-
-//  delete RateGraphAxes_H;
-//  RateGraphAxes_H = new TH1F("RateGraphAxes_H",
-//				 "A TH1F used to create X and Y axes for rate plotting",
-//				 100, 0, MaxWaveformLength);
-//  
-//  // Set the waveform title and axes properties
-//  RateGraphAxes_H->SetTitle(Title.c_str());
-//  
-//  RateGraphAxes_H->GetXaxis()->SetTitle(XTitle.c_\tstr());
-//  RateGraphAxes_H->GetXaxis()->SetTitleSize(XSize);
-//  RateGraphAxes_H->GetXaxis()->SetTitleOffset(XOffset);
-//  RateGraphAxes_H->GetXaxis()->SetLabelSize(XSize);
-//  RateGraphAxes_H->GetXaxis()->SetRangeUser(0, MaxWaveformLength);
-//  
-//  RateGraphAxes_H->GetYaxis()->SetTitle(YTitle.c_str());
-//  RateGraphAxes_H->GetYaxis()->SetTitleSize(YSize);
-//  RateGraphAxes_H->GetYaxis()->SetTitleOffset(YOffset);
-//  RateGraphAxes_H->GetYaxis()->SetLabelSize(YSize);
-
-//  RateGraphAxes_H->SetStats(false);
-//}
-
-//void AAGraphics::PlotRate(Double_t tss)
-//{
-//  Int_t Channel = TheSettings->RateChannel;
-//  std::list<unsigned int> * data = AAAcquisitionManager::GetInstance()->GetRateList(Channel);
-
-//  // Plotting arrays filled with the data from the list pointer
-//  Double_t ta[data->size()];
-//  Double_t ra[data->size()];
-
-//  unsigned int ci = 0;
-//  Double_t AbsoluteMax = 0;
-//  for (std::list<unsigned int>::iterator it=data->begin(); it != data->end(); ++it){
-//    ta[ci] = ci*TheSettings->RateIntegrationPeriod + tss;
-//    ra[ci] = ((Double_t)*it)/TheSettings->RateIntegrationPeriod;
-//    if (ra[ci]>AbsoluteMax) AbsoluteMax = 1.05*ra[ci];
-//    ci++;
-//  }
-//  
-
-//  RateGraph->SetLineColor(ChColor[Channel]);
-//  RateGraph->SetLineWidth(SpectrumWidth);
-//  RateGraph->SetMarkerStyle(24);
-//  RateGraph->SetMarkerColor(ChColor[Channel]);
-//  RateGraph->SetMarkerSize(0.75);
-//  RateGraph->SetFillColor(ChColor[Channel]);
-
-////  // Set spectrum axes range and lin/log 
-
-//  XMin = ta[data->size()-1] * TheSettings->HorizontalSliderMin;
-//  XMax = ta[data->size()-1] * TheSettings->HorizontalSliderMax;
-//  
-//  (TheSettings->DisplayXAxisInLog) ? 
-//    gPad->SetLogx(true) : gPad->SetLogx(false);
-//  
-//  // Double_t AbsoluteMax = RateGraph->GetMaximum() * 1.05;
-//  YMin = AbsoluteMax * TheSettings->VerticalSliderMin;
-//  YMax = AbsoluteMax * TheSettings->VerticalSliderMax;
-//  
-//  if(TheSettings->DisplayYAxisInLog){
-//    if(YMin == 0) YMin = 1;
-//    gPad->SetLogy(true);
-//  }
-//  else 
-//    gPad->SetLogy(false);
-
-//	RateGraphAxes_H->GetXaxis()->SetRangeUser(XMin,XMax);
-//	RateGraphAxes_H->SetMinimum(YMin);
-//	RateGraphAxes_H->SetMaximum(YMax);
-//	RateGraphAxes_H->Draw("");
-
-//	RateGraph->SetTitle("");
-//  RateGraph->DrawGraph(data->size(),ta,ra,"ALP");
-//  RateGraph->GetXaxis()->SetRangeUser(XMin, XMax);
-//  
-//  // Set plot and axis title text properties
-
-
-//  (TheSettings->DisplayGrid) ? gPad->SetGrid(true, true) : gPad->SetGrid(false, false);
-//  
-//  // If calibration is enabled the draw a vertical line corresponding
-//  // to the current pulse value selected by the triple slider pointer
-
-//  TheCanvas_C->Update();
-//}
-
 void AAGraphics::SetupSpectrumGraphics()
 {
   if(TheSettings->DisplayTitlesEnable){
@@ -900,7 +782,7 @@ void AAGraphics::SetupRateGraphics()
   RateGraphAxes_H->GetXaxis()->SetTitleSize(XSize);
   RateGraphAxes_H->GetXaxis()->SetTitleOffset(XOffset);
   RateGraphAxes_H->GetXaxis()->SetLabelSize(XSize);
-  RateGraphAxes_H->GetXaxis()->SetRangeUser(0, MaxRateSize);
+  RateGraphAxes_H->GetXaxis()->SetRangeUser(0, TheSettings->RateDisplayPeriod);
   
   RateGraphAxes_H->GetYaxis()->SetTitle(YTitle.c_str());
   RateGraphAxes_H->GetYaxis()->SetTitleSize(YSize);
@@ -954,11 +836,15 @@ void AAGraphics::PlotRate(Double_t tss)
     
 
   RateGraphAxes_H->GetXaxis()->SetRangeUser(XMin,XMax);
+  RateGraphAxes_H->GetYaxis()->SetRangeUser(YMin,YMax);
   RateGraphAxes_H->SetMinimum(YMin);
   RateGraphAxes_H->SetMaximum(YMax);
-  RateGraphAxes_H->Draw("");
+  //RateGraphAxes_H->Draw("");
 
+  RateGraph->SetTitle("");
   RateGraph->DrawGraph(data->size(),&timeR[0],&rateR[0],"ALP");
 
   (TheSettings->DisplayGrid) ? gPad->SetGrid(true, true) : gPad->SetGrid(false, false);
+
+  TheCanvas_C->Update();
 }

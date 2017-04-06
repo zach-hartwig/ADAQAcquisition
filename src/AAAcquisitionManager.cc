@@ -394,6 +394,7 @@ void AAAcquisitionManager::PrepareAcquisition()
 
 void AAAcquisitionManager::StartAcquisition()
 {
+  unsigned int hys = 0;
   ADAQDigitizer *DGManager = AAVMEManager::GetInstance()->GetDGManager();
   
   AAGraphics *TheGraphicsManager = AAGraphics::GetInstance();
@@ -897,9 +898,14 @@ void AAAcquisitionManager::StartAcquisition()
         Rate_C[ch]->resize(tvi+1,0);
       }
 
-      // Last element of list now corresponds to current event if it didn't
-      // before
-      Rate_C[ch]->back()++;
+      // Timestamps are not ordered, so may need to iterate to correct bin
+      UInt_t diff = (Rate_C[ch]->size()-1) - tvi;
+      UInt_t dcnt = 0;
+      for (std::list<unsigned int>::reverse_iterator it=Rate_C[ch]->rbegin(); it != Rate_C[ch]->rend(); ++it, dcnt++)
+        if (dcnt == diff){
+          (*it)++;
+          break;
+        }
     
       // Trim front of container if beyond number of requested periods and
       // corresponding increment the list start time
