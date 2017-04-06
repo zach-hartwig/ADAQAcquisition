@@ -756,11 +756,14 @@ void AAAcquisitionManager::StartAcquisition()
 	
 	// Test the time stamp for a rollover and increment if found
 	if(RawTimeStamp < PrevTimeStamp[ch])
+	{
+          // std::cout<<"Rolling "<<CorrectedTimeStamp[ch]<<" "<<RawTimeStamp<<" "<<PrevTimeStamp[ch]<<"\n";
 	  TimeStampRollovers[ch]++;
+        }
 	
 	// Compute the corrected time stamp; store as 64-bit integer
         PrevCorTimeStamp[ch] = CorrectedTimeStamp[ch];
-	CorrectedTimeStamp[ch] = (ULong64_t)(RawTimeStamp + TimeStampRollovers[ch] * pow(2,31));
+	CorrectedTimeStamp[ch] = (ULong64_t)(RawTimeStamp + TimeStampRollovers[ch] * pow(2,32));
 
 	// Set the previous time stamp
 	PrevTimeStamp[ch] = RawTimeStamp;
@@ -886,7 +889,8 @@ void AAAcquisitionManager::StartAcquisition()
 
     else if(TheSettings->RateMode){
       Double_t tss = ((Double_t)CorrectedTimeStamp[ch])*TheSettings->RateTSResolution*1e-9;
-        
+      
+      if (PrevCorTimeStamp[ch]>CorrectedTimeStamp[ch]) cout<<"BACK IN TIME "<<PrevCorTimeStamp[ch]<<" "<<CorrectedTimeStamp[ch]<<"\n";
       // std::cout<<tss<<" "<<Rate_C[ch]->size()<<" "<<Rate_Lead[ch]<<" "<<TheSettings->RateNumPeriods<<"\n";
 
       // First event initialization
