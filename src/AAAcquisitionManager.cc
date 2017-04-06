@@ -108,6 +108,7 @@ void AAAcquisitionManager::Initialize()
     
     CorrectedTimeStamp.push_back(0);
     PrevTimeStamp.push_back(0);
+    PrevCorTimeStamp.push_back(0);
     TimeStampRollovers.push_back(0);
   }
 }
@@ -344,6 +345,7 @@ void AAAcquisitionManager::PrepareAcquisition()
     // Reset time stamp variables 
     TimeStampRollovers[ch] = 0;
     PrevTimeStamp[ch] = 0;
+    PrevCorTimeStamp[ch] = 0;
     CorrectedTimeStamp[ch] = 0;
   }
 
@@ -757,6 +759,7 @@ void AAAcquisitionManager::StartAcquisition()
 	  TimeStampRollovers[ch]++;
 	
 	// Compute the corrected time stamp; store as 64-bit integer
+        PrevCorTimeStamp[ch] = CorrectedTimeStamp[ch];
 	CorrectedTimeStamp[ch] = (ULong64_t)(RawTimeStamp + TimeStampRollovers[ch] * pow(2,31));
 
 	// Set the previous time stamp
@@ -883,7 +886,7 @@ void AAAcquisitionManager::StartAcquisition()
 
     else if(TheSettings->RateMode){
       Double_t tss = ((Double_t)CorrectedTimeStamp[ch])*TheSettings->RateTSResolution*1e-9;
-
+        
       // std::cout<<tss<<" "<<Rate_C[ch]->size()<<" "<<Rate_Lead[ch]<<" "<<TheSettings->RateNumPeriods<<"\n";
 
       // First event initialization

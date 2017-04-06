@@ -161,6 +161,7 @@ private:
   vector<ULong64_t> CorrectedTimeStamp;
 #ifndef __CINT__
   vector<uint32_t> PrevTimeStamp, TimeStampRollovers;
+  vector<ULong64_t> PrevCorTimeStamp;
   uint32_t RawTimeStamp;
 #endif
 

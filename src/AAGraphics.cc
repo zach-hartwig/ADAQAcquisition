@@ -795,6 +795,8 @@ void AAGraphics::SetupRateGraphics()
 
 void AAGraphics::PlotRate(Double_t tss)
 {
+	gPad->Clear();
+
   Int_t Channel = TheSettings->RateChannel;
   std::list<unsigned int> * data = AAAcquisitionManager::GetInstance()->GetRateList(Channel);
 
@@ -841,8 +843,8 @@ void AAGraphics::PlotRate(Double_t tss)
   RateGraphAxes_H->SetMaximum(YMax);
   //RateGraphAxes_H->Draw("");
 
-  RateGraph->SetTitle("");
   RateGraph->DrawGraph(data->size(),&timeR[0],&rateR[0],"ALP");
+  RateGraph->SetTitle("");
 
   (TheSettings->DisplayGrid) ? gPad->SetGrid(true, true) : gPad->SetGrid(false, false);
 
