@@ -87,7 +87,7 @@ private:
 
   vector<Int_t> ChColor;
 
-  Int_t MaxWaveformLength, WaveformWidth, SpectrumWidth;
+  Int_t MaxWaveformLength, WaveformWidth, SpectrumWidth, MaxRateSize;
 
   AASettings *TheSettings;
 
@@ -95,6 +95,8 @@ private:
 
   TGraph *RateGraph;
   TH1F *RateGraphAxes_H;
+  vector<Double_t> timeR;
+  vector<Double_t> rateR;
 
   string Title, XTitle, YTitle;
   Double_t XSize, YSize, XOffset, YOffset;
