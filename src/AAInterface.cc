@@ -2533,15 +2533,6 @@ void AAInterface::FillAcquisitionFrame()
   RatePlotPeriod_NEL->GetEntry()->Resize(50,20);
   RatePlotPeriod_NEL->GetEntry()->SetNumber(2);
 
-  RateDrawOptions_GF->AddFrame(RateTSResolution_NEL = new ADAQNumberEntryWithLabel(RateDrawOptions_GF, "Timestamp Resolution (ns)", -1),
-			      new TGLayoutHints(kLHintsNormal, 0,0,5,0));
-  RateTSResolution_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
-  RateTSResolution_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
-  RateTSResolution_NEL->GetEntry()->Resize(50,20);
-  RateTSResolution_NEL->GetEntry()->SetNumber(4);
-
-
-
   DrawSpectrumWithLine_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
   DrawSpectrumWithLine_RB->SetState(kButtonDown);
   
@@ -2733,7 +2724,6 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
 
   RatePlotDisp_NEL->GetEntry()->SetState(WidgetState);
   RatePlotPeriod_NEL->GetEntry()->SetState(WidgetState);
-  RateTSResolution_NEL->GetEntry()->SetState(WidgetState);
 
   // The following widgets have special settings depending on
   // the acquisition state
@@ -3075,7 +3065,6 @@ void AAInterface::SaveSettings()
     TheSettings->RateChannel = RateChannel_CBL->GetComboBox()->GetSelected();
     TheSettings->RateIntegrationPeriod = RatePlotPeriod_NEL->GetEntry()->GetNumber();
     TheSettings->RateDisplayPeriod = RatePlotDisp_NEL->GetEntry()->GetNumber();
-    TheSettings->RateTSResolution = RateTSResolution_NEL->GetEntry()->GetNumber();
 
     TheSettings->SpectrumRefreshRate = SpectrumRefreshRate_NEL->GetEntry()->GetIntNumber();
 

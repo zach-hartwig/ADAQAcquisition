@@ -762,8 +762,8 @@ void AAAcquisitionManager::StartAcquisition()
         }
 	
 	// Compute the corrected time stamp; store as 64-bit integer
-        PrevCorTimeStamp[ch] = CorrectedTimeStamp[ch];
-	CorrectedTimeStamp[ch] = (ULong64_t)(RawTimeStamp + TimeStampRollovers[ch] * pow(2,32));
+  PrevCorTimeStamp[ch] = CorrectedTimeStamp[ch];
+	CorrectedTimeStamp[ch] = (ULong64_t)(RawTimeStamp + TimeStampRollovers[ch] * ((ULong64_t)1<<DGManager->GetTimeStampSize()));// pow(2,32));
 
 	// Set the previous time stamp
 	PrevTimeStamp[ch] = RawTimeStamp;
@@ -888,7 +888,7 @@ void AAAcquisitionManager::StartAcquisition()
 	  }
 
     else if(TheSettings->RateMode){
-      Double_t tss = ((Double_t)CorrectedTimeStamp[ch])*TheSettings->RateTSResolution*1e-9;
+      Double_t tss = ((Double_t)CorrectedTimeStamp[ch])*DGManager->GetTimeStampUnit()*1e-9;
       
       if (PrevCorTimeStamp[ch]>CorrectedTimeStamp[ch]) cout<<"BACK IN TIME "<<PrevCorTimeStamp[ch]<<" "<<CorrectedTimeStamp[ch]<<"\n";
       // std::cout<<tss<<" "<<Rate_C[ch]->size()<<" "<<Rate_Lead[ch]<<" "<<TheSettings->RateNumPeriods<<"\n";
@@ -905,7 +905,9 @@ void AAAcquisitionManager::StartAcquisition()
         Rate_C[ch]->resize(tvi+1,0);
       }
 
-      // Timestamps are not ordered, so may need to iterate to correct bin
+      // Timestamps are not ordered, so may need to iterate to correct bin (OK,
+      // turns out they are, but this shouldn't cause a slowdown and maintains
+      // generality for the case that they may not be)
       UInt_t diff = (Rate_C[ch]->size()-1) - tvi;
       UInt_t dcnt = 0;
       for (std::list<unsigned int>::reverse_iterator it=Rate_C[ch]->rbegin(); it != Rate_C[ch]->rend(); ++it, dcnt++)

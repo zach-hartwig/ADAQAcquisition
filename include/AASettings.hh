@@ -208,7 +208,6 @@ public:
   Int_t RateNumPeriods;
   Double_t RateIntegrationPeriod;
   Double_t RateDisplayPeriod;
-  Double_t RateTSResolution;
 
   //////////////////////////////
   // Pulse discrimination limits
