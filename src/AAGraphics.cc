@@ -15,6 +15,7 @@
 #include <TStyle.h>
 #include <TFrame.h>
 #include <TPaletteAxis.h>
+#include <TH1F.h>
 
 // Boost
 #include <boost/assign/std/vector.hpp>
@@ -45,7 +46,7 @@ AAGraphics::AAGraphics()
   : MaxWaveformLength(0), WaveformWidth(2), SpectrumWidth(2), MaxRateSize(0),
     XMin(0.), XMax(1.), YMin(0.), YMax(1.),
     BaselineStart(0), BaselineStop(1),
-    WaveformGraphAxes_H(new TH1F)
+    WaveformGraphAxes_H(new TH1F), RateGraphAxes_H(new TH1F)
 {
   if(TheGraphicsManager)
     cout << "\nError! The GraphicsManager was constructed twice!\n" << endl;
@@ -734,9 +735,7 @@ void AAGraphics::SetupRateGraphics()
   }
   else{
     Title = "Trigger rate";
-    string Unit = TheSettings->SpectrumCalibrationUnit;
     XTitle = "Run time [s]";
-
     YTitle = "Triggers/s";
     
     XSize = YSize = 0.05;
@@ -784,11 +783,13 @@ void AAGraphics::SetupRateGraphics()
     YOffset = 1.2;
   }
 
-  delete RateGraphAxes_H;
+  if (RateGraphAxes_H)
+    delete RateGraphAxes_H;
+
   RateGraphAxes_H = new TH1F("RateGraphAxes_H",
 				 "A TH1F used to create X and Y axes for trigger rate plotting",
 				 MaxRateSize, 0, TheSettings->RateDisplayPeriod);
-  
+
   // Set the waveform title and axes properties
   RateGraphAxes_H->SetTitle(Title.c_str());
   
@@ -802,6 +803,8 @@ void AAGraphics::SetupRateGraphics()
   RateGraphAxes_H->GetYaxis()->SetTitleSize(YSize);
   RateGraphAxes_H->GetYaxis()->SetTitleOffset(YOffset);
   RateGraphAxes_H->GetYaxis()->SetLabelSize(YSize);
+
+  RateGraphAxes_H->SetCanExtend(7);
 
   RateGraphAxes_H->SetStats(false);
 
@@ -851,7 +854,10 @@ void AAGraphics::PlotRate(Double_t tss)
   else
     gPad->SetLogy(false);
   
+  RateGraphAxes_H->Fill(XMax); // Force axis extension then clear the bin count
+  RateGraphAxes_H->Reset();
   RateGraphAxes_H->GetXaxis()->SetRangeUser(XMin,XMax);
+  RateGraphAxes_H->SetAxisRange(XMin,XMax);
   RateGraphAxes_H->SetMinimum(YMin);
   RateGraphAxes_H->SetMaximum(YMax);
   RateGraphAxes_H->Draw("");
@@ -859,5 +865,7 @@ void AAGraphics::PlotRate(Double_t tss)
   RateGraph->DrawGraph(data->size()-1,&timeR[0],&rateR[0],"LP"); // -1 to avoid partially filled time bins
 
   (TheSettings->DisplayGrid) ? gPad->SetGrid(true, true) : gPad->SetGrid(false, false);
+
+  TheCanvas_C->Update();
 
 }

@@ -2531,7 +2531,7 @@ void AAInterface::FillAcquisitionFrame()
   RatePlotPeriod_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
   RatePlotPeriod_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
   RatePlotPeriod_NEL->GetEntry()->Resize(50,20);
-  RatePlotPeriod_NEL->GetEntry()->SetNumber(2);
+  RatePlotPeriod_NEL->GetEntry()->SetNumber(0.1);
 
   DrawSpectrumWithLine_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
   DrawSpectrumWithLine_RB->SetState(kButtonDown);
