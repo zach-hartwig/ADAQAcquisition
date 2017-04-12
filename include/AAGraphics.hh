@@ -94,7 +94,6 @@ private:
   vector<Int_t> Time;
 
   TGraph *RateGraph;
-  TH1F *RateGraphAxes_H;
   vector<Double_t> timeR;
   vector<Double_t> rateR;
 

@@ -45,7 +45,7 @@ AAGraphics::AAGraphics()
   : MaxWaveformLength(0), WaveformWidth(2), SpectrumWidth(2), MaxRateSize(0),
     XMin(0.), XMax(1.), YMin(0.), YMax(1.),
     BaselineStart(0), BaselineStop(1),
-    WaveformGraphAxes_H(new TH1F), RateGraphAxes_H(new TH1F)
+    WaveformGraphAxes_H(new TH1F)
 {
   if(TheGraphicsManager)
     cout << "\nError! The GraphicsManager was constructed twice!\n" << endl;
@@ -743,12 +743,6 @@ void AAGraphics::SetupRateGraphics()
     XOffset = 1.1;
     YOffset = 1.2;
   }
-
-  // Similar approach to how the waveforms are plotted using TGraph objects:
-  //
-  // 0. Previous TGraph objects are deleted to prevent memory leak
-  // 1. New TGraph objects are created for all channels
-  // 3. Static graphical attributes are set for each channel's TGraph
   
   if (RateGraph)
     delete RateGraph;
@@ -765,33 +759,32 @@ void AAGraphics::SetupRateGraphics()
   RateGraph->SetMarkerSize(0.75);
   RateGraph->SetMarkerColor(ChColor[ch]);
   RateGraph->SetFillColor(ChColor[ch]);
-  
-  // Delete and recreate a TH1F object that is used to create the X
-  // and Y axes for plotting the trigger rate. The title/xtitle/ytitle
-  // and other graphical options should be set here.
-  
-  delete RateGraphAxes_H;
-  RateGraphAxes_H = new TH1F("RateGraphAxes_H",
-				 "A TH1F used to create X and Y axes for rate plotting",
-				 MaxRateSize, 0, MaxRateSize);
-  
-  // Set the rate title and axes properties
-  RateGraphAxes_H->SetTitle(Title.c_str());
-  
-  RateGraphAxes_H->GetXaxis()->SetTitle(XTitle.c_str());
-  RateGraphAxes_H->GetXaxis()->SetTitleSize(XSize);
-  RateGraphAxes_H->GetXaxis()->SetTitleOffset(XOffset);
-  RateGraphAxes_H->GetXaxis()->SetLabelSize(XSize);
-  RateGraphAxes_H->GetXaxis()->SetRangeUser(0, TheSettings->RateDisplayPeriod);
-  
-  RateGraphAxes_H->GetYaxis()->SetTitle(YTitle.c_str());
-  RateGraphAxes_H->GetYaxis()->SetTitleSize(YSize);
-  RateGraphAxes_H->GetYaxis()->SetTitleOffset(YOffset);
-  RateGraphAxes_H->GetYaxis()->SetLabelSize(YSize);
 
-  RateGraphAxes_H->SetStats(false);
+  if(TheSettings->DisplayTitlesEnable){
+    Title = TheSettings->DisplayTitle;
+    XTitle = TheSettings->DisplayXTitle;
+    YTitle = TheSettings->DisplayYTitle;
+    
+    XSize = TheSettings->DisplayXTitleSize;
+    XOffset = TheSettings->DisplayXTitleOffset;
+
+    YSize = TheSettings->DisplayYTitleSize;
+    YOffset = TheSettings->DisplayYTitleOffset;
+  }
+  else{
+    Title = "Trigger rate";
+    
+    Int_t Channel = TheSettings->RateChannel;
+
+    XTitle = "Run time [s]";
+    YTitle = "Trigger rate [triggers/s]";
+    
+    XSize = YSize = 0.05;
+    XOffset = 1.1;
+    YOffset = 1.2;
+  }
+
 }
-
 
 void AAGraphics::PlotRate(Double_t tss)
 {
@@ -800,8 +793,9 @@ void AAGraphics::PlotRate(Double_t tss)
   Int_t Channel = TheSettings->RateChannel;
   std::list<unsigned int> * data = AAAcquisitionManager::GetInstance()->GetRateList(Channel);
 
-  // Prevent plotting if there is no data
-  if(data->size() == 0)
+  // Prevent plotting if there is no data (or only one data point which may be
+  // incomplete)
+  if(data->size() < 2)
     return;
 
   timeR.clear();
@@ -817,11 +811,27 @@ void AAGraphics::PlotRate(Double_t tss)
     ci++;
   }
 
+  RateGraph->DrawGraph(data->size()-1,&timeR[0],&rateR[0],"LP"); // -1 to avoid partially filled time bins
+  TheCanvas_C->Update();
+
+  RateGraph->GetXaxis()->SetLimits(XMin, XMax);
+
+  RateGraph->SetTitle(Title.c_str());
+  
+  RateGraph->GetXaxis()->SetTitle(XTitle.c_str());
+  RateGraph->GetXaxis()->SetTitleSize(XSize);
+  RateGraph->GetXaxis()->SetTitleOffset(XOffset);
+  RateGraph->GetXaxis()->SetLabelSize(XSize);
+
+  RateGraph->GetYaxis()->SetTitle(YTitle.c_str());
+  RateGraph->GetYaxis()->SetTitleSize(YSize);
+  RateGraph->GetYaxis()->SetTitleOffset(YOffset);
+  RateGraph->GetYaxis()->SetLabelSize(YSize);
+
   // Set the horiz. and vert. min/max ranges of the rate graph.
 
   XMin = MaxRateSize * TheSettings->HorizontalSliderMin;
   XMax = MaxRateSize * TheSettings->HorizontalSliderMax;
-  RateGraph->GetXaxis()->SetRangeUser(XMin, XMax);
 
   (TheSettings->DisplayXAxisInLog) ? 
     gPad->SetLogx(true) : gPad->SetLogx(false);
@@ -835,18 +845,8 @@ void AAGraphics::PlotRate(Double_t tss)
   }
   else
     gPad->SetLogy(false);
-    
-
-  RateGraphAxes_H->GetXaxis()->SetRangeUser(XMin,XMax);
-  RateGraphAxes_H->GetYaxis()->SetRangeUser(YMin,YMax);
-  RateGraphAxes_H->SetMinimum(YMin);
-  RateGraphAxes_H->SetMaximum(YMax);
-  //RateGraphAxes_H->Draw("");
-
-  RateGraph->DrawGraph(data->size(),&timeR[0],&rateR[0],"ALP");
-  RateGraph->SetTitle("");
 
   (TheSettings->DisplayGrid) ? gPad->SetGrid(true, true) : gPad->SetGrid(false, false);
 
-  TheCanvas_C->Update();
+  //RateGraph->Draw();
 }

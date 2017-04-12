@@ -174,6 +174,7 @@ private:
 
   // vector<TGraph *> Rate_P;
   vector< list<unsigned int> * > Rate_C;
+  unsigned int RateAccum;
   vector<double> Rate_Lead;
   vector<Bool_t> RateExists;
   

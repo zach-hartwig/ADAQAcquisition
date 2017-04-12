@@ -47,7 +47,7 @@ AAAcquisitionManager::AAAcquisitionManager()
     EventCounter(0),
     LLD(0), ULD(0), SampleHeight(0.), TriggerHeight(0.),
     PulseHeight(0.), PulseArea(0.), PSDTotal(0.), PSDTail(0.), PeakPosition(0),
-    RawTimeStamp(0),
+    RawTimeStamp(0), RateAccum(0),
     FillWaveformTree(false), TheReadoutManager(new ADAQReadoutManager)
 {
   if(TheAcquisitionManager)
@@ -903,6 +903,7 @@ void AAAcquisitionManager::StartAcquisition()
       // Increase size of storage list if needed
       if(tvi>=(double)Rate_C[ch]->size()){
         Rate_C[ch]->resize(tvi+1,0);
+        RateAccum++;
       }
 
       // Timestamps are not ordered, so may need to iterate to correct bin (OK,
@@ -1036,8 +1037,10 @@ void AAAcquisitionManager::StartAcquisition()
       }
 
       else if(TheSettings->RateMode){
-        if(EventCounter % Rate == 0)
+        if(EventCounter % Rate == 0 && RateAccum>1){ // Only plot after 2 points have been accumulated to avoid partial plots
           TheGraphicsManager->PlotRate(Rate_Lead[TheSettings->RateChannel]);
+          RateAccum = 0;
+        }
       }
       
       else if(TheSettings->PSDMode){
@@ -1450,7 +1453,7 @@ void AAAcquisitionManager::CloseADAQFile()
 void AAAcquisitionManager::SetupRateVector()
 {
   TheSettings->RateNumPeriods = (int)(TheSettings->RateDisplayPeriod/TheSettings->RateIntegrationPeriod);
-
+  RateAccum = 0;
   for(Int_t ch=0; ch<AAVMEManager::GetInstance()->GetDGManager()->GetNumChannels(); ch++){
     // Rate_C[ch]->reserve(TheSettings->RateNumPeriods);
     Rate_Lead[ch] = std::numeric_limits<double>::max();
