@@ -754,9 +754,9 @@ void AAGraphics::SetupRateGraphics()
 
   // Set the static rate plot graphical options
   RateGraph->SetLineColor(ChColor[ch]);
-  RateGraph->SetLineWidth(WaveformWidth);  // Not important enough to change
+  RateGraph->SetLineWidth(WaveformWidth-1);  // Not important enough to change
   RateGraph->SetMarkerStyle(24);           // to use a separate value from waveform
-  RateGraph->SetMarkerSize(0.75);
+  RateGraph->SetMarkerSize(0.65);
   RateGraph->SetMarkerColor(ChColor[ch]);
   RateGraph->SetFillColor(ChColor[ch]);
 
@@ -783,6 +783,27 @@ void AAGraphics::SetupRateGraphics()
     XOffset = 1.1;
     YOffset = 1.2;
   }
+
+  delete RateGraphAxes_H;
+  RateGraphAxes_H = new TH1F("RateGraphAxes_H",
+				 "A TH1F used to create X and Y axes for trigger rate plotting",
+				 MaxRateSize, 0, TheSettings->RateDisplayPeriod);
+  
+  // Set the waveform title and axes properties
+  RateGraphAxes_H->SetTitle(Title.c_str());
+  
+  RateGraphAxes_H->GetXaxis()->SetTitle(XTitle.c_str());
+  RateGraphAxes_H->GetXaxis()->SetTitleSize(XSize);
+  RateGraphAxes_H->GetXaxis()->SetTitleOffset(XOffset);
+  RateGraphAxes_H->GetXaxis()->SetLabelSize(XSize);
+  RateGraphAxes_H->GetXaxis()->SetRangeUser(0, TheSettings->RateDisplayPeriod);
+  
+  RateGraphAxes_H->GetYaxis()->SetTitle(YTitle.c_str());
+  RateGraphAxes_H->GetYaxis()->SetTitleSize(YSize);
+  RateGraphAxes_H->GetYaxis()->SetTitleOffset(YOffset);
+  RateGraphAxes_H->GetYaxis()->SetLabelSize(YSize);
+
+  RateGraphAxes_H->SetStats(false);
 
 }
 
@@ -811,42 +832,32 @@ void AAGraphics::PlotRate(Double_t tss)
     ci++;
   }
 
-  RateGraph->DrawGraph(data->size()-1,&timeR[0],&rateR[0],"LP"); // -1 to avoid partially filled time bins
-  TheCanvas_C->Update();
+  // Set the horiz. and vert. min/max ranges of the rate plot
 
-  RateGraph->GetXaxis()->SetLimits(XMin, XMax);
-
-  RateGraph->SetTitle(Title.c_str());
-  
-  RateGraph->GetXaxis()->SetTitle(XTitle.c_str());
-  RateGraph->GetXaxis()->SetTitleSize(XSize);
-  RateGraph->GetXaxis()->SetTitleOffset(XOffset);
-  RateGraph->GetXaxis()->SetLabelSize(XSize);
-
-  RateGraph->GetYaxis()->SetTitle(YTitle.c_str());
-  RateGraph->GetYaxis()->SetTitleSize(YSize);
-  RateGraph->GetYaxis()->SetTitleOffset(YOffset);
-  RateGraph->GetYaxis()->SetLabelSize(YSize);
-
-  // Set the horiz. and vert. min/max ranges of the rate graph.
-
-  XMin = MaxRateSize * TheSettings->HorizontalSliderMin;
-  XMax = MaxRateSize * TheSettings->HorizontalSliderMax;
+  XMin = TheSettings->RateDisplayPeriod * TheSettings->HorizontalSliderMin + tss;
+  XMax = TheSettings->RateDisplayPeriod * TheSettings->HorizontalSliderMax + tss;
+  RateGraph->GetXaxis()->SetRangeUser(XMin, XMax);
 
   (TheSettings->DisplayXAxisInLog) ? 
     gPad->SetLogx(true) : gPad->SetLogx(false);
   
   YMin = AbsoluteMax * TheSettings->VerticalSliderMin;
   YMax = AbsoluteMax * TheSettings->VerticalSliderMax;
-    
+  
   if(TheSettings->DisplayYAxisInLog){
     if(YMin == 0) YMin = 1;
     gPad->SetLogy(true);
   }
   else
     gPad->SetLogy(false);
+  
+  RateGraphAxes_H->GetXaxis()->SetRangeUser(XMin,XMax);
+  RateGraphAxes_H->SetMinimum(YMin);
+  RateGraphAxes_H->SetMaximum(YMax);
+  RateGraphAxes_H->Draw("");
+
+  RateGraph->DrawGraph(data->size()-1,&timeR[0],&rateR[0],"LP"); // -1 to avoid partially filled time bins
 
   (TheSettings->DisplayGrid) ? gPad->SetGrid(true, true) : gPad->SetGrid(false, false);
 
-  //RateGraph->Draw();
 }
