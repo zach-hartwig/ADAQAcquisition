@@ -681,6 +681,7 @@ void AASubtabSlots::HandleRadioButtons()
 
   case AQWaveform_RB_ID:
   case AQSpectrum_RB_ID:
+  case AQRate_RB_ID:
   case AQPSDHistogram_RB_ID:
 
     // Reset the horizontal and vertical sliders to restore the

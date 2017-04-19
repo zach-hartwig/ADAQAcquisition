@@ -15,6 +15,7 @@
 #include <TStyle.h>
 #include <TFrame.h>
 #include <TPaletteAxis.h>
+#include <TH1F.h>
 
 // Boost
 #include <boost/assign/std/vector.hpp>
@@ -25,6 +26,7 @@ using namespace boost::assign;
 #include <sstream>
 #include <numeric>
 #include <cmath>
+#include <list>
 
 // ADAQAcquisition
 #include "AAGraphics.hh"
@@ -41,10 +43,10 @@ AAGraphics *AAGraphics::GetInstance()
 
 
 AAGraphics::AAGraphics()
-  : MaxWaveformLength(0), WaveformWidth(2), SpectrumWidth(2),
+  : MaxWaveformLength(0), WaveformWidth(2), SpectrumWidth(2), MaxRateSize(0),
     XMin(0.), XMax(1.), YMin(0.), YMax(1.),
     BaselineStart(0), BaselineStop(1),
-    WaveformGraphAxes_H(new TH1F)
+    WaveformGraphAxes_H(new TH1F), RateGraphAxes_H(new TH1F)
 {
   if(TheGraphicsManager)
     cout << "\nError! The GraphicsManager was constructed twice!\n" << endl;
@@ -136,6 +138,8 @@ AAGraphics::AAGraphics()
     
     Waveform_LG->AddEntry(Line, LineName.c_str(), "L");
   }
+
+  RateGraph = NULL;
 }
 
 
@@ -360,7 +364,7 @@ void AAGraphics::PlotWaveforms(vector<vector<uint16_t> > &Waveforms,
     // The WaveformGraphAxes_H object creates the X and Y axes upon
     // which the TGraph waveform objects are plotted. A TH1F is used
     // because (a)the TAxis::SetRangeUser() methods do NOT appear to
-    // work when using the TGraph::DrawGraph() method amd (b) to
+    // work when using the TGraph::DrawGraph() method and (b) to
     // refresh the canvas between successive triggers. This is done
     // such that we do NOT need to delete/recreate the TGraph object
     // via dynamic memory allocation every time we plot (as was done
@@ -487,7 +491,6 @@ void AAGraphics::DrawWaveformGraphics(vector<double> &BaselineValue,
   TheCanvas_C->Update();
 }
 
-
 void AAGraphics::SetupSpectrumGraphics()
 {
   if(TheSettings->DisplayTitlesEnable){
@@ -514,9 +517,9 @@ void AAGraphics::SetupSpectrumGraphics()
     }
     else{
       if(TheSettings->SpectrumPulseHeight)
-	XTitle = "Pulse height [ADC]";
+        XTitle = "Pulse height [ADC]";
       else if(TheSettings->SpectrumPulseArea)
-	XTitle = "Pulse area [ADC]";
+        XTitle = "Pulse area [ADC]";
     }
     YTitle = "Counts";
     
@@ -524,8 +527,8 @@ void AAGraphics::SetupSpectrumGraphics()
     XOffset = 1.1;
     YOffset = 1.2;
   }
-}
 
+}
 
 void AAGraphics::PlotSpectrum(TH1F *Spectrum_H)
 {
@@ -707,4 +710,162 @@ void AAGraphics::PlotCalibration(int Channel)
   CalibrationCurve->Draw("ALP");
   
   CalibrationCanvas_C->Update();
+}
+
+void AAGraphics::SetupRateGraphics()
+{
+  // Clear and reserve space for the plotting vectors (so that no dynamic
+  // changes to their size in memory are needed during readout)
+  MaxRateSize = TheSettings->RateNumPeriods;
+  timeR.clear();
+  rateR.clear();
+  timeR.reserve(MaxRateSize);
+  rateR.reserve(MaxRateSize);
+
+  if(TheSettings->DisplayTitlesEnable){
+    Title = TheSettings->DisplayTitle;
+    XTitle = TheSettings->DisplayXTitle;
+    YTitle = TheSettings->DisplayYTitle;
+    
+    XSize = TheSettings->DisplayXTitleSize;
+    XOffset = TheSettings->DisplayXTitleOffset;
+
+    YSize = TheSettings->DisplayYTitleSize;
+    YOffset = TheSettings->DisplayYTitleOffset;
+  }
+  else{
+    Title = "Trigger rate";
+    XTitle = "Run time [s]";
+    YTitle = "Triggers/s";
+    
+    XSize = YSize = 0.05;
+    XOffset = 1.1;
+    YOffset = 1.2;
+  }
+  
+  if (RateGraph)
+    delete RateGraph;
+ 
+  // Create a new TGraph representing the rate plot
+  RateGraph = new TGraph;
+
+  Int_t ch = TheSettings->RateChannel;
+
+  // Set the static rate plot graphical options
+  RateGraph->SetLineColor(ChColor[ch]);
+  RateGraph->SetLineWidth(WaveformWidth-1);  // Not important enough to change
+  RateGraph->SetMarkerStyle(24);           // to use a separate value from waveform
+  RateGraph->SetMarkerSize(0.65);
+  RateGraph->SetMarkerColor(ChColor[ch]);
+  RateGraph->SetFillColor(ChColor[ch]);
+
+  if(TheSettings->DisplayTitlesEnable){
+    Title = TheSettings->DisplayTitle;
+    XTitle = TheSettings->DisplayXTitle;
+    YTitle = TheSettings->DisplayYTitle;
+    
+    XSize = TheSettings->DisplayXTitleSize;
+    XOffset = TheSettings->DisplayXTitleOffset;
+
+    YSize = TheSettings->DisplayYTitleSize;
+    YOffset = TheSettings->DisplayYTitleOffset;
+  }
+  else{
+    Title = "Trigger rate";
+    
+    Int_t Channel = TheSettings->RateChannel;
+
+    XTitle = "Run time [s]";
+    YTitle = "Trigger rate [triggers/s]";
+    
+    XSize = YSize = 0.05;
+    XOffset = 1.1;
+    YOffset = 1.2;
+  }
+
+  if (RateGraphAxes_H)
+    delete RateGraphAxes_H;
+
+  RateGraphAxes_H = new TH1F("RateGraphAxes_H",
+				 "A TH1F used to create X and Y axes for trigger rate plotting",
+				 MaxRateSize, 0, TheSettings->RateDisplayPeriod);
+
+  // Set the waveform title and axes properties
+  RateGraphAxes_H->SetTitle(Title.c_str());
+  
+  RateGraphAxes_H->GetXaxis()->SetTitle(XTitle.c_str());
+  RateGraphAxes_H->GetXaxis()->SetTitleSize(XSize);
+  RateGraphAxes_H->GetXaxis()->SetTitleOffset(XOffset);
+  RateGraphAxes_H->GetXaxis()->SetLabelSize(XSize);
+  RateGraphAxes_H->GetXaxis()->SetRangeUser(0, TheSettings->RateDisplayPeriod);
+  
+  RateGraphAxes_H->GetYaxis()->SetTitle(YTitle.c_str());
+  RateGraphAxes_H->GetYaxis()->SetTitleSize(YSize);
+  RateGraphAxes_H->GetYaxis()->SetTitleOffset(YOffset);
+  RateGraphAxes_H->GetYaxis()->SetLabelSize(YSize);
+
+  RateGraphAxes_H->SetCanExtend(7);
+
+  RateGraphAxes_H->SetStats(false);
+
+}
+
+void AAGraphics::PlotRate(Double_t tss)
+{
+	gPad->Clear();
+
+  Int_t Channel = TheSettings->RateChannel;
+  std::list<unsigned int> * data = AAAcquisitionManager::GetInstance()->GetRateList(Channel);
+
+  // Prevent plotting if there is no data (or only one data point which may be
+  // incomplete)
+  if(data->size() < 2)
+    return;
+
+  timeR.clear();
+  rateR.clear();
+
+  // Fill the plot vectors, get the max rate value
+  unsigned int ci = 0;
+  Double_t AbsoluteMax = 0;
+  for (std::list<unsigned int>::iterator it=data->begin(); it != data->end(); ++it){
+    timeR.push_back(ci*TheSettings->RateIntegrationPeriod + tss);
+    rateR.push_back(((Double_t)*it)/TheSettings->RateIntegrationPeriod);
+    if (rateR.back()>AbsoluteMax) AbsoluteMax = 1.05*rateR.back();
+    ci++;
+  }
+
+  // Set the horiz. and vert. min/max ranges of the rate plot
+
+  XMin = TheSettings->RateDisplayPeriod * TheSettings->HorizontalSliderMin + tss;
+  XMax = TheSettings->RateDisplayPeriod * TheSettings->HorizontalSliderMax + tss;
+  RateGraph->GetXaxis()->SetRangeUser(XMin, XMax);
+
+  (TheSettings->DisplayXAxisInLog) ? 
+    gPad->SetLogx(true) : gPad->SetLogx(false);
+  
+  YMin = AbsoluteMax * TheSettings->VerticalSliderMin;
+  YMax = AbsoluteMax * TheSettings->VerticalSliderMax;
+  
+  if(TheSettings->DisplayYAxisInLog){
+    if(YMin == 0) YMin = 1;
+    gPad->SetLogy(true);
+  }
+  else
+    gPad->SetLogy(false);
+  
+  RateGraphAxes_H->Fill(XMax); // Force axis extension then clear the bin count
+  RateGraphAxes_H->Reset();
+  RateGraphAxes_H->GetXaxis()->SetRangeUser(XMin,XMax);
+  RateGraphAxes_H->SetAxisRange(XMin,XMax);
+  RateGraphAxes_H->SetMinimum(YMin);
+  RateGraphAxes_H->SetMaximum(YMax);
+  RateGraphAxes_H->Draw("");
+
+  RateGraph->DrawGraph(data->size()-1,&timeR[0],&rateR[0],"LP"); // -1 to avoid partially filled time bins
+
+  (TheSettings->DisplayGrid) ? gPad->SetGrid(true, true) : gPad->SetGrid(false, false);
+
+  TheCanvas_C->Update();
+
 }

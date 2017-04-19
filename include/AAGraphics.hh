@@ -59,6 +59,9 @@ public:
 
   void SetupSpectrumGraphics();
   void PlotSpectrum(TH1F *);
+
+  void SetupRateGraphics();
+  void PlotRate(Double_t tss);
   
   void SetupPSDHistogramGraphics();
   void PlotPSDHistogram(TH2F *);
@@ -84,11 +87,16 @@ private:
 
   vector<Int_t> ChColor;
 
-  Int_t MaxWaveformLength, WaveformWidth, SpectrumWidth;
+  Int_t MaxWaveformLength, WaveformWidth, SpectrumWidth, MaxRateSize;
 
   AASettings *TheSettings;
 
   vector<Int_t> Time;
+
+  TGraph *RateGraph;
+  TH1F *RateGraphAxes_H;
+  vector<Double_t> timeR;
+  vector<Double_t> rateR;
 
   string Title, XTitle, YTitle;
   Double_t XSize, YSize, XOffset, YOffset;

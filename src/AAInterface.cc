@@ -957,7 +957,7 @@ void AAInterface::FillAcquisitionFrame()
   }
 
   DGChEnable_CB_ID_Vec += 
-    (Int_t)DGCh0Enable_CB_ID,  (Int_t)DGCh1Enable_CB_ID,  (Int_t)DGCh2Enable_CB_ID, 
+    (Int_t)DGCh0Enable_CB_ID,  (Int_t)DGCh1Enable_CB_ID,  (Int_t)DGCh2Enable_CB_ID,
     (Int_t)DGCh3Enable_CB_ID,  (Int_t)DGCh4Enable_CB_ID,  (Int_t)DGCh5Enable_CB_ID, 
     (Int_t)DGCh6Enable_CB_ID,  (Int_t)DGCh7Enable_CB_ID,  (Int_t)DGCh8Enable_CB_ID,
     (Int_t)DGCh9Enable_CB_ID,  (Int_t)DGCh10Enable_CB_ID, (Int_t)DGCh11Enable_CB_ID,
@@ -1666,6 +1666,9 @@ void AAInterface::FillAcquisitionFrame()
   AQPSDHistogram_RB = new TGRadioButton(DGScopeMode_BG, "PSD Histogram", AQPSDHistogram_RB_ID);
   AQPSDHistogram_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
   
+  AQRate_RB = new TGRadioButton(DGScopeMode_BG, "Trigger Rate Plot", AQRate_RB_ID);
+  AQRate_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
+
   DGScopeMode_BG->Show();
 
 
@@ -2504,6 +2507,39 @@ void AAInterface::FillAcquisitionFrame()
 				   new TGLayoutHints(kLHintsNormal, 0,3,3,-2));
   DrawSpectrumWithBars_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
 
+//
+  TGGroupFrame *RateDrawOptions_GF = new TGGroupFrame(DisplaySettings_GF, "Rate plot options", kVerticalFrame);
+  DisplaySettings_GF->AddFrame(RateDrawOptions_GF,
+			       new TGLayoutHints(kLHintsNormal, 0,0,5,0));
+
+  RateDrawOptions_GF->AddFrame(RateChannel_CBL = new ADAQComboBoxWithLabel(RateDrawOptions_GF, "", RateDrawOptions_CBL_ID),
+				 new TGLayoutHints(kLHintsNormal,0,0,5,5));
+  for(uint32_t ch=0; ch<NumDGChannels; ch++)
+    RateChannel_CBL->GetComboBox()->AddEntry(DGChannelLabels[ch].c_str(),ch);
+  RateChannel_CBL->GetComboBox()->Select(0);
+  RateChannel_CBL->GetComboBox()->Connect("Selected(int,int)", "AASubtabSlots", SubtabSlots, "HandleComboBoxes(int,int)");
+  
+  RateDrawOptions_GF->AddFrame(RatePlotDisp_NEL = new ADAQNumberEntryWithLabel(RateDrawOptions_GF, "Rate display period (s)", -1),
+			      new TGLayoutHints(kLHintsNormal, 0,0,5,0));
+  RatePlotDisp_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
+  RatePlotDisp_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+  RatePlotDisp_NEL->GetEntry()->Resize(50,20);
+  RatePlotDisp_NEL->GetEntry()->SetNumber(60);
+
+  RateDrawOptions_GF->AddFrame(RatePlotPeriod_NEL = new ADAQNumberEntryWithLabel(RateDrawOptions_GF, "Rate integration period (s)", -1),
+			      new TGLayoutHints(kLHintsNormal, 0,0,5,0));
+  RatePlotPeriod_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
+  RatePlotPeriod_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+  RatePlotPeriod_NEL->GetEntry()->Resize(50,20);
+  RatePlotPeriod_NEL->GetEntry()->SetNumber(0.1);
+
+  DrawSpectrumWithLine_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
+  DrawSpectrumWithLine_RB->SetState(kButtonDown);
+  
+
+
+//
+
   
   TGGroupFrame *DisplayControl_GF = new TGGroupFrame(GraphicsSubframe, "Control", kVerticalFrame);
   DisplayControl_GF->SetTitlePos(TGGroupFrame::kCenter);
@@ -2515,7 +2551,6 @@ void AAInterface::FillAcquisitionFrame()
   SpectrumRefreshRate_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
   SpectrumRefreshRate_NEL->GetEntry()->Resize(50,20);
   SpectrumRefreshRate_NEL->GetEntry()->SetNumber(100);
-  
 
   TGButtonGroup *DisplayControl_BG = new TGButtonGroup(DisplayControl_GF, "");
   DisplayControl_BG->SetBorderDrawn(false);
@@ -2625,6 +2660,7 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
 
   AQWaveform_RB->SetEnabled(WidgetState);
   AQSpectrum_RB->SetEnabled(WidgetState);
+  AQRate_RB->SetEnabled(WidgetState);
   AQPSDHistogram_RB->SetEnabled(WidgetState);
   
   DGTriggerType_CBL->GetComboBox()->SetEnabled(WidgetState);
@@ -2685,6 +2721,9 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
   PSDTailMinBin_NEL->GetEntry()->SetState(WidgetState);
   PSDTailMaxBin_NEL->GetEntry()->SetState(WidgetState);
   PSDThreshold_NEL->GetEntry()->SetState(WidgetState);
+
+  RatePlotDisp_NEL->GetEntry()->SetState(WidgetState);
+  RatePlotPeriod_NEL->GetEntry()->SetState(WidgetState);
 
   // The following widgets have special settings depending on
   // the acquisition state
@@ -2898,6 +2937,7 @@ void AAInterface::SaveSettings()
     // Scope display
     TheSettings->WaveformMode = AQWaveform_RB->IsDown();
     TheSettings->SpectrumMode = AQSpectrum_RB->IsDown();
+    TheSettings->RateMode = AQRate_RB->IsDown();
     TheSettings->PSDMode = AQPSDHistogram_RB->IsDown();
     
     // Trigger control settings
@@ -3021,7 +3061,11 @@ void AAInterface::SaveSettings()
     TheSettings->SpectrumWithLine = DrawSpectrumWithLine_RB->IsDown();
     TheSettings->SpectrumWithMarkers = DrawSpectrumWithMarkers_RB->IsDown();
     TheSettings->SpectrumWithBars = DrawSpectrumWithBars_RB->IsDown();
-  
+
+    TheSettings->RateChannel = RateChannel_CBL->GetComboBox()->GetSelected();
+    TheSettings->RateIntegrationPeriod = RatePlotPeriod_NEL->GetEntry()->GetNumber();
+    TheSettings->RateDisplayPeriod = RatePlotDisp_NEL->GetEntry()->GetNumber();
+
     TheSettings->SpectrumRefreshRate = SpectrumRefreshRate_NEL->GetEntry()->GetIntNumber();
 
     TheSettings->DisplayContinuous = DisplayContinuous_RB->IsDown();
@@ -3062,6 +3106,7 @@ void AAInterface::SaveSettings()
       TheSettings->WaveformMode = AQWaveform_RB->IsDisabledAndSelected();
       TheSettings->SpectrumMode = AQSpectrum_RB->IsDisabledAndSelected();
       TheSettings->PSDMode = AQPSDHistogram_RB->IsDisabledAndSelected();
+      TheSettings->RateMode = AQRate_RB->IsDisabledAndSelected();
 
       TheSettings->TriggerCoincidenceEnable = DGTriggerCoincidenceEnable_CB->IsDisabledAndSelected();
       
@@ -3294,16 +3339,25 @@ void AAInterface::LoadSettingsFromFile()
       AQWaveform_RB->SetState(kButtonDown);
       AQSpectrum_RB->SetState(kButtonUp);
       AQPSDHistogram_RB->SetState(kButtonUp);
+      AQRate_RB->SetState(kButtonUp);
     }
     else if(TheSettings->SpectrumMode){
       AQWaveform_RB->SetState(kButtonUp);
       AQSpectrum_RB->SetState(kButtonDown);
       AQPSDHistogram_RB->SetState(kButtonUp);
+      AQRate_RB->SetState(kButtonUp);
     }
     else if(TheSettings->PSDMode){
       AQWaveform_RB->SetState(kButtonUp);
       AQSpectrum_RB->SetState(kButtonUp);
       AQPSDHistogram_RB->SetState(kButtonDown);
+      AQRate_RB->SetState(kButtonUp);
+    }
+    else if(TheSettings->RateMode){
+      AQWaveform_RB->SetState(kButtonUp);
+      AQSpectrum_RB->SetState(kButtonUp);
+      AQPSDHistogram_RB->SetState(kButtonUp);
+      AQRate_RB->SetState(kButtonDown);
     }
 
     // Trigger control
@@ -3405,6 +3459,7 @@ void AAInterface::LoadSettingsFromFile()
       SpectrumUseCalibrationSlider_CB->SetState(kButtonUp);
 
     // TheSettings->SpectrumCalibrationUnit = SpectrumCalibrationUnit_CBL->GetComboBox()->GetSelectedEntry()->GetTitle();
+
 
     ///////////////////////
     // Pulse discrimination

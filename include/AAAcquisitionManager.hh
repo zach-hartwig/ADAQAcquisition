@@ -30,6 +30,7 @@
 
 // C++
 #include <vector>
+#include <list>
 #include <string>
 using namespace std;
 
@@ -87,7 +88,10 @@ public:
 
   TH1F *GetSpectrum(Int_t C) {return Spectrum_H[C];}
   TGraph *GetCalibrationCurve(Int_t C) {return CalibrationCurves[C];}
-  
+
+  void SetupRateVector();
+  list<unsigned int> * GetRateList(Int_t C) {return Rate_C[C];}
+
   TH2F *GetPSDHistogram(Int_t C) {return PSDHistogram_H[C];}
   
   TString GetADAQFileComment() {return TheReadoutManager->GetFileComment();}
@@ -157,6 +161,7 @@ private:
   vector<ULong64_t> CorrectedTimeStamp;
 #ifndef __CINT__
   vector<uint32_t> PrevTimeStamp, TimeStampRollovers;
+  vector<ULong64_t> PrevCorTimeStamp;
   uint32_t RawTimeStamp;
 #endif
 
@@ -166,6 +171,12 @@ private:
   
   vector<TH1F *> Spectrum_H;
   vector<Bool_t> SpectrumExists;
+
+  // vector<TGraph *> Rate_P;
+  vector< list<unsigned int> * > Rate_C;
+  unsigned int RateAccum;
+  vector<double> Rate_Lead;
+  vector<Bool_t> RateExists;
   
   vector<TH2F *> PSDHistogram_H;
   vector<Bool_t> PSDHistogramExists;

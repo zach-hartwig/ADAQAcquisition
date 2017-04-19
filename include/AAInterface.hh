@@ -277,7 +277,7 @@ private:
   
   // Data acquisition subtab
   
-  TGRadioButton *AQWaveform_RB, *AQSpectrum_RB, *AQPSDHistogram_RB;
+  TGRadioButton *AQWaveform_RB, *AQSpectrum_RB, *AQPSDHistogram_RB, *AQRate_RB;
 
   ADAQComboBoxWithLabel *DGTriggerType_CBL;
   ADAQComboBoxWithLabel *DGTriggerEdge_CBL;
@@ -378,6 +378,10 @@ private:
   ADAQNumberEntryWithLabel *DisplayYTitleOffset_NEL, *DisplayYTitleSize_NEL;
 
   ADAQNumberEntryWithLabel *SpectrumRefreshRate_NEL;
+
+  ADAQComboBoxWithLabel *RateChannel_CBL;
+  ADAQNumberEntryWithLabel *RatePlotDisp_NEL;
+  ADAQNumberEntryWithLabel *RatePlotPeriod_NEL;
 
   TGRadioButton *DisplayContinuous_RB, *DisplayUpdateable_RB, *DisplayNonUpdateable_RB;
 

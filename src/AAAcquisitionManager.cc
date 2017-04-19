@@ -47,7 +47,7 @@ AAAcquisitionManager::AAAcquisitionManager()
     EventCounter(0),
     LLD(0), ULD(0), SampleHeight(0.), TriggerHeight(0.),
     PulseHeight(0.), PulseArea(0.), PSDTotal(0.), PSDTail(0.), PeakPosition(0),
-    RawTimeStamp(0),
+    RawTimeStamp(0), RateAccum(0),
     FillWaveformTree(false), TheReadoutManager(new ADAQReadoutManager)
 {
   if(TheAcquisitionManager)
@@ -96,6 +96,11 @@ void AAAcquisitionManager::Initialize()
     Spectrum_H.push_back(new TH1F);
     SpectrumExists.push_back(true);
 
+    // Rate_P.push_back(new TGraph);
+    Rate_C.push_back(new std::list<unsigned int>(0));
+    Rate_Lead.push_back(std::numeric_limits<double>::max());
+    RateExists.push_back(true);
+
     PSDHistogram_H.push_back(new TH2F);
     PSDHistogramExists.push_back(true);
     
@@ -103,6 +108,7 @@ void AAAcquisitionManager::Initialize()
     
     CorrectedTimeStamp.push_back(0);
     PrevTimeStamp.push_back(0);
+    PrevCorTimeStamp.push_back(0);
     TimeStampRollovers.push_back(0);
   }
 }
@@ -312,6 +318,7 @@ void AAAcquisitionManager::PrepareAcquisition()
       
       PSDHistogramExists[ch] = true;
     }
+
   }
   
   
@@ -327,13 +334,18 @@ void AAAcquisitionManager::PrepareAcquisition()
     AAGraphics::GetInstance()->SetupSpectrumGraphics();
   else if(TheSettings->PSDMode)
     AAGraphics::GetInstance()->SetupPSDHistogramGraphics();
-  
+  else if(TheSettings->RateMode){
+    SetupRateVector();
+    AAGraphics::GetInstance()->SetupRateGraphics();
+  }
+
   for(Int_t ch=0; ch<NumDGChannels; ch++){
     NumPSDEvents[ch] = 0;
     
     // Reset time stamp variables 
     TimeStampRollovers[ch] = 0;
     PrevTimeStamp[ch] = 0;
+    PrevCorTimeStamp[ch] = 0;
     CorrectedTimeStamp[ch] = 0;
   }
 
@@ -384,6 +396,7 @@ void AAAcquisitionManager::PrepareAcquisition()
 
 void AAAcquisitionManager::StartAcquisition()
 {
+  unsigned int hys = 0;
   ADAQDigitizer *DGManager = AAVMEManager::GetInstance()->GetDGManager();
   
   AAGraphics *TheGraphicsManager = AAGraphics::GetInstance();
@@ -600,21 +613,21 @@ void AAAcquisitionManager::StartAcquisition()
 	      
 	      // Data reduction waveforms
 	      if(TheSettings->DataReductionEnable){
-		if(sample % TheSettings->DataReductionFactor == 0){
-		  Int_t Index = sample / TheSettings->DataReductionFactor;
-		  if(UseSTDFirmware)
-		    Waveforms[ch][Index] = EventWaveform->DataChannel[ch][sample];
-		  else if(UsePSDFirmware)
-		    Waveforms[ch][Index] = PSDWaveforms->Trace1[sample];
-		}
+          if(sample % TheSettings->DataReductionFactor == 0){
+            Int_t Index = sample / TheSettings->DataReductionFactor;
+            if(UseSTDFirmware)
+              Waveforms[ch][Index] = EventWaveform->DataChannel[ch][sample];
+            else if(UsePSDFirmware)
+              Waveforms[ch][Index] = PSDWaveforms->Trace1[sample];
+          }
 	      }
 	      
 	      // Raw waveforms
 	      else{
-		if(UseSTDFirmware)
-		  Waveforms[ch][sample] = EventWaveform->DataChannel[ch][sample];
-		else if(UsePSDFirmware)
-		  Waveforms[ch][sample] = PSDWaveforms->Trace1[sample];
+          if(UseSTDFirmware)
+            Waveforms[ch][sample] = EventWaveform->DataChannel[ch][sample];
+          else if(UsePSDFirmware)
+            Waveforms[ch][sample] = PSDWaveforms->Trace1[sample];
 	      }
 	    }
 	    
@@ -623,25 +636,25 @@ void AAAcquisitionManager::StartAcquisition()
 	      // Calculate the baseline by taking the average of all
 	      // samples that fall within the baseline calculation region
 	      if(sample > BaselineStart[ch] and sample <= BaselineStop[ch])
-		BaselineValue[ch] += Waveforms[ch][sample] * 1.0 / BaselineLength[ch]; // [ADC]
+          BaselineValue[ch] += Waveforms[ch][sample] * 1.0 / BaselineLength[ch]; // [ADC]
 	      
 	      // Analyze the pulses to obtain pulse spectra
 	      else if(sample >= BaselineStop[ch]){
-		
-		// Calculate the waveform sample distance from the baseline
-		SampleHeight = Polarity[ch] * (Waveforms[ch][sample] - BaselineValue[ch]);
-		
-		// Simple algorithm to determine the pulse height [ADC]
-		// and peak position [sample] by looping over all samples
-		if(SampleHeight > PulseHeight){
-		  PulseHeight = SampleHeight;
-		  PeakPosition[ch] = sample;
-		}
-		
-		// Integrate the "area under the pulse" by summing the
-		// all samples in the waveform. Note that the assumption
-		// is made that + and - noise will cancel
-		PulseArea += SampleHeight;
+          
+          // Calculate the waveform sample distance from the baseline
+          SampleHeight = Polarity[ch] * (Waveforms[ch][sample] - BaselineValue[ch]);
+          
+          // Simple algorithm to determine the pulse height [ADC]
+          // and peak position [sample] by looping over all samples
+          if(SampleHeight > PulseHeight){
+            PulseHeight = SampleHeight;
+            PeakPosition[ch] = sample;
+          }
+          
+          // Integrate the "area under the pulse" by summing the
+          // all samples in the waveform. Note that the assumption
+          // is made that + and - noise will cancel
+          PulseArea += SampleHeight;
 	      }
 	    }
 	  }// End sample loop
@@ -743,10 +756,14 @@ void AAAcquisitionManager::StartAcquisition()
 	
 	// Test the time stamp for a rollover and increment if found
 	if(RawTimeStamp < PrevTimeStamp[ch])
+	{
+          // std::cout<<"Rolling "<<CorrectedTimeStamp[ch]<<" "<<RawTimeStamp<<" "<<PrevTimeStamp[ch]<<"\n";
 	  TimeStampRollovers[ch]++;
+        }
 	
 	// Compute the corrected time stamp; store as 64-bit integer
-	CorrectedTimeStamp[ch] = (ULong64_t)(RawTimeStamp + TimeStampRollovers[ch] * pow(2,31));
+  PrevCorTimeStamp[ch] = CorrectedTimeStamp[ch];
+	CorrectedTimeStamp[ch] = (ULong64_t)(RawTimeStamp + TimeStampRollovers[ch] * ((ULong64_t)1<<DGManager->GetTimeStampSize()));// pow(2,32));
 
 	// Set the previous time stamp
 	PrevTimeStamp[ch] = RawTimeStamp;
@@ -814,16 +831,16 @@ void AAAcquisitionManager::StartAcquisition()
 	      // otherwise, simply bin the pulse height in the spectrum
 	      
 	      if(TheSettings->LDEnable){
-		if(PulseHeight > LLD and PulseHeight < ULD)
-		  Spectrum_H[ch]->Fill(PulseHeight);
+          if(PulseHeight > LLD and PulseHeight < ULD)
+            Spectrum_H[ch]->Fill(PulseHeight);
 	      }
 	      else
-		Spectrum_H[ch]->Fill(PulseHeight);
+          Spectrum_H[ch]->Fill(PulseHeight);
 	      
 	      // If the level-discrimantor is to be used as a
 	      // 'trigger' to output the waveform to the ADAQ 
 	      if(TheSettings->LDTrigger and ch == TheSettings->LDChannel)
-		FillWaveformTree = true;
+          FillWaveformTree = true;
 	    }
 	    
 	    // Pulse area spectrum
@@ -834,8 +851,8 @@ void AAAcquisitionManager::StartAcquisition()
 	      // discrimator range 
 	      
 	      if(TheSettings->LDEnable){
-		if(PulseArea > LLD and PulseArea < ULD)
-		  Spectrum_H[ch]->Fill(PulseArea);
+          if(PulseArea > LLD and PulseArea < ULD)
+            Spectrum_H[ch]->Fill(PulseArea);
 	      }
 	      
 	      // If reading out waveforms with DPP-PSD in list mode,
@@ -843,15 +860,15 @@ void AAAcquisitionManager::StartAcquisition()
 	      // the Spectrum with these values
 	      
 	      else if(UsePSDFirmware and TheSettings->PSDListAnalysis){
-		if(PulseArea < pow(2,16)-1)
-		  Spectrum_H[ch]->Fill(PulseArea);
+          if(PulseArea < pow(2,16)-1)
+            Spectrum_H[ch]->Fill(PulseArea);
 	      }
 	      
 	      else
-		Spectrum_H[ch]->Fill(PulseArea);
+          Spectrum_H[ch]->Fill(PulseArea);
 	      
 	      if(TheSettings->LDTrigger and ch == TheSettings->LDChannel)
-		FillWaveformTree = true;
+          FillWaveformTree = true;
 	    }
 	  }
 	  
@@ -864,11 +881,51 @@ void AAAcquisitionManager::StartAcquisition()
 	      
 	      Double_t PSDParameter = PSDTail;
 	      if(TheSettings->PSDYAxisTailTotal)
-		PSDParameter /= PSDTotal;
+          PSDParameter /= PSDTotal;
 	      
 	      PSDHistogram_H[ch]->Fill(PSDTotal, PSDParameter);
 	    }
 	  }
+
+    else if(TheSettings->RateMode){
+      Double_t tss = ((Double_t)CorrectedTimeStamp[ch])*DGManager->GetTimeStampUnit()*1e-9;
+      
+      if (PrevCorTimeStamp[ch]>CorrectedTimeStamp[ch]) cout<<"BACK IN TIME "<<PrevCorTimeStamp[ch]<<" "<<CorrectedTimeStamp[ch]<<"\n";
+      // std::cout<<tss<<" "<<Rate_C[ch]->size()<<" "<<Rate_Lead[ch]<<" "<<TheSettings->RateNumPeriods<<"\n";
+
+      // First event initialization
+      if (Rate_Lead[ch] == std::numeric_limits<double>::max())
+        Rate_Lead[ch] = tss;
+
+      // Current plot vector index
+      UInt_t tvi = (tss-Rate_Lead[ch])/TheSettings->RateIntegrationPeriod;
+
+      // Increase size of storage list if needed
+      if(tvi>=(double)Rate_C[ch]->size()){
+        Rate_C[ch]->resize(tvi+1,0);
+        RateAccum++;
+      }
+
+      // Timestamps are not ordered, so may need to iterate to correct bin (OK,
+      // turns out they are, but this shouldn't cause a slowdown and maintains
+      // generality for the case that they may not be)
+      UInt_t diff = (Rate_C[ch]->size()-1) - tvi;
+      UInt_t dcnt = 0;
+      for (std::list<unsigned int>::reverse_iterator it=Rate_C[ch]->rbegin(); it != Rate_C[ch]->rend(); ++it, dcnt++)
+        if (dcnt == diff){
+          (*it)++;
+          break;
+        }
+    
+      // Trim front of container if beyond number of requested periods and
+      // corresponding increment the list start time
+      while(Rate_C[ch]->size()>TheSettings->RateNumPeriods){
+        Rate_C[ch]->pop_front();
+        Rate_Lead[ch]+=TheSettings->RateIntegrationPeriod;
+      }
+
+      // std::cout<<tss<<" "<<Rate_C[ch]->size()<<" "<<Rate_Lead[ch]<<" "<<TheSettings->RateNumPeriods<<"\n\n";
+    }
 	}
 	
 	///////////////////////////////////////
@@ -958,7 +1015,7 @@ void AAAcquisitionManager::StartAcquisition()
 
       // Zero the number of of PSD events after each channel readout.
       if(UsePSDFirmware)
-	NumPSDEvents[ch] = 0;
+        NumPSDEvents[ch] = 0;
       
     }// End of the data readout loop over channels
 
@@ -975,14 +1032,21 @@ void AAAcquisitionManager::StartAcquisition()
       Int_t Rate = TheSettings->SpectrumRefreshRate;
       
       if(TheSettings->SpectrumMode){
-	if(EventCounter % Rate == 0)
-	  TheGraphicsManager->PlotSpectrum(Spectrum_H[TheSettings->SpectrumChannel]);
+        if(EventCounter % Rate == 0)
+          TheGraphicsManager->PlotSpectrum(Spectrum_H[TheSettings->SpectrumChannel]);
+      }
+
+      else if(TheSettings->RateMode){
+        if(EventCounter % Rate == 0 && RateAccum>1){ // Only plot after 2 points have been accumulated to avoid partial plots
+          TheGraphicsManager->PlotRate(Rate_Lead[TheSettings->RateChannel]);
+          RateAccum = 0;
+        }
       }
       
       else if(TheSettings->PSDMode){
-	if(EventCounter % Rate == 0){
-	  TheGraphicsManager->PlotPSDHistogram(PSDHistogram_H[TheSettings->PSDChannel]);
-	}
+        if(EventCounter % Rate == 0){
+          TheGraphicsManager->PlotPSDHistogram(PSDHistogram_H[TheSettings->PSDChannel]);
+        }
       }
     }
   } // End of the acquisition loop
@@ -1131,10 +1195,10 @@ void AAAcquisitionManager::SaveObjectData(string ObjectType,
       }
       
       else if(ObjectType == "Spectrum")
-	Spectrum_H[Channel]->Write("Spectrum");
+        Spectrum_H[Channel]->Write("Spectrum");
       
       else if(ObjectType == "PSDHistogram")
-	PSDHistogram_H[Channel]->Write("PSDHistogram");
+        PSDHistogram_H[Channel]->Write("PSDHistogram");
       
       ObjectOutput->Close();
     }
@@ -1386,6 +1450,16 @@ void AAAcquisitionManager::CloseADAQFile()
   TheReadoutManager->WriteFile();
 }
 
+void AAAcquisitionManager::SetupRateVector()
+{
+  TheSettings->RateNumPeriods = (int)(TheSettings->RateDisplayPeriod/TheSettings->RateIntegrationPeriod);
+  RateAccum = 0;
+  for(Int_t ch=0; ch<AAVMEManager::GetInstance()->GetDGManager()->GetNumChannels(); ch++){
+    // Rate_C[ch]->reserve(TheSettings->RateNumPeriods);
+    Rate_Lead[ch] = std::numeric_limits<double>::max();
+    Rate_C[ch]->clear();
+  }
+}
 
 /*
 void AAInterface::GenerateArtificialWaveform(Int_t RecordLength, vector<int> &Voltage, 

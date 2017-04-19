@@ -52,7 +52,7 @@ void AADisplaySlots::HandleTextButtons()
 
       // Ensure the waveform storage has ceased 
       if(TI->WaveformStorageEnable_CB->IsDown())
-	TI->WaveformStorageEnable_CB->Clicked();
+        TI->WaveformStorageEnable_CB->Clicked();
       
       // Stop data acquisition first
       TheACQManager->StopAcquisition();
@@ -62,7 +62,7 @@ void AADisplaySlots::HandleTextButtons()
       
       // Special handling for acquisition timer 
       if(TheACQManager->GetAcquisitionTimerEnable())
-	TheACQManager->SetAcquisitionTimerEnable(false);
+        TheACQManager->SetAcquisitionTimerEnable(false);
     }
     
     // If acquisition is not presently running then start it
@@ -79,9 +79,9 @@ void AADisplaySlots::HandleTextButtons()
       bool DGChannelEnableSuccess = TheVMEManager->GetDGManager()->CheckForEnabledChannel();
 
       if(DGProgramSuccess and DGChannelEnableSuccess)
-	TheACQManager->StartAcquisition();
+        TheACQManager->StartAcquisition();
       else
-	TI->SetAcquisitionWidgetState(true, kButtonUp);
+        TI->SetAcquisitionWidgetState(true, kButtonUp);
       break;
     }
     break;
@@ -99,18 +99,18 @@ void AADisplaySlots::HandleTextButtons()
     else{
       
       if(TI->TheSettings->WaveformMode and !TI->TheSettings->DisplayNonUpdateable){
-	// Possibly implement future ability to update waveform manually
+        // Possibly implement future ability to update waveform manually
       }
       
       else if(TI->TheSettings->SpectrumMode and !TI->TheSettings->DisplayNonUpdateable){
-	int Channel = TI->TheSettings->SpectrumChannel;
-	TH1F *Spectrum_H = TheACQManager->GetSpectrum(Channel);
-	AAGraphics::GetInstance()->PlotSpectrum(Spectrum_H);
+        int Channel = TI->TheSettings->SpectrumChannel;
+        TH1F *Spectrum_H = TheACQManager->GetSpectrum(Channel);
+        AAGraphics::GetInstance()->PlotSpectrum(Spectrum_H);
       }
       else if(TI->TheSettings->PSDMode and !TI->TheSettings->DisplayNonUpdateable){
-	int Channel = TI->TheSettings->PSDChannel;
-	TH2F *PSDHistogram_H = TheACQManager->GetPSDHistogram(Channel);
-	AAGraphics::GetInstance()->PlotPSDHistogram(PSDHistogram_H);
+        int Channel = TI->TheSettings->PSDChannel;
+        TH2F *PSDHistogram_H = TheACQManager->GetPSDHistogram(Channel);
+        AAGraphics::GetInstance()->PlotPSDHistogram(PSDHistogram_H);
       }
       
       break;
