@@ -24,12 +24,12 @@
 
 # Include the Makefile for ROOT-based projects
 RC:=root-config
-ROOTSYS:=$(shell $(RC) --prefix)
-ROOTMAKE:=$(ROOTSYS)/etc/Makefile.arch
+ROOTSYS:=$(shell $(RC) --etcdir)
+ROOTMAKE:=$(ROOTSYS)/Makefile.arch
 include $(ROOTMAKE)
 
 # Enable C++11 features
-CXXFLAGS += -std=c++11
+CXXFLAGS += -std=c++17
 
 # Specify the the binary, build, and source directories
 BUILDDIR = build

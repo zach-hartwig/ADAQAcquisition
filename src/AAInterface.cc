@@ -2868,7 +2868,7 @@ void AAInterface::SaveSettings()
       TheSettings->HVChCurrent[ch] = HVChCurrent_NEL[ch]->GetEntry()->GetIntNumber();
     }
   }
-
+  
   
   /////////////////////
   // Acquisition tab //
