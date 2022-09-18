@@ -179,9 +179,9 @@ void AATabSlots::HandleConnectionTextButtons()
       }
       
       if(BRLinkOpen == 0 or DGLinkOpen == 0 or HVLinkOpen == 0){
-
+	
 	TheVMEManager->SetVMEConnectionEstablished(true);
-
+	
 	TI->BuildSecondaryFrames();
 
 	AAAcquisitionManager::GetInstance()->Initialize();
@@ -502,10 +502,13 @@ void AATabSlots::HandleVoltageTextButtons()
       // number entry widgets for the desired HV channel
       int HVVoltageValue = TI->HVChVoltage_NEL[HVChannel]->GetEntry()->GetIntNumber();
       int HVCurrentValue = TI->HVChCurrent_NEL[HVChannel]->GetEntry()->GetIntNumber();
+      int HVRampRateValue = TI->HVChRampRate_NEL[HVChannel]->GetEntry()->GetIntNumber();
 
-      // Set the voltage and maxmimum current drawn and turn the HV channel on
+      // Set the voltage, current, and ramp rate then turn the HV channel on
       TheVMEManager->GetHVManager()->SetVoltage(HVChannel, HVVoltageValue); 
       TheVMEManager->GetHVManager()->SetCurrent(HVChannel, HVCurrentValue);
+      //TheVMEManager->GetHVManager()->SetRampUpRate(HVChannel, HVRampRateValue);
+      //TheVMEManager->GetHVManager()->SetRampDownRate(HVChannel, HVRampRateValue);
       TheVMEManager->GetHVManager()->SetPowerOn(HVChannel);
       
       TI->SetVoltageChannelWidgetState(HVChannel, true);

@@ -28,9 +28,6 @@ ROOTSYS:=$(shell $(RC) --etcdir)
 ROOTMAKE:=$(ROOTSYS)/Makefile.arch
 include $(ROOTMAKE)
 
-# Enable C++11 features
-CXXFLAGS += -std=c++17
-
 # Specify the the binary, build, and source directories
 BUILDDIR = build
 BINDIR = bin

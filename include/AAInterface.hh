@@ -218,7 +218,7 @@ private:
   /////////////////////////////
   // High voltage frame widgets
 
-  ADAQNumberEntryWithLabel *HVChVoltage_NEL[6], *HVChCurrent_NEL[6];
+  ADAQNumberEntryWithLabel *HVChVoltage_NEL[6], *HVChCurrent_NEL[6], *HVChRampRate_NEL[6];
   ADAQNumberEntryFieldWithLabel *HVChVoltageMonitor_NEFL[6], *HVChCurrentMonitor_NEFL[6];
   TGTextButton *HVChPower_TB[6];
 

@@ -169,7 +169,7 @@ void AAInterface::BuildSecondaryFrames()
   
   if(TheVMEManager->GetBRLinkOpen())
     FillPulserFrame();
-
+  
   if(TheVMEManager->GetHVLinkOpen()){
     NumHVChannels = TheVMEManager->GetHVManager()->GetNumChannels();
     FillVoltageFrame();
@@ -873,17 +873,25 @@ void AAInterface::FillVoltageFrame()
     HVChVoltage_NEL[ch]->GetEntry()->SetNumLimits(TGNumberFormat::kNELLimitMinMax);
     HVChVoltage_NEL[ch]->GetEntry()->SetLimitValues(0, TheVMEManager->GetHVManager()->GetMaxVoltage(ch));
     HVChVoltage_NEL[ch]->GetEntry()->SetNumber(0);
-    
+
     // ADAQ number entry for setting maximum channel current that can be drawn
-    HVChannelSet_VF->AddFrame(HVChCurrent_NEL[ch] = new ADAQNumberEntryWithLabel(HVChannelSet_VF, "Set Current [uA]",-1),
+    HVChannelSet_VF->AddFrame(HVChCurrent_NEL[ch] = new ADAQNumberEntryWithLabel(HVChannelSet_VF, "Max Current [uA]",-1),
 			      new TGLayoutHints(kLHintsTop | kLHintsLeft, 5,5,5,0));
     HVChCurrent_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
     HVChCurrent_NEL[ch]->GetEntry()->SetNumLimits(TGNumberFormat::kNELLimitMinMax);
     HVChCurrent_NEL[ch]->GetEntry()->SetLimitValues(0, TheVMEManager->GetHVManager()->GetMaxCurrent());
     HVChCurrent_NEL[ch]->GetEntry()->SetNumber(0);
     
+    // ADAQ number entry for setting the channel ramp rate
+    HVChannelSet_VF->AddFrame(HVChRampRate_NEL[ch] = new ADAQNumberEntryWithLabel(HVChannelSet_VF, "Set Ramp Rate [V/s]",-1),
+			      new TGLayoutHints(kLHintsTop | kLHintsLeft, 5,5,5,0));
+    HVChRampRate_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+    HVChRampRate_NEL[ch]->GetEntry()->SetNumLimits(TGNumberFormat::kNELLimitMinMax);
+    HVChRampRate_NEL[ch]->GetEntry()->SetLimitValues(0, 200);
+    HVChRampRate_NEL[ch]->GetEntry()->SetNumber(50);
+    
     TGVerticalFrame *HVChannelGet_VF = new TGVerticalFrame(HVChannel_GF);
-    HVChannel_GF->AddFrame(HVChannelGet_VF, new TGLayoutHints(kLHintsTop | kLHintsLeft, 15,15,5,0));
+    HVChannel_GF->AddFrame(HVChannelGet_VF, new TGLayoutHints(kLHintsCenterX | kLHintsLeft, 15,15,20,0));
 
     // ADAQ number entry field for displaying the real-time channel voltage [in volts]
     HVChannelGet_VF->AddFrame(HVChVoltageMonitor_NEFL[ch] = new ADAQNumberEntryFieldWithLabel(HVChannelGet_VF, "Active Voltage [V]", -1),
