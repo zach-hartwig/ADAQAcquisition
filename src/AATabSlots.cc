@@ -507,8 +507,8 @@ void AATabSlots::HandleVoltageTextButtons()
       // Set the voltage, current, and ramp rate then turn the HV channel on
       TheVMEManager->GetHVManager()->SetVoltage(HVChannel, HVVoltageValue); 
       TheVMEManager->GetHVManager()->SetCurrent(HVChannel, HVCurrentValue);
-      //TheVMEManager->GetHVManager()->SetRampUpRate(HVChannel, HVRampRateValue);
-      //TheVMEManager->GetHVManager()->SetRampDownRate(HVChannel, HVRampRateValue);
+      TheVMEManager->GetHVManager()->SetRampUpRate(HVChannel, HVRampRateValue);
+      TheVMEManager->GetHVManager()->SetRampDownRate(HVChannel, HVRampRateValue);
       TheVMEManager->GetHVManager()->SetPowerOn(HVChannel);
       
       TI->SetVoltageChannelWidgetState(HVChannel, true);

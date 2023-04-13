@@ -888,7 +888,7 @@ void AAInterface::FillVoltageFrame()
     HVChRampRate_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
     HVChRampRate_NEL[ch]->GetEntry()->SetNumLimits(TGNumberFormat::kNELLimitMinMax);
     HVChRampRate_NEL[ch]->GetEntry()->SetLimitValues(0, 200);
-    HVChRampRate_NEL[ch]->GetEntry()->SetNumber(50);
+    HVChRampRate_NEL[ch]->GetEntry()->SetNumber(100);
     
     TGVerticalFrame *HVChannelGet_VF = new TGVerticalFrame(HVChannel_GF);
     HVChannel_GF->AddFrame(HVChannelGet_VF, new TGLayoutHints(kLHintsCenterX | kLHintsLeft, 15,15,20,0));
