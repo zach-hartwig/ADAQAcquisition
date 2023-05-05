@@ -762,9 +762,9 @@ void AAAcquisitionManager::StartAcquisition()
         }
 	
 	// Compute the corrected time stamp; store as 64-bit integer
-  PrevCorTimeStamp[ch] = CorrectedTimeStamp[ch];
+	PrevCorTimeStamp[ch] = CorrectedTimeStamp[ch];
 	CorrectedTimeStamp[ch] = (ULong64_t)(RawTimeStamp + TimeStampRollovers[ch] * ((ULong64_t)1<<DGManager->GetTimeStampSize()));// pow(2,32));
-
+	
 	// Set the previous time stamp
 	PrevTimeStamp[ch] = RawTimeStamp;
 	

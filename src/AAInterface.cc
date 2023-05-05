@@ -353,7 +353,7 @@ void AAInterface::FillConnectionFrame()
   BoardLinkNumberID += (int)0, (int)DGBoardLinkNumber_ID, (int)HVBoardLinkNumber_ID;
   
   vector<uint32_t> BoardAddress, BoardLinkNumber;
-  BoardAddress += 0, 0x00420000, 0x42420000;
+  BoardAddress += 0, 0x00000000, 0x00000000;
   BoardLinkNumber += 0, 0, 0;
 
   TGGroupFrame *DeviceSettings_GF = new TGGroupFrame(ConnectionFrame, "CAEN Device Settings", kHorizontalFrame);
@@ -393,7 +393,7 @@ void AAInterface::FillConnectionFrame()
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790M", zDT5790M);
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790N", zDT5790N);
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790P", zDT5790P);
-      BoardType_CBL[board]->GetComboBox()->Select(zV1725);
+      BoardType_CBL[board]->GetComboBox()->Select(zDT5790M);
     }
     else if(board == zHV){
       BoardType_CBL[board]->GetComboBox()->AddEntry("V6533M", zV6533M);
@@ -405,7 +405,7 @@ void AAInterface::FillConnectionFrame()
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790M", zDT5790M);
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790N", zDT5790N);
       BoardType_CBL[board]->GetComboBox()->AddEntry("DT5790P", zDT5790P);
-      BoardType_CBL[board]->GetComboBox()->Select(zV6534M);
+      BoardType_CBL[board]->GetComboBox()->Select(zDT5790M);
     }
 
     TGHorizontalFrame *BoardAddress_HF = new TGHorizontalFrame(BoardOptions_VF);
@@ -1508,7 +1508,7 @@ void AAInterface::FillAcquisitionFrame()
       DGChPreTrigger_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
       DGChPreTrigger_NEL[ch]->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
       DGChPreTrigger_NEL[ch]->GetEntry()->Resize(49,20);
-      DGChPreTrigger_NEL[ch]->GetEntry()->SetNumber(100);
+      DGChPreTrigger_NEL[ch]->GetEntry()->SetNumber(50);
       DGChPreTrigger_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AAChannelSlots", ChannelSlots, "HandleNumberEntries()");
       
       PSD_HF1->AddFrame(DGChGateOffset_NEL[ch] = new ADAQNumberEntryWithLabel(PSD_HF1,
@@ -1517,7 +1517,7 @@ void AAInterface::FillAcquisitionFrame()
 			new TGLayoutHints(kLHintsLeft,5,0,0,0));
       DGChGateOffset_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
       DGChGateOffset_NEL[ch]->GetEntry()->Resize(49,20);
-      DGChGateOffset_NEL[ch]->GetEntry()->SetNumber(50);
+      DGChGateOffset_NEL[ch]->GetEntry()->SetNumber(10);
       DGChGateOffset_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AAChannelSlots", ChannelSlots, "HandleNumberEntries()");
     }
   }
