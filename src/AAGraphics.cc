@@ -418,9 +418,9 @@ void AAGraphics::DrawWaveformGraphics(vector<double> &BaselineValue,
     
     if(!TheSettings->ChEnable[ch])
       continue;
-
+    
     if(TheSettings->DisplayTrigger){
-
+      
       // STD firmware: trigger value is in absolute ADC units
       // PSD firmware: trigger value relative to baseline in ADC units
       
@@ -470,15 +470,15 @@ void AAGraphics::DrawWaveformGraphics(vector<double> &BaselineValue,
 			       YMin,
 			       PSDTailAbsStart[ch],
 			       YMax);
-
+      
       PSDTail_L1[ch]->DrawLine(PSDTailAbsStop[ch],
 			       YMin,
 			       PSDTailAbsStop[ch],
 			       YMax);
-
-      PSDTriggerHoldoff_L[ch]->DrawLine(PSDTotalAbsStop[ch]+TheSettings->PSDTriggerHoldoff,
+      
+      PSDTriggerHoldoff_L[ch]->DrawLine(TheSettings->ChPreTrigger[ch]+TheSettings->PSDTriggerHoldoff,
 					YMin,
-					PSDTotalAbsStop[ch]+TheSettings->PSDTriggerHoldoff,
+					TheSettings->ChPreTrigger[ch]+TheSettings->PSDTriggerHoldoff,
 					YMax);
     }
 

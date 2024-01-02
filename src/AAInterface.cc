@@ -1727,7 +1727,7 @@ void AAInterface::FillAcquisitionFrame()
     DGPSDTriggerHoldoff_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
     DGPSDTriggerHoldoff_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
     DGPSDTriggerHoldoff_NEL->GetEntry()->Resize(60,20);
-    DGPSDTriggerHoldoff_NEL->GetEntry()->SetNumber(10);
+    DGPSDTriggerHoldoff_NEL->GetEntry()->SetNumber(512-50);
   }
   
   DGTriggerControls_GF->AddFrame(DGTriggerCoincidenceEnable_CB = new TGCheckButton(DGTriggerControls_GF, "Coincidence triggering", DGTriggerCoincidenceEnable_CB_ID),
