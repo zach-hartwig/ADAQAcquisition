@@ -1337,12 +1337,24 @@ void AAInterface::FillAcquisitionFrame()
       DGChPolarity_BG->Show();
       
       // ADAQ number entry to set channel's DAC offset [hex : 0x0000 - 0xffff]]
+      /*
       DGChannelControl_GF->AddFrame(DGChDCOffset_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "DC offset (hex)", DGChDCOffset_NEL_ID_Vec[ch]),
 				    new TGLayoutHints(kLHintsNormal, 10,0,0,0));
       DGChDCOffset_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESHex);
       DGChDCOffset_NEL[ch]->GetEntry()->SetNumLimits(TGNumberFormat::kNELLimitMinMax);
       DGChDCOffset_NEL[ch]->GetEntry()->SetLimitValues(0x0000,0xffff);
       DGChDCOffset_NEL[ch]->GetEntry()->SetNumber(0x8000);
+      DGChDCOffset_NEL[ch]->GetEntry()->Resize(55,20);
+      DGChDCOffset_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AAChannelSlots", ChannelSlots, "HandleNumberEntries()");
+      */
+
+      
+      DGChannelControl_GF->AddFrame(DGChDCOffset_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "DC offset (-1V to +1V)", DGChDCOffset_NEL_ID_Vec[ch]),
+				    new TGLayoutHints(kLHintsNormal, 10,0,0,0));
+      DGChDCOffset_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESRealOne);
+      DGChDCOffset_NEL[ch]->GetEntry()->SetNumLimits(TGNumberFormat::kNELLimitMinMax);
+      DGChDCOffset_NEL[ch]->GetEntry()->SetLimitValues(-1.0, 1.0);
+      DGChDCOffset_NEL[ch]->GetEntry()->SetNumber(0.0);
       DGChDCOffset_NEL[ch]->GetEntry()->Resize(55,20);
       DGChDCOffset_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AAChannelSlots", ChannelSlots, "HandleNumberEntries()");
       
@@ -1368,7 +1380,7 @@ void AAInterface::FillAcquisitionFrame()
       // x725/x730 : 0 == FIXED; 1 == 16 samples; 2 == 64, 3 = 256, 4 = 1024
 
       ZBoardType DGType = TheVMEManager->GetDGManager()->GetBoardType();
-
+      
       if(DGType == zV1720 or DGType == zDT5720 or
 	 DGType == zDT5790M or DGType == zDT5790N or DGType == zDT5790P){
 	DGChBaselineSamples_CBL[ch]->GetComboBox()->AddEntry("8", 1);
@@ -2898,7 +2910,7 @@ void AAInterface::SaveSettings()
       TheSettings->ChEnable[ch] = DGChEnable_CB[ch]->IsDown();
       TheSettings->ChPosPolarity[ch] = DGChPosPolarity_RB[ch]->IsDown();
       TheSettings->ChNegPolarity[ch] = DGChNegPolarity_RB[ch]->IsDown();
-      TheSettings->ChDCOffset[ch] = DGChDCOffset_NEL[ch]->GetEntry()->GetHexNumber();
+      TheSettings->ChDCOffset[ch] = TheVMEManager->GetDGManager()->CalculateDCOffset(DGChDCOffset_NEL[ch]->GetEntry()->GetNumber());
       TheSettings->ChTriggerThreshold[ch] = DGChTriggerThreshold_NEL[ch]->GetEntry()->GetIntNumber();
       if(FirmwareType == "STD"){
 	TheSettings->ChZLEThreshold[ch] = DGChZLEThreshold_NEL[ch]->GetEntry()->GetIntNumber();
@@ -3301,7 +3313,7 @@ void AAInterface::LoadSettingsFromFile()
 	DGChNegPolarity_RB[ch]->SetState(kButtonDown);
       else
 	DGChNegPolarity_RB[ch]->SetState(kButtonUp);
-
+      
       DGChDCOffset_NEL[ch]->GetEntry()->SetHexNumber(TheSettings->ChDCOffset[ch]);
       DGChTriggerThreshold_NEL[ch]->GetEntry()->SetIntNumber(TheSettings->ChTriggerThreshold[ch]);
 

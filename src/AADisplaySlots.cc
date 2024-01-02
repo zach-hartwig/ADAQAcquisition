@@ -75,9 +75,9 @@ void AADisplaySlots::HandleTextButtons()
 
       // Program the digitizers with the current settings
       bool DGProgramSuccess = TheVMEManager->ProgramDigitizers();
-
-      bool DGChannelEnableSuccess = TheVMEManager->GetDGManager()->CheckForEnabledChannel();
-
+      
+      bool DGChannelEnableSuccess = TheVMEManager->GetDGManager()->CheckForEnabledChannels();
+      
       if(DGProgramSuccess and DGChannelEnableSuccess)
         TheACQManager->StartAcquisition();
       else
