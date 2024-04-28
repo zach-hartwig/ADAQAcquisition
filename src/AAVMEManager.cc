@@ -129,7 +129,11 @@ bool AAVMEManager::ProgramDigitizers()
   ////////////////////////////
   // Channel-specific settings
 
+  DGChEnableMask = DGMgr->CalculateChannelEnableMask(TheSettings->ChEnable);
+
   for(int ch=0; ch<DGMgr->GetNumChannels(); ch++){
+
+    /*
     // Calculate the channel enable mask, where each hex digit
     // represents channel state as "0" == disabled, "1" == enabled
     if(TheSettings->ChEnable[ch]){
@@ -139,6 +143,7 @@ bool AAVMEManager::ProgramDigitizers()
     }
     else
       continue;
+    */
 
     if(TheSettings->STDFirmware){
       DGMgr->SetChannelDCOffset(ch, TheSettings->ChDCOffset[ch]);
@@ -369,8 +374,11 @@ bool AAVMEManager::ProgramDigitizers()
 
     DGMgr->SetDPPAcquisitionMode((CAEN_DGTZ_DPP_AcqMode_t)TheSettings->PSDOperationMode,
 				 CAEN_DGTZ_DPP_SAVE_PARAM_EnergyAndTime);
-    
-    DGMgr->SetDPPTriggerMode(CAEN_DGTZ_DPP_TriggerMode_Normal);
+
+    if(TheSettings->TriggerCoincidenceEnable)
+      DGMgr->SetDPPTriggerMode(CAEN_DGTZ_DPP_TriggerMode_Coincidence);
+    else
+      DGMgr->SetDPPTriggerMode(CAEN_DGTZ_DPP_TriggerMode_Normal);
     
     DGMgr->SetIOLevel(CAEN_DGTZ_IOLevel_TTL);
     
@@ -414,7 +422,6 @@ bool AAVMEManager::ProgramDigitizers()
     Status = DGMgr->SetDPPVirtualProbe(DIGITAL_TRACE_4,
 				       CAEN_DGTZ_DPP_DIGITALPROBE_GateShort);
   }
-  
   return true;
 }
 

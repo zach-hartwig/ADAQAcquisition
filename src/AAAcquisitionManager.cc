@@ -487,8 +487,8 @@ void AAAcquisitionManager::StartAcquisition()
       if(UsePSDFirmware)
 	PCEvents = NumPSDEvents[ch];
       
-      // Reset all channel's corrected time stamp values to -42 to
-      // ensure time stamps only register for the triggered channel
+      // Reset all channel's corrected time stamp values to ensure
+      // time stamps only register for the triggered channel
       CorrectedTimeStamp[ch] = 0;
       
       // Loop over the digitizer stored events in the PC buffer
@@ -497,10 +497,21 @@ void AAAcquisitionManager::StartAcquisition()
 	////////////////////////////
 	// Pre-event-readout actions
 
-	// Reset event-level variables
+	// Initialize enabled channel's waveforms to zero
+	vector<uint16_t>::iterator It;
+	for(It = Waveforms[ch].begin(); It != Waveforms[ch].end(); It++)
+	  (*It) = 0;
+	
+	// Initialize enabled channel's waveforms to zero
+	for(It = Waveforms4Storage[ch].begin(); It != Waveforms4Storage[ch].end(); It++)
+	  (*It) = 0;
+	
+	// Initialize enabled channel's waveform data to zero
+	WaveformData[ch]->Initialize();
+
+	// Initialize local enabled channel's aggregators to zero
 	BaselineValue[ch] = PulseHeight = PulseArea = 0.;
 	PSDTotal = PSDTail = 0.;
-	WaveformData[ch]->Initialize();
 	
 	if(AcquisitionTimerEnable){
 	  
@@ -595,7 +606,7 @@ void AAAcquisitionManager::StartAcquisition()
 	// digitizers) or 'Mixed' modes (V1720/DT5790)
 	
 	if(UseSTDFirmware or (UsePSDFirmware and AnalyzePSDWaveform)){
-
+	  
 	  // Get the number of samples in the current waveform
 	  uint32_t NumSamples = 0;
 	  if(UseSTDFirmware)
@@ -608,26 +619,26 @@ void AAAcquisitionManager::StartAcquisition()
 	    // Store raw and data-reduction waveforms into the waveforms
 	    // data member; zero-suppression waveforms are already
 	    // stored at this point in the acquisition loop
-
+	    
 	    if(!TheSettings->ZeroSuppressionEnable){
 	      
 	      // Data reduction waveforms
 	      if(TheSettings->DataReductionEnable){
-          if(sample % TheSettings->DataReductionFactor == 0){
-            Int_t Index = sample / TheSettings->DataReductionFactor;
-            if(UseSTDFirmware)
-              Waveforms[ch][Index] = EventWaveform->DataChannel[ch][sample];
-            else if(UsePSDFirmware)
-              Waveforms[ch][Index] = PSDWaveforms->Trace1[sample];
-          }
+		if(sample % TheSettings->DataReductionFactor == 0){
+		  Int_t Index = sample / TheSettings->DataReductionFactor;
+		  if(UseSTDFirmware)
+		    Waveforms[ch][Index] = EventWaveform->DataChannel[ch][sample];
+		  else if(UsePSDFirmware)
+		    Waveforms[ch][Index] = PSDWaveforms->Trace1[sample];
+		}
 	      }
 	      
 	      // Raw waveforms
 	      else{
-          if(UseSTDFirmware)
-            Waveforms[ch][sample] = EventWaveform->DataChannel[ch][sample];
-          else if(UsePSDFirmware)
-            Waveforms[ch][sample] = PSDWaveforms->Trace1[sample];
+		if(UseSTDFirmware)
+		  Waveforms[ch][sample] = EventWaveform->DataChannel[ch][sample];
+		else if(UsePSDFirmware)
+		  Waveforms[ch][sample] = PSDWaveforms->Trace1[sample];
 	      }
 	    }
 	    
@@ -636,29 +647,29 @@ void AAAcquisitionManager::StartAcquisition()
 	      // Calculate the baseline by taking the average of all
 	      // samples that fall within the baseline calculation region
 	      if(sample > BaselineStart[ch] and sample <= BaselineStop[ch])
-          BaselineValue[ch] += Waveforms[ch][sample] * 1.0 / BaselineLength[ch]; // [ADC]
+		BaselineValue[ch] += Waveforms[ch][sample] * 1.0 / BaselineLength[ch]; // [ADC]
 	      
 	      // Analyze the pulses to obtain pulse spectra
 	      else if(sample >= BaselineStop[ch]){
-          
-          // Calculate the waveform sample distance from the baseline
-          SampleHeight = Polarity[ch] * (Waveforms[ch][sample] - BaselineValue[ch]);
-          
-          // Simple algorithm to determine the pulse height [ADC]
-          // and peak position [sample] by looping over all samples
-          if(SampleHeight > PulseHeight){
-            PulseHeight = SampleHeight;
-            PeakPosition[ch] = sample;
-          }
-          
-          // Integrate the "area under the pulse" by summing the
-          // all samples in the waveform. Note that the assumption
-          // is made that + and - noise will cancel
-          PulseArea += SampleHeight;
+		
+		// Calculate the waveform sample distance from the baseline
+		SampleHeight = Polarity[ch] * (Waveforms[ch][sample] - BaselineValue[ch]);
+		
+		// Simple algorithm to determine the pulse height [ADC]
+		// and peak position [sample] by looping over all samples
+		if(SampleHeight > PulseHeight){
+		  PulseHeight = SampleHeight;
+		  PeakPosition[ch] = sample;
+		}
+		
+		// Integrate the "area under the pulse" by summing the
+		// all samples in the waveform. Note that the assumption
+		// is made that + and - noise will cancel
+		PulseArea += SampleHeight;
 	      }
 	    }
 	  }// End sample loop
-
+	  
 	  // Computation of PSD integrals
 	  
 	  // In STD firmware, the PSD integrals are taken relative to
@@ -756,10 +767,10 @@ void AAAcquisitionManager::StartAcquisition()
 	
 	// Test the time stamp for a rollover and increment if found
 	if(RawTimeStamp < PrevTimeStamp[ch])
-	{
-          // std::cout<<"Rolling "<<CorrectedTimeStamp[ch]<<" "<<RawTimeStamp<<" "<<PrevTimeStamp[ch]<<"\n";
-	  TimeStampRollovers[ch]++;
-        }
+	  {
+	    // std::cout<<"Rolling "<<CorrectedTimeStamp[ch]<<" "<<RawTimeStamp<<" "<<PrevTimeStamp[ch]<<"\n";
+	    TimeStampRollovers[ch]++;
+	  }
 	
 	// Compute the corrected time stamp; store as 64-bit integer
 	PrevCorTimeStamp[ch] = CorrectedTimeStamp[ch];
@@ -831,16 +842,16 @@ void AAAcquisitionManager::StartAcquisition()
 	      // otherwise, simply bin the pulse height in the spectrum
 	      
 	      if(TheSettings->LDEnable){
-          if(PulseHeight > LLD and PulseHeight < ULD)
-            Spectrum_H[ch]->Fill(PulseHeight);
+		if(PulseHeight > LLD and PulseHeight < ULD)
+		  Spectrum_H[ch]->Fill(PulseHeight);
 	      }
 	      else
-          Spectrum_H[ch]->Fill(PulseHeight);
+		Spectrum_H[ch]->Fill(PulseHeight);
 	      
 	      // If the level-discrimantor is to be used as a
 	      // 'trigger' to output the waveform to the ADAQ 
 	      if(TheSettings->LDTrigger and ch == TheSettings->LDChannel)
-          FillWaveformTree = true;
+		FillWaveformTree = true;
 	    }
 	    
 	    // Pulse area spectrum
@@ -851,8 +862,8 @@ void AAAcquisitionManager::StartAcquisition()
 	      // discrimator range 
 	      
 	      if(TheSettings->LDEnable){
-          if(PulseArea > LLD and PulseArea < ULD)
-            Spectrum_H[ch]->Fill(PulseArea);
+		if(PulseArea > LLD and PulseArea < ULD)
+		  Spectrum_H[ch]->Fill(PulseArea);
 	      }
 	      
 	      // If reading out waveforms with DPP-PSD in list mode,
@@ -860,15 +871,15 @@ void AAAcquisitionManager::StartAcquisition()
 	      // the Spectrum with these values
 	      
 	      else if(UsePSDFirmware and TheSettings->PSDListAnalysis){
-          if(PulseArea < pow(2,16)-1)
-            Spectrum_H[ch]->Fill(PulseArea);
+		if(PulseArea < pow(2,16)-1)
+		  Spectrum_H[ch]->Fill(PulseArea);
 	      }
 	      
 	      else
-          Spectrum_H[ch]->Fill(PulseArea);
+		Spectrum_H[ch]->Fill(PulseArea);
 	      
 	      if(TheSettings->LDTrigger and ch == TheSettings->LDChannel)
-          FillWaveformTree = true;
+		FillWaveformTree = true;
 	    }
 	  }
 	  
@@ -881,51 +892,51 @@ void AAAcquisitionManager::StartAcquisition()
 	      
 	      Double_t PSDParameter = PSDTail;
 	      if(TheSettings->PSDYAxisTailTotal)
-          PSDParameter /= PSDTotal;
+		PSDParameter /= PSDTotal;
 	      
 	      PSDHistogram_H[ch]->Fill(PSDTotal, PSDParameter);
 	    }
 	  }
 
-    else if(TheSettings->RateMode){
-      Double_t tss = ((Double_t)CorrectedTimeStamp[ch])*DGManager->GetTimeStampUnit()*1e-9;
+	  else if(TheSettings->RateMode){
+	    Double_t tss = ((Double_t)CorrectedTimeStamp[ch])*DGManager->GetTimeStampUnit()*1e-9;
       
-      if (PrevCorTimeStamp[ch]>CorrectedTimeStamp[ch]) cout<<"BACK IN TIME "<<PrevCorTimeStamp[ch]<<" "<<CorrectedTimeStamp[ch]<<"\n";
-      // std::cout<<tss<<" "<<Rate_C[ch]->size()<<" "<<Rate_Lead[ch]<<" "<<TheSettings->RateNumPeriods<<"\n";
+	    if (PrevCorTimeStamp[ch]>CorrectedTimeStamp[ch]) cout<<"BACK IN TIME "<<PrevCorTimeStamp[ch]<<" "<<CorrectedTimeStamp[ch]<<"\n";
+	    // std::cout<<tss<<" "<<Rate_C[ch]->size()<<" "<<Rate_Lead[ch]<<" "<<TheSettings->RateNumPeriods<<"\n";
 
-      // First event initialization
-      if (Rate_Lead[ch] == std::numeric_limits<double>::max())
-        Rate_Lead[ch] = tss;
+	    // First event initialization
+	    if (Rate_Lead[ch] == std::numeric_limits<double>::max())
+	      Rate_Lead[ch] = tss;
 
-      // Current plot vector index
-      UInt_t tvi = (tss-Rate_Lead[ch])/TheSettings->RateIntegrationPeriod;
+	    // Current plot vector index
+	    UInt_t tvi = (tss-Rate_Lead[ch])/TheSettings->RateIntegrationPeriod;
 
-      // Increase size of storage list if needed
-      if(tvi>=(double)Rate_C[ch]->size()){
-        Rate_C[ch]->resize(tvi+1,0);
-        RateAccum++;
-      }
+	    // Increase size of storage list if needed
+	    if(tvi>=(double)Rate_C[ch]->size()){
+	      Rate_C[ch]->resize(tvi+1,0);
+	      RateAccum++;
+	    }
 
-      // Timestamps are not ordered, so may need to iterate to correct bin (OK,
-      // turns out they are, but this shouldn't cause a slowdown and maintains
-      // generality for the case that they may not be)
-      UInt_t diff = (Rate_C[ch]->size()-1) - tvi;
-      UInt_t dcnt = 0;
-      for (std::list<unsigned int>::reverse_iterator it=Rate_C[ch]->rbegin(); it != Rate_C[ch]->rend(); ++it, dcnt++)
-        if (dcnt == diff){
-          (*it)++;
-          break;
-        }
+	    // Timestamps are not ordered, so may need to iterate to correct bin (OK,
+	    // turns out they are, but this shouldn't cause a slowdown and maintains
+	    // generality for the case that they may not be)
+	    UInt_t diff = (Rate_C[ch]->size()-1) - tvi;
+	    UInt_t dcnt = 0;
+	    for (std::list<unsigned int>::reverse_iterator it=Rate_C[ch]->rbegin(); it != Rate_C[ch]->rend(); ++it, dcnt++)
+	      if (dcnt == diff){
+		(*it)++;
+		break;
+	      }
     
-      // Trim front of container if beyond number of requested periods and
-      // corresponding increment the list start time
-      while(Rate_C[ch]->size()>TheSettings->RateNumPeriods){
-        Rate_C[ch]->pop_front();
-        Rate_Lead[ch]+=TheSettings->RateIntegrationPeriod;
-      }
+	    // Trim front of container if beyond number of requested periods and
+	    // corresponding increment the list start time
+	    while(Rate_C[ch]->size()>TheSettings->RateNumPeriods){
+	      Rate_C[ch]->pop_front();
+	      Rate_Lead[ch]+=TheSettings->RateIntegrationPeriod;
+	    }
 
-      // std::cout<<tss<<" "<<Rate_C[ch]->size()<<" "<<Rate_Lead[ch]<<" "<<TheSettings->RateNumPeriods<<"\n\n";
-    }
+	    // std::cout<<tss<<" "<<Rate_C[ch]->size()<<" "<<Rate_Lead[ch]<<" "<<TheSettings->RateNumPeriods<<"\n\n";
+	  }
 	}
 	
 	///////////////////////////////////////
@@ -947,32 +958,41 @@ void AAAcquisitionManager::StartAcquisition()
 	  // If storing raw waveforms to disk then copy the read out
 	  // waveforms vector ("Waveforms") to the vector whose
 	  // address is assigned to the waveforms branch in the ROOT
-	  // TTree in the ADAQ file ("Waveforms4Storage"). While this
-	  // is slightly inefficient (i.e. having two
-	  // vector-of-vectors with the same data), it enables the
-	  // user to analyze and view the waveforms without having to
-	  // store them to disk. I am making the assumption that if
-	  // the user is storing full waveforms then they understand
-	  // the throughput penalty necessary to do this. Thus, the
-	  // small amount of CPU time required for copying the vectors
-	  // should be negligible.
+	  // TTree in the ADAQ file ("Waveforms4Storage"). For this
+	  // for the presnet channel only.
 	  
-	  if(TheSettings->WaveformStoreRaw){
-	    for(int ch=0; ch<DGManager->GetNumChannels(); ch++){
-	      Waveforms4Storage[ch] = Waveforms[ch];
-	    }
-	  }
+	  if(TheSettings->WaveformStoreRaw)
+	    Waveforms4Storage[ch] = Waveforms[ch];
 	  
 	  // If the user has specified to store ANY data at all then
 	  // fill the waveform tree via the readout manager
+
 	  if(TheSettings->WaveformStoreRaw or
 	     TheSettings->WaveformStoreEnergyData or 
 	     TheSettings->WaveformStorePSDData)
 	    TheReadoutManager->GetWaveformTree()->Fill();
-	  
+
 	  // Reset the bool used to determine if the LLD/ULD window
 	  // should be used as the "trigger" for writing waveforms
+
 	  FillWaveformTree = false;
+
+	  // **IMPORTANT**
+	  //
+	  // Presently, the entire TTree holding waveforms is filled
+	  // every event; this will add entries to all branches not
+	  // just the present channel. Thus, we must ensure that all
+	  // channel branches for waveforms and waveform data are zero
+	  // unless they have been filled above. To do this given the
+	  // present readout loop, we must re-initialize the present
+	  // waveform storage vector to zero. In the future, it would
+	  // be ideal to overhaul readout such that channel *branches*
+	  // are filled at each event and not the entire TTree.
+	  //
+	  // ZSH (27 Apr 24)
+
+	  Waveforms4Storage[ch].clear();
+	  WaveformData[ch]->Initialize();
 	}
 	
 	/////////////////////////////////
@@ -1003,7 +1023,6 @@ void AAAcquisitionManager::StartAcquisition()
 	  }
 	}
 	EventCounter++;
-	
       } // End of the data readout loop over events
       
       // ZSH (23 Jul 15) : It is not clear to me why the following
@@ -1289,8 +1308,8 @@ Bool_t AAAcquisitionManager::ResetCalibration(Int_t Channel)
 
 
 Bool_t AAAcquisitionManager::LoadCalibration(Int_t Channel, 
-					   string FileName, 
-					   Int_t &NumPoints)
+					     string FileName, 
+					     Int_t &NumPoints)
 {
   size_t Found = FileName.find_last_of(".");
   if(Found != string::npos){
@@ -1462,9 +1481,9 @@ void AAAcquisitionManager::SetupRateVector()
 }
 
 /*
-void AAInterface::GenerateArtificialWaveform(Int_t RecordLength, vector<int> &Voltage, 
-						 Double_t *Voltage_graph, Double_t VerticalPosition)
-{
+  void AAInterface::GenerateArtificialWaveform(Int_t RecordLength, vector<int> &Voltage, 
+  Double_t *Voltage_graph, Double_t VerticalPosition)
+  {
   // Exponential time constants with small random variations
   const Double_t t1 = 20. - (RNG->Rndm()*10);
   const Double_t t2 = 80. - (RNG->Rndm()*40);;
@@ -1485,15 +1504,15 @@ void AAInterface::GenerateArtificialWaveform(Int_t RecordLength, vector<int> &Vo
   // Fill the Voltage vector with the artificial waveform
   for(Int_t sample=0; sample<RecordLength; sample++){
     
-    if(sample < NumLeadingSamples){
-      Voltage[sample] = b + VerticalPosition;
-      Voltage_graph[sample] = b + VerticalPosition;
-    }
-    else{
-      Double_t t = (sample - NumLeadingSamples)*1.0;
-      Voltage[sample] = (p * (a * (t1-t2) * (exp(-t/t1)-exp(-t/t2)))) + b + VerticalPosition;
-      Voltage_graph[sample] = Voltage[sample];
-    }
+  if(sample < NumLeadingSamples){
+  Voltage[sample] = b + VerticalPosition;
+  Voltage_graph[sample] = b + VerticalPosition;
   }
-}
+  else{
+  Double_t t = (sample - NumLeadingSamples)*1.0;
+  Voltage[sample] = (p * (a * (t1-t2) * (exp(-t/t1)-exp(-t/t2)))) + b + VerticalPosition;
+  Voltage_graph[sample] = Voltage[sample];
+  }
+  }
+  }
 */

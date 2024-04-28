@@ -491,6 +491,7 @@ void AAInterface::FillConnectionFrame()
       BoardEnable_TB[board]->SetForegroundColor(ColorManager->Number2Pixel(kWhite));
       BoardEnable_TB[board]->ChangeOptions(BoardEnable_TB[board]->GetOptions() | kFixedSize);
     }
+    BoardEnable_TB[0]->Clicked();
   }
 }
 
@@ -1151,13 +1152,13 @@ void AAInterface::FillAcquisitionFrame()
 
       DGChPolarity_BG->Show();
 
-      // ADAQ number entry to set channel's DAC offset [hex : 0x0000 - 0xffff]]
-      DGChannelControl_GF->AddFrame(DGChDCOffset_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "DC offset (hex)", DGChDCOffset_NEL_ID_Vec[ch]),
+      // ADAQ number entry to set channel's DAC offset 
+      DGChannelControl_GF->AddFrame(DGChDCOffset_NEL[ch] = new ADAQNumberEntryWithLabel(DGChannelControl_GF, "DC offset (-1V to +1V)", DGChDCOffset_NEL_ID_Vec[ch]),
 				    new TGLayoutHints(kLHintsNormal, 10,0,0,0));
-      DGChDCOffset_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESHex);
+      DGChDCOffset_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESRealOne);
       DGChDCOffset_NEL[ch]->GetEntry()->SetNumLimits(TGNumberFormat::kNELLimitMinMax);
-      DGChDCOffset_NEL[ch]->GetEntry()->SetLimitValues(0x0000,0xffff);
-      DGChDCOffset_NEL[ch]->GetEntry()->SetNumber(0x8000);
+      DGChDCOffset_NEL[ch]->GetEntry()->SetLimitValues(-1.0, 1.0);
+      DGChDCOffset_NEL[ch]->GetEntry()->SetNumber(0.0);
       DGChDCOffset_NEL[ch]->GetEntry()->Resize(55,20);
       DGChDCOffset_NEL[ch]->GetEntry()->Connect("ValueSet(Long_t)", "AAChannelSlots", ChannelSlots, "HandleNumberEntries()");
       
