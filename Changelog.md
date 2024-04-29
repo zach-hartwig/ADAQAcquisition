@@ -1,8 +1,27 @@
 ## ADAQAcquisition Source Code Change Log
 name: Changelog.md  
-date: 26 Aug 16 (last updated)
+date: 27 Apr 24 (last updated)
 auth: Zach Hartwig  
 mail: hartwig@psfc.mit.edu
+
+## Version 1.7 Series
+
+### 1.7.0
+
+ - Fixed major waveform readout into storage bug that occured when
+   multiple channels were enabled. Improper initialization of
+   waveforms to zero-length (given the channel->event level readout
+   loop) caused long duplicative waveforms to be recorded in the
+   active channel. Fix eliminates the issue, reducing the file size
+   and increasing readout rate by 1/n, where n is the number of
+   detectors, and eliminates massive zero-bin spectra spike in
+   ADAQAnalysis post-processing. Thanks to Kevin Woller for finding
+   this bug.
+
+ - Added capability to adjust the high voltage ramp up/down rate
+
+ - Various other minor fixes and updates added over the years
+	
 
 ## Version 1.6 Series
 
