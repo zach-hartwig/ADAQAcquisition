@@ -2609,6 +2609,7 @@ void AAInterface::SetVoltageChannelWidgetState(int HVChannel, bool HVActive)
   
   HVChVoltage_NEL[HVChannel]->GetEntry()->SetState(WidgetState);
   HVChCurrent_NEL[HVChannel]->GetEntry()->SetState(WidgetState);
+  HVChRampRate_NEL[HVChannel]->GetEntry()->SetState(WidgetState);
 }
 
 
@@ -2623,7 +2624,7 @@ void AAInterface::SetVoltageWidgetState(bool WidgetState, EButtonState ButtonSta
 
     HVChVoltageMonitor_NEFL[ch]->GetEntry()->SetState(WidgetState);
     HVChCurrentMonitor_NEFL[ch]->GetEntry()->SetState(WidgetState);
-    
+    HVChRampRate_NEL[ch]->GetEntry()->SetState(WidgetState);
     HVChPower_TB[ch]->SetState(ButtonState);
   }
   HVMonitorEnable_CB->SetState(ButtonState);
