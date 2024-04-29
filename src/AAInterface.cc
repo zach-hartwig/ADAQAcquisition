@@ -60,7 +60,7 @@ using namespace boost::assign;
 AAInterface::AAInterface(Bool_t ALS, string SFN)
   : TGMainFrame(gClient->GetRoot()),
     InterfaceBuildComplete(false),
-    DisplayWidth(1130), DisplayHeight(833), 
+    DisplayWidth(1150), DisplayHeight(833), 
     ButtonForeColor(kWhite), ButtonBackColorOn(kGreen-5), ButtonBackColorOff(kRed-3),
     SettingsFileName("DefaultSettings.acq.root"),
     AutoSaveSettings(false), AutoLoadSettings(false),
@@ -888,8 +888,8 @@ void AAInterface::FillVoltageFrame()
 			      new TGLayoutHints(kLHintsTop | kLHintsLeft, 5,5,5,0));
     HVChRampRate_NEL[ch]->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
     HVChRampRate_NEL[ch]->GetEntry()->SetNumLimits(TGNumberFormat::kNELLimitMinMax);
-    HVChRampRate_NEL[ch]->GetEntry()->SetLimitValues(0, 200);
-    HVChRampRate_NEL[ch]->GetEntry()->SetNumber(100);
+    HVChRampRate_NEL[ch]->GetEntry()->SetLimitValues(0, 500);
+    HVChRampRate_NEL[ch]->GetEntry()->SetNumber(250);
     
     TGVerticalFrame *HVChannelGet_VF = new TGVerticalFrame(HVChannel_GF);
     HVChannel_GF->AddFrame(HVChannelGet_VF, new TGLayoutHints(kLHintsCenterX | kLHintsLeft, 15,15,20,0));
@@ -1647,6 +1647,10 @@ void AAInterface::FillAcquisitionFrame()
   TGCompositeFrame *PSDSubtab = AQControlSubtabs->AddTab(" Pulse discrimination ");
   TGCompositeFrame *PSDSubframe = new TGCompositeFrame(PSDSubtab, 0, 0, kHorizontalFrame);
   PSDSubtab->AddFrame(PSDSubframe);
+
+  TGCompositeFrame *RateSubtab = AQControlSubtabs->AddTab(" Trigger rate ");
+  TGCompositeFrame *RateSubframe = new TGCompositeFrame(RateSubtab, 0, 0, kHorizontalFrame);
+  RateSubtab->AddFrame(RateSubframe);
   
   TGCompositeFrame *DataSubtab = AQControlSubtabs->AddTab(" Persistent storage ");
   TGCompositeFrame *DataSubframe = new TGCompositeFrame(DataSubtab, 0, 0, kHorizontalFrame);
@@ -1684,10 +1688,10 @@ void AAInterface::FillAcquisitionFrame()
   AQSpectrum_RB = new TGRadioButton(DGScopeMode_BG, "Pulse spectrum", AQSpectrum_RB_ID);
   AQSpectrum_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
   
-  AQPSDHistogram_RB = new TGRadioButton(DGScopeMode_BG, "PSD Histogram", AQPSDHistogram_RB_ID);
+  AQPSDHistogram_RB = new TGRadioButton(DGScopeMode_BG, "PSD histogram", AQPSDHistogram_RB_ID);
   AQPSDHistogram_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
   
-  AQRate_RB = new TGRadioButton(DGScopeMode_BG, "Trigger Rate Plot", AQRate_RB_ID);
+  AQRate_RB = new TGRadioButton(DGScopeMode_BG, "Trigger rate plt", AQRate_RB_ID);
   AQRate_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
 
   DGScopeMode_BG->Show();
@@ -2201,8 +2205,38 @@ void AAInterface::FillAcquisitionFrame()
   PSDThreshold_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
   PSDThreshold_NEL->GetEntry()->SetNumber(100);
   PSDThreshold_NEL->GetEntry()->Resize(60, 20);
-  
 
+  
+  //////////////////
+  // Trigger rate //
+  //////////////////
+  
+  TGGroupFrame *RateDrawOptions_GF = new TGGroupFrame(RateSubframe, "Trigger Rate Control", kVerticalFrame);
+  RateDrawOptions_GF->SetTitlePos(TGGroupFrame::kCenter);
+  RateSubframe->AddFrame(RateDrawOptions_GF, new TGLayoutHints(kLHintsNormal, 0,0,5,0));
+  
+  RateDrawOptions_GF->AddFrame(RateChannel_CBL = new ADAQComboBoxWithLabel(RateDrawOptions_GF, "", RateDrawOptions_CBL_ID),
+			       new TGLayoutHints(kLHintsNormal,0,0,5,5));
+  for(uint32_t ch=0; ch<NumDGChannels; ch++)
+    RateChannel_CBL->GetComboBox()->AddEntry(DGChannelLabels[ch].c_str(),ch);
+  RateChannel_CBL->GetComboBox()->Select(0);
+  RateChannel_CBL->GetComboBox()->Connect("Selected(int,int)", "AASubtabSlots", SubtabSlots, "HandleComboBoxes(int,int)");
+  
+  RateDrawOptions_GF->AddFrame(RatePlotDisp_NEL = new ADAQNumberEntryWithLabel(RateDrawOptions_GF, "Rate display period (s)", -1),
+			       new TGLayoutHints(kLHintsNormal, 0,0,5,0));
+  RatePlotDisp_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
+  RatePlotDisp_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+  RatePlotDisp_NEL->GetEntry()->Resize(50,20);
+  RatePlotDisp_NEL->GetEntry()->SetNumber(60);
+  
+  RateDrawOptions_GF->AddFrame(RatePlotPeriod_NEL = new ADAQNumberEntryWithLabel(RateDrawOptions_GF, "Rate integration period (s)", -1),
+			       new TGLayoutHints(kLHintsNormal, 0,0,5,0));
+  RatePlotPeriod_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
+  RatePlotPeriod_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+  RatePlotPeriod_NEL->GetEntry()->Resize(50,20);
+  RatePlotPeriod_NEL->GetEntry()->SetNumber(0.1);
+
+  
   //////////////////
   // Data storage //
   //////////////////
@@ -2528,40 +2562,8 @@ void AAInterface::FillAcquisitionFrame()
 				   new TGLayoutHints(kLHintsNormal, 0,3,3,-2));
   DrawSpectrumWithBars_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
 
-//
-  TGGroupFrame *RateDrawOptions_GF = new TGGroupFrame(DisplaySettings_GF, "Rate plot options", kVerticalFrame);
-  DisplaySettings_GF->AddFrame(RateDrawOptions_GF,
-			       new TGLayoutHints(kLHintsNormal, 0,0,5,0));
+  // Display control group
 
-  RateDrawOptions_GF->AddFrame(RateChannel_CBL = new ADAQComboBoxWithLabel(RateDrawOptions_GF, "", RateDrawOptions_CBL_ID),
-				 new TGLayoutHints(kLHintsNormal,0,0,5,5));
-  for(uint32_t ch=0; ch<NumDGChannels; ch++)
-    RateChannel_CBL->GetComboBox()->AddEntry(DGChannelLabels[ch].c_str(),ch);
-  RateChannel_CBL->GetComboBox()->Select(0);
-  RateChannel_CBL->GetComboBox()->Connect("Selected(int,int)", "AASubtabSlots", SubtabSlots, "HandleComboBoxes(int,int)");
-  
-  RateDrawOptions_GF->AddFrame(RatePlotDisp_NEL = new ADAQNumberEntryWithLabel(RateDrawOptions_GF, "Rate display period (s)", -1),
-			      new TGLayoutHints(kLHintsNormal, 0,0,5,0));
-  RatePlotDisp_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
-  RatePlotDisp_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
-  RatePlotDisp_NEL->GetEntry()->Resize(50,20);
-  RatePlotDisp_NEL->GetEntry()->SetNumber(60);
-
-  RateDrawOptions_GF->AddFrame(RatePlotPeriod_NEL = new ADAQNumberEntryWithLabel(RateDrawOptions_GF, "Rate integration period (s)", -1),
-			      new TGLayoutHints(kLHintsNormal, 0,0,5,0));
-  RatePlotPeriod_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESReal);
-  RatePlotPeriod_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
-  RatePlotPeriod_NEL->GetEntry()->Resize(50,20);
-  RatePlotPeriod_NEL->GetEntry()->SetNumber(0.1);
-
-  DrawSpectrumWithLine_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
-  DrawSpectrumWithLine_RB->SetState(kButtonDown);
-  
-
-
-//
-
-  
   TGGroupFrame *DisplayControl_GF = new TGGroupFrame(GraphicsSubframe, "Control", kVerticalFrame);
   DisplayControl_GF->SetTitlePos(TGGroupFrame::kCenter);
   GraphicsSubframe->AddFrame(DisplayControl_GF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
@@ -2585,8 +2587,14 @@ void AAInterface::FillAcquisitionFrame()
   
   DisplayNonUpdateable_RB = new TGRadioButton(DisplayControl_BG, "Waveform storage only!", DisplayNonUpdateable_RB_ID);
 
+  DrawSpectrumWithLine_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
+  DrawSpectrumWithLine_RB->SetState(kButtonDown);
+  
   MapSubwindows();
   MapWindow();
+
+
+  
 }
   
 
