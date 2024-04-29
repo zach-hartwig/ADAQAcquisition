@@ -20,8 +20,14 @@ mail: hartwig@psfc.mit.edu
 
  - Added capability to adjust the high voltage ramp up/down rate
 
- - Various other minor fixes and updates added over the years
-	
+ - Added new trigger rate subtab for those widgets to avoid poor
+   widget gits; moved widgets from "Display" subtab. This avoids
+   annoying sliders.
+
+ - Properly sized overall graphical window 
+
+ - Properly enable/disable the HV ramp rate widgets when HV on/off
+
 
 ## Version 1.6 Series
 
