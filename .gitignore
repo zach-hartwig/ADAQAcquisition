@@ -18,3 +18,4 @@ bin/*
 doc/build/*
 doc/ADAQAcquisition_UsersGuide.pdf
 include/boost/*
+.vscode/
