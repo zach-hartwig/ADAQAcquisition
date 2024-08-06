@@ -60,7 +60,7 @@ using namespace boost::assign;
 AAInterface::AAInterface(Bool_t ALS, string SFN)
   : TGMainFrame(gClient->GetRoot()),
     InterfaceBuildComplete(false),
-    DisplayWidth(1150), DisplayHeight(833), 
+    DisplayWidth(1150), DisplayHeight(850), 
     ButtonForeColor(kWhite), ButtonBackColorOn(kGreen-5), ButtonBackColorOff(kRed-3),
     SettingsFileName("DefaultSettings.acq.root"),
     AutoSaveSettings(false), AutoLoadSettings(false),
@@ -1739,6 +1739,14 @@ void AAInterface::FillAcquisitionFrame()
 				 new TGLayoutHints(kLHintsNormal,5,5,0,0));
   DGTriggerCoincidenceEnable_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
   
+  DGTriggerControls_GF->AddFrame(DGTriggerCoincidenceWindow_NEL = new ADAQNumberEntryWithLabel(DGTriggerControls_GF, "Window (samples)",DGTriggerCoincidenceWindow_NEL_ID),
+          new TGLayoutHints(kLHintsNormal,5,5,0,0));
+  DGTriggerCoincidenceWindow_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+  DGTriggerCoincidenceWindow_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+  DGTriggerCoincidenceWindow_NEL->GetEntry()->Resize(60,20);
+  DGTriggerCoincidenceWindow_NEL->GetEntry()->SetNumber(5);
+  DGTriggerCoincidenceWindow_NEL->GetEntry()->Connect("ValueSet(long)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
+
   DGTriggerControls_GF->AddFrame(DGTriggerCoincidenceLevel_CBL = new ADAQComboBoxWithLabel(DGTriggerControls_GF, "Level", DGTriggerCoincidenceLevel_CBL_ID),
 				 new TGLayoutHints(kLHintsNormal,5,5,0,0));
   DGTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("2 channel",1);
@@ -2699,6 +2707,7 @@ void AAInterface::SetAcquisitionWidgetState(bool WidgetState, EButtonState Butto
   else if(FirmwareType == "PSD")
     DGPSDTriggerHoldoff_NEL->GetEntry()->SetState(WidgetState);
   DGTriggerCoincidenceEnable_CB->SetState(ButtonState);
+  DGTriggerCoincidenceWindow_NEL->GetEntry()->SetState(WidgetState);
   
   DGAcquisitionControl_CBL->GetComboBox()->SetEnabled(WidgetState);
   if(FirmwareType == "STD"){
@@ -2983,6 +2992,7 @@ void AAInterface::SaveSettings()
     }
     
     TheSettings->TriggerCoincidenceEnable = DGTriggerCoincidenceEnable_CB->IsDown();
+    TheSettings->TriggerCoincidenceWindow = DGTriggerCoincidenceWindow_NEL->GetEntry()->GetIntNumber();
     TheSettings->TriggerCoincidenceLevel = DGTriggerCoincidenceLevel_CBL->GetComboBox()->GetSelected();
 
     // Acquisition
@@ -3405,6 +3415,8 @@ void AAInterface::LoadSettingsFromFile()
       DGTriggerCoincidenceEnable_CB->SetState(kButtonUp);
 
     DGTriggerCoincidenceLevel_CBL->GetComboBox()->Select(TheSettings->TriggerCoincidenceLevel);
+
+    DGTriggerCoincidenceWindow_NEL->GetEntry()->SetIntNumber(TheSettings->TriggerCoincidenceWindow);
 
     // Acquisition
 

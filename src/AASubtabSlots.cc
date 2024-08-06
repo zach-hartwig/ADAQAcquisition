@@ -15,6 +15,7 @@
 #include <sstream>
 #include <fstream>
 #include <iomanip>
+#include <iostream>
 
 #include "ADAQDigitizer.hh"
 
@@ -194,6 +195,9 @@ void AASubtabSlots::HandleNumberEntries()
   AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
 
   switch(ActiveID){
+
+  case DGTriggerCoincidenceWindow_NEL_ID:
+    break;
     
   case SpectrumCalibrationEnergy_NEL_ID:
     break;

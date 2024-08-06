@@ -249,6 +249,7 @@ enum{
   DGTriggerEdge_CBL_ID,
   DGPSDTriggerHoldoff_NEL_ID,
   DGTriggerCoincidenceEnable_CB_ID,
+  DGTriggerCoincidenceWindow_NEL_ID,
   DGTriggerCoincidenceLevel_CBL_ID,
 
   DGAcquisitionControl_CBL_ID,

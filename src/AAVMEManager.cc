@@ -248,7 +248,7 @@ bool AAVMEManager::ProgramDigitizers()
   if(TheSettings->TriggerCoincidenceEnable and
      TheSettings->TriggerCoincidenceLevel < DGNumChEnabled){
       std::cout<<"Enabling STD Coincidence"<<std::endl;
-    DGMgr->SetTriggerCoincidence(true, TheSettings->TriggerCoincidenceLevel);
+    DGMgr->SetTriggerCoincidence(true, TheSettings->TriggerCoincidenceLevel,TheSettings->TriggerCoincidenceWindow);
      }
   }
   
@@ -354,7 +354,7 @@ bool AAVMEManager::ProgramDigitizers()
 
     if(TheSettings->TriggerCoincidenceEnable and TheSettings->TriggerCoincidenceLevel < DGNumChEnabled){
       std::cout<<"Enabling PSD Coincidence"<<std::endl;
-      DGMgr->SetTriggerCoincidence(true, TheSettings->TriggerCoincidenceLevel);
+      DGMgr->SetTriggerCoincidence(true, TheSettings->TriggerCoincidenceLevel,TheSettings->TriggerCoincidenceWindow);
     }
 
     ///////////////////////////////////////////////////////

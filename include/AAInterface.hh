@@ -283,6 +283,7 @@ private:
   ADAQComboBoxWithLabel *DGTriggerEdge_CBL;
   ADAQNumberEntryWithLabel *DGPSDTriggerHoldoff_NEL;
   TGCheckButton *DGTriggerCoincidenceEnable_CB;
+  ADAQNumberEntryWithLabel *DGTriggerCoincidenceWindow_NEL;
   ADAQComboBoxWithLabel *DGTriggerCoincidenceLevel_CBL;
   
   ADAQComboBoxWithLabel *DGAcquisitionControl_CBL;

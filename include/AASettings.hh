@@ -163,6 +163,7 @@ public:
   string TriggerTypeName, TriggerEdgeName;
   Int_t PSDTriggerHoldoff;
   Bool_t TriggerCoincidenceEnable;
+  Int_t TriggerCoincidenceWindow;
   Int_t TriggerCoincidenceLevel;
 
   
