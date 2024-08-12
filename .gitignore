@@ -17,4 +17,5 @@ bin/*
 # Ignore all documentation transients and PDF
 doc/build/*
 doc/ADAQAcquisition_UsersGuide.pdf
-
+include/boost/*
+.vscode/

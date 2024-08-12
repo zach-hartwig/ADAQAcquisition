@@ -17,6 +17,7 @@
 #include "ADAQHighVoltage.hh"
 
 #include "AAVMEManager.hh"
+#include <iostream>
 
 
 AAVMEManager *AAVMEManager::TheVMEManager = 0;
@@ -133,17 +134,12 @@ bool AAVMEManager::ProgramDigitizers()
 
   for(int ch=0; ch<DGMgr->GetNumChannels(); ch++){
 
-    /*
-    // Calculate the channel enable mask, where each hex digit
-    // represents channel state as "0" == disabled, "1" == enabled
+    // DGNumChEnabled
     if(TheSettings->ChEnable[ch]){
-      uint32_t Ch = 0x00000001<<ch;
-      DGChEnableMask |= Ch;
       DGNumChEnabled++;
     }
     else
       continue;
-    */
 
     if(TheSettings->STDFirmware){
       DGMgr->SetChannelDCOffset(ch, TheSettings->ChDCOffset[ch]);
@@ -249,11 +245,14 @@ bool AAVMEManager::ProgramDigitizers()
 	break;
       }
     }
+  if(TheSettings->TriggerCoincidenceEnable and
+     TheSettings->TriggerCoincidenceLevel < DGNumChEnabled){
+      std::cout<<"Enabling STD Coincidence"<<std::endl;
+    DGMgr->SetTriggerCoincidence(true, TheSettings->TriggerCoincidenceLevel);
+     }
   }
   
-  if(TheSettings->TriggerCoincidenceEnable and
-     TheSettings->TriggerCoincidenceLevel < DGNumChEnabled)
-    DGMgr->SetTriggerCoincidence(true, TheSettings->TriggerCoincidenceLevel);
+
 
 
   ///////////////////////
@@ -314,11 +313,11 @@ bool AAVMEManager::ProgramDigitizers()
       
       // Channel self-triggering (automatic)
       if(TheSettings->TriggerType == 2)
-	PSDParameters.selft[ch] = 1;
+	      PSDParameters.selft[ch] = 1;
       
       // Software or external triggering
       else
-	PSDParameters.selft[ch] = 0;
+	      PSDParameters.selft[ch] = 0;
       
       PSDParameters.thr[ch] = TheSettings->ChTriggerThreshold[ch];
       PSDParameters.tvaw[ch] = TheSettings->ChTriggerValidation[ch];
@@ -347,9 +346,16 @@ bool AAVMEManager::ProgramDigitizers()
     //
     // PSDParameters.blthr = 3;     // Baseline threshold  (Depracated?)
     // PSDParameters.bltmo = 100;   // Baseline timeout  (Depracated?)
-
     DGMgr->SetDPPParameters(DGChEnableMask, &PSDParameters);
+    
+      // For some ungodly reason DPP-PSD software reuses registers already set
+      // by other values, so coincidence must be set on *AFTER* other parameters 
+      // have been set
 
+    if(TheSettings->TriggerCoincidenceEnable and TheSettings->TriggerCoincidenceLevel < DGNumChEnabled){
+      std::cout<<"Enabling PSD Coincidence"<<std::endl;
+      DGMgr->SetTriggerCoincidence(true, TheSettings->TriggerCoincidenceLevel);
+    }
 
     ///////////////////////////////////////////////////////
     // Set channel-specific, non-PSD structure PSD settings
