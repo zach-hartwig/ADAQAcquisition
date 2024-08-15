@@ -1660,6 +1660,10 @@ void AAInterface::FillAcquisitionFrame()
   TGCompositeFrame *GraphicsSubframe = new TGCompositeFrame(GraphicsSubtab, 0, 0, kHorizontalFrame);
   GraphicsSubtab->AddFrame(GraphicsSubframe);
 
+  TGCompositeFrame *CoincidenceSubtab = AQControlSubtabs->AddTab(" Coincidence ");
+  TGCompositeFrame *CoincidenceSubframe = new TGCompositeFrame(CoincidenceSubtab, 0, 0, kHorizontalFrame);
+  CoincidenceSubtab->AddFrame(CoincidenceSubframe);
+
   SubtabFrame->AddFrame(AQControlSubtabs, new TGLayoutHints(kLHintsTop, 0,0,0,0));
 
 
@@ -1728,7 +1732,7 @@ void AAInterface::FillAcquisitionFrame()
   }
   else if(FirmwareType == "PSD"){
     DGTriggerControls_GF->AddFrame(DGPSDTriggerHoldoff_NEL = new ADAQNumberEntryWithLabel(DGTriggerControls_GF, "Holdoff (samples)", DGPSDTriggerHoldoff_NEL_ID),
-				   new TGLayoutHints(kLHintsNormal,5,0,0,5));
+				   new TGLayoutHints(kLHintsNormal,5,15,10,5));
     DGPSDTriggerHoldoff_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
     DGPSDTriggerHoldoff_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
     DGPSDTriggerHoldoff_NEL->GetEntry()->Resize(60,20);
@@ -1736,30 +1740,9 @@ void AAInterface::FillAcquisitionFrame()
   }
   
   DGTriggerControls_GF->AddFrame(DGTriggerCoincidenceEnable_CB = new TGCheckButton(DGTriggerControls_GF, "Coincidence triggering", DGTriggerCoincidenceEnable_CB_ID),
-				 new TGLayoutHints(kLHintsNormal,5,5,0,0));
+				 new TGLayoutHints(kLHintsNormal,5,15,0,0));
   DGTriggerCoincidenceEnable_CB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleCheckButtons()");
   
-  DGTriggerControls_GF->AddFrame(DGTriggerCoincidenceWindow_NEL = new ADAQNumberEntryWithLabel(DGTriggerControls_GF, "Window (samples)",DGTriggerCoincidenceWindow_NEL_ID),
-          new TGLayoutHints(kLHintsNormal,5,5,0,0));
-  DGTriggerCoincidenceWindow_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
-  DGTriggerCoincidenceWindow_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
-  DGTriggerCoincidenceWindow_NEL->GetEntry()->Resize(60,20);
-  DGTriggerCoincidenceWindow_NEL->GetEntry()->SetNumber(5);
-  DGTriggerCoincidenceWindow_NEL->GetEntry()->Connect("ValueSet(long)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
-
-  DGTriggerControls_GF->AddFrame(DGTriggerCoincidenceLevel_CBL = new ADAQComboBoxWithLabel(DGTriggerControls_GF, "Level", DGTriggerCoincidenceLevel_CBL_ID),
-				 new TGLayoutHints(kLHintsNormal,5,5,0,0));
-  DGTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("2 channel",1);
-  DGTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("3 channel",2);
-  DGTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("4 channel",3);
-  DGTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("5 channel",4);
-  DGTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("6 channel",5);
-  DGTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("7 channel",6);
-  DGTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("8 channel",7);
-  DGTriggerCoincidenceLevel_CBL->GetComboBox()->Select(1);
-  DGTriggerCoincidenceLevel_CBL->GetComboBox()->SetEnabled(false);
-  
-
   ///////////////////////
   // Acquisition controls
 
@@ -2597,6 +2580,86 @@ void AAInterface::FillAcquisitionFrame()
 
   DrawSpectrumWithLine_RB->Connect("Clicked()", "AASubtabSlots", SubtabSlots, "HandleRadioButtons()");
   DrawSpectrumWithLine_RB->SetState(kButtonDown);
+
+  //////////////////////////////
+  //// Coincidence Controls ////
+  //////////////////////////////
+  TGGroupFrame *CoincidenceControl_GF = new TGGroupFrame(CoincidenceSubframe, "Control", kVerticalFrame);
+  CoincidenceControl_GF->SetTitlePos(TGGroupFrame::kCenter);
+  CoincidenceSubframe->AddFrame(CoincidenceControl_GF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
+  
+  CoincidenceControl_GF->AddFrame(DGTriggerCoincidenceWindow_NEL = new ADAQNumberEntryWithLabel(CoincidenceControl_GF, "Window (samples)",DGTriggerCoincidenceWindow_NEL_ID),
+          new TGLayoutHints(kLHintsNormal,5,5,10,0));
+  DGTriggerCoincidenceWindow_NEL->GetEntry()->SetNumStyle(TGNumberFormat::kNESInteger);
+  DGTriggerCoincidenceWindow_NEL->GetEntry()->SetNumAttr(TGNumberFormat::kNEAPositive);
+  DGTriggerCoincidenceWindow_NEL->GetEntry()->Resize(60,20);
+  DGTriggerCoincidenceWindow_NEL->GetEntry()->SetNumber(5);
+  DGTriggerCoincidenceWindow_NEL->GetEntry()->Connect("ValueSet(long)", "AASubtabSlots", SubtabSlots, "HandleNumberEntries()");
+  DGTriggerCoincidenceWindow_NEL->GetEntry()->SetState(false);
+
+  CoincidenceControl_GF->AddFrame(DGTriggerCoincidenceLevel_CBL = new ADAQComboBoxWithLabel(CoincidenceControl_GF, "Level", DGTriggerCoincidenceLevel_CBL_ID),
+				 new TGLayoutHints(kLHintsNormal,5,5,10,0));
+  DGTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("2 channel",1);
+  DGTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("3 channel",2);
+  DGTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("4 channel",3);
+  DGTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("5 channel",4);
+  DGTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("6 channel",5);
+  DGTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("7 channel",6);
+  DGTriggerCoincidenceLevel_CBL->GetComboBox()->AddEntry("8 channel",7);
+  DGTriggerCoincidenceLevel_CBL->GetComboBox()->Select(1);
+  DGTriggerCoincidenceLevel_CBL->GetComboBox()->SetEnabled(false);
+
+  TGGroupFrame *CoincidenceChannels_GF = new TGGroupFrame(CoincidenceSubframe, "Channel Setup", kVerticalFrame);
+  CoincidenceChannels_GF->SetTitlePos(TGGroupFrame::kCenter);
+  CoincidenceSubframe->AddFrame(CoincidenceChannels_GF, new TGLayoutHints(kLHintsNormal,5,5,5,5));
+
+  ZBoardType DGType = TheVMEManager->GetDGManager()->GetBoardType();
+
+  CoincidenceChannels_GF->AddFrame(DGTriggerCoincidenceChannel1_CBL = new ADAQComboBoxWithLabel(CoincidenceChannels_GF, "Channel 1", DGTriggerCoincidenceChannel1_CBL_ID),
+				 new TGLayoutHints(kLHintsNormal,5,5,10,0));
+  DGTriggerCoincidenceChannel1_CBL->GetComboBox()->AddEntry("Channel 0",0);
+  DGTriggerCoincidenceChannel1_CBL->GetComboBox()->AddEntry("Channel 1",1);
+  if(DGType == zV1720 or DGType == zV1725){
+    DGTriggerCoincidenceChannel1_CBL->GetComboBox()->AddEntry("Channel 2",2);
+    DGTriggerCoincidenceChannel1_CBL->GetComboBox()->AddEntry("Channel 3",3);
+    DGTriggerCoincidenceChannel1_CBL->GetComboBox()->AddEntry("Channel 4",4);
+    DGTriggerCoincidenceChannel1_CBL->GetComboBox()->AddEntry("Channel 5",5);
+    DGTriggerCoincidenceChannel1_CBL->GetComboBox()->AddEntry("Channel 6",6);
+    DGTriggerCoincidenceChannel1_CBL->GetComboBox()->AddEntry("Channel 7",7);
+    DGTriggerCoincidenceChannel1_CBL->GetComboBox()->AddEntry("Channel 8",8);
+    DGTriggerCoincidenceChannel1_CBL->GetComboBox()->AddEntry("Channel 9",9);
+    DGTriggerCoincidenceChannel1_CBL->GetComboBox()->AddEntry("Channel 10",10);
+    DGTriggerCoincidenceChannel1_CBL->GetComboBox()->AddEntry("Channel 11",11);
+    DGTriggerCoincidenceChannel1_CBL->GetComboBox()->AddEntry("Channel 12",12);
+    DGTriggerCoincidenceChannel1_CBL->GetComboBox()->AddEntry("Channel 13",13);
+    DGTriggerCoincidenceChannel1_CBL->GetComboBox()->AddEntry("Channel 14",14);
+    DGTriggerCoincidenceChannel1_CBL->GetComboBox()->AddEntry("Channel 15",15);
+  }
+  DGTriggerCoincidenceChannel1_CBL->GetComboBox()->Select(0);
+  DGTriggerCoincidenceChannel1_CBL->GetComboBox()->SetEnabled(false);  
+
+  CoincidenceChannels_GF->AddFrame(DGTriggerCoincidenceChannel2_CBL = new ADAQComboBoxWithLabel(CoincidenceChannels_GF, "Channel 2", DGTriggerCoincidenceChannel2_CBL_ID),
+				 new TGLayoutHints(kLHintsNormal,5,5,10,0));
+  DGTriggerCoincidenceChannel2_CBL->GetComboBox()->AddEntry("Channel 0",0);
+  DGTriggerCoincidenceChannel2_CBL->GetComboBox()->AddEntry("Channel 1",1);
+  if(DGType == zV1720 or DGType == zV1725){
+    DGTriggerCoincidenceChannel2_CBL->GetComboBox()->AddEntry("Channel 2",2);
+    DGTriggerCoincidenceChannel2_CBL->GetComboBox()->AddEntry("Channel 3",3);
+    DGTriggerCoincidenceChannel2_CBL->GetComboBox()->AddEntry("Channel 4",4);
+    DGTriggerCoincidenceChannel2_CBL->GetComboBox()->AddEntry("Channel 5",5);
+    DGTriggerCoincidenceChannel2_CBL->GetComboBox()->AddEntry("Channel 6",6);
+    DGTriggerCoincidenceChannel2_CBL->GetComboBox()->AddEntry("Channel 7",7);
+    DGTriggerCoincidenceChannel2_CBL->GetComboBox()->AddEntry("Channel 8",8);
+    DGTriggerCoincidenceChannel2_CBL->GetComboBox()->AddEntry("Channel 9",9);
+    DGTriggerCoincidenceChannel2_CBL->GetComboBox()->AddEntry("Channel 10",10);
+    DGTriggerCoincidenceChannel2_CBL->GetComboBox()->AddEntry("Channel 11",11);
+    DGTriggerCoincidenceChannel2_CBL->GetComboBox()->AddEntry("Channel 12",12);
+    DGTriggerCoincidenceChannel2_CBL->GetComboBox()->AddEntry("Channel 13",13);
+    DGTriggerCoincidenceChannel2_CBL->GetComboBox()->AddEntry("Channel 14",14);
+    DGTriggerCoincidenceChannel2_CBL->GetComboBox()->AddEntry("Channel 15",15);
+  }
+  DGTriggerCoincidenceChannel2_CBL->GetComboBox()->Select(1);
+  DGTriggerCoincidenceChannel2_CBL->GetComboBox()->SetEnabled(false);  
   
   MapSubwindows();
   MapWindow();
@@ -2992,8 +3055,6 @@ void AAInterface::SaveSettings()
     }
     
     TheSettings->TriggerCoincidenceEnable = DGTriggerCoincidenceEnable_CB->IsDown();
-    TheSettings->TriggerCoincidenceWindow = DGTriggerCoincidenceWindow_NEL->GetEntry()->GetIntNumber();
-    TheSettings->TriggerCoincidenceLevel = DGTriggerCoincidenceLevel_CBL->GetComboBox()->GetSelected();
 
     // Acquisition
     TheSettings->AcquisitionControl = DGAcquisitionControl_CBL->GetComboBox()->GetSelected();
@@ -3111,6 +3172,12 @@ void AAInterface::SaveSettings()
     TheSettings->DisplayContinuous = DisplayContinuous_RB->IsDown();
     TheSettings->DisplayUpdateable = DisplayUpdateable_RB->IsDown();
     TheSettings->DisplayNonUpdateable = DisplayNonUpdateable_RB->IsDown();
+
+    // Coincidence Subtab
+    TheSettings->TriggerCoincidenceWindow = DGTriggerCoincidenceWindow_NEL->GetEntry()->GetIntNumber();
+    TheSettings->TriggerCoincidenceLevel = DGTriggerCoincidenceLevel_CBL->GetComboBox()->GetSelected();
+    TheSettings->TriggerCoincidenceChannel1 = DGTriggerCoincidenceChannel1_CBL->GetComboBox()->GetSelected();
+    TheSettings->TriggerCoincidenceChannel2 = DGTriggerCoincidenceChannel2_CBL->GetComboBox()->GetSelected();
   
 
     ///////////////////////////////

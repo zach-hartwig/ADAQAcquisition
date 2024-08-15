@@ -48,10 +48,18 @@ void AASubtabSlots::HandleCheckButtons()
   switch(ActiveID){
 
   case DGTriggerCoincidenceEnable_CB_ID:
-    if(ActiveButton->IsDown())
+    if(ActiveButton->IsDown()){
       TI->DGTriggerCoincidenceLevel_CBL->GetComboBox()->SetEnabled(true);
-    else
+      TI->DGTriggerCoincidenceWindow_NEL->GetEntry()->SetState(true);
+      TI->DGTriggerCoincidenceChannel1_CBL->GetComboBox()->SetEnabled(true);
+      TI->DGTriggerCoincidenceChannel2_CBL->GetComboBox()->SetEnabled(true);
+    }
+    else{
       TI->DGTriggerCoincidenceLevel_CBL->GetComboBox()->SetEnabled(false);
+      TI->DGTriggerCoincidenceWindow_NEL->GetEntry()->SetState(false);
+      TI->DGTriggerCoincidenceChannel1_CBL->GetComboBox()->SetEnabled(false);
+      TI->DGTriggerCoincidenceChannel2_CBL->GetComboBox()->SetEnabled(false);
+    }
     break;
 
   case SpectrumCalibration_CB_ID:

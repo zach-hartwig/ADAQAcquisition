@@ -249,8 +249,6 @@ enum{
   DGTriggerEdge_CBL_ID,
   DGPSDTriggerHoldoff_NEL_ID,
   DGTriggerCoincidenceEnable_CB_ID,
-  DGTriggerCoincidenceWindow_NEL_ID,
-  DGTriggerCoincidenceLevel_CBL_ID,
 
   DGAcquisitionControl_CBL_ID,
   DGRecordLength_NEL_ID,
@@ -359,7 +357,13 @@ enum{
   DisplayNonUpdateable_RB_ID,
 
   RateChannel_CBL_ID,
-  RateDrawOptions_CBL_ID
+  RateDrawOptions_CBL_ID,
+
+  // Coincidence Subtab
+  DGTriggerCoincidenceWindow_NEL_ID,
+  DGTriggerCoincidenceLevel_CBL_ID,
+  DGTriggerCoincidenceChannel1_CBL_ID,
+  DGTriggerCoincidenceChannel2_CBL_ID
 };
 
 struct CalibrationDataStruct{

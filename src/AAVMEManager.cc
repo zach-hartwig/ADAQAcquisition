@@ -246,9 +246,12 @@ bool AAVMEManager::ProgramDigitizers()
       }
     }
   if(TheSettings->TriggerCoincidenceEnable and
-     TheSettings->TriggerCoincidenceLevel < DGNumChEnabled){
+     TheSettings->TriggerCoincidenceLevel < DGNumChEnabled and
+     TheSettings->TriggerCoincidenceChannel1 != TheSettings->TriggerCoincidenceChannel2)
+     {
       std::cout<<"Enabling STD Coincidence"<<std::endl;
-    DGMgr->SetTriggerCoincidence(true, TheSettings->TriggerCoincidenceLevel,TheSettings->TriggerCoincidenceWindow);
+    DGMgr->SetTriggerCoincidence(true, TheSettings->TriggerCoincidenceLevel,TheSettings->TriggerCoincidenceWindow,
+                                  TheSettings->TriggerCoincidenceChannel1,TheSettings->TriggerCoincidenceChannel2);
      }
   }
   
@@ -352,9 +355,13 @@ bool AAVMEManager::ProgramDigitizers()
       // by other values, so coincidence must be set on *AFTER* other parameters 
       // have been set
 
-    if(TheSettings->TriggerCoincidenceEnable and TheSettings->TriggerCoincidenceLevel < DGNumChEnabled){
+    if(TheSettings->TriggerCoincidenceEnable and 
+      TheSettings->TriggerCoincidenceLevel < DGNumChEnabled 
+      and TheSettings->TriggerCoincidenceChannel1 != TheSettings->TriggerCoincidenceChannel2)
+    {
       std::cout<<"Enabling PSD Coincidence"<<std::endl;
-      DGMgr->SetTriggerCoincidence(true, TheSettings->TriggerCoincidenceLevel,TheSettings->TriggerCoincidenceWindow);
+      DGMgr->SetTriggerCoincidence(true, TheSettings->TriggerCoincidenceLevel,TheSettings->TriggerCoincidenceWindow,
+                                    TheSettings->TriggerCoincidenceChannel1,TheSettings->TriggerCoincidenceChannel2);
     }
 
     ///////////////////////////////////////////////////////
