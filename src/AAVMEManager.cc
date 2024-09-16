@@ -249,16 +249,17 @@ bool AAVMEManager::ProgramDigitizers()
       if(TheSettings->TriggerCoincidenceLevel < DGNumChEnabled 
       and TheSettings->TriggerCoincidenceChannel1 != TheSettings->TriggerCoincidenceChannel2)
     {
-      std::cout<<"Enabling PSD Coincidence"<<std::endl;
+      std::cout<<"Enabling STD Coincidence"<<std::endl;
       DGMgr->SetTriggerCoincidence(true, TheSettings->TriggerCoincidenceLevel,TheSettings->TriggerCoincidenceWindow,
                                     TheSettings->TriggerCoincidenceChannel1,TheSettings->TriggerCoincidenceChannel2);
     }
-      else if(TheSettings -> TriggerCoincidenceLevel > DGNumChEnabled)
-        cout<<"Error! Not enough channels enabled for "<<(TheSettings->TriggerCoindenceLevel+1)<<"channel coincidence."<<endl;
+      else if(TheSettings -> TriggerCoincidenceLevel >= DGNumChEnabled)
+        cout<<"Error! Not enough channels enabled for "<<(TheSettings->TriggerCoincidenceLevel+1)<<" channel coincidence."<<endl;
       
-      else if(TheSettings->TriggerCoincidenceChannel1 != TheSettings->TriggerCoincidenceChannel2)
+      else
         cout<<"Error! Cannot preform coincidence between a channel and itself. \n Please select two distinct channels." <<endl;
     }
+  }
   
 
 
@@ -368,10 +369,10 @@ bool AAVMEManager::ProgramDigitizers()
       DGMgr->SetTriggerCoincidence(true, TheSettings->TriggerCoincidenceLevel,TheSettings->TriggerCoincidenceWindow,
                                     TheSettings->TriggerCoincidenceChannel1,TheSettings->TriggerCoincidenceChannel2);
     }
-      else if(TheSettings -> TriggerCoincidenceLevel > DGNumChEnabled)
-        cout<<"Error! Not enough channels enabled for "<<(TheSettings->TriggerCoindenceLevel+1)<<"channel coincidence."<<endl;
+      else if(TheSettings -> TriggerCoincidenceLevel >= DGNumChEnabled)
+        cout<<"Error! Not enough channels enabled for "<<(TheSettings->TriggerCoincidenceLevel+1)<<" channel coincidence."<<endl;
       
-      else if(TheSettings->TriggerCoincidenceChannel1 != TheSettings->TriggerCoincidenceChannel2)
+      else
         cout<<"Error! Cannot preform coincidence between a channel and itself. \n Please select two distinct channels." <<endl;
     }
 
