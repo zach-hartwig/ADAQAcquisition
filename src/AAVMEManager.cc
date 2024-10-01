@@ -131,9 +131,9 @@ bool AAVMEManager::ProgramDigitizers()
   // Channel-specific settings
 
   DGChEnableMask = DGMgr->CalculateChannelEnableMask(TheSettings->ChEnable);
-
+  
   for(int ch=0; ch<DGMgr->GetNumChannels(); ch++){
-
+    
     // DGNumChEnabled
     if(TheSettings->ChEnable[ch]){
       DGNumChEnabled++;
@@ -245,27 +245,26 @@ bool AAVMEManager::ProgramDigitizers()
 	break;
       }
     }
-    if(TheSettings->TriggerCoincidenceEnable){
-      if(TheSettings->TriggerCoincidenceLevel < DGNumChEnabled 
-      and TheSettings->TriggerCoincidenceChannel1 != TheSettings->TriggerCoincidenceChannel2)
-    {
-      std::cout<<"Enabling PSD Coincidence"<<std::endl;
-      DGMgr->SetTriggerCoincidence(true, TheSettings->TriggerCoincidenceLevel,TheSettings->TriggerCoincidenceWindow,
-                                    TheSettings->TriggerCoincidenceChannel1,TheSettings->TriggerCoincidenceChannel2);
-    }
-      else if(TheSettings -> TriggerCoincidenceLevel > DGNumChEnabled)
-        cout<<"Error! Not enough channels enabled for "<<(TheSettings->TriggerCoindenceLevel+1)<<"channel coincidence."<<endl;
-      
-      else if(TheSettings->TriggerCoincidenceChannel1 != TheSettings->TriggerCoincidenceChannel2)
-        cout<<"Error! Cannot preform coincidence between a channel and itself. \n Please select two distinct channels." <<endl;
-    }
+  }
   
-
-
+  if(TheSettings->TriggerCoincidenceEnable){
+    if(TheSettings->TriggerCoincidenceLevel < DGNumChEnabled 
+       and TheSettings->TriggerCoincidenceChannel1 != TheSettings->TriggerCoincidenceChannel2)
+      {
+	std::cout<<"Enabling PSD Coincidence"<<std::endl;
+	DGMgr->SetTriggerCoincidence(true, TheSettings->TriggerCoincidenceLevel,TheSettings->TriggerCoincidenceWindow,
+				     TheSettings->TriggerCoincidenceChannel1,TheSettings->TriggerCoincidenceChannel2);
+      }
+    else if(TheSettings -> TriggerCoincidenceLevel > DGNumChEnabled)
+      cout<<"Error! Not enough channels enabled for "<<(TheSettings->TriggerCoincidenceLevel+1)<<"channel coincidence."<<endl;
+    
+    else if(TheSettings->TriggerCoincidenceChannel1 != TheSettings->TriggerCoincidenceChannel2)
+      cout<<"Error! Cannot preform coincidence between a channel and itself. \n Please select two distinct channels." <<endl;
+  }
 
   ///////////////////////
   // Acquisition settings
-
+  
   switch(TheSettings->AcquisitionControl){
     
   case 0: // Standard (software controlled)
@@ -369,7 +368,7 @@ bool AAVMEManager::ProgramDigitizers()
                                     TheSettings->TriggerCoincidenceChannel1,TheSettings->TriggerCoincidenceChannel2);
     }
       else if(TheSettings -> TriggerCoincidenceLevel > DGNumChEnabled)
-        cout<<"Error! Not enough channels enabled for "<<(TheSettings->TriggerCoindenceLevel+1)<<"channel coincidence."<<endl;
+        cout<<"Error! Not enough channels enabled for "<<(TheSettings->TriggerCoincidenceLevel+1)<<"channel coincidence."<<endl;
       
       else if(TheSettings->TriggerCoincidenceChannel1 != TheSettings->TriggerCoincidenceChannel2)
         cout<<"Error! Cannot preform coincidence between a channel and itself. \n Please select two distinct channels." <<endl;
