@@ -283,7 +283,6 @@ private:
   ADAQComboBoxWithLabel *DGTriggerEdge_CBL;
   ADAQNumberEntryWithLabel *DGPSDTriggerHoldoff_NEL;
   TGCheckButton *DGTriggerCoincidenceEnable_CB;
-  ADAQComboBoxWithLabel *DGTriggerCoincidenceLevel_CBL;
   
   ADAQComboBoxWithLabel *DGAcquisitionControl_CBL;
   ADAQNumberEntryWithLabel *DGRecordLength_NEL;
@@ -384,6 +383,12 @@ private:
   ADAQNumberEntryWithLabel *RatePlotPeriod_NEL;
 
   TGRadioButton *DisplayContinuous_RB, *DisplayUpdateable_RB, *DisplayNonUpdateable_RB;
+
+  // Coincidence
+  ADAQNumberEntryWithLabel *DGTriggerCoincidenceWindow_NEL;
+  ADAQComboBoxWithLabel *DGTriggerCoincidenceLevel_CBL;
+  ADAQComboBoxWithLabel *DGTriggerCoincidenceChannel1_CBL;
+  ADAQComboBoxWithLabel *DGTriggerCoincidenceChannel2_CBL;
 
 
   // Define the AAInterface class to ROOT 

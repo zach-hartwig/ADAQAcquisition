@@ -163,7 +163,6 @@ public:
   string TriggerTypeName, TriggerEdgeName;
   Int_t PSDTriggerHoldoff;
   Bool_t TriggerCoincidenceEnable;
-  Int_t TriggerCoincidenceLevel;
 
   
   // Acquisition
@@ -255,6 +254,14 @@ public:
   int SpectrumRefreshRate;
   
   Bool_t DisplayContinuous, DisplayUpdateable, DisplayNonUpdateable;
+
+  //////////////////////
+  // Coincidence widgets
+
+  Int_t TriggerCoincidenceWindow;
+  Int_t TriggerCoincidenceLevel;
+  Int_t TriggerCoincidenceChannel1;
+  Int_t TriggerCoincidenceChannel2;
   
   ClassDef(AASettings, 1);
 };

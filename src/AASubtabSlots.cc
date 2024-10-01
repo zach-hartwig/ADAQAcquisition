@@ -15,6 +15,7 @@
 #include <sstream>
 #include <fstream>
 #include <iomanip>
+#include <iostream>
 
 #include "ADAQDigitizer.hh"
 
@@ -47,10 +48,18 @@ void AASubtabSlots::HandleCheckButtons()
   switch(ActiveID){
 
   case DGTriggerCoincidenceEnable_CB_ID:
-    if(ActiveButton->IsDown())
+    if(ActiveButton->IsDown()){
       TI->DGTriggerCoincidenceLevel_CBL->GetComboBox()->SetEnabled(true);
-    else
+      TI->DGTriggerCoincidenceWindow_NEL->GetEntry()->SetState(true);
+      TI->DGTriggerCoincidenceChannel1_CBL->GetComboBox()->SetEnabled(true);
+      TI->DGTriggerCoincidenceChannel2_CBL->GetComboBox()->SetEnabled(true);
+    }
+    else{
       TI->DGTriggerCoincidenceLevel_CBL->GetComboBox()->SetEnabled(false);
+      TI->DGTriggerCoincidenceWindow_NEL->GetEntry()->SetState(false);
+      TI->DGTriggerCoincidenceChannel1_CBL->GetComboBox()->SetEnabled(false);
+      TI->DGTriggerCoincidenceChannel2_CBL->GetComboBox()->SetEnabled(false);
+    }
     break;
 
   case SpectrumCalibration_CB_ID:
@@ -194,6 +203,9 @@ void AASubtabSlots::HandleNumberEntries()
   AAVMEManager *TheVMEManager = AAVMEManager::GetInstance();
 
   switch(ActiveID){
+
+  case DGTriggerCoincidenceWindow_NEL_ID:
+    break;
     
   case SpectrumCalibrationEnergy_NEL_ID:
     break;
